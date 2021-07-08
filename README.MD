@@ -1,21 +1,26 @@
 dom-render
 ===
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <script src="../dist/DomRenderCompiler.js"></script>
+    <script src="../dist/DomRender.js"></script>
 </head>
 <body>
 <div id="body">
     <div>
         <!--%
-        for(var i = 0 ; i < 10; i++) {
+        for(var i = 0 ; i < this.cnt; i++) {
             write(this.name + '--' + i)
         }
         %-->
+    </div>
+
+    <div>
+        <!--% write(this.car.name + '  --' + this.car.model)%-->
     </div>
 </div>
 </body>
@@ -23,21 +28,72 @@ dom-render
     console.log('-->', ScopeRawSet)
     const body = document.querySelector('#body');
     let targetNode = new TargetNode(body, TargetNodeMode.appendChild)
-    const raw = new ScopeRawSet(body.innerHTML)
+    const raw = new ScopeRawSet(body.innerHTML, ['div {color: <!--%write(this.color)%-->}'])
 
-    class User {
-        constructor(name, height, width) {
-            this.name = name;
-            this.height = height;
-            this.width = width;
+    class Test extends ScopeObject {
+        constructor() {
+            super();
+            this.zz = '22'
+            console.log('---')
+        }
+        say () {
+            console.log('say~')
         }
     }
 
-    const user = new User('visualkhh', 55, 22);
-    let compiler = new DomRenderCompiler(raw, user).run(targetNode);
-    targetNode = compiler.root.executeToTargetNode();
-    console.log(targetNode)
+    class Person {
+        constructor() {
+            this.eat = 'zzz'
+            this.food = 'food'
+        }
+    }
+    class Wheel {
+        constructor() {
+            this.x = 100;
+            this.y = 500;
+        }
+    }
+
+    class Car {
+        constructor() {
+            this.name = 'car'
+            this.model = 'tt'
+            this.leftWheel = new Wheel();
+            this.rightWheel = this.leftWheel;
+            // this.rightWheel = new Wheel();
+        }
+    }
+    class User extends Person {
+        constructor(name, height, width) {
+            super();
+            this.cnt = 10;
+            this.name = name;
+            this.color = RandomUtils.getRandomColor();
+            this.height = height;
+            this.width = width;
+            this.car = new Car();
+            this.childs = ['one', 'tow', 'three', 'four'];
+        }
+    }
+
+    let user = new User('visualkhh', 55, 22);
+    let config = new Config((it) => new Test());
+    console.log(user)
+    user = new DomRender(raw, config).runRender(user, targetNode);
+    // user.childs.push('-zzzzzzzzzzzzzzzz')
+    setTimeout(() => {
+        user.car.name = 'zzzzzzzzzzzzzzzzzzzzz';
+    }, 5000)
+    setTimeout(() => {
+        user.cnt = 100;
+    }, 2000)
+
+    setInterval(() => {
+        user.color = RandomUtils.getRandomColor();
+    },1500)
+    console.log(user, user.width)
 </script>
 </html>
+
 
 ```

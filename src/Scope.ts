@@ -2,13 +2,14 @@ import {ScopeObject} from './ScopeObject';
 import {ScopePosition} from './ScopePosition';
 import {ScopeResultSet} from './ScopeResultSet';
 import {RandomUtils} from './utils/random/RandomUtils';
+import {Config} from './Config';
 
 export class Scope {
     public childs: Scope[] = [];
     public usingVars: string[] = [];
     public scopeResult?: ScopeResultSet;
 
-    constructor(public raws: string, public obj: any, public uuid = RandomUtils.uuid(), public config = {start: '<!--%', end: '%-->'}, private position = new ScopePosition(0, raws.length)) {
+    constructor(public raws: string, public obj: any, public uuid = RandomUtils.uuid(), public config = new Config(), private position = new ScopePosition(0, raws.length)) {
         this.run();
     }
 
@@ -22,7 +23,7 @@ export class Scope {
     }
 
     exec(obj: any = this.obj) {
-        const scopeObject = new ScopeObject();
+        const scopeObject = this.config.factoryScopeObject ? this.config.factoryScopeObject(this) : new ScopeObject();
         // scopeObject.eval(this.raws, obj);
         const object = Object.assign(scopeObject, obj) as ScopeObject
         this.scopeResult = object.executeResultSet(this.raws); // , this.uuid

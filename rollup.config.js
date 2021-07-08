@@ -1,7 +1,7 @@
 import typescript from '@rollup/plugin-typescript';
 import replace from '@rollup/plugin-replace';
 export default {
-    input: 'src/DomRenderCompiler.ts',
+    input: 'src/DomRender.ts',
     output: {
         dir: 'dist',
         format: 'cjs'

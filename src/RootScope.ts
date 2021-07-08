@@ -2,14 +2,17 @@ import {Scope} from './Scope';
 import {ScopePosition} from './ScopePosition';
 import {ScopeRawSet} from './ScopeRawSet';
 import {ScopeResultSet} from './ScopeResultSet';
-import {RandomUtils} from "./utils/random/RandomUtils";
+import {RandomUtils} from './utils/random/RandomUtils';
 import {NodeUtils} from './utils/node/NodeUtils';
+import {Config} from './Config';
 
 export enum TargetNodeMode {
     // eslint-disable-next-line no-unused-vars
     child = 'child',
     // eslint-disable-next-line no-unused-vars
     appendChild = 'appendChild',
+    // eslint-disable-next-line no-unused-vars
+    prepend = 'prepend',
     // eslint-disable-next-line no-unused-vars
     replace = 'replace'
 }
@@ -30,17 +33,19 @@ export class TargetNode {
 export class RootScope extends Scope {
     public targetNode: TargetNode = new TargetNode();
 
-    constructor(public rawSet: ScopeRawSet, obj: any, uuid: string, config: { start: string; end: string }, position: ScopePosition = new ScopePosition(0, rawSet.raw.length)) {
+    constructor(public rawSet: ScopeRawSet, obj: any, uuid = RandomUtils.uuid(), config = new Config(), position: ScopePosition = new ScopePosition(0, rawSet.raw.length)) {
         super(rawSet.raw, obj, uuid, config, position);
     }
 
-    executeToTargetNode(option?: {head?: Node, tail?: Node, childElementAttr?: Map<string, string>}) {
+    executeRender(option?: {head?: Node, tail?: Node, childElementAttr?: Map<string, string>}) {
         const fragment = this.executeFragment(option);
         if (this.targetNode.node && TargetNodeMode.child === this.targetNode.mode) {
             NodeUtils.removeAllChildNode(this.targetNode.node)
             NodeUtils.appendChild(this.targetNode.node, fragment)
         } if (this.targetNode.node && TargetNodeMode.appendChild === this.targetNode.mode) {
             NodeUtils.appendChild(this.targetNode.node, fragment)
+        } if (this.targetNode.node && TargetNodeMode.prepend === this.targetNode.mode) {
+            (this.targetNode.node as any)?.prepend(fragment)
         } else if (this.targetNode.node && TargetNodeMode.replace === this.targetNode.mode) {
             NodeUtils.replaceNode(this.targetNode.node, fragment)
         } else {
