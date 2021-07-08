@@ -73,6 +73,9 @@
     }
 
     let user = new User('visualkhh', 55, 22);
+    for (const key in user) {
+        console.log('target->',  key)
+    }
     let config = new Config((it) => new Test());
     console.log(user)
     user = new DomRender(raw, config).runRender(user, targetNode);

@@ -98,7 +98,7 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
 
     public set(obj: any, prop: string, value: any): boolean {
         // console.log('set-->', obj, ' prop:', prop, value, this._refs);
-        obj[prop] = value
+        obj[prop] = this.proxy(value);
 
         const depths = [prop];
         const parentDepths = this.goRoot(depths, obj);
