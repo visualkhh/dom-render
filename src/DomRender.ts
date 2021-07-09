@@ -24,6 +24,14 @@ export class DomRender {
         }
     }
 
+    compile(target: any, targetNode?: TargetNode): RootScope {
+        this.root = new RootScope(this.raws, target, this.rootUUID, this.config);
+        if (targetNode) {
+            this.root.targetNode = targetNode;
+        }
+        return this.root;
+    }
+
     run<T>(target: T, targetNode?: TargetNode): T {
         this.root = new RootScope(this.raws, target, this.rootUUID, this.config);
         if (targetNode) {
