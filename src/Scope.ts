@@ -23,7 +23,7 @@ export class Scope {
     }
 
     exec(obj: any = this.obj) {
-        const scopeObject = this.config.factoryScopeObject ? this.config.factoryScopeObject(this) : new ScopeObject();
+        const scopeObject = this.config.factoryScopeObject ? this.config.factoryScopeObject(this) : new ScopeObject(this.config);
         // scopeObject.eval(this.raws, obj);
         const object = Object.assign(scopeObject, obj) as ScopeObject
         this.scopeResult = object.executeResultSet(this.raws); // , this.uuid

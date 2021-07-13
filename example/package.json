@@ -41,6 +41,8 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
-    "dom-render": "1.0.1"
+    "@types/jsdom": "^16.2.13",
+    "dom-render": "1.0.7",
+    "jsdom": "^16.6.0"
   }
 }

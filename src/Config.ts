@@ -4,6 +4,11 @@ import {ScopeObject} from './ScopeObject';
 export class Config {
     public start = '<!--%';
     public end = '%-->';
-    constructor(public factoryScopeObject?: (scope: Scope) => ScopeObject | undefined) {
+    // public document = document;
+    constructor(private _document?: Document, public factoryScopeObject?: (scope: Scope) => ScopeObject | undefined) {
+    }
+
+    get document() {
+        return this._document ?? document;
     }
 }

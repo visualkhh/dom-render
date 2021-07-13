@@ -1,5 +1,6 @@
 import {ScopeResultSet} from './ScopeResultSet';
 import {RandomUtils} from './utils/random/RandomUtils';
+import {Config} from './Config';
 
 export type ScopeObjectCalls = {name: string, parameter: any[], result: any}[];
 export class ScopeObject {
@@ -7,17 +8,18 @@ export class ScopeObject {
     [name: string]: any;
     public writes = '';
 
-    constructor(public uuid = RandomUtils.uuid()) {
+    constructor(public config: Config, public uuid = RandomUtils.uuid()) {
     }
 
     public executeResultSet(code: string): ScopeResultSet {
         this.eval(code);
-        const templateElement = document.createElement('template');
+        const templateElement = this.config.document.createElement('template');
         templateElement.innerHTML = this.writes;
-        const startComment = document.createComment('scope start ' + this.uuid)
-        const endComment = document.createComment('scope end ' + this.uuid)
+        const startComment = this.config.document.createComment('scope start ' + this.uuid)
+        const endComment = this.config.document.createComment('scope end ' + this.uuid)
         templateElement.content.childNodes.forEach(it => {
-            if (it.nodeType === Node.ELEMENT_NODE) {
+            // Node.ELEMENT_NODE = 1
+            if (it.nodeType === 1) {
                 (it as Element).setAttribute('scope-uuid', this.uuid);
             }
         })

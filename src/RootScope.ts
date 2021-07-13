@@ -31,9 +31,7 @@ export class TargetNode {
 }
 
 export class RootScope extends Scope {
-    public targetNode: TargetNode = new TargetNode();
-
-    constructor(public rawSet: ScopeRawSet, obj: any, uuid = RandomUtils.uuid(), config = new Config(), position: ScopePosition = new ScopePosition(0, rawSet.raw.length)) {
+    constructor(public rawSet: ScopeRawSet, obj: any, uuid = RandomUtils.uuid(), config = new Config(), public targetNode = new TargetNode(config.document), position: ScopePosition = new ScopePosition(0, rawSet.raw.length)) {
         super(rawSet.raw, obj, uuid, config, position);
     }
 
@@ -55,7 +53,7 @@ export class RootScope extends Scope {
     }
 
     executeFragment(option?: {head?: Node, tail?: Node, childElementAttr?: Map<string, string>}) {
-        const templateElement = document.createElement('template');
+        const templateElement = this.config.document.createElement('template');
         templateElement.innerHTML = this.raws;
         const rawFragment = templateElement.content;
         // console.log('executeFragment ', rawFragment.childNodes.length)
@@ -86,13 +84,14 @@ export class RootScope extends Scope {
             const styleScope = new RootScope(new ScopeRawSet(this.rawSet.styles.join(' ')), this.obj, RandomUtils.uuid(), this.config); // , {start: '/*%', end: '%*/'};
             const styleFragment = styleScope.executeFragment();
             styleScope.childs.forEach(it => this.childs.push(it));
-            const style = document.createElement('style');
+            const style = this.config.document.createElement('style');
             style.appendChild(styleFragment);
             rawFragment.prepend(style);
         }
         if (option?.childElementAttr && option?.childElementAttr?.size > 0) {
-            rawFragment.childNodes.forEach(it => {
-                if (it.nodeType === Node.ELEMENT_NODE) {
+            rawFragment.childNodes.forEach((it) => {
+                // Node.ELEMENT_NODE
+                if (it.nodeType === 1) {
                     option?.childElementAttr?.forEach((v, k) => {
                         (it as Element).setAttribute(k, v);
                     })
@@ -103,14 +102,17 @@ export class RootScope extends Scope {
     }
 
     private extracted(rawFragment: DocumentFragment, it: Scope, childScopeObject: ScopeResultSet) {
-        const nodeIterator = document.createNodeIterator(
+        const nodeIterator = this.config.document.createNodeIterator(
             rawFragment,
-            NodeFilter.SHOW_COMMENT,
+            // https://developer.mozilla.org/ko/docs/Web/API/Document/createTreeWalker
+            // NodeFilter.SHOW_COMMENT: 128
+            128,
             {
-                acceptNode: (node) => {
+                acceptNode: (node: Comment) => {
                     const coment = (node as Comment).data.replace(/[\r\n]/g, '');
                     const b = coment.startsWith('%') && coment.endsWith('%') && coment === ('%' + it.raws.replace(/[\r\n]/g, '') + '%');
-                    return b ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                    // NodeFilter.FILTER_ACCEPT: 1, NodeFilter.FILTER_REJECT: 2
+                    return b ? 1 : 2;
                 }
             }
         )

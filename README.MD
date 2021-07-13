@@ -7,7 +7,7 @@ dom-render
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <script src="../dist/DomRender.js"></script>
+    <script src="../dist/dist/dom-render.js"></script>
 </head>
 <body>
 <div id="body">
@@ -25,14 +25,15 @@ dom-render
 </div>
 </body>
 <script>
+
     console.log('-->', ScopeRawSet)
     const body = document.querySelector('#body');
     let targetNode = new TargetNode(body, TargetNodeMode.appendChild)
     const raw = new ScopeRawSet(body.innerHTML, ['div {color: <!--%write(this.color)%-->}'])
 
     class Test extends ScopeObject {
-        constructor() {
-            super();
+        constructor(config) {
+            super(config);
             this.zz = '22'
             console.log('---')
         }
@@ -77,9 +78,13 @@ dom-render
     }
 
     let user = new User('visualkhh', 55, 22);
-    let config = new Config((it) => new Test());
+    for (const key in user) {
+        console.log('target->',  key)
+    }
+    let config = new Config(document, (it) => new Test(it.config));
     console.log(user)
-    user = new DomRender(raw, config).runRender(user, targetNode);
+    let domRender = new DomRender(raw, config, 'zzzzzzzz');
+    user = domRender.runRender(user, targetNode);
     // user.childs.push('-zzzzzzzzzzzzzzzz')
     setTimeout(() => {
         user.car.name = 'zzzzzzzzzzzzzzzzzzzzz';
@@ -94,6 +99,7 @@ dom-render
     console.log(user, user.width)
 </script>
 </html>
+
 
 
 ```

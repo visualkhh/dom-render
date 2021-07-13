@@ -6,37 +6,32 @@ import {ScopeObjectProxyHandler} from './ScopeObjectProxyHandler';
 
 export class DomRender {
     public root: RootScope | undefined;
-    private rootUUID: string;
     private config: Config;
+    private rootUUID: string;
 
-    constructor(raws: ScopeRawSet, rootUUID?: string);
+    constructor(raws: ScopeRawSet, uuid?: string);
     constructor(raws: ScopeRawSet, config?: Config);
-    constructor(public raws: ScopeRawSet, private uuidAndConfig?: string | Config) {
+    constructor(raws: ScopeRawSet, config?: Config, uuid?: string);
+    constructor(public raws: ScopeRawSet, private uuidAndConfig?: string | Config, uuid?: string) {
         if (typeof uuidAndConfig === 'string') {
+            this.config = new Config(document);
             this.rootUUID = uuidAndConfig;
-            this.config = new Config();
         } else if (uuidAndConfig instanceof Config) {
-            this.rootUUID = RandomUtils.uuid();
             this.config = uuidAndConfig;
+            this.rootUUID = uuid ?? RandomUtils.uuid();
         } else {
+            this.config = new Config(document);
             this.rootUUID = RandomUtils.uuid();
-            this.config = new Config();
         }
     }
 
     compile(target: any, targetNode?: TargetNode): RootScope {
-        this.root = new RootScope(this.raws, target, this.rootUUID, this.config);
-        if (targetNode) {
-            this.root.targetNode = targetNode;
-        }
+        this.root = new RootScope(this.raws, target, this.rootUUID, this.config, targetNode);
         return this.root;
     }
 
     run<T>(target: T, targetNode?: TargetNode): T {
-        this.root = new RootScope(this.raws, target, this.rootUUID, this.config);
-        if (targetNode) {
-            this.root.targetNode = targetNode;
-        }
+        this.root = new RootScope(this.raws, target, this.rootUUID, this.config, targetNode);
 
         const proxy = new Proxy(target, new ScopeObjectProxyHandler());
         proxy?._ScopeObjectProxyHandler?.run(proxy, target, this.root);
