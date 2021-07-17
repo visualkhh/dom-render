@@ -97,7 +97,7 @@ class User extends Person {
 }
 
 let user = new User('visualkhh', 55, 22);
-// const config = new Config(document);
+// const config = new Config(document);=
 const config = new Config(document, (it) => new Test(it.config));
 console.log(user)
 const domRender = new DomRender(raw, config, 'zzzzzzzz');
