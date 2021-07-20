@@ -10,7 +10,15 @@ export class ScopeOpjectProxy implements ProxyHandler<any> {
         return key in target
     }
 
+    set(target: any, p: string | symbol, value: any, receiver: any): boolean {
+        // console.log('set--->', target, p, value, receiver)
+        this.origin[p] = value;
+        target[p] = value;
+        return true;
+    }
+
     get(target: any, p: string | symbol, receiver: any): any {
+        // console.log('get--->', target, p, receiver)
         return target[p] ?? this.origin[p];
     }
 }

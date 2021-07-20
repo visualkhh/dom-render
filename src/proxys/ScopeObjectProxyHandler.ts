@@ -1,5 +1,5 @@
-import {RootScope} from './RootScope';
-import {NodeUtils} from './utils/node/NodeUtils';
+import {RootScope} from '../RootScope';
+import {NodeUtils} from '../utils/node/NodeUtils';
 
 export type DepthType = { rootScope: RootScope | undefined, rootTargetOrigin?: any, rootTargetProxy?: any, depths: string[] };
 
@@ -86,6 +86,12 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
                 patharray.forEach(it => arr.push(it))
             });
         } else {
+            if (this._targetProxy?.changeField) {
+                this._targetProxy?.changeField(depths.join('.'))
+            }
+            if (this._rootScope?.changeField) {
+                this._rootScope?.changeField(depths.join('.'))
+            }
             const item = {
                 rootScope: this._rootScope,
                 rootTargetOrigin: this._targetOrigin,
@@ -103,7 +109,6 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
 
         const depths = [prop];
         const parentDepths = this.goRoot(depths, obj);
-        // console.log('depths==>', parentDepths)
         // alert(1);
         parentDepths.filter(it => it.rootScope).forEach(it => {
             const fullDepth = it.depths.join('.');

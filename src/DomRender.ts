@@ -2,7 +2,7 @@ import {RootScope, TargetNode} from './RootScope';
 import {ScopeRawSet} from './ScopeRawSet';
 import {RandomUtils} from './utils/random/RandomUtils';
 import {Config} from './Config';
-import {ScopeObjectProxyHandler} from './ScopeObjectProxyHandler';
+import {ScopeObjectProxyHandler} from './proxys/ScopeObjectProxyHandler';
 
 export class DomRender {
     public root: RootScope | undefined;
@@ -40,8 +40,6 @@ export class DomRender {
 
     runRender<T>(target: T, targetNode?: TargetNode, option?: {head?: Node, tail?: Node, childElementAttr?: Map<string, string>}): T {
         const t = this.run(target, targetNode);
-        // option = option ?? {};
-        // (option as any).bindObj = t;
         this.root?.executeRender(option);
         return t;
     }

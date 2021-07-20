@@ -10,13 +10,26 @@
     <div>
         <!--%
         for(var i = 0 ; i < this.cnt; i++) {
-            write(`<button dr-click='test'>${i} ${this.make()}</button>`)
+            write(`<button dr-event-click='test'>${i} ${this.make()}</button>`)
         }
         %-->
     </div>
 
+
     <div>
         <!--%write(this.make())%-->
+    </div>
+
+    <div>
+        <!--%write(this.car.name)%-->
+    </div>
+
+    <div>
+        <div rd-attr="return {wow: this.name}">zdsdasdasdasd</div>
+        <div rd-style="return {color: '#ff0000'}">stststst</div>
+    </div>
+    <div>
+        <button dr-event-click='test'>zzzzzzzzzzzzzz</button>
     </div>
 </div>
 </body>
@@ -24,7 +37,7 @@
 
     // console.log('-->', ScopeRawSet)
     const body = document.querySelector('#body');
-    let targetNode = new TargetNode(body, TargetNodeMode.appendChild)
+    let targetNode = new TargetNode(body, TargetNodeMode.child)
     const raw = new ScopeRawSet(body.innerHTML, ['div {color: <!--%write(this.color)%-->}'])
 
     class Test extends ScopeObject {
@@ -72,11 +85,26 @@
             this.childs = ['one', 'tow', 'three', 'four'];
         }
         test(e) {
-            this.cnt = 100;
             console.log('user test-->', this, e)
+            this.name = 'vvvv'
+            this.car.name = 'zzz'
+            this.car.model = 'zaaaaaaaaaazz'
+            // this.cnt = 100;
         }
         make() {
             return 'makemake' + Math.random()
+        }
+        onReady(f) {
+            console.log('onReady' + f)
+        }
+        onRenderd(f) {
+            console.log('onRenderd' + f)
+        }
+        onScopeMaked(f) {
+            console.log('onScopeMaked' + f)
+        }
+        changeField(data) {
+            console.log('changeField------------->' + data)
         }
     }
 
@@ -93,10 +121,10 @@
     // setTimeout(() => {
     //     user.car.name = 'zzzzzzzzzzzzzzzzzzzzz';
     // }, 5000)
-    setTimeout(() => {
-        // console.log('222222222222222')
-        user.cnt = 10;
-    }, 2000)
+    // setTimeout(() => {
+    //     // console.log('222222222222222')
+    //     user.cnt = 10;
+    // }, 2000)
 
     // setInterval(() => {
     //     user.color = RandomUtils.getRandomColor();

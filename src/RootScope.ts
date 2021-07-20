@@ -5,6 +5,8 @@ import {ScopeResultSet} from './ScopeResultSet';
 import {RandomUtils} from './utils/random/RandomUtils';
 import {NodeUtils} from './utils/node/NodeUtils';
 import {Config} from './Config';
+import {eventManager} from './events/EventManager';
+import {ChangeField} from './ChangeField';
 
 export enum TargetNodeMode {
     // eslint-disable-next-line no-unused-vars
@@ -30,13 +32,21 @@ export class TargetNode {
     }
 }
 
-export class RootScope extends Scope {
+export class RootScope extends Scope implements ChangeField {
     constructor(public rawSet: ScopeRawSet, obj: any, uuid = RandomUtils.uuid(), config = new Config(), public targetNode = new TargetNode(config.document), position: ScopePosition = new ScopePosition(0, rawSet.raw.length)) {
         super(rawSet.raw, obj, uuid, config, position);
     }
 
+    changeField(path: string): void {
+        eventManager.changeVar(this.obj, this.targetNode.node as HTMLElement)
+    }
+
     executeRender(option?: {head?: Node, tail?: Node, childElementAttr?: Map<string, string>}) {
         const fragment = this.executeFragment(option);
+        if (this.obj.onReady) {
+            this.obj.onReady(fragment);
+        }
+        // console.log(fragment.childNodes)
         if (this.targetNode.node && TargetNodeMode.child === this.targetNode.mode) {
             NodeUtils.removeAllChildNode(this.targetNode.node)
             NodeUtils.appendChild(this.targetNode.node, fragment)
@@ -49,6 +59,9 @@ export class RootScope extends Scope {
         } else {
             // nothing..
         }
+        if (this.obj.onRenderd) {
+            this.obj.onRenderd(fragment);
+        }
         return this.targetNode;
     }
 
@@ -56,6 +69,7 @@ export class RootScope extends Scope {
         const templateElement = this.config.document.createElement('template');
         templateElement.innerHTML = this.raws;
         const rawFragment = templateElement.content;
+        eventManager.applyEvent(this.obj, templateElement);
         // console.log('executeFragment ', rawFragment.childNodes.length)
         this.childs.forEach(it => {
             const childScopeObject = it.exec().result;
@@ -73,6 +87,7 @@ export class RootScope extends Scope {
                 childScopeObject.fragment.append(option?.tail)
             }
             currentNode?.parentNode?.replaceChild(childScopeObject.fragment, currentNode);
+
             /*
                 let currentNode = nodeIterator.nextNode();
                 while (currentNode = nodeIterator.nextNode()) {...}

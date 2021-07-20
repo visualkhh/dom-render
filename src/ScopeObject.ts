@@ -1,6 +1,7 @@
 import {ScopeResultSet} from './ScopeResultSet';
 import {RandomUtils} from './utils/random/RandomUtils';
 import {Config} from './Config';
+import {eventManager} from './events/EventManager';
 
 export type ScopeObjectCalls = {name: string, parameter: any[], result: any}[];
 export class ScopeObject {
@@ -16,10 +17,8 @@ export class ScopeObject {
         this.eval(code);
         const templateElement = this.config.document.createElement('template');
         templateElement.innerHTML = this.writes;
-        // event?? join?
-        ['click', 'change', 'keyup', 'keydown', 'input'].forEach(it => {
-            this.setEvent(it, templateElement);
-        });
+        // console.log('ScopeObjectScopeObject', this)
+        eventManager.applyEvent(this, templateElement);
         const startComment = this.config.document.createComment('scope start ' + this.uuid)
         const endComment = this.config.document.createComment('scope end ' + this.uuid)
         templateElement.content.childNodes.forEach(it => {
@@ -29,49 +28,6 @@ export class ScopeObject {
             }
         })
         return new ScopeResultSet(this.uuid, this, templateElement.content, startComment, endComment, this.calls)
-    }
-
-    private setEvent(eventName: string, template: HTMLTemplateElement) {
-        const attr = 'dr-' + eventName
-        this.procAttr<HTMLInputElement>(template.content, attr, (it, attribute) => {
-            // console.log('-----ttttttttttt', attribute, this[attribute!], this._originObj[attribute!])
-            if (attribute && (this[attribute] || this._originObj[attribute])) {
-                it.addEventListener(eventName, (event) => {
-                    if (typeof this.getValue(attribute) === 'function') {
-                        this.getValue(attribute)(event)
-                    } else {
-                        this.setValue(attribute, it.value)
-                    }
-                })
-            }
-        })
-    }
-
-    procAttr<T extends HTMLElement>(element: DocumentFragment, attrName: string, f: (h: T, value: string | null) => void) {
-        element.querySelectorAll<T>(`[${attrName}]`).forEach(it => {
-            f(it, it.getAttribute(attrName));
-        });
-    }
-
-    public getValue<T = any>(name: string, value?: any): T {
-        const thisAny = this as any;
-        let r = thisAny[name] ?? this._originObj[name];
-        if (typeof r === 'function') {
-            r = r.bind(thisAny[name] ? thisAny : this._originObj);
-        }
-        return r;
-    }
-
-    public setValue(name: string, value?: any) {
-        const thisAny = this as any;
-        const thisAnyElement = thisAny[name] ?? this._originObj[name];
-        if (typeof thisAnyElement === 'number') {
-            thisAny[name] = Number(value);
-            this._originObj[name] = Number(value);
-        } else {
-            thisAny[name] = value.toString();
-            this._originObj[name] = value.toString();
-        }
     }
 
     private eval(str: string): any {
