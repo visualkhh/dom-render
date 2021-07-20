@@ -1,7 +1,7 @@
 import {RootScope} from './RootScope';
 import {NodeUtils} from './utils/node/NodeUtils';
 
-export type DepthType = { rootScope: RootScope | undefined, rootTargetOrigin?: any, depths: string[] };
+export type DepthType = { rootScope: RootScope | undefined, rootTargetOrigin?: any, rootTargetProxy?: any, depths: string[] };
 
 export class ScopeObjectProxyHandler implements ProxyHandler<any> {
     // public _SimObjectProxyHandler_ref = new Map<string, any>();
@@ -89,6 +89,7 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
             const item = {
                 rootScope: this._rootScope,
                 rootTargetOrigin: this._targetOrigin,
+                rootTargetProxy: this._targetProxy,
                 depths: depths
             } as DepthType
             arr.push(item);
@@ -103,7 +104,7 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
         const depths = [prop];
         const parentDepths = this.goRoot(depths, obj);
         // console.log('depths==>', parentDepths)
-
+        // alert(1);
         parentDepths.filter(it => it.rootScope).forEach(it => {
             const fullDepth = it.depths.join('.');
             it.rootScope?.childs.filter(sit => sit.scopeResult && sit.usingVars.includes(fullDepth)).forEach(sit => {
@@ -111,7 +112,8 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
                     sit.scopeResult.childAllRemove();
                     const startComment = sit.scopeResult.startComment;
                     const endComment = sit.scopeResult.endComment;
-                    sit.exec(it.rootTargetOrigin)
+                    // sit.exec(it.rootTargetOrigin)
+                    sit.exec(it.rootTargetProxy)
                     // module.addEvent(it.scopeResult.fragment);
                     sit.scopeResult.childNodes.forEach(cit => NodeUtils.addNode(startComment, cit));
                     NodeUtils.replaceNode(startComment, sit.scopeResult.startComment);
@@ -120,6 +122,10 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
             })
         })
         return true
+    }
+
+    apply(target: Function, thisArg: any, argumentsList?: any): any {
+        return target.apply(thisArg, argumentsList);
     }
 
     has(target: any, key: PropertyKey): boolean {

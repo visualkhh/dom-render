@@ -8,7 +8,7 @@ export default {
         format: 'cjs'
     },
     plugins: [
-        typescript({outDir: './dist/dist', declaration: false}),
+        typescript({outDir: './dist/dist', module: 'ES2015', declaration: false}),
         replace({
             "Object.defineProperty(exports, '__esModule', { value: true });": 'try{if(!exports) {var exports = {}}}catch (e) {var exports = {}} Object.defineProperty(exports, \'__esModule\', { value: true });',
             delimiters: ['\n', '\n']

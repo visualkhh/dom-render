@@ -31,15 +31,17 @@ export class DomRender {
     }
 
     run<T>(target: T, targetNode?: TargetNode): T {
-        this.root = new RootScope(this.raws, target, this.rootUUID, this.config, targetNode);
-
         const proxy = new Proxy(target, new ScopeObjectProxyHandler());
+        this.root = new RootScope(this.raws, proxy, this.rootUUID, this.config, targetNode);
         proxy?._ScopeObjectProxyHandler?.run(proxy, target, this.root);
+
         return proxy;
     }
 
     runRender<T>(target: T, targetNode?: TargetNode, option?: {head?: Node, tail?: Node, childElementAttr?: Map<string, string>}): T {
         const t = this.run(target, targetNode);
+        // option = option ?? {};
+        // (option as any).bindObj = t;
         this.root?.executeRender(option);
         return t;
     }

@@ -10,19 +10,19 @@
     <div>
         <!--%
         for(var i = 0 ; i < this.cnt; i++) {
-            write(this.name + '--' + i)
+            write(`<button dr-click='test'>${i} ${this.make()}</button>`)
         }
         %-->
     </div>
 
     <div>
-        <!--% write(this.car.name + '  --' + this.car.model)%-->
+        <!--%write(this.make())%-->
     </div>
 </div>
 </body>
 <script>
 
-    console.log('-->', ScopeRawSet)
+    // console.log('-->', ScopeRawSet)
     const body = document.querySelector('#body');
     let targetNode = new TargetNode(body, TargetNodeMode.appendChild)
     const raw = new ScopeRawSet(body.innerHTML, ['div {color: <!--%write(this.color)%-->}'])
@@ -31,7 +31,7 @@
         constructor(config) {
             super(config);
             this.zz = '22'
-            console.log('---')
+            // console.log('---')
         }
         say () {
             console.log('say~')
@@ -63,7 +63,7 @@
     class User extends Person {
         constructor(name, height, width) {
             super();
-            this.cnt = 10;
+            this.cnt = 2;
             this.name = name;
             this.color = RandomUtils.getRandomColor();
             this.height = height;
@@ -71,27 +71,36 @@
             this.car = new Car();
             this.childs = ['one', 'tow', 'three', 'four'];
         }
+        test(e) {
+            this.cnt = 100;
+            console.log('user test-->', this, e)
+        }
+        make() {
+            return 'makemake' + Math.random()
+        }
     }
 
     let user = new User('visualkhh', 55, 22);
-    for (const key in user) {
-        console.log('target->',  key)
-    }
+    // console.log('origin user', user)
+    // for (const key in user) {
+    //     console.log('target->',  key)
+    // }
     let config = new Config(document, (it) => new Test(it.config));
-    console.log(user)
     let domRender = new DomRender(raw, config, 'zzzzzzzz');
     user = domRender.runRender(user, targetNode);
+    // console.log('proxy user', user)
     // user.childs.push('-zzzzzzzzzzzzzzzz')
+    // setTimeout(() => {
+    //     user.car.name = 'zzzzzzzzzzzzzzzzzzzzz';
+    // }, 5000)
     setTimeout(() => {
-        user.car.name = 'zzzzzzzzzzzzzzzzzzzzz';
-    }, 5000)
-    setTimeout(() => {
-        user.cnt = 100;
+        // console.log('222222222222222')
+        user.cnt = 10;
     }, 2000)
 
-    setInterval(() => {
-        user.color = RandomUtils.getRandomColor();
-    },1500)
+    // setInterval(() => {
+    //     user.color = RandomUtils.getRandomColor();
+    // },1500)
     console.log(user, user.width)
 </script>
 </html>

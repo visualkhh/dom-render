@@ -3,6 +3,7 @@ import {ScopePosition} from './ScopePosition';
 import {ScopeResultSet} from './ScopeResultSet';
 import {RandomUtils} from './utils/random/RandomUtils';
 import {Config} from './Config';
+import {ScopeOpjectProxy} from './ScopeOpjectProxy';
 
 export class Scope {
     public childs: Scope[] = [];
@@ -23,9 +24,18 @@ export class Scope {
     }
 
     exec(obj: any = this.obj) {
-        const scopeObject = this.config.factoryScopeObject ? this.config.factoryScopeObject(this) : new ScopeObject(this.config);
+        let scopeObject = this.config.factoryScopeObject ? this.config.factoryScopeObject(this) : new ScopeObject(this.config);
+        scopeObject = (scopeObject ?? new ScopeObject(this.config));
         // scopeObject.eval(this.raws, obj);
-        const object = Object.assign(scopeObject, obj) as ScopeObject
+        // console.log('objjjjjjj->', obj)
+        // debugger;
+        // console.log('------>', Object.create(scopeObject, obj))
+
+        scopeObject._originObj = obj;
+        let object = Object.assign(scopeObject, obj) as ScopeObject
+        object = new Proxy(object, new ScopeOpjectProxy(obj))
+        // console.log('exe', obj, object)
+        // console.log('exe - test', obj.test, object.test)
         this.scopeResult = object.executeResultSet(this.raws); // , this.uuid
         return {object, result: this.scopeResult};
     }
