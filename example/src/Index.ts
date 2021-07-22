@@ -100,9 +100,9 @@ user = DomRender.render(user, raw, config, targetNode);
 // user = domRender.runRender(user, targetNode);
 //
 setTimeout(() => {
-    // user.cnt = 5;
-    // user.name = RandomUtils.getRandomColor()
-    user.friend.name = 'zzzzzzzzzzzzzzzzzzzzz';
+    user.cnt = 5;
+    user.name = RandomUtils.getRandomColor()
+    // user.friend.name = 'zzzzzzzzzzzzzzzzzzzzz';
 }, 3000)
 // // setTimeout(() => {
 // //     fectory.obj.name = 'zzzzzzzzzzzzzzzzzzzzz';

@@ -4,10 +4,10 @@ import {TargetNode, TargetNodeMode} from './RootScope';
 import {DomRender} from './DomRender';
 import {Scope} from './Scope';
 
-export type ScopeObjectCalls = {name: string, parameter: any[], result: any}[];
+export type ScopeObjectCall = {name: string, parameter: any[], result: any};
 export class ScopeObject {
     public _originObj: any;
-    public _calls: ScopeObjectCalls = [];
+    public _calls: ScopeObjectCall[] = [];
     [name: string]: any;
     public _writes = '';
 
@@ -46,6 +46,7 @@ export class ScopeObject {
             const uuid = this._makeUUID();
             const targetNode = this.getTargetNode(uuid);
             const rootScope = this._compileRootScope(target, targetNode, uuid);
+            this._calls.push({name: 'include', parameter: [target], result: rootScope})
             // console.log('ScopeObject-->', uuid);
             if (rootScope) {
                 this._writes += '<div include-scope-uuid="'+uuid+'"></div>';

@@ -56,7 +56,7 @@ export class RootScope extends Scope implements ChangeField {
         if (this.obj.onReady) {
             this.obj.onReady(this.raws.node);
         }
-        // console.log(fragment.childNodes)
+        console.log(this.raws.node, this.targetNode)
         if (this.targetNode.node && TargetNodeMode.child === this.targetNode.mode) {
             NodeUtils.removeAllChildNode(this.targetNode.node)
             NodeUtils.appendChild(this.targetNode.node, this.raws.node)
@@ -72,6 +72,7 @@ export class RootScope extends Scope implements ChangeField {
         if (this.obj.onRenderd) {
             this.obj.onRenderd(this.raws.node);
         }
+        this.executeChildResultSet(option);
         return this.targetNode;
     }
 
@@ -150,6 +151,13 @@ export class RootScope extends Scope implements ChangeField {
         // return rawFragment;
     }
 
+    private executeChildResultSet(option: ScopeOption | undefined) {
+        this.childs.forEach(it => {
+            it.scopeResult?.calls.filter(it => it.name === 'include' && it.result instanceof RootScope).map(it => it.result as RootScope).forEach(it => {
+                it.executeRender();
+            })
+        });
+    }
     // private extracted(rawFragment: DocumentFragment, it: Scope, childScopeObject: ScopeResultSet) {
     //     const nodeIterator = this.raws.document.createNodeIterator(
     //         rawFragment,
@@ -171,4 +179,5 @@ export class RootScope extends Scope implements ChangeField {
     //     currentNode?.parentNode?.insertBefore(childScopeObject.endComment, currentNode.nextSibling);
     //     return currentNode;
     // }
+
 }

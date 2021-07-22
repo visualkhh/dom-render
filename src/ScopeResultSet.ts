@@ -7,7 +7,7 @@ import {NodeUtils} from './utils/node/NodeUtils';
 export class ScopeResultSet {
     // eslint-disable-next-line no-undef
     public childNodes: ChildNode[];
-    constructor(public uuid: string, public object: ScopeObject, public fragment: DocumentFragment, public startComment: Comment, public endComment: Comment, public calls: ScopeObjectCalls = []) {
+    constructor(public uuid: string, public object: ScopeObject, public fragment: DocumentFragment, public startComment: Comment, public endComment: Comment, public calls: ScopeObjectCalls[] = []) {
         // console.log('----->fragment', fragment.childNodes)
         // eslint-disable-next-line no-undef
         this.childNodes = [];
