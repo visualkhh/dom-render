@@ -3,9 +3,8 @@ import {RandomUtils} from './utils/random/RandomUtils';
 import {TargetNode, TargetNodeMode} from './RootScope';
 import {DomRender, RawSet} from './DomRender';
 import {Scope} from './Scope';
-import {ScopeRawSet} from "./ScopeRawSet";
+import {ScopeObjectCall} from "./ScopeObjectCall";
 
-export type ScopeObjectCall = {name: string, parameter: any[], result: any};
 export class ScopeObject {
     public _originObj: any;
     public _calls: ScopeObjectCall[] = [];
@@ -75,7 +74,7 @@ export class ScopeObject {
     }
 
     private getTargetNode(uuid: string) {
-        return new TargetNode(`[include-scope-uuid='${uuid}']`, TargetNodeMode.replace);
+        return new TargetNode(`[include-scope-uuid='${uuid}']`, TargetNodeMode.replace, this._scope.raws.document);
     }
 
     protected customScript() {

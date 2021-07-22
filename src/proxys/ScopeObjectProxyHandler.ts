@@ -1,8 +1,6 @@
 import {RootScope} from '../RootScope';
 import {NodeUtils} from '../utils/node/NodeUtils';
 import {Scope} from '../Scope';
-import {ScopeFectory} from '../fectorys/ScopeFectory';
-import {ScopeRawSet} from '../ScopeRawSet';
 
 export type DepthType = { rootScopes: Map<string, RootScope>, rootTargetOrigin?: any, rootTargetProxy?: any, depths: string[] };
 
@@ -41,7 +39,7 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
     }
 
     public proxy(target: any) {
-        if (typeof target === 'object' && !('_ScopeObjectProxyHandler_isProxy' in target) && !(target instanceof Scope) && !(target instanceof ScopeFectory)) {
+        if (typeof target === 'object' && !('_ScopeObjectProxyHandler_isProxy' in target) && !(target instanceof Scope)) {
             const scopeObjectProxyHandler = new ScopeObjectProxyHandler(this._rawSet);
             scopeObjectProxyHandler._refs.push(this._targetProxy);
             const targetProxy = new Proxy(target, scopeObjectProxyHandler);

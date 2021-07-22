@@ -22,12 +22,12 @@ export enum TargetNodeMode {
 }
 
 export class TargetNode {
-    constructor(private _node: Node | string = document.body, public mode = TargetNodeMode.child) {
+    constructor(private _node: Node | string = 'body', public mode = TargetNodeMode.child, public document: Document = document) {
     }
 
     get node(): Node | Element | null {
         if (typeof this._node === 'string') {
-            return document.querySelector(this._node);
+            return this.document.querySelector(this._node);
         } else {
             return this._node;
         }

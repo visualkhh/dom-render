@@ -1,13 +1,11 @@
-import {ScopeObject, ScopeObjectCalls} from './ScopeObject';
+import {ScopeObject} from './ScopeObject';
 import {eventManager} from './events/EventManager';
-import {RootScope, TargetNode, TargetNodeMode} from './RootScope';
-import {ScopeFectory} from './fectorys/ScopeFectory';
-import {NodeUtils} from './utils/node/NodeUtils';
+import {ScopeObjectCall} from "./ScopeObjectCall";
 
 export class ScopeResultSet {
     // eslint-disable-next-line no-undef
     public childNodes: ChildNode[];
-    constructor(public uuid: string, public object: ScopeObject, public fragment: DocumentFragment, public startComment: Comment, public endComment: Comment, public calls: ScopeObjectCalls[] = []) {
+    constructor(public uuid: string, public object: ScopeObject, public fragment: DocumentFragment, public startComment: Comment, public endComment: Comment, public calls: ScopeObjectCall[] = []) {
         // console.log('----->fragment', fragment.childNodes)
         // eslint-disable-next-line no-undef
         this.childNodes = [];

@@ -1,6 +1,3 @@
-import {Scope} from '../Scope';
-import {ScopeRawSet} from "../ScopeRawSet";
-
 export const eventManager = new class {
     public readonly attrPrefix = 'dr-';
     public readonly eventNames = ['click', 'change', 'keyup', 'keydown', 'input'];
@@ -32,7 +29,8 @@ export const eventManager = new class {
 
     // eslint-disable-next-line no-undef
     public applyEvent(obj: any, childNodes: ChildNode[]) {
-        const elements = childNodes.filter(it => it instanceof Element).map(it => it as Element);
+        // Node.ELEMENT_NODE	1
+        const elements = childNodes.filter(it => it.nodeType === 1).map(it => it as Element);
         // event
         this.eventNames.forEach(it => {
             this.addDrEvent(obj, it, elements);

@@ -1,10 +1,8 @@
 import {TargetNode, TargetNodeMode} from 'dom-render/RootScope';
-import {ScopeRawSet} from 'dom-render/ScopeRawSet';
 import {RandomUtils} from 'dom-render/utils/random/RandomUtils';
 import {Config} from 'dom-render/Config';
 import {DomRender} from 'dom-render/DomRender';
 import {ScopeObject} from 'dom-render/ScopeObject';
-import {ScopeFectory} from 'dom-render/fectorys/ScopeFectory';
 import html from './index.html'
 import {Scope} from 'dom-render/Scope';
 
@@ -91,7 +89,6 @@ class User extends Person {
     }
 }
 
-// const config = new Config((it) => new Test(it));
 const config = new Config();
 let userFriend = new User('visualkhh-friend', 515, 122);
 const fraw = {template: `
@@ -99,38 +96,14 @@ const fraw = {template: `
 <hr>
 `, styles: []};
 userFriend = DomRender.proxy(userFriend, fraw);
-// const fectory = new ScopeFectory(userFriend, new ScopeRawSet('<div>friend<!--%write(this.name)%--></div>', []), config);
-// .runSet(userFriend);
-// console.log('-->frindRootScope', frindRootScope)
 let user = new User('visualkhh', 55, 22, userFriend);
-// console.log('origin user', user)
-// for (const key in user) {
-//     console.log('target->',  key)
-// }
-// console.log('user-->', user)
 const body = document.querySelector('#app');
 const targetNode = new TargetNode(body, TargetNodeMode.replace)
 const raw = {template: html, styles: ['div {color: <!--%write(this.color)%-->}']};
 
 user = DomRender.render(document, user, raw, config, targetNode);
-// user = domRender.runRender(user, targetNode);
 setTimeout(() => {
     user.name = RandomUtils.getRandomColor()
     user.color = RandomUtils.getRandomColor();
     console.log('-->', user)
 }, 3000)
-// setTimeout(() => {
-//     // user.cnt = 5;
-//     user.car.model = RandomUtils.getRandomColor()
-//     user.friend.name = RandomUtils.getRandomColor()
-//     console.log('-->', user.friend)
-// }, 3000)
-// setTimeout(() => {
-//
-//     user.name = RandomUtils.getRandomColor()
-//     user.friend.name = 'zzzzzzzzzzzzzzzzzzzzz';
-// }, 3000)
-// setTimeout(() => {
-//     user.cnt = 20;
-//     console.log('--->', userFriend)
-// }, 10000)
