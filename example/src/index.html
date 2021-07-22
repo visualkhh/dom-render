@@ -1,12 +1,14 @@
 
 <div>
-    <!--%include(this.friend)%-->
+    <!--%
+    for(var i = 0 ; i < this.cnt; i++) {
+        include(this.friend);
+    }
+
+    %-->
 </div>
-<div>
-    <!--%write(this.name);%-->
-    <!--%write(this.cnt);%-->
-</div>
+------------------------
 
 <div>
-    <button dr-event-click='test'>zzzzzzzzzzzzzz</button>
+    <button dr-event-click='this.plus(4)'>zzzzzzzzzzzzzz</button>
 </div>

@@ -1,17 +1,23 @@
+import {eventManager} from "./events/EventManager";
+
 export class ScopeRawSet {
     public node: DocumentFragment | Node;
     public usingVars: string[] = [];
 
-    constructor(public document: Document, raw: string | Node, public styles: string[] = []) {
-        if (typeof raw === 'string') {
+    constructor(public document: Document, public raw: string | Node, public styles: string[] = []) {
+        if (typeof this.raw === 'string') {
             const template = this.document.createElement('template');
-            template.innerHTML = raw;
+            template.innerHTML = this.raw;
             this.node = template.content
         } else {
-            this.node = raw;
+            this.node = this.raw;
         }
         this.usingVars = this.usingThisVar(this.node.textContent ?? '');
     }
+
+    // remakeNode() {
+    //
+    // }
 
     findScopeComment() {
         const nodeIterator = this.document.createNodeIterator(
@@ -44,16 +50,17 @@ export class ScopeRawSet {
     }
 
     private usingThisVar(raws: string): string[] {
-        const regex = /["'].*["']/gm;
-        raws = raws.replace(regex, '');
-        const varRegexStr = 'this\\.([a-zA-Z_$][a-zA-Z_.$0-9]*)';
-        const varRegex = RegExp(varRegexStr, 'gm');
-        let varExec = varRegex.exec(raws)
-        const usingVars = [];
-        while (varExec) {
-            usingVars.push(varExec[1]);
-            varExec = varRegex.exec(varExec.input)
-        }
-        return usingVars;
+        return eventManager.usingThisVar(raws)
+        // const regex = /["'].*["']/gm;
+        // raws = raws.replace(regex, '');
+        // const varRegexStr = 'this\\.([a-zA-Z_$][a-zA-Z_.$0-9]*)';
+        // const varRegex = RegExp(varRegexStr, 'gm');
+        // let varExec = varRegex.exec(raws)
+        // const usingVars = [];
+        // while (varExec) {
+        //     usingVars.push(varExec[1]);
+        //     varExec = varRegex.exec(varExec.input)
+        // }
+        // return usingVars;
     }
 }

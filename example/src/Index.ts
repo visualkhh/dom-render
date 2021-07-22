@@ -65,7 +65,7 @@ class User extends Person {
     childs: string[];
     constructor(name: string, height: number, width: number, friend?: User) {
         super();
-        this.cnt = 10;
+        this.cnt = 2;
         this.name = name;
         this.color = RandomUtils.getRandomColor();
         this.height = height;
@@ -74,15 +74,24 @@ class User extends Person {
         this.friend = friend;
         this.childs = ['one', 'tow', 'three', 'four'];
     }
+
     test() {
-        console.log('test')
+        console.log('test->' + this.name)
+    }
+
+    plus(n: number) {
+        user.cnt = n;
     }
 }
 
 // const config = new Config((it) => new Test(it));
 const config = new Config();
 let userFriend = new User('visualkhh-friend', 515, 122);
-userFriend = DomRender.proxy(userFriend, new ScopeRawSet(document, '<div>friend<!--%write(this.name)%--></div>', []));
+const fraw = {template: `
+<div>friend<!--%write(this.name)%--><button dr-event-click="test">----</button></div>
+<hr>
+`, styles: []};
+userFriend = DomRender.proxy(userFriend, fraw);
 // const fectory = new ScopeFectory(userFriend, new ScopeRawSet('<div>friend<!--%write(this.name)%--></div>', []), config);
 // .runSet(userFriend);
 // console.log('-->frindRootScope', frindRootScope)
@@ -94,19 +103,22 @@ let user = new User('visualkhh', 55, 22, userFriend);
 // console.log('user-->', user)
 const body = document.querySelector('#app');
 const targetNode = new TargetNode(body, TargetNodeMode.replace)
-const raw = new ScopeRawSet(document, html, ['div {color: <!--%write(this.color)%-->}'])
+const raw = {template: html, styles: ['div {color: <!--%write(this.color)%-->}']};
 
-user = DomRender.render(user, raw, config, targetNode);
+user = DomRender.render(document, user, raw, config, targetNode);
 // user = domRender.runRender(user, targetNode);
+// setTimeout(() => {
+//     user.cnt = 5;
+//     user.car.model = RandomUtils.getRandomColor()
+//     user.friend.name = RandomUtils.getRandomColor()
+//     console.log('-->', user.friend)
+// }, 3000)
+// setTimeout(() => {
 //
-setTimeout(() => {
-    user.cnt = 5;
-    user.name = RandomUtils.getRandomColor()
-    // user.friend.name = 'zzzzzzzzzzzzzzzzzzzzz';
-}, 3000)
-// // setTimeout(() => {
-// //     fectory.obj.name = 'zzzzzzzzzzzzzzzzzzzzz';
-// // }, 10000)
-setTimeout(() => {
-    console.log('--->', userFriend)
-}, 10000)
+//     user.name = RandomUtils.getRandomColor()
+//     user.friend.name = 'zzzzzzzzzzzzzzzzzzzzz';
+// }, 3000)
+// setTimeout(() => {
+//     user.cnt = 20;
+//     console.log('--->', userFriend)
+// }, 10000)

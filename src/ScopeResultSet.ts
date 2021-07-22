@@ -18,6 +18,11 @@ export class ScopeResultSet {
     }
 
     public childAllRemove() {
+        // this.startComment.remove();
+        // this.childNodes.forEach(it => {
+        //     it.remove();
+        // })
+        // this.endComment.remove();
         let next = this.startComment.nextSibling;
         while (next) {
             if (next === this.endComment) {
@@ -30,45 +35,5 @@ export class ScopeResultSet {
 
     public applyEvent() {
         eventManager.applyEvent(this.object._originObj, this.childNodes);
-
-        const includeScopeAttrName = 'include-scope-uuid';
-        this.childNodes.filter(it => it instanceof Element)
-            .map(it => it as Element)
-            .filter(it => it.getAttribute(includeScopeAttrName))
-            .forEach(it => {
-                const uuid = it.getAttribute(includeScopeAttrName)!;
-                // console.log('--fffffff->', this.object, this.object._originObj)
-                for (const [key, value] of Object.entries(this.object._originObj)) {
-                    if (value instanceof ScopeFectory) {
-                        console.log('uuid-->', uuid)
-                        // it.remove()
-                        const fragment = value.executeFragment(uuid)
-                        // it.setAttribute('date', new Date().toString())
-                        // alert(1)
-                        // console.log('--->', uuid, value, it, fragment.childNodes)
-                        // fragment.childNodes.forEach((it: any) => {
-                        //     console.log('child----->', it)
-                        // })
-                        // it.appendChild(document.createComment('------'))
-                        if (fragment) {
-                            // it.parentNode?.replaceChild(document.createElement('div'), it);
-                            // NodeUtils.replaceNode(it, document.createElement('div'))
-                            // NodeUtils.replaceNode(it, fragment)
-                            // console.log('------>', fragment, fragment.childNodes)
-                            // NodeUtils.appendChild(it, fragment)
-                            NodeUtils.replaceNode(it, fragment)
-                            // NodeUtils.replaceNode(it, document.createElement('div'))
-                            // console.log('------>', fragment, fragment.childNodes)
-                        }
-                        //console.log('sskeys-->', key, value)
-                    }
-                }
-            })
-
-        // eventManager.attrNames.forEach(it => {
-        //     this.childNodes.forEach(eit => {
-        //
-        //     })
-        // })
     }
 }

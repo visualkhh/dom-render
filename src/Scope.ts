@@ -37,7 +37,7 @@ export class Scope {
         // console.log('exe - test', obj.test, object.test)
         // console.log('--this script', this.raws.getScopeCommentData())
         this.scopeResult = object.executeResultSet(this.raws.getScopeCommentData()); // , this.uuid
-        // this.scopeResult?.applyEvent();
+        this.scopeResult?.applyEvent();
         if (obj.onScopeMaked) {
             obj.onScopeMaked(this);
         }

@@ -1,4 +1,5 @@
 import {Scope} from '../Scope';
+import {ScopeRawSet} from "../ScopeRawSet";
 
 export const eventManager = new class {
     public readonly attrPrefix = 'dr-';
@@ -21,7 +22,7 @@ export const eventManager = new class {
         const datas: {name: string, value: string | null, element: Element}[] = [];
         this.attrNames.forEach(attrName => {
             fragment.querySelectorAll(`[${attrName}]`).forEach(it => {
-                console.log('find-->', it)
+                // console.log('find-->', it)
                 datas.push({name: attrName, value: it.getAttribute(attrName), element: it});
             });
 
@@ -83,7 +84,7 @@ export const eventManager = new class {
 
         // attribute
         this.procAttr(elements, this.attrPrefix + 'attr', (it, attribute) => {
-            const varNames = new Set(Scope.usingThisVar(attribute ?? ''));
+            const varNames = new Set(this.usingThisVar(attribute ?? ''));
             const script = attribute;
             if ((varName && varNames.has(varName)) || varName === undefined) {
                 // eslint-disable-next-line no-new-func
@@ -97,7 +98,7 @@ export const eventManager = new class {
         })
         // // style
         this.procAttr(elements, this.attrPrefix + 'style', (it, attribute) => {
-            const varNames = new Set(Scope.usingThisVar(attribute ?? ''));
+            const varNames = new Set(this.usingThisVar(attribute ?? ''));
             const script = attribute;
             if ((varName && varNames.has(varName)) || varName === undefined) {
                 // eslint-disable-next-line no-new-func
@@ -117,15 +118,18 @@ export const eventManager = new class {
             // console.log('-----ttttttttttt', attribute, obj[attribute!], obj)
             // console.log('-----ttttttttttt', attribute, this[attribute!], this._originObj[attribute!])
             // if (attribute && (this[attribute] || this._originObj[attribute])) {
-            if (attribute && obj[attribute]) {
-                it.addEventListener(eventName, (event) => {
-                    if (typeof this.getValue(obj, attribute) === 'function') {
-                        this.getValue(obj, attribute)(event)
-                    } else {
-                        this.setValue(obj, attribute, it.value)
-                    }
-                })
-            }
+            const script = attribute;
+            it.addEventListener(eventName, (event) => {
+                console.log('--->', script)
+                const f = Function(`"use strict"; const $event=event; ${script} `);
+                // Object.defineProperty(f, '$event', event);
+                const data = f.bind(Object.assign(obj))() ?? {};
+                // if (typeof this.getValue(obj, attribute) === 'function') {
+                //     this.getValue(obj, attribute)(event)
+                // } else {
+                //     this.setValue(obj, attribute, it.value)
+                // }
+            })
         })
     }
 
@@ -158,5 +162,22 @@ export const eventManager = new class {
         } else {
             obj[name] = value.toString();
         }
+    }
+
+
+
+
+    public usingThisVar(raws: string): string[] {
+        const regex = /["'].*["']/gm;
+        raws = raws.replace(regex, '');
+        const varRegexStr = 'this\\.([a-zA-Z_$][a-zA-Z_.$0-9]*)';
+        const varRegex = RegExp(varRegexStr, 'gm');
+        let varExec = varRegex.exec(raws)
+        const usingVars = [];
+        while (varExec) {
+            usingVars.push(varExec[1]);
+            varExec = varRegex.exec(varExec.input)
+        }
+        return usingVars;
     }
 }();

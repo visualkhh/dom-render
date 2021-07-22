@@ -4,6 +4,7 @@ import {RandomUtils} from './utils/random/RandomUtils';
 import {Config} from './Config';
 import {ScopeObjectProxyHandler} from './proxys/ScopeObjectProxyHandler';
 
+export type RawSet = {template: string, styles: string[]}
 export class DomRender {
     // public root: RootScope | undefined;
     // private config: Config;
@@ -30,22 +31,23 @@ export class DomRender {
     //     return this.root;
     // }
 
-    public static compileSet<T>(target: T, raws: ScopeRawSet, config?: Config, targetNode?: TargetNode, uuid = RandomUtils.uuid()): {target: T, rootScope: RootScope} {
+    public static compileSet<T>(document: Document, target: T, raws: RawSet, config?: Config, targetNode?: TargetNode, uuid = RandomUtils.uuid()): {target: T, rootScope: RootScope} {
         const proxy = DomRender.proxy(target, raws) as any;
-        const root = new RootScope(raws, proxy, uuid, config, targetNode);
+        const scopeRaws = new ScopeRawSet(document, raws.template, raws.styles);
+        const root = new RootScope(scopeRaws, proxy, uuid, config, targetNode);
         proxy?._ScopeObjectProxyHandler?.run(proxy, target, root);
         return {target: proxy, rootScope: root};
     }
 
-    public static compile<T>(target: T, raws: ScopeRawSet, config?: Config, targetNode?: TargetNode): T {
-        return DomRender.compileSet(target, raws, config, targetNode).target;
+    // public static compile<T>(target: T, raws: ScopeRawSet, config?: Config, targetNode?: TargetNode): T {
+    //     return DomRender.compileSet(target, raws, config, targetNode).target;
+    // }
+
+    public static compileRootScope<T>(document: Document, target: T, raws: RawSet, config: Config, targetNode?: TargetNode, uuid?: string): RootScope {
+        return DomRender.compileSet(document, target, raws, config, targetNode, uuid).rootScope;
     }
 
-    public static compileRootScope<T>(target: T, raws: ScopeRawSet, config: Config, targetNode?: TargetNode, uuid?: string): RootScope {
-        return DomRender.compileSet(target, raws, config, targetNode, uuid).rootScope;
-    }
-
-    public static proxy<T>(target: T, raws: ScopeRawSet): T {
+    public static proxy<T>(target: T, raws: RawSet): T {
         let proxy;
         if ('_ScopeObjectProxyHandler_isProxy' in target) {
             proxy = target;
@@ -55,8 +57,8 @@ export class DomRender {
         return proxy;
     }
 
-    public static render<T>(target: T, raws: ScopeRawSet, config: Config, targetNode?: TargetNode): T {
-        const dest = DomRender.compileSet(target, raws, config, targetNode);
+    public static render<T>(document: Document, target: T, raws: RawSet, config: Config, targetNode?: TargetNode): T {
+        const dest = DomRender.compileSet(document, target, raws, config, targetNode);
         dest.rootScope.executeRender();
         return dest.target;
     }

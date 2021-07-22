@@ -37,7 +37,6 @@ export class TargetNode {
 export class RootScope extends Scope implements ChangeField {
     constructor(raws: ScopeRawSet, obj: any, uuid = RandomUtils.uuid(), config = new Config(), public targetNode = new TargetNode(raws.document)) {
         super(raws, obj, uuid, config);
-        // console.log(this.childs)
     }
 
     changeField(path: string): void {
@@ -56,18 +55,20 @@ export class RootScope extends Scope implements ChangeField {
         if (this.obj.onReady) {
             this.obj.onReady(this.raws.node);
         }
-        console.log(this.raws.node, this.targetNode)
-        if (this.targetNode.node && TargetNodeMode.child === this.targetNode.mode) {
-            NodeUtils.removeAllChildNode(this.targetNode.node)
-            NodeUtils.appendChild(this.targetNode.node, this.raws.node)
-        } if (this.targetNode.node && TargetNodeMode.appendChild === this.targetNode.mode) {
-            NodeUtils.appendChild(this.targetNode.node, this.raws.node)
-        } if (this.targetNode.node && TargetNodeMode.prepend === this.targetNode.mode) {
-            (this.targetNode.node as any)?.prepend(this.raws.node)
-        } else if (this.targetNode.node && TargetNodeMode.replace === this.targetNode.mode) {
-            NodeUtils.replaceNode(this.targetNode.node, this.raws.node)
-        } else {
-            // nothing..
+        // console.log(this.raws.node, this.targetNode)
+        if (this.raws.node) {
+            if (this.targetNode.node && TargetNodeMode.child === this.targetNode.mode) {
+                NodeUtils.removeAllChildNode(this.targetNode.node)
+                NodeUtils.appendChild(this.targetNode.node, this.raws.node)
+            } if (this.targetNode.node && TargetNodeMode.appendChild === this.targetNode.mode) {
+                NodeUtils.appendChild(this.targetNode.node, this.raws.node)
+            } if (this.targetNode.node && TargetNodeMode.prepend === this.targetNode.mode) {
+                (this.targetNode.node as any)?.prepend(this.raws.node)
+            } else if (this.targetNode.node && TargetNodeMode.replace === this.targetNode.mode) {
+                NodeUtils.replaceNode(this.targetNode.node, this.raws.node)
+            } else {
+                // nothing..
+            }
         }
         if (this.obj.onRenderd) {
             this.obj.onRenderd(this.raws.node);
@@ -78,33 +79,35 @@ export class RootScope extends Scope implements ChangeField {
 
     execRoot(fragment: DocumentFragment) {
         // eslint-disable-next-line no-undef
-        // const childNodes: ChildNode[] = [];
-        // const startComment = this.config.document.createComment('rootScope start');
-        // const endComment = this.config.document.createComment('rootScope end');
-        // eventManager.findAttrElements(fragment).forEach(it => {
-        //     childNodes.push(it.element)
-        // })
-        // const scopeObject = new ScopeObject(this.config);
-        // scopeObject._originObj = this.obj;
-        // const object = new Proxy(scopeObject, new ScopeOpjectProxy(this.obj))
-        // this.scopeResult = new ScopeResultSet(RandomUtils.uuid(), object, fragment, startComment, endComment);
-        // this.scopeResult.childNodes = childNodes;
-        // this.scopeResult.applyEvent();
-        // if (this.obj.onScopeMaked) {
-        //     this.obj.onScopeMaked(this);
-        // }
+        const childNodes: ChildNode[] = [];
+        const startComment = this.raws.document.createComment('rootScope start');
+        const endComment = this.raws.document.createComment('rootScope end');
+        eventManager.findAttrElements(fragment).forEach(it => {
+            childNodes.push(it.element)
+        })
+        const scopeObject = new ScopeObject(this);
+        scopeObject._originObj = this.obj;
+        const object = new Proxy(scopeObject, new ScopeOpjectProxy(this.obj))
+        this.scopeResult = new ScopeResultSet(RandomUtils.uuid(), object, fragment, startComment, endComment);
+        this.scopeResult.childNodes = childNodes;
+        this.scopeResult.applyEvent();
+        if (this.obj.onScopeMaked) {
+            this.obj.onScopeMaked(this);
+        }
     }
 
     executeFragment(option?: ScopeOption) {
-        // this.execRoot(this.raws.node);
+        this.execRoot(this.raws.node as DocumentFragment);
 
         // eventManager.applyEvent(this.obj, templateElement);
         // console.log('executeFragment ', rawFragment.childNodes.length)
         this.childs.forEach(it => {
             const childScopeObject = it.exec().result;
-            it.raws.node.parentNode?.appendChild(childScopeObject.startComment);
-            it.raws.node.parentNode?.appendChild(childScopeObject.fragment);
-            it.raws.node.parentNode?.appendChild(childScopeObject.endComment);
+            if (it.raws.node) {
+                it.raws.node.parentNode?.appendChild(childScopeObject.startComment);
+                it.raws.node.parentNode?.appendChild(childScopeObject.fragment);
+                it.raws.node.parentNode?.appendChild(childScopeObject.endComment);
+            }
             // const childScopeObject = it.scopeResult!
             // const currentNode = this.extracted(rawFragment, it, childScopeObject);
             // childScopeObject.fragment.childNodes.forEach(it => {

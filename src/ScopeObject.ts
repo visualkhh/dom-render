@@ -1,8 +1,9 @@
 import {ScopeResultSet} from './ScopeResultSet';
 import {RandomUtils} from './utils/random/RandomUtils';
 import {TargetNode, TargetNodeMode} from './RootScope';
-import {DomRender} from './DomRender';
+import {DomRender, RawSet} from './DomRender';
 import {Scope} from './Scope';
+import {ScopeRawSet} from "./ScopeRawSet";
 
 export type ScopeObjectCall = {name: string, parameter: any[], result: any};
 export class ScopeObject {
@@ -47,9 +48,9 @@ export class ScopeObject {
             const targetNode = this.getTargetNode(uuid);
             const rootScope = this._compileRootScope(target, targetNode, uuid);
             this._calls.push({name: 'include', parameter: [target], result: rootScope})
-            // console.log('ScopeObject-->', uuid);
+            
             if (rootScope) {
-                this._writes += '<div include-scope-uuid="'+uuid+'"></div>';
+                this._writes += ("<template include-scope-uuid='" + uuid + "'></template>");
             }
         }
         
@@ -69,7 +70,8 @@ export class ScopeObject {
             console.error('no Domrander Proxy Object -> var proxy = Domrender.proxy(target, ScopeRawSet)', target)
             return new Error('no Domrander compile Object');
         }
-        return DomRender.compileRootScope(target, target._ScopeObjectProxyHandler_rawSet!, this._scope.config, targetNode, uuid);
+        const rawSet = target._ScopeObjectProxyHandler_rawSet! as RawSet;
+        return DomRender.compileRootScope(this._scope.raws.document, target, rawSet, this._scope.config, targetNode, uuid);
     }
 
     private getTargetNode(uuid: string) {

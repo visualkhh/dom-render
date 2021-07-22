@@ -13,7 +13,7 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
     private _targetProxy?: any;
     private _targetOrigin?: any;
 
-    constructor(public _rawSet: ScopeRawSet) {
+    constructor(public _rawSet: {template: string, styles: string[]} ) {
     }
 
     run(_targetProxy: any, _targetOrigin: any, _rootScope?: RootScope) {
@@ -22,13 +22,18 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
         if (_rootScope) {
             this._rootScopes.push(_rootScope);
         }
+        const data = Object.keys(_targetOrigin) || [];
+        data.forEach(it => {
+            this._targetOrigin[it] = this.proxy(this._targetOrigin[it])
+        })
         // console.log('proxy>', _target, typeof _target, this._refs)
-        if (!('_ScopeObjectProxyHandler_isProxy' in _targetProxy)) {
-            const data = Object.keys(_targetOrigin) || [];
-            data.forEach(it => {
-                this._targetOrigin[it] = this.proxy(this._targetOrigin[it])
-            })
-        }
+        // if (!('_ScopeObjectProxyHandler_isProxy' in _targetProxy)) {
+        //     const data = Object.keys(_targetOrigin) || [];
+        //     data.forEach(it => {
+        //         this._targetOrigin[it] = this.proxy(this._targetOrigin[it])
+        //     })
+        // }
+
         // const proto = Object.getPrototypeOf(target);
         // data = Object.keys(target) || [];
         // console.log('0---startproxy', target,  proto, data);
@@ -118,31 +123,40 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
             obj[prop] = value;
             return true;
         }
-        console.log('set-->', obj, ' prop:', prop, value, this._refs);
+        // console.log('set-->', obj, ' prop:', prop, value, this._refs);
         obj[prop] = this.proxy(value);
         const depths = [prop];
         const parentDepths = this.goRoot(depths, obj);
         parentDepths.filter(it => it.rootScopes.length > 0).forEach(it => {
             const fullDepth = it.depths.join('.');
             it.rootScopes.forEach(rit => {
-                console.log('>> ', fullDepth, rit)
+                console.log('>---> ', fullDepth, '\t\t', rit.uuid, rit.raws.node.childNodes)
+                // console.log('>> ', fullDepth, rit, rit.childs)
                 rit.childs.filter(sit => sit.scopeResult && sit.raws.usingVars.includes(fullDepth)).forEach(sit => {
-                    console.log('----> ', fullDepth, sit)
-                    // sit.exec(this._targetOrigin)
                     if (sit.scopeResult) {
                         sit.scopeResult.childAllRemove();
+
+                        // const startComment = sit.scopeResult.startComment;
+                        // const endComment = sit.scopeResult.endComment;
+                            // const result = sit.exec(it.rootTargetProxy).result
+                        // if (sit.raws.node) {
+                        //     sit.raws.node.parentNode?.appendChild(result.startComment);
+                        //     sit.raws.node.parentNode?.appendChild(result.fragment);
+                        //     sit.raws.node.parentNode?.appendChild(result.endComment);
+                        // }
                         const startComment = sit.scopeResult.startComment;
                         const endComment = sit.scopeResult.endComment;
-                        // sit.exec(it.rootTargetOrigin)
-                        sit.exec(it.rootTargetProxy)
-                        // module.addEvent(it.scopeResult.fragment);
-                        // sit.scopeResult.childNodes.forEach(cit => NodeUtils.addNode(startComment, cit));
-                        sit.scopeResult.childNodes.reduce((it, current) => {
+                        const result = sit.exec(it.rootTargetProxy).result
+                        result.childNodes.reduce((it, current) => {
                             NodeUtils.addNode(it, current);
                             return current;
                         }, startComment);
-                        NodeUtils.replaceNode(startComment, sit.scopeResult.startComment);
-                        NodeUtils.replaceNode(endComment, sit.scopeResult.endComment);
+                        NodeUtils.replaceNode(startComment, result.startComment);
+                        NodeUtils.replaceNode(endComment, result.endComment);
+
+                        result.calls.filter(it => it.name === 'include' && it.result instanceof RootScope).map(it => it.result as RootScope).forEach(it => {
+                            it.executeRender();
+                        })
                     }
                 })
             })
