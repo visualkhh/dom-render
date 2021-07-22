@@ -20,7 +20,6 @@ export class ScopeRawSet {
             const fragment = this.makeFragment(this.styles.join(' '));
             const style = document.createElement('style')
             style.appendChild(fragment);
-            console.log('---style--->', style);
             (this.node as Element).prepend(style);
         }
 

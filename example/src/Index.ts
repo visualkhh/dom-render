@@ -116,6 +116,7 @@ user = DomRender.render(document, user, raw, config, targetNode);
 // user = domRender.runRender(user, targetNode);
 setTimeout(() => {
     user.name = RandomUtils.getRandomColor()
+    user.color = RandomUtils.getRandomColor();
     console.log('-->', user)
 }, 3000)
 // setTimeout(() => {

@@ -107,9 +107,9 @@ export class RootScope extends Scope implements ChangeField {
         this.childs.forEach(it => {
             const childScopeObject = it.exec().result;
             if (it.raws.node) {
-                it.raws.node.parentNode?.appendChild(childScopeObject.startComment);
-                it.raws.node.parentNode?.appendChild(childScopeObject.fragment);
-                it.raws.node.parentNode?.appendChild(childScopeObject.endComment);
+                const fragment = this.raws.document.createDocumentFragment();
+                fragment.append(childScopeObject.startComment, childScopeObject.fragment, childScopeObject.endComment)
+                NodeUtils.replaceNode(it.raws.node, fragment);
             }
             // const childScopeObject = it.scopeResult!
             // const currentNode = this.extracted(rawFragment, it, childScopeObject);
