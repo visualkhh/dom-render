@@ -65,7 +65,7 @@ class User extends Person {
     childs: string[];
     constructor(name: string, height: number, width: number, friend?: User) {
         super();
-        this.cnt = 2;
+        this.cnt = 1;
         this.name = name;
         this.color = RandomUtils.getRandomColor();
         this.height = height;
@@ -79,6 +79,13 @@ class User extends Person {
         console.log('test->' + this.name)
     }
 
+    random() {
+        return RandomUtils.random();
+    }
+    randomRgb() {
+        return RandomUtils.getRandomColor();
+    }
+
     plus(n: number) {
         user.cnt = n;
     }
@@ -88,7 +95,7 @@ class User extends Person {
 const config = new Config();
 let userFriend = new User('visualkhh-friend', 515, 122);
 const fraw = {template: `
-<div>friend<!--%write(this.name)%--><button dr-event-click="test">----</button></div>
+<div>friend<!--%write(this.name)%--><button dr-event-click="console.log($event)">----</button></div>
 <hr>
 `, styles: []};
 userFriend = DomRender.proxy(userFriend, fraw);
@@ -107,8 +114,12 @@ const raw = {template: html, styles: ['div {color: <!--%write(this.color)%-->}']
 
 user = DomRender.render(document, user, raw, config, targetNode);
 // user = domRender.runRender(user, targetNode);
+setTimeout(() => {
+    user.name = RandomUtils.getRandomColor()
+    console.log('-->', user)
+}, 3000)
 // setTimeout(() => {
-//     user.cnt = 5;
+//     // user.cnt = 5;
 //     user.car.model = RandomUtils.getRandomColor()
 //     user.friend.name = RandomUtils.getRandomColor()
 //     console.log('-->', user.friend)

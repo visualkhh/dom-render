@@ -33,6 +33,15 @@ export class ScopeResultSet {
         }
     }
 
+    public isConnected() {
+        for (let childNode of this.childNodes) {
+            if (childNode.isConnected) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public applyEvent() {
         eventManager.applyEvent(this.object._originObj, this.childNodes);
     }

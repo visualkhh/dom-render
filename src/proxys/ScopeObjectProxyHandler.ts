@@ -4,12 +4,13 @@ import {Scope} from '../Scope';
 import {ScopeFectory} from '../fectorys/ScopeFectory';
 import {ScopeRawSet} from '../ScopeRawSet';
 
-export type DepthType = { rootScopes: RootScope[], rootTargetOrigin?: any, rootTargetProxy?: any, depths: string[] };
+export type DepthType = { rootScopes: Map<string, RootScope>, rootTargetOrigin?: any, rootTargetProxy?: any, depths: string[] };
 
 export class ScopeObjectProxyHandler implements ProxyHandler<any> {
     // public _SimObjectProxyHandler_ref = new Map<string, any>();
     public _refs: any[] = [];
-    private _rootScopes: RootScope[] = [];
+    // private _rootScopes: RootScope[] = [];
+    private _rootScopes = new Map<string, RootScope>()
     private _targetProxy?: any;
     private _targetOrigin?: any;
 
@@ -20,7 +21,7 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
         this._targetProxy = _targetProxy;
         this._targetOrigin = _targetOrigin;
         if (_rootScope) {
-            this._rootScopes.push(_rootScope);
+            this._rootScopes.set(_rootScope.uuid, _rootScope);
         }
         const data = Object.keys(_targetOrigin) || [];
         data.forEach(it => {
@@ -103,15 +104,15 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
             if (this._targetProxy?.changeField) {
                 this._targetProxy?.changeField(depths.join('.'))
             }
-            this._rootScopes.filter(it => it.changeField).forEach(it => {
-                it.changeField(depths.join('.'))
+            this._rootScopes.forEach((v, k, m) => {
+                v?.changeField(depths.join('.'));
             })
             const item = {
                 rootScopes: this._rootScopes,
                 rootTargetOrigin: this._targetOrigin,
                 rootTargetProxy: this._targetProxy,
                 depths: depths
-            } as DepthType
+            } as DepthType;
             arr.push(item);
         }
         return arr;
@@ -127,10 +128,14 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
         obj[prop] = this.proxy(value);
         const depths = [prop];
         const parentDepths = this.goRoot(depths, obj);
-        parentDepths.filter(it => it.rootScopes.length > 0).forEach(it => {
+        parentDepths.filter(it => it.rootScopes.size > 0).forEach(it => {
             const fullDepth = it.depths.join('.');
-            it.rootScopes.forEach(rit => {
-                console.log('>---> ', fullDepth, '\t\t', rit.uuid, rit.raws.node.childNodes)
+            it.rootScopes.forEach((rit, rkey, rmap) => {
+                if (!rit.scopeResult?.isConnected()) {
+                    this._rootScopes.delete(rit.uuid);
+                    return;
+                }
+                // console.log('>---> ', fullDepth, 'prop:'+prop, '\t\t', rit.uuid, rit.raws.node.childNodes)
                 // console.log('>> ', fullDepth, rit, rit.childs)
                 rit.childs.filter(sit => sit.scopeResult && sit.raws.usingVars.includes(fullDepth)).forEach(sit => {
                     if (sit.scopeResult) {

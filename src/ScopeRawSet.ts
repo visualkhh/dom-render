@@ -12,12 +12,28 @@ export class ScopeRawSet {
         } else {
             this.node = this.raw;
         }
+
+
+        //style
+        // Node.ELEMENT_NODE	= 1  DOCUMENT_FRAGMENT= 11
+        if (this.styles.length > 0 && (this.node.nodeType === 1 || this.node.nodeType === 11)) {
+            const fragment = this.makeFragment(this.styles.join(' '));
+            const style = document.createElement('style')
+            style.appendChild(fragment);
+            console.log('---style--->', style);
+            (this.node as Element).prepend(style);
+        }
+
+
+
         this.usingVars = this.usingThisVar(this.node.textContent ?? '');
     }
 
-    // remakeNode() {
-    //
-    // }
+    makeFragment(str: string): DocumentFragment {
+        const template = this.document.createElement('template');
+        template.innerHTML = str;
+        return template.content;
+    }
 
     findScopeComment() {
         const nodeIterator = this.document.createNodeIterator(

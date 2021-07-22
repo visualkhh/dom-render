@@ -5,8 +5,8 @@ export const eventManager = new class {
     public readonly attrPrefix = 'dr-';
     public readonly eventNames = ['click', 'change', 'keyup', 'keydown', 'input'];
     public readonly attrNames = [
-        this.attrPrefix + 'value-link',
         this.attrPrefix + 'value',
+        this.attrPrefix + 'value-link',
         this.attrPrefix + 'attr',
         this.attrPrefix + 'style'
     ];
@@ -40,13 +40,9 @@ export const eventManager = new class {
 
         // value
         this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'value', (it, attribute) => {
-            if (attribute && this.getValue(obj, attribute)) {
-                if (typeof this.getValue(obj, attribute) === 'function') {
-                    it.value = this.getValue(obj, attribute)()
-                } else {
-                    it.value = this.getValue(obj, attribute)
-                }
-            }
+            const script = attribute;
+            const data = Function(`"use strict"; ${script} `).bind(Object.assign(obj))() ?? {};
+            it.value = data;
         })
 
         // link event
@@ -70,7 +66,7 @@ export const eventManager = new class {
         this.changeVar(obj, elements);
     }
 
-    public changeVar(obj: any, elements: Element[], varName?: string) {
+    public changeVar(obj: any, elements: Element[] | ChildNode[], varName?: string) {
         // link event
         this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'value-link', (it, varName) => {
             if (varName && this.getValue(obj, varName)) {
@@ -132,14 +128,21 @@ export const eventManager = new class {
         })
     }
 
-    public procAttr<T extends Element>(elements: Element[] = [], attrName: string, f: (h: T, value: string | null) => void) {
+    public procAttr<T extends Element>(elements: Element[] | ChildNode[] = [], attrName: string, f: (h: T, value: string | null) => void) {
         elements.forEach(it => {
-            if (undefined !== it.getAttribute(attrName)) {
-                f(it as T, it.getAttribute(attrName));
+            if (!it) {
+                return;
             }
-            it.querySelectorAll<T>(`[${attrName}]`).forEach(it => {
-                f(it, it.getAttribute(attrName));
-            })
+            // Node.ELEMENT_NODE	1
+            if (it.nodeType === 1) {
+                const e = it as Element;
+                if (e.getAttribute(attrName)) {
+                    f(it as T, e.getAttribute(attrName));
+                }
+                e.querySelectorAll<T>(`[${attrName}]`).forEach(it => {
+                    f(it, it.getAttribute(attrName));
+                })
+            }
         });
     }
 
