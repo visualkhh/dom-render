@@ -120,7 +120,6 @@ export const eventManager = new class {
             // if (attribute && (this[attribute] || this._originObj[attribute])) {
             const script = attribute;
             it.addEventListener(eventName, (event) => {
-                console.log('--->', script)
                 const f = Function(`"use strict"; const $event=event; ${script} `);
                 // Object.defineProperty(f, '$event', event);
                 const data = f.bind(Object.assign(obj))() ?? {};
