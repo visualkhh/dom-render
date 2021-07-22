@@ -1,35 +1,42 @@
 import {RootScope} from '../RootScope';
 import {NodeUtils} from '../utils/node/NodeUtils';
+import {Scope} from '../Scope';
+import {ScopeFectory} from '../fectorys/ScopeFectory';
+import {ScopeRawSet} from '../ScopeRawSet';
 
-export type DepthType = { rootScope: RootScope | undefined, rootTargetOrigin?: any, rootTargetProxy?: any, depths: string[] };
+export type DepthType = { rootScopes: RootScope[], rootTargetOrigin?: any, rootTargetProxy?: any, depths: string[] };
 
 export class ScopeObjectProxyHandler implements ProxyHandler<any> {
     // public _SimObjectProxyHandler_ref = new Map<string, any>();
     public _refs: any[] = [];
-    private _rootScope?: RootScope;
+    private _rootScopes: RootScope[] = [];
     private _targetProxy?: any;
     private _targetOrigin?: any;
 
-    constructor() {
+    constructor(public _rawSet: ScopeRawSet) {
     }
 
     run(_targetProxy: any, _targetOrigin: any, _rootScope?: RootScope) {
         this._targetProxy = _targetProxy;
         this._targetOrigin = _targetOrigin;
-        this._rootScope = _rootScope;
+        if (_rootScope) {
+            this._rootScopes.push(_rootScope);
+        }
         // console.log('proxy>', _target, typeof _target, this._refs)
-        const data = Object.keys(_targetOrigin) || [];
-        data.forEach(it => {
-            this._targetOrigin[it] = this.proxy(this._targetOrigin[it])
-        })
+        if (!('_ScopeObjectProxyHandler_isProxy' in _targetProxy)) {
+            const data = Object.keys(_targetOrigin) || [];
+            data.forEach(it => {
+                this._targetOrigin[it] = this.proxy(this._targetOrigin[it])
+            })
+        }
         // const proto = Object.getPrototypeOf(target);
         // data = Object.keys(target) || [];
         // console.log('0---startproxy', target,  proto, data);
     }
 
     public proxy(target: any) {
-        if (typeof target === 'object' && !('_ScopeObjectProxyHandler_isProxy' in target)) {
-            const scopeObjectProxyHandler = new ScopeObjectProxyHandler();
+        if (typeof target === 'object' && !('_ScopeObjectProxyHandler_isProxy' in target) && !(target instanceof Scope) && !(target instanceof ScopeFectory)) {
+            const scopeObjectProxyHandler = new ScopeObjectProxyHandler(this._rawSet);
             scopeObjectProxyHandler._refs.push(this._targetProxy);
             const targetProxy = new Proxy(target, scopeObjectProxyHandler);
             targetProxy?._ScopeObjectProxyHandler?.run(targetProxy, target)
@@ -47,8 +54,10 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
             return this._targetProxy;
         } else if (name === '_ScopeObjectProxyHandler_targetOrigin') {
             return this._targetOrigin;
-        } else if (name === '_ScopeObjectProxyHandler_rootScope') {
-            return this._rootScope;
+        } else if (name === '_ScopeObjectProxyHandler_rootScopes') {
+            return this._rootScopes;
+        } else if (name === '_ScopeObjectProxyHandler_rawSet') {
+            return this._rawSet;
         } else {
             return target[name]
         }
@@ -89,11 +98,11 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
             if (this._targetProxy?.changeField) {
                 this._targetProxy?.changeField(depths.join('.'))
             }
-            if (this._rootScope?.changeField) {
-                this._rootScope?.changeField(depths.join('.'))
-            }
+            this._rootScopes.filter(it => it.changeField).forEach(it => {
+                it.changeField(depths.join('.'))
+            })
             const item = {
-                rootScope: this._rootScope,
+                rootScopes: this._rootScopes,
                 rootTargetOrigin: this._targetOrigin,
                 rootTargetProxy: this._targetProxy,
                 depths: depths
@@ -104,26 +113,38 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
     }
 
     public set(obj: any, prop: string, value: any): boolean {
-        // console.log('set-->', obj, ' prop:', prop, value, this._refs);
+        const ignoreFields = ['_originObj', '_calls', '_writes', '_raws', '_uuid'];
+        if (ignoreFields.includes(prop)) {
+            obj[prop] = value;
+            return true;
+        }
+        console.log('set-->', obj, ' prop:', prop, value, this._refs);
         obj[prop] = this.proxy(value);
-
         const depths = [prop];
         const parentDepths = this.goRoot(depths, obj);
-        // alert(1);
-        parentDepths.filter(it => it.rootScope).forEach(it => {
+        parentDepths.filter(it => it.rootScopes.length > 0).forEach(it => {
             const fullDepth = it.depths.join('.');
-            it.rootScope?.childs.filter(sit => sit.scopeResult && sit.usingVars.includes(fullDepth)).forEach(sit => {
-                if (sit.scopeResult) {
-                    sit.scopeResult.childAllRemove();
-                    const startComment = sit.scopeResult.startComment;
-                    const endComment = sit.scopeResult.endComment;
-                    // sit.exec(it.rootTargetOrigin)
-                    sit.exec(it.rootTargetProxy)
-                    // module.addEvent(it.scopeResult.fragment);
-                    sit.scopeResult.childNodes.forEach(cit => NodeUtils.addNode(startComment, cit));
-                    NodeUtils.replaceNode(startComment, sit.scopeResult.startComment);
-                    NodeUtils.replaceNode(endComment, sit.scopeResult.endComment);
-                }
+            it.rootScopes.forEach(rit => {
+                console.log('>> ', fullDepth, rit)
+                rit.childs.filter(sit => sit.scopeResult && sit.raws.usingVars.includes(fullDepth)).forEach(sit => {
+                    console.log('----> ', fullDepth, sit)
+                    // sit.exec(this._targetOrigin)
+                    if (sit.scopeResult) {
+                        sit.scopeResult.childAllRemove();
+                        const startComment = sit.scopeResult.startComment;
+                        const endComment = sit.scopeResult.endComment;
+                        // sit.exec(it.rootTargetOrigin)
+                        sit.exec(it.rootTargetProxy)
+                        // module.addEvent(it.scopeResult.fragment);
+                        // sit.scopeResult.childNodes.forEach(cit => NodeUtils.addNode(startComment, cit));
+                        sit.scopeResult.childNodes.reduce((it, current) => {
+                            NodeUtils.addNode(it, current);
+                            return current;
+                        }, startComment);
+                        NodeUtils.replaceNode(startComment, sit.scopeResult.startComment);
+                        NodeUtils.replaceNode(endComment, sit.scopeResult.endComment);
+                    }
+                })
             })
         })
         return true

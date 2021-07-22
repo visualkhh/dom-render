@@ -1,3 +1,4 @@
+import {JSDOM} from 'jsdom';
 import {TargetNode, TargetNodeMode} from 'dom-render/RootScope';
 import {ScopeRawSet} from 'dom-render/ScopeRawSet';
 import {RandomUtils} from 'dom-render/utils/random/RandomUtils';
@@ -5,16 +6,46 @@ import {Config} from 'dom-render/Config';
 import {DomRender} from 'dom-render/DomRender';
 import {ScopeObject} from 'dom-render/ScopeObject';
 import {ScopeFectory} from 'dom-render/fectorys/ScopeFectory';
-import html from './index.html'
-import {Scope} from 'dom-render/Scope';
+
+const dom = new JSDOM(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../dist/dist/dom-render.js"></script>
+</head>
+<body>
+<div id="body">
+
+    <div>
+        <!--%
+        for(var i = 0; i < this.cnt; i++) {
+            createScope(this.friend);
+            write('11');
+        }
+        %-->
+    </div>
+
+    <div>
+        <!--%createScope(this.friend); %-->
+    </div>
+
+</div>
+</body>
+</html>
+`)
+const document = dom.window.document;
+const body = document.querySelector('#body');
+const targetNode = new TargetNode(body, TargetNodeMode.replace)
+const raw = new ScopeRawSet(body.innerHTML, ['div {color: <!--%write(this.color)%-->}'])
 
 class Test extends ScopeObject {
-    constructor(public scope: Scope) {
-        super(scope);
+    constructor(public config: Config) {
+        super(config);
         this.zz = '22'
         console.log('---')
     }
-
     say () {
         console.log('say~')
     }
@@ -61,9 +92,9 @@ class User extends Person {
     height: number;
     width: number;
     car: Car;
-    friend: User;
+    friend: ScopeFectory;
     childs: string[];
-    constructor(name: string, height: number, width: number, friend?: User) {
+    constructor(name: string, height: number, width: number, friend?: ScopeFectory) {
         super();
         this.cnt = 10;
         this.name = name;
@@ -74,39 +105,27 @@ class User extends Person {
         this.friend = friend;
         this.childs = ['one', 'tow', 'three', 'four'];
     }
-    test() {
-        console.log('test')
-    }
 }
 
-// const config = new Config((it) => new Test(it));
-const config = new Config();
-let userFriend = new User('visualkhh-friend', 515, 122);
-userFriend = DomRender.proxy(userFriend, new ScopeRawSet(document, '<div>friend<!--%write(this.name)%--></div>', []));
-// const fectory = new ScopeFectory(userFriend, new ScopeRawSet('<div>friend<!--%write(this.name)%--></div>', []), config);
+const config = new Config(document, (it) => new Test(it.config));
+
+const userFriend = new User('visualkhh-friend', 515, 122);
+const fectory = new ScopeFectory(userFriend, new ScopeRawSet('<div>friend<!--%write(this.name)%--></div>', []), config);
 // .runSet(userFriend);
 // console.log('-->frindRootScope', frindRootScope)
-let user = new User('visualkhh', 55, 22, userFriend);
+let user = new User('visualkhh', 55, 22, fectory);
 // console.log('origin user', user)
 // for (const key in user) {
 //     console.log('target->',  key)
 // }
 // console.log('user-->', user)
-const body = document.querySelector('#app');
-const targetNode = new TargetNode(body, TargetNodeMode.replace)
-const raw = new ScopeRawSet(document, html, ['div {color: <!--%write(this.color)%-->}'])
+const domRender = new DomRender(raw, config, 'zzzzzzzz');
+user = domRender.runRender(user, targetNode);
 
-user = DomRender.render(user, raw, config, targetNode);
-// user = domRender.runRender(user, targetNode);
-//
 setTimeout(() => {
-    // user.cnt = 5;
-    // user.name = RandomUtils.getRandomColor()
-    user.friend.name = 'zzzzzzzzzzzzzzzzzzzzz';
+    user.cnt = 5;
+    // fectory.obj.name = 'zzzzzzzzzzzzzzzzzzzzz';
 }, 3000)
-// // setTimeout(() => {
-// //     fectory.obj.name = 'zzzzzzzzzzzzzzzzzzzzz';
-// // }, 10000)
 setTimeout(() => {
-    console.log('--->', userFriend)
+    fectory.obj.name = 'zzzzzzzzzzzzzzzzzzzzz';
 }, 10000)

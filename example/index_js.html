@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../dist/dist/dom-render.js"></script>
+</head>
+<body>
+<div id="body">
+
+    <div>
+        <!--%
+        for(var i = 0; i < this.cnt; i++) {
+            createScope(this.friend);
+        }
+        %-->
+    </div>
+
+
+
+</div>
+</body>
+<!--<div>-->
+<!--    &lt;!&ndash;%-->
+<!--    createScope(this.friend);-->
+<!--    %&ndash;&gt;-->
+<!--</div>-->
+<!--<hr>-->
+<!--<div>-->
+<!--    &lt;!&ndash;%-->
+<!--    for(var i = 0; i < this.cnt; i++) {-->
+<!--        createScope(this.friend)-->
+<!--    }-->
+<!--    %&ndash;&gt;-->
+<!--</div>-->
+<!--            write(`<button>${i}</button>`);-->
+<script>
+
+    // console.log('-->', ScopeRawSet)
+
+    const body = document.querySelector('#body');
+    let targetNode = new TargetNode(body, TargetNodeMode.child)
+    // const raw = new ScopeRawSet(body.innerHTML, ['div {color: <!--%write(this.color)%-->}'])
+    const raw = new ScopeRawSet(body.innerHTML, [])
+
+    class Test extends ScopeObject {
+        constructor(config) {
+            super(config);
+            this.zz = '22'
+            // console.log('---')
+        }
+        say () {
+            console.log('say~')
+        }
+    }
+
+    class Person {
+        constructor() {
+            this.eat = 'zzz'
+            this.food = 'food'
+        }
+    }
+    class Wheel {
+        constructor() {
+            this.x = 100;
+            this.y = 500;
+        }
+    }
+
+    class Car {
+        constructor() {
+            this.name = 'car'
+            this.model = 'tt'
+            this.leftWheel = new Wheel();
+            this.rightWheel = this.leftWheel;
+            // this.rightWheel = new Wheel();
+        }
+    }
+    class User extends Person {
+        constructor(name, height, width, friend) {
+            super();
+            this.cnt = 2;
+            this.name = name;
+            this.color = RandomUtils.getRandomColor();
+            this.height = height;
+            this.width = width;
+            this.friend = friend;
+            this.car = new Car();
+            this.childs = ['one', 'tow', 'three', 'four'];
+        }
+        test(e) {
+            console.log('user test-->', this, e)
+            this.name = 'vvvv'
+            // this.car.name = 'zzz'
+            // this.car.model = 'zaaaaaaaaaazz'
+            this.cnt = 1;
+        }
+        make() {
+            return 'makemake' + Math.floor(Math.random() * 10)
+        }
+        random() {
+            return Math.floor(Math.random() * 100)
+        }
+        onReady(f) {
+            // console.log('onReady' + f)
+        }
+        onRenderd(f) {
+            // console.log('onRenderd' + f)
+        }
+        onScopeMaked(f) {
+            // console.log('onScopeMaked' + f)
+        }
+        changeField(data) {
+            // console.log('changeField------------->' + data)
+        }
+    }
+
+    const config = new Config(document, (it) => new Test(it.config));
+
+    const userFriend = new User('visualkhh-friend', 515, 122);
+    const fectory = new ScopeFectory(userFriend, new ScopeRawSet('11111111<div><!--%write(this.make())%-->friend<!--%write(this.name)%--></div>', []), config);
+    // .runSet(userFriend);
+    // console.log('-->frindRootScope', frindRootScope)
+    let user = new User('visualkhh', 55, 22, fectory);
+    // console.log('origin user', user)
+    // for (const key in user) {
+    //     console.log('target->',  key)
+    // }
+    // console.log('user-->', user)
+    let domRender = new DomRender(raw, config, 'zzzzzzzz');
+    user = domRender.runRender(user, targetNode);
+
+    setTimeout(() => {
+        user.cnt = 5;
+        // fectory.obj.name = 'zzzzzzzzzzzzzzzzzzzzz';
+    }, 5000)
+    // setTimeout(() => {
+    //     fectory.obj.name = 'zzzzzzzzzzzzzzzzzzzzz';
+    // }, 10000)
+    // console.log('proxy user', user)
+    // user.childs.push('-zzzzzzzzzzzzzzzz')
+    // setTimeout(() => {
+    //     user.car.name = 'zzzzzzzzzzzzzzzzzzzzz';
+    // }, 5000)
+    // setTimeout(() => {
+    //     // console.log('222222222222222')
+    //     user.cnt = 10;
+    // }, 2000)
+
+    // setInterval(() => {
+    //     user.color = RandomUtils.getRandomColor();
+    // },1500)
+    console.log(user, user.width)
+</script>
+</html>
+<!-- aza 33-->

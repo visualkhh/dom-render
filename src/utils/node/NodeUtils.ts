@@ -12,6 +12,7 @@ export class NodeUtils {
     }
 
     static replaceNode(targetNode: Node, newNode: Node) {
+        // console.log('repalceNode', targetNode, newNode, targetNode.parentNode)
         return targetNode.parentNode?.replaceChild(newNode, targetNode);
     }
 

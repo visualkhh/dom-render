@@ -1,134 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <script src="../dist/dist/dom-render.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <title>simple-boot-front</title>
 </head>
 <body>
-<div id="body">
-    <div>
-        <!--%
-        for(var i = 0 ; i < this.cnt; i++) {
-            write(`<button dr-event-click='test'>${i} ${this.make()}</button>`)
-        }
-        %-->
-    </div>
-
-
-    <div>
-        <!--%write(this.make())%-->
-    </div>
-
-    <div>
-        <!--%write(this.car.name)%-->
-    </div>
-
-    <div>
-        <div rd-attr="return {wow: this.name}">zdsdasdasdasd</div>
-        <div rd-style="return {color: '#ff0000'}">stststst</div>
-    </div>
-    <div>
-        <button dr-event-click='test'>zzzzzzzzzzzzzz</button>
-    </div>
-</div>
+<div id="app"></div>
+<script src="./src/index.ts"></script>
 </body>
-<script>
-
-    // console.log('-->', ScopeRawSet)
-    const body = document.querySelector('#body');
-    let targetNode = new TargetNode(body, TargetNodeMode.child)
-    const raw = new ScopeRawSet(body.innerHTML, ['div {color: <!--%write(this.color)%-->}'])
-
-    class Test extends ScopeObject {
-        constructor(config) {
-            super(config);
-            this.zz = '22'
-            // console.log('---')
-        }
-        say () {
-            console.log('say~')
-        }
-    }
-
-    class Person {
-        constructor() {
-            this.eat = 'zzz'
-            this.food = 'food'
-        }
-    }
-    class Wheel {
-        constructor() {
-            this.x = 100;
-            this.y = 500;
-        }
-    }
-
-    class Car {
-        constructor() {
-            this.name = 'car'
-            this.model = 'tt'
-            this.leftWheel = new Wheel();
-            this.rightWheel = this.leftWheel;
-            // this.rightWheel = new Wheel();
-        }
-    }
-    class User extends Person {
-        constructor(name, height, width) {
-            super();
-            this.cnt = 2;
-            this.name = name;
-            this.color = RandomUtils.getRandomColor();
-            this.height = height;
-            this.width = width;
-            this.car = new Car();
-            this.childs = ['one', 'tow', 'three', 'four'];
-        }
-        test(e) {
-            console.log('user test-->', this, e)
-            this.name = 'vvvv'
-            this.car.name = 'zzz'
-            this.car.model = 'zaaaaaaaaaazz'
-            // this.cnt = 100;
-        }
-        make() {
-            return 'makemake' + Math.random()
-        }
-        onReady(f) {
-            console.log('onReady' + f)
-        }
-        onRenderd(f) {
-            console.log('onRenderd' + f)
-        }
-        onScopeMaked(f) {
-            console.log('onScopeMaked' + f)
-        }
-        changeField(data) {
-            console.log('changeField------------->' + data)
-        }
-    }
-
-    let user = new User('visualkhh', 55, 22);
-    // console.log('origin user', user)
-    // for (const key in user) {
-    //     console.log('target->',  key)
-    // }
-    let config = new Config(document, (it) => new Test(it.config));
-    let domRender = new DomRender(raw, config, 'zzzzzzzz');
-    user = domRender.runRender(user, targetNode);
-    // console.log('proxy user', user)
-    // user.childs.push('-zzzzzzzzzzzzzzzz')
-    // setTimeout(() => {
-    //     user.car.name = 'zzzzzzzzzzzzzzzzzzzzz';
-    // }, 5000)
-    // setTimeout(() => {
-    //     // console.log('222222222222222')
-    //     user.cnt = 10;
-    // }, 2000)
-
-    // setInterval(() => {
-    //     user.color = RandomUtils.getRandomColor();
-    // },1500)
-    console.log(user, user.width)
-</script>
 </html>
+

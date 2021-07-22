@@ -1,14 +1,44 @@
 import {Scope} from '../Scope';
 
 export const eventManager = new class {
-    public applyEvent(obj: any, templateElement: HTMLTemplateElement) {
+    public readonly attrPrefix = 'dr-';
+    public readonly eventNames = ['click', 'change', 'keyup', 'keydown', 'input'];
+    public readonly attrNames = [
+        this.attrPrefix + 'value-link',
+        this.attrPrefix + 'value',
+        this.attrPrefix + 'attr',
+        this.attrPrefix + 'style'
+    ];
+
+    constructor() {
+        this.eventNames.forEach(it => {
+            this.attrNames.push(this.attrPrefix + 'event-' + it);
+        });
+        // console.log('attrname', this.attrNames)
+    }
+
+    public findAttrElements(fragment: DocumentFragment) {
+        const datas: {name: string, value: string | null, element: Element}[] = [];
+        this.attrNames.forEach(attrName => {
+            fragment.querySelectorAll(`[${attrName}]`).forEach(it => {
+                console.log('find-->', it)
+                datas.push({name: attrName, value: it.getAttribute(attrName), element: it});
+            });
+
+        })
+        return datas;
+    }
+
+    // eslint-disable-next-line no-undef
+    public applyEvent(obj: any, childNodes: ChildNode[]) {
+        const elements = childNodes.filter(it => it instanceof Element).map(it => it as Element);
         // event
-        ['click', 'change', 'keyup', 'keydown', 'input'].forEach(it => {
-            this.setEvent(obj, it, templateElement);
+        this.eventNames.forEach(it => {
+            this.addDrEvent(obj, it, elements);
         });
 
         // value
-        this.procAttr<HTMLInputElement>(templateElement.content, 'rd-value', (it, attribute) => {
+        this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'value', (it, attribute) => {
             if (attribute && this.getValue(obj, attribute)) {
                 if (typeof this.getValue(obj, attribute) === 'function') {
                     it.value = this.getValue(obj, attribute)()
@@ -18,8 +48,8 @@ export const eventManager = new class {
             }
         })
 
-        // link
-        this.procAttr<HTMLInputElement>(templateElement.content, 'rd-value-link', (it, varName) => {
+        // link event
+        this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'value-link', (it, varName) => {
             if (varName && this.getValue(obj, varName)) {
                 it.addEventListener('input', (eit) => {
                     if (typeof this.getValue(obj, varName) === 'function') {
@@ -36,12 +66,23 @@ export const eventManager = new class {
                 }
             }
         })
-        this.changeVar(obj, templateElement.content);
+        this.changeVar(obj, elements);
     }
 
-    public changeVar(obj: any, templateElement: HTMLElement | DocumentFragment, varName?: string) {
+    public changeVar(obj: any, elements: Element[], varName?: string) {
+        // link event
+        this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'value-link', (it, varName) => {
+            if (varName && this.getValue(obj, varName)) {
+                if (typeof this.getValue(obj, varName) === 'function') {
+                    it.value = this.getValue(obj, varName);
+                } else {
+                    it.value = this.getValue(obj, varName);
+                }
+            }
+        })
+
         // attribute
-        this.procAttr(templateElement, 'rd-attr', (it, attribute) => {
+        this.procAttr(elements, this.attrPrefix + 'attr', (it, attribute) => {
             const varNames = new Set(Scope.usingThisVar(attribute ?? ''));
             const script = attribute;
             if ((varName && varNames.has(varName)) || varName === undefined) {
@@ -54,15 +95,15 @@ export const eventManager = new class {
                 }
             }
         })
-        // style
-        this.procAttr(templateElement, 'rd-style', (it, attribute) => {
+        // // style
+        this.procAttr(elements, this.attrPrefix + 'style', (it, attribute) => {
             const varNames = new Set(Scope.usingThisVar(attribute ?? ''));
             const script = attribute;
             if ((varName && varNames.has(varName)) || varName === undefined) {
                 // eslint-disable-next-line no-new-func
                 const data = Function(`"use strict"; ${script} `).bind(obj)() ?? {};
                 for (const [key, value] of Object.entries(data)) {
-                    if (typeof value === 'string') {
+                    if (typeof value === 'string' && it instanceof HTMLElement) {
                         (it.style as any)[key] = value;
                     }
                 }
@@ -70,9 +111,9 @@ export const eventManager = new class {
         })
     }
 
-    public setEvent(obj: any, eventName: string, template: HTMLTemplateElement) {
-        const attr = 'dr-event-' + eventName
-        this.procAttr<HTMLInputElement>(template.content, attr, (it, attribute) => {
+    public addDrEvent(obj: any, eventName: string, elements: Element[]) {
+        const attr = this.attrPrefix + 'event-' + eventName
+        this.procAttr<HTMLInputElement>(elements, attr, (it, attribute) => {
             // console.log('-----ttttttttttt', attribute, obj[attribute!], obj)
             // console.log('-----ttttttttttt', attribute, this[attribute!], this._originObj[attribute!])
             // if (attribute && (this[attribute] || this._originObj[attribute])) {
@@ -88,9 +129,14 @@ export const eventManager = new class {
         })
     }
 
-    public procAttr<T extends HTMLElement>(element: DocumentFragment | HTMLElement, attrName: string, f: (h: T, value: string | null) => void) {
-        element.querySelectorAll<T>(`[${attrName}]`).forEach(it => {
-            f(it, it.getAttribute(attrName));
+    public procAttr<T extends Element>(elements: Element[] = [], attrName: string, f: (h: T, value: string | null) => void) {
+        elements.forEach(it => {
+            if (undefined !== it.getAttribute(attrName)) {
+                f(it as T, it.getAttribute(attrName));
+            }
+            it.querySelectorAll<T>(`[${attrName}]`).forEach(it => {
+                f(it, it.getAttribute(attrName));
+            })
         });
     }
 

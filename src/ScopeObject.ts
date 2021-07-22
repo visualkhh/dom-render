@@ -1,33 +1,34 @@
 import {ScopeResultSet} from './ScopeResultSet';
 import {RandomUtils} from './utils/random/RandomUtils';
-import {Config} from './Config';
-import {eventManager} from './events/EventManager';
+import {TargetNode, TargetNodeMode} from './RootScope';
+import {DomRender} from './DomRender';
+import {Scope} from './Scope';
 
 export type ScopeObjectCalls = {name: string, parameter: any[], result: any}[];
 export class ScopeObject {
     public _originObj: any;
-    public calls: ScopeObjectCalls = [];
+    public _calls: ScopeObjectCalls = [];
     [name: string]: any;
-    public writes = '';
+    public _writes = '';
 
-    constructor(public config: Config, public uuid = RandomUtils.uuid()) {
+    constructor(public _scope: Scope, public _uuid = RandomUtils.uuid()) {
     }
 
-    public executeResultSet(code: string): ScopeResultSet {
-        this.eval(code);
-        const templateElement = this.config.document.createElement('template');
-        templateElement.innerHTML = this.writes;
-        // console.log('ScopeObjectScopeObject', this)
-        eventManager.applyEvent(this, templateElement);
-        const startComment = this.config.document.createComment('scope start ' + this.uuid)
-        const endComment = this.config.document.createComment('scope end ' + this.uuid)
+    public executeResultSet(script: string): ScopeResultSet {
+        this.eval(script);
+        const templateElement = this._scope.raws.document.createElement('template');
+        templateElement.innerHTML = this._writes;
+        // console.log('-->html-', script, templateElement.innerHTML)
+        // eventManager.applyEvent(this, templateElement.content);
+        const startComment = this._scope.raws.document.createComment('scope start ' + this._uuid)
+        const endComment = this._scope.raws.document.createComment('scope end ' + this._uuid)
         templateElement.content.childNodes.forEach(it => {
             // Node.ELEMENT_NODE = 1
             if (it.nodeType === 1) {
-                (it as Element).setAttribute('scope-uuid', this.uuid);
+                (it as Element).setAttribute('scope-uuid', this._uuid);
             }
         })
-        return new ScopeResultSet(this.uuid, this, templateElement.content, startComment, endComment, this.calls)
+        return new ScopeResultSet(this._uuid, this, templateElement.content, startComment, endComment, this._calls)
     }
 
     private eval(str: string): any {
@@ -38,7 +39,17 @@ export class ScopeObject {
         // eslint-disable-next-line no-new-func
         return Function(`"use strict";
         const write = (str) => {
-            this.appendWrite(str);
+            this._writes += str;
+        };
+        
+        const include = (target) => {
+            const uuid = this._makeUUID();
+            const targetNode = this.getTargetNode(uuid);
+            const rootScope = this._compileRootScope(target, targetNode, uuid);
+            // console.log('ScopeObject-->', uuid);
+            if (rootScope) {
+                this._writes += '<div include-scope-uuid="'+uuid+'"></div>';
+            }
         }
         
         ${this.customScript()}
@@ -47,11 +58,24 @@ export class ScopeObject {
         `).bind(scope)();
     }
 
-    public customScript() {
-        return '';
+    private _makeUUID() {
+        return RandomUtils.uuid();
     }
 
-    public appendWrite(str: string) {
-        this.writes += str;
+    private _compileRootScope(target: any, targetNode: TargetNode, uuid: string) {
+        // console.log('-----> target', target)
+        if (!('_ScopeObjectProxyHandler_isProxy' in target)) {
+            console.error('no Domrander Proxy Object -> var proxy = Domrender.proxy(target, ScopeRawSet)', target)
+            return new Error('no Domrander compile Object');
+        }
+        return DomRender.compileRootScope(target, target._ScopeObjectProxyHandler_rawSet!, this._scope.config, targetNode, uuid);
+    }
+
+    private getTargetNode(uuid: string) {
+        return new TargetNode(`[include-scope-uuid='${uuid}']`, TargetNodeMode.replace);
+    }
+
+    protected customScript() {
+        return '';
     }
 }
