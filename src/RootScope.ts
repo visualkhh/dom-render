@@ -40,7 +40,7 @@ export class RootScope extends Scope implements ChangeField {
     }
 
     changeField(path: string): void {
-        // console.log('change field', path)
+        console.log('change field', path)
         // 수정 포인트.
         if (this.scopeResult) {
             eventManager.changeVar(this.obj, this.scopeResult.childNodes, path)
@@ -164,26 +164,15 @@ export class RootScope extends Scope implements ChangeField {
             })
         });
     }
-    // private extracted(rawFragment: DocumentFragment, it: Scope, childScopeObject: ScopeResultSet) {
-    //     const nodeIterator = this.raws.document.createNodeIterator(
-    //         rawFragment,
-    //         // https://developer.mozilla.org/ko/docs/Web/API/Document/createTreeWalker
-    //         // NodeFilter.SHOW_COMMENT: 128
-    //         128,
-    //         {
-    //             acceptNode: (node: Comment) => {
-    //                 const coment = (node as Comment).data.replace(/[\r\n]/g, '');
-    //                 const b = coment.startsWith('%') && coment.endsWith('%') && coment === ('%' + it.raws.replace(/[\r\n]/g, '') + '%');
-    //                 // NodeFilter.FILTER_ACCEPT: 1, NodeFilter.FILTER_REJECT: 2
-    //                 return b ? 1 : 2;
-    //             }
-    //         }
-    //     )
-    //
-    //     const currentNode = nodeIterator.nextNode();
-    //     currentNode?.parentNode?.insertBefore(childScopeObject.startComment, currentNode);
-    //     currentNode?.parentNode?.insertBefore(childScopeObject.endComment, currentNode.nextSibling);
-    //     return currentNode;
-    // }
 
+    isConnected() {
+        for (const it of this.childs) {
+            // console.log('iscon-->', it.scopeResult?.isConnected())
+            if (it.scopeResult?.isConnected()) {
+                return true;
+            }
+        }
+
+        return !!this.scopeResult?.isConnected();
+    }
 }

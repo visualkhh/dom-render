@@ -11,6 +11,7 @@ export class ScopeResultSet {
         this.childNodes = [];
         for (let i = 0; i < fragment.childNodes.length; i++) {
             const childNode = fragment.childNodes[i];
+            console.log('--->', uuid,  childNode)
             this.childNodes.push(childNode);
         }
     }
@@ -32,7 +33,9 @@ export class ScopeResultSet {
     }
 
     public isConnected() {
-        for (let childNode of this.childNodes) {
+        // console.log('--->isConnected', this.childNodes)
+        for (const childNode of this.childNodes) {
+            // console.log('isCOnnected-->', childNode)
             if (childNode.isConnected) {
                 return true;
             }

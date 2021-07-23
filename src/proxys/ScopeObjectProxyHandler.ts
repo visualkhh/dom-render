@@ -1,6 +1,7 @@
 import {RootScope} from '../RootScope';
 import {NodeUtils} from '../utils/node/NodeUtils';
 import {Scope} from '../Scope';
+import {RawSet} from '../DomRender';
 
 export type DepthType = { rootScopes: Map<string, RootScope>, rootTargetOrigin?: any, rootTargetProxy?: any, depths: string[] };
 
@@ -12,14 +13,18 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
     private _targetProxy?: any;
     private _targetOrigin?: any;
 
-    constructor(public _rawSet: {template: string, styles: string[]} ) {
+    constructor(public _rawSet: RawSet) {
     }
 
     run(_targetProxy: any, _targetOrigin: any, _rootScope?: RootScope) {
         this._targetProxy = _targetProxy;
         this._targetOrigin = _targetOrigin;
         if (_rootScope) {
-            this._rootScopes.set(_rootScope.uuid, _rootScope);
+            if (this._rootScopes.set) {
+                this._rootScopes.set(_rootScope.uuid, _rootScope);
+            } else if ((this._rootScopes as any).remove) {
+                (this._rootScopes as any).remove(_rootScope.uuid, _rootScope);
+            }
         }
         const data = Object.keys(_targetOrigin) || [];
         data.forEach(it => {
@@ -122,15 +127,20 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
             obj[prop] = value;
             return true;
         }
-        // console.log('set-->', obj, ' prop:', prop, value, this._refs);
+        console.log('set-->', obj, ' prop:', prop, value, this._refs);
         obj[prop] = this.proxy(value);
         const depths = [prop];
         const parentDepths = this.goRoot(depths, obj);
         parentDepths.filter(it => it.rootScopes.size > 0).forEach(it => {
             const fullDepth = it.depths.join('.');
             it.rootScopes.forEach((rit, rkey, rmap) => {
-                if (!rit.scopeResult?.isConnected()) {
-                    this._rootScopes.delete(rit.uuid);
+                // console.log('----->', rit.isConnected())
+                if (!rit.isConnected()) {
+                    if (this._rootScopes.delete) {
+                        this._rootScopes.delete(rit.uuid);
+                    } else if (this._targetProxy.remove) {
+                        this._targetProxy.remove(rit.uuid);
+                    }
                     return;
                 }
                 // console.log('>---> ', fullDepth, 'prop:'+prop, '\t\t', rit.uuid, rit.raws.node.childNodes)

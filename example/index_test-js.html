@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../dist/dist/dom-render.js"></script>
+</head>
+<body>
+<div id="app">
+
+    <div>
+        <!--%
+            write(this.name);
+        %-->
+    </div>
+
+
+
+</div>
+</body>
+<script>
+    class Nutrient {
+
+    }
+    class Metrial {
+        constructor(nutrients) {
+            this.nutrients = nutrients;
+        }
+
+    }
+    class Food {
+        fd_cd; //: "BA0101001"
+        fd_kind_cd; //: "BA0101"
+        fd_nm; //: "누룬밥"
+        constructor(metrials) {
+            this.metrials = metrials;
+        }
+    }
+    class Meal {
+        foods = [];
+        constructor(type) {
+            this.type = type;
+        }
+    }
+    class Diary {
+
+        constructor(name, meals, foods) {
+            this.name = name;
+            this.meals = meals;
+            this.foods = foods;
+        }
+
+        name = 'zzww'
+        meals = []
+        foods = []
+    }
+    const app = document.querySelector('#app');
+    let diary = new Diary();
+    const targetNode = new TargetNode(app, TargetNodeMode.appendChild);
+    const raw = {template: app.innerHTML, styles: []};
+    diary = DomRender.render(document, diary, raw, new Config(), targetNode);
+    console.log('-------ddd', diary);
+    const food = new Food();
+    food.fd_cd = 'zz'
+    setTimeout(() => {
+        diary.name = 'zddz'
+        diary.foods = [food]
+
+    }, 3000)
+    // const config = new Config();
+    // const targetNode = new TargetNode(app, TargetNodeMode.replace)
+    // let user = new User(5);
+    // const raw = {template: app.innerHTML, styles: ['div {color: <!--%write(this.color)%-->}']};
+
+</script>
+</html>
+

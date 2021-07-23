@@ -90,20 +90,25 @@ class User extends Person {
 }
 
 const config = new Config();
-let userFriend = new User('visualkhh-friend', 515, 122);
-const fraw = {template: `
-<div>friend<!--%write(this.name)%--><button dr-event-click="console.log($event)">----</button></div>
-<hr>
-`, styles: []};
-userFriend = DomRender.proxy(userFriend, fraw);
-let user = new User('visualkhh', 55, 22, userFriend);
+// let userFriend = new User('visualkhh-friend', 515, 122);
+// const fraw = {template: `
+// <div>friend<!--%write(this.name)%--><button dr-event-click="console.log($event)">----</button></div>
+// <hr>
+// `, styles: []};
+// userFriend = DomRender.proxy(userFriend, fraw);
+
+let user = new User('visualkhh', 55, 22); // userFriend
 const body = document.querySelector('#app');
 const targetNode = new TargetNode(body, TargetNodeMode.replace)
-const raw = {template: html, styles: ['div {color: <!--%write(this.color)%-->}']};
+const raw = {template: html};
 
 user = DomRender.render(document, user, raw, config, targetNode);
 setTimeout(() => {
     user.name = RandomUtils.getRandomColor()
-    user.color = RandomUtils.getRandomColor();
-    console.log('-->', user)
+    // user.color = RandomUtils.getRandomColor();
+    // console.log('-->', user)
+    setTimeout(() => {
+        user.name = RandomUtils.getRandomColor()
+        user.childs.push('22')
+    }, 3000)
 }, 3000)

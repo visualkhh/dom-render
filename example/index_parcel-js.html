@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+<!--    <script src="../dist-parcel/dom-render.js"></script>-->
     <script src="../dist/dist/dom-render.js"></script>
 </head>
 <body>
@@ -15,20 +16,16 @@
         }
         %-->
     </div>
-    <div>
-        <!--% write(this.name);%-->
-    </div>
 
 
 
 </div>
 </body>
 <script>
-    console.log('-----')
+    console.log('-----', DomRender)
     const app = document.querySelector('#app');
     class User {
         constructor(cnt) {
-            this.name = 'zz'
             this.cnt = cnt;
         }
     }
@@ -37,9 +34,7 @@
     let user = new User(5);
     const raw = {template: app.innerHTML, styles: ['div {color: <!--%write(this.color)%-->}']};
     user = DomRender.render(document, user, raw, config, targetNode);
-    setTimeout(() => {
-        user.name = RandomUtils.getRandomColor()
-    }, 3000)
+
 </script>
 </html>
 

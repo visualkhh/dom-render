@@ -1,4 +1,4 @@
-import {eventManager} from "./events/EventManager";
+import {eventManager} from './events/EventManager';
 
 export class ScopeRawSet {
     public node: DocumentFragment | Node;
@@ -13,9 +13,8 @@ export class ScopeRawSet {
             this.node = this.raw;
         }
 
-
-        //style
-        // Node.ELEMENT_NODE	= 1  DOCUMENT_FRAGMENT= 11
+        // style
+        // Node.ELEMENT_NODE = 1, DOCUMENT_FRAGMENT = 11
         if (this.styles.length > 0 && (this.node.nodeType === 1 || this.node.nodeType === 11)) {
             const fragment = this.makeFragment(this.styles.join(' '));
             const style = document.createElement('style')
