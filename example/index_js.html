@@ -7,19 +7,44 @@
 </head>
 <body>
 <div id="app">
+    <style>
+        div {
+            color: /*%write(this.makeRandomColor())%*/;
+            font-size: 55px;
+        }
+    </style>
+    <p>T222222222his text will be green. Inline styles take precedence over CSS included externally.</p>
+    <p style="color: blue">The <code>style</code> attribute can override it, though.</p>
 
+    <div>zzzzㅗㅗㅗzzzzzz</div>
+
+    <select id="se" dr-value-link="selectValue">
+        <option value="avalue">aa</option>
+        <option value="nvalue">nn</option>
+    </select>
+
+    <input type="text" id="ii" dr-value-link="textValue">
+
+    <input type="text" dr-on-init="element">
+    <button data="text" dr-on-init="element">asdas </button>
+
+    <!--%
+      for(var i = 0 ; i < this.cnt ; i ++) {
+          write('<input type="text" dr-on-init="element">');
+      }
+      %-->
+    <div>
+        <button dr-event-click="this.cc()">ㄴㄴㄴㄴㄴ</button>
+    </div>
     <div>
         <!--%
-        for(var i = 0; i < this.cnt; i++) {
-            write('<div>zzzzz</div>');
+        for(var i = 0 ; i < this.friends?.length ?? 0 ; i ++) {
+            write(this.friends[i]);
         }
         %-->
     </div>
-    <div>
-        <!--% write(this.name);%-->
-    </div>
 
-
+    <p>zzzzzzzzzzzadfwowroqewfjoiwefhiwehfoiu</p>
 
 </div>
 </body>
@@ -27,18 +52,36 @@
     console.log('-----')
     const app = document.querySelector('#app');
     class User {
+        friends;
+        color;
+        selectValue;
+        textValue;
         constructor(cnt) {
             this.name = 'zz'
             this.cnt = cnt;
+            this.color = RandomUtils.getRandomColor();
+            //this.friends = ['a'];
+        }
+        cc($event) {
+            console.log('-->', $event, this.selectValue, this.textValue)
+            this.textValue = RandomUtils.getRandomColor();
+        }
+        makeRandomColor() {
+            return RandomUtils.getRandomColor();
+        }
+        element($element) {
+            console.log('ele', $element);
         }
     }
     const config = new Config();
     const targetNode = new TargetNode(app, TargetNodeMode.replace)
-    let user = new User(5);
-    const raw = {template: app.innerHTML, styles: ['div {color: <!--%write(this.color)%-->}']};
+    let user = new User(1);
+    const raw = {template: app.innerHTML, styles: ['p {color: /*%write(this.color)%*/}']};
     user = DomRender.render(document, user, raw, config, targetNode);
     setTimeout(() => {
-        user.name = RandomUtils.getRandomColor()
+        // user.friends.push(2)
+        user.cnt = 2;
+        user.friends = [2,3,4];
     }, 3000)
 </script>
 </html>

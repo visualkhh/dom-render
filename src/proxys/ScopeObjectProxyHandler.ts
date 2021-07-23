@@ -20,11 +20,7 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
         this._targetProxy = _targetProxy;
         this._targetOrigin = _targetOrigin;
         if (_rootScope) {
-            if (this._rootScopes.set) {
-                this._rootScopes.set(_rootScope.uuid, _rootScope);
-            } else if ((this._rootScopes as any).remove) {
-                (this._rootScopes as any).remove(_rootScope.uuid, _rootScope);
-            }
+            this._rootScopes.set(_rootScope.uuid, _rootScope);
         }
         const data = Object.keys(_targetOrigin) || [];
         data.forEach(it => {
@@ -127,7 +123,7 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
             obj[prop] = value;
             return true;
         }
-        console.log('set-->', obj, ' prop:', prop, value, this._refs);
+        // console.log('set-->', obj, ' prop:', prop, value, this._refs);
         obj[prop] = this.proxy(value);
         const depths = [prop];
         const parentDepths = this.goRoot(depths, obj);
@@ -136,11 +132,7 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
             it.rootScopes.forEach((rit, rkey, rmap) => {
                 // console.log('----->', rit.isConnected())
                 if (!rit.isConnected()) {
-                    if (this._rootScopes.delete) {
-                        this._rootScopes.delete(rit.uuid);
-                    } else if (this._targetProxy.remove) {
-                        this._targetProxy.remove(rit.uuid);
-                    }
+                    this._rootScopes.delete(rit.uuid);
                     return;
                 }
                 // console.log('>---> ', fullDepth, 'prop:'+prop, '\t\t', rit.uuid, rit.raws.node.childNodes)

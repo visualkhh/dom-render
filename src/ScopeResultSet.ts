@@ -1,6 +1,6 @@
 import {ScopeObject} from './ScopeObject';
 import {eventManager} from './events/EventManager';
-import {ScopeObjectCall} from "./ScopeObjectCall";
+import {ScopeObjectCall} from './ScopeObjectCall';
 
 export class ScopeResultSet {
     // eslint-disable-next-line no-undef
@@ -11,7 +11,7 @@ export class ScopeResultSet {
         this.childNodes = [];
         for (let i = 0; i < fragment.childNodes.length; i++) {
             const childNode = fragment.childNodes[i];
-            console.log('--->', uuid,  childNode)
+            // console.log('--->', uuid,  childNode)
             this.childNodes.push(childNode);
         }
     }
@@ -34,6 +34,9 @@ export class ScopeResultSet {
 
     public isConnected() {
         // console.log('--->isConnected', this.childNodes)
+        if (this.childNodes.length <= 0) {
+            return true;
+        }
         for (const childNode of this.childNodes) {
             // console.log('isCOnnected-->', childNode)
             if (childNode.isConnected) {

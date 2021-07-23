@@ -22,6 +22,7 @@ export enum TargetNodeMode {
 }
 
 export class TargetNode {
+    // eslint-disable-next-line no-use-before-define
     constructor(private _node: Node | string = 'body', public mode = TargetNodeMode.child, public document: Document = document) {
     }
 
@@ -40,7 +41,7 @@ export class RootScope extends Scope implements ChangeField {
     }
 
     changeField(path: string): void {
-        console.log('change field', path)
+        // console.log('change field', path)
         // 수정 포인트.
         if (this.scopeResult) {
             eventManager.changeVar(this.obj, this.scopeResult.childNodes, path)

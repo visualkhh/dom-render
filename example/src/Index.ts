@@ -61,6 +61,7 @@ class User extends Person {
     car: Car;
     friend: User;
     childs: string[];
+    searchText = ''
     constructor(name: string, height: number, width: number, friend?: User) {
         super();
         this.cnt = 1;
@@ -70,11 +71,15 @@ class User extends Person {
         this.width = width;
         this.car = new Car();
         this.friend = friend;
-        this.childs = ['one', 'tow', 'three', 'four'];
+        this.childs = []; // ['one', 'tow', 'three', 'four'];
     }
 
     test() {
         console.log('test->' + this.name)
+    }
+
+    vava(a, bb) {
+        console.log('vava->', a.target.value, bb, this.searchText)
     }
 
     random() {
@@ -103,12 +108,7 @@ const targetNode = new TargetNode(body, TargetNodeMode.replace)
 const raw = {template: html};
 
 user = DomRender.render(document, user, raw, config, targetNode);
-setTimeout(() => {
-    user.name = RandomUtils.getRandomColor()
-    // user.color = RandomUtils.getRandomColor();
-    // console.log('-->', user)
-    setTimeout(() => {
-        user.name = RandomUtils.getRandomColor()
-        user.childs.push('22')
-    }, 3000)
-}, 3000)
+// setTimeout(() => {
+//     console.log('iii-->', user);
+//     user.childs = ['1', '2', '3']
+// }, 3000)
