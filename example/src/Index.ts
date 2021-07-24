@@ -2,112 +2,55 @@ import {TargetNode, TargetNodeMode} from 'dom-render/RootScope';
 import {RandomUtils} from 'dom-render/utils/random/RandomUtils';
 import {Config} from 'dom-render/Config';
 import {DomRender} from 'dom-render/DomRender';
-import {ScopeObject} from 'dom-render/ScopeObject';
 import html from './index.html'
-import {Scope} from 'dom-render/Scope';
 
-class Test extends ScopeObject {
-    constructor(public scope: Scope) {
-        super(scope);
-        this.zz = '22'
-        console.log('---')
-    }
-
-    say () {
-        console.log('say~')
-    }
-
-    protected customScript(): string {
-        return super.customScript();
-    }
-}
-
-class Person {
-    public eat: string;
-    public food: string;
-    constructor() {
-        this.eat = 'zzz'
-        this.food = 'food'
-    }
-}
-class Wheel {
-    public x: number;
-    public y: number;
-    constructor() {
-        this.x = 100;
-        this.y = 500;
-    }
-}
-
-class Car {
-    public name: string;
-    public model: string;
-    public leftWheel: Wheel;
-    public rightWheel: Wheel;
-    constructor() {
-        this.name = 'car'
-        this.model = 'tt'
-        this.leftWheel = new Wheel();
-        this.rightWheel = this.leftWheel;
-        // this.rightWheel = new Wheel();
-    }
-}
-class User extends Person {
-    cnt: number;
+class User {
+    friends?;
+    color?;
+    selectValue?;
+    textValue?;
+    e1?: Element;
+    e2?: Element;
     name: string;
-    color: string;
-    height: number;
-    width: number;
-    car: Car;
-    friend: User;
-    childs: string[];
-    searchText = ''
-    constructor(name: string, height: number, width: number, friend?: User) {
-        super();
-        this.cnt = 1;
-        this.name = name;
+    cnt: number;
+
+    constructor(cnt) {
+        this.name = 'zz'
+        this.cnt = cnt;
         this.color = RandomUtils.getRandomColor();
-        this.height = height;
-        this.width = width;
-        this.car = new Car();
-        this.friend = friend;
-        this.childs = []; // ['one', 'tow', 'three', 'four'];
     }
 
-    test() {
-        console.log('test->' + this.name)
+    cc($event) {
+        // console.log('-->', $event, this.selectValue, this.textValue)
+        console.log('-->', this.e1, this.e2)
+        // this.textValue = RandomUtils.getRandomColor();
     }
 
-    vava(a, bb) {
-        console.log('vava->', a.target.value, bb, this.searchText)
-    }
-
-    random() {
-        return RandomUtils.random();
-    }
-    randomRgb() {
+    makeRandomColor() {
         return RandomUtils.getRandomColor();
     }
 
-    plus(n: number) {
-        user.cnt = n;
+    element($element: any) {
+        $element.value = RandomUtils.getRandomColor();
+        console.log('ele', $element);
     }
 }
 
 const config = new Config();
-// let userFriend = new User('visualkhh-friend', 515, 122);
-// const fraw = {template: `
-// <div>friend<!--%write(this.name)%--><button dr-event-click="console.log($event)">----</button></div>
-// <hr>
-// `, styles: []};
-// userFriend = DomRender.proxy(userFriend, fraw);
 
-let user = new User('visualkhh', 55, 22); // userFriend
+let user = new User(1);
 const body = document.querySelector('#app');
 const targetNode = new TargetNode(body, TargetNodeMode.replace)
 const raw = {template: html};
 
 user = DomRender.render(document, user, raw, config, targetNode);
+
+setTimeout(() => {
+    // user.friends.push(2)
+    user.cnt = 2;
+    // console.log('-->user.cnt', user, user.cnt)
+    // user.friends = [2,3,4];
+}, 3000)
 // setTimeout(() => {
 //     console.log('iii-->', user);
 //     user.childs = ['1', '2', '3']

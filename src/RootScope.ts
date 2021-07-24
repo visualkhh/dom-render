@@ -86,6 +86,9 @@ export class RootScope extends Scope implements ChangeField {
         const childNodes: ChildNode[] = [];
         const startComment = this.raws.document.createComment('rootScope start');
         const endComment = this.raws.document.createComment('rootScope end');
+        fragment.prepend(startComment)
+        fragment.appendChild(endComment)
+        childNodes.push((this.targetNode.node ?? this.raws.document.body) as Element)
         eventManager.findAttrElements(fragment).forEach(it => {
             childNodes.push(it.element)
         })
@@ -102,7 +105,6 @@ export class RootScope extends Scope implements ChangeField {
 
     executeFragment(option?: ScopeOption) {
         this.execRoot(this.raws.node as DocumentFragment);
-
         // eventManager.applyEvent(this.obj, templateElement);
         // console.log('executeFragment ', rawFragment.childNodes.length)
         this.childs.forEach(it => {
@@ -135,27 +137,6 @@ export class RootScope extends Scope implements ChangeField {
                 while (currentNode = nodeIterator.nextNode()) {...}
              */
         });
-
-        // styles
-        // if (this.rawSet.styles.length > 0) {
-        //     const styleScope = new RootScope(new ScopeRawSet(this.rawSet.styles.join(' ')), this.obj, RandomUtils.uuid(), this.config); // , {start: '/*%', end: '%*/'};
-        //     const styleFragment = styleScope.executeFragment();
-        //     styleScope.childs.forEach(it => this.childs.push(it));
-        //     const style = this.config.document.createElement('style');
-        //     style.appendChild(styleFragment);
-        //     rawFragment.prepend(style);
-        // }
-        // if (option?.childElementAttr && option?.childElementAttr?.size > 0) {
-        //     rawFragment.childNodes.forEach((it) => {
-        //         // Node.ELEMENT_NODE
-        //         if (it.nodeType === 1) {
-        //             option?.childElementAttr?.forEach((v, k) => {
-        //                 (it as Element).setAttribute(k, v);
-        //             })
-        //         }
-        //     })
-        // }
-        // return rawFragment;
     }
 
     private executeChildResultSet(option: ScopeOption | undefined) {

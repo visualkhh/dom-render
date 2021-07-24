@@ -127,23 +127,25 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
         obj[prop] = this.proxy(value);
         const depths = [prop];
         const parentDepths = this.goRoot(depths, obj);
+        // console.log('set--> parentDepths', parentDepths);
+        // console.dir(parentDepths);
         parentDepths.filter(it => it.rootScopes.size > 0).forEach(it => {
             const fullDepth = it.depths.join('.');
+            // console.log('set--> rootScopes', fullDepth);
             it.rootScopes.forEach((rit, rkey, rmap) => {
-                // console.log('----->', rit.isConnected())
+                // console.log('---rootScopesrootScopesrootScopes-->', this._rootScopes.values(), rit.isConnected())
                 if (!rit.isConnected()) {
                     this._rootScopes.delete(rit.uuid);
                     return;
                 }
-                // console.log('>---> ', fullDepth, 'prop:'+prop, '\t\t', rit.uuid, rit.raws.node.childNodes)
+                // console.log('>---> ', fullDepth, 'prop:' + prop, '\t\t', rit.uuid, rit.raws.node.childNodes)
                 // console.log('>> ', fullDepth, rit, rit.childs)
                 rit.childs.filter(sit => sit.scopeResult && sit.raws.usingVars.includes(fullDepth)).forEach(sit => {
                     if (sit.scopeResult) {
                         sit.scopeResult.childAllRemove();
-
                         // const startComment = sit.scopeResult.startComment;
                         // const endComment = sit.scopeResult.endComment;
-                            // const result = sit.exec(it.rootTargetProxy).result
+                        // const result = sit.exec(it.rootTargetProxy).result
                         // if (sit.raws.node) {
                         //     sit.raws.node.parentNode?.appendChild(result.startComment);
                         //     sit.raws.node.parentNode?.appendChild(result.fragment);

@@ -1,31 +1,11 @@
-<style type="text/css">
-    p {
-        color: #26b72b;
-    }
-</style>
-<p>This text will be green. Inline styles take precedence over CSS included externally.</p>
-<p style="color: blue">The <code>style</code> attribute can override it, though.</p>
 
-
-
-
-<div>
-<style>
-    input {
-        color: pink;
-    }
-    /*% console.log(11111); %*/
-</style>
-</div>
-------------------------
 <!--%
-
-for(var i = 0 ; i < this.childs.length; i++) {
-    write('<tr><td>' + this.childs[i] + '</td></tr>')
+for(var i = 0 ; i < this.cnt ; i ++) {
+  write(`<div>${i}</div>`);
+  write(`<div>${i}: <input type="text" dr-on-init="e${i+1}"><div>`);
 }
 %-->
-<input dr-event-input="console.log(1)">
-<select dr-value-link="vava">
-    <option value="1">11</option>
-    <option value="2">22</option>
-</select>
+<div>
+    <button dr-event-click="this.cc()">ㄴㄴㄴㄴㄴ</button>
+</div>
+

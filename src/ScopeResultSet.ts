@@ -34,11 +34,14 @@ export class ScopeResultSet {
 
     public isConnected() {
         // console.log('--->isConnected', this.childNodes)
+        // if (this.startComment.isConnected && this.endComment.isConnected) {
+        //     return true;
+        // }
         if (this.childNodes.length <= 0) {
             return true;
         }
         for (const childNode of this.childNodes) {
-            // console.log('isCOnnected-->', childNode)
+            // console.log('isCOnnected-->', childNode, childNode.isConnected)
             if (childNode.isConnected) {
                 return true;
             }

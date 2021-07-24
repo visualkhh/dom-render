@@ -12,9 +12,13 @@
     <!--%
   for(var i = 0 ; i < this.cnt ; i ++) {
       write(`<div>${i}</div>`);
-      write(`<div>${i}: <input type="text" dr-on-init="e${i+1}"><div>`);
+      write(`<div>${i}: <input type="text" dr-on-init="e${i+1}" dr-value-link='e${i+1}_val'><div>`);
   }
   %-->
+    <select dr-value-link="so_val">
+        <option value="1">1</option>
+        <option value="2">2</option>
+    </select>
     <div>
         <button dr-event-click="this.cc()">ㄴㄴㄴㄴㄴ</button>
     </div>
@@ -32,6 +36,9 @@
         textValue;
         e1;
         e2;
+        e1_val;
+        e2_val;
+        so_val;
 
         constructor(cnt) {
             this.name = 'zz'
@@ -40,9 +47,19 @@
             //this.friends = ['a'];
         }
 
+        e1_fnc(data) {
+            console.log('e1_fnc-->', data)
+        }
+
+        e2_fnc(data) {
+            console.log('e2_fnc-->', data)
+        }
+        so_val_fnc(data, b, c) {
+            console.log('------->so_val_fnc', data, b, c)
+        }
         cc($event) {
             // console.log('-->', $event, this.selectValue, this.textValue)
-            console.log('-->', this.e1, this.e2)
+            console.log('-->', this.e1, this.e2, this.e1_val, this.e2_val, this.so_val)
             // this.textValue = RandomUtils.getRandomColor();
         }
 
@@ -55,16 +72,9 @@
             console.log('ele', $element);
         }
     }
-    const config = new Config();
-    const targetNode = new TargetNode(app, TargetNodeMode.replace)
-    let user = new User(1);
-    const raw = {template: app.innerHTML, styles: ['p {color: /*%write(this.color)%*/}']};
-    user = DomRender.render(document, user, raw, config, targetNode);
+   const user = DomRender.renderTarget(new User(1), document, "#app");
     setTimeout(() => {
-        // user.friends.push(2)
         user.cnt = 2;
-        // console.log('-->user.cnt', user, user.cnt)
-        // user.friends = [2,3,4];
     }, 3000)
 </script>
 </html>

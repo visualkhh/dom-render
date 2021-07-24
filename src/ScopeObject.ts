@@ -3,7 +3,7 @@ import {RandomUtils} from './utils/random/RandomUtils';
 import {TargetNode, TargetNodeMode} from './RootScope';
 import {DomRender, RawSet} from './DomRender';
 import {Scope} from './Scope';
-import {ScopeObjectCall} from "./ScopeObjectCall";
+import {ScopeObjectCall} from './ScopeObjectCall';
 
 export class ScopeObject {
     public _originObj: any;
@@ -18,8 +18,6 @@ export class ScopeObject {
         this.eval(script);
         const templateElement = this._scope.raws.document.createElement('template');
         templateElement.innerHTML = this._writes;
-        // console.log('-->html-', script, templateElement.innerHTML)
-        // eventManager.applyEvent(this, templateElement.content);
         const startComment = this._scope.raws.document.createComment('scope start ' + this._uuid)
         const endComment = this._scope.raws.document.createComment('scope end ' + this._uuid)
         templateElement.content.childNodes.forEach(it => {
@@ -39,7 +37,7 @@ export class ScopeObject {
         // eslint-disable-next-line no-new-func
         return Function(`"use strict";
         const write = (str) => {
-            this._writes += str;
+            this._appendWrite(str);
         };
         
         const include = (target) => {
@@ -49,7 +47,7 @@ export class ScopeObject {
             this._calls.push({name: 'include', parameter: [target], result: rootScope})
             
             if (rootScope) {
-                this._writes += ("<template include-scope-uuid='" + uuid + "'></template>");
+                this._appendWrite("<template include-scope-uuid='" + uuid + "'></template>");
             }
         }
         
@@ -59,12 +57,15 @@ export class ScopeObject {
         `).bind(scope)();
     }
 
+    private _appendWrite(str: string) {
+        this._writes += str;
+    }
+
     private _makeUUID() {
         return RandomUtils.uuid();
     }
 
     private _compileRootScope(target: any, targetNode: TargetNode, uuid: string) {
-        // console.log('-----> target', target)
         if (!('_ScopeObjectProxyHandler_isProxy' in target)) {
             console.error('no Domrander Proxy Object -> var proxy = Domrender.proxy(target, ScopeRawSet)', target)
             return new Error('no Domrander compile Object');

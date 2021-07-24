@@ -44,46 +44,62 @@ export const eventManager = new class {
             it.value = data;
         })
 
-        // link event
+        // on-init event
+        this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'on-init', (it, varName) => {
+            if (varName) {
+                if (typeof this.getValue(obj, varName) === 'function') {
+                    this.getValue(obj, varName)(it)
+                } else {
+                    this.setValue(obj, varName, it)
+                }
+            }
+        })
+
+        // value-link event
         this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'value-link', (it, varName) => {
             if (varName) {
+                if (typeof this.getValue(obj, varName) === 'function') {
+                    this.getValue(obj, varName)(it.value)
+                } else {
+                    this.setValue(obj, varName, it.value)
+                }
                 it.addEventListener('input', (eit) => {
                     if (typeof this.getValue(obj, varName) === 'function') {
-                        this.getValue(obj, varName)(eit)
+                        this.getValue(obj, varName)(it.value, eit)
                     } else {
                         this.setValue(obj, varName, it.value)
                     }
                 })
             }
         })
-
-
         this.changeVar(obj, elements);
     }
 
     // eslint-disable-next-line no-undef
     public changeVar(obj: any, elements: Element[] | ChildNode[], varName?: string) {
+        // console.log('-changeVar-->', obj, elements, varName)
         // on-init
-        this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'on-init', (it, attribute) => {
-            const varNames = new Set(this.usingThisVar(attribute ?? ''));
-            if ((varName && varNames.has(varName)) || varName === undefined) {
-                if (attribute) {
-                    if (typeof this.getValue(obj, attribute) === 'function') {
-                        this.getValue(obj, attribute)(it)
-                    } else {
-                        this.setValue(obj, attribute, it)
-                    }
-                }
-            }
-        })
+        // this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'on-init', (it, attribute) => {
+        //     if (attribute && attribute === varName) {
+        //         if (typeof this.getValue(obj, attribute) === 'function') {
+        //             this.getValue(obj, attribute)(it)
+        //         } else {
+        //             obj[attribute] = it;
+        //         }
+        //     }
+        // })
 
-        // link event
-        this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'value-link', (it, varName) => {
-            if (varName) {
-                if (typeof this.getValue(obj, varName) === 'function') {
-                    it.value = this.getValue(obj, varName)();
+        // value-link event
+        this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'value-link', (it, attribute) => {
+            // const varNames = new Set(this.usingThisVar(varName ?? ''));
+            if (attribute && attribute === varName) {
+                if (typeof this.getValue(obj, attribute) === 'function') {
+                    this.getValue(obj, attribute)(it.value);
                 } else {
-                    it.value = this.getValue(obj, varName);
+                    const value = this.getValue(obj, attribute);
+                    if (value !== undefined && value !== null) {
+                        it.value = value;
+                    }
                 }
             }
         })
@@ -128,14 +144,8 @@ export const eventManager = new class {
             it.addEventListener(eventName, (event) => {
                 // eslint-disable-next-line no-new-func
                 const f = Function(`"use strict"; const $event=event; ${script} `);
-                // Object.defineProperty(f, '$event', event);
                 // eslint-disable-next-line no-unused-vars
                 const data = f.bind(Object.assign(obj))() ?? {};
-                // if (typeof this.getValue(obj, attribute) === 'function') {
-                //     this.getValue(obj, attribute)(event)
-                // } else {
-                //     this.setValue(obj, attribute, it.value)
-                // }
             })
         })
     }

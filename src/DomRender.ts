@@ -1,4 +1,4 @@
-import {RootScope, TargetNode} from './RootScope';
+import {RootScope, TargetNode, TargetNodeMode} from './RootScope';
 import {ScopeRawSet} from './ScopeRawSet';
 import {RandomUtils} from './utils/random/RandomUtils';
 import {Config} from './Config';
@@ -30,6 +30,16 @@ export class DomRender {
 
     public static render<T>(document: Document, target: T, raws: RawSet, config: Config, targetNode?: TargetNode): T {
         const dest = DomRender.compileSet(document, target, raws, config, targetNode);
+        dest.rootScope.executeRender();
+        return dest.target;
+    }
+
+    public static renderTarget<T>(target: T, document: Document, selector: string): T {
+        const app = document.querySelector(selector)!
+        const raw = {template: app.innerHTML};
+        app.innerHTML = '';
+        const targetNode = new TargetNode(app, TargetNodeMode.appendChild)
+        const dest = DomRender.compileSet(document, target, raw, new Config(), targetNode);
         dest.rootScope.executeRender();
         return dest.target;
     }
