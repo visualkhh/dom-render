@@ -15,6 +15,9 @@
       write(`<div>${i}: <input type="text" dr-on-init="e${i+1}" dr-value-link='e${i+1}_val'><div>`);
   }
   %-->
+    <div dr-on-init="div">
+        ffff
+    </div>
     <select dr-value-link="so_val">
         <option value="1">1</option>
         <option value="2">2</option>
@@ -39,6 +42,7 @@
         e1_val;
         e2_val;
         so_val;
+        div;
 
         constructor(cnt) {
             this.name = 'zz'
@@ -59,7 +63,8 @@
         }
         cc($event) {
             // console.log('-->', $event, this.selectValue, this.textValue)
-            console.log('-->', this.e1, this.e2, this.e1_val, this.e2_val, this.so_val)
+            console.log('-->,', this.div)
+            // console.log('-->', this.e1, this.e2, this.e1_val, this.e2_val, this.so_val)
             // this.textValue = RandomUtils.getRandomColor();
         }
 
@@ -73,9 +78,9 @@
         }
     }
    const user = DomRender.renderTarget(new User(1), document, "#app");
-    setTimeout(() => {
-        user.cnt = 2;
-    }, 3000)
+    // setTimeout(() => {
+    //     user.cnt = 2;
+    // }, 3000)
 </script>
 </html>
 

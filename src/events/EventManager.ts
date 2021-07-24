@@ -50,7 +50,7 @@ export const eventManager = new class {
                 if (typeof this.getValue(obj, varName) === 'function') {
                     this.getValue(obj, varName)(it)
                 } else {
-                    this.setValue(obj, varName, it)
+                    obj[varName] = it;
                 }
             }
         })
@@ -78,17 +78,6 @@ export const eventManager = new class {
     // eslint-disable-next-line no-undef
     public changeVar(obj: any, elements: Element[] | ChildNode[], varName?: string) {
         // console.log('-changeVar-->', obj, elements, varName)
-        // on-init
-        // this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'on-init', (it, attribute) => {
-        //     if (attribute && attribute === varName) {
-        //         if (typeof this.getValue(obj, attribute) === 'function') {
-        //             this.getValue(obj, attribute)(it)
-        //         } else {
-        //             obj[attribute] = it;
-        //         }
-        //     }
-        // })
-
         // value-link event
         this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'value-link', (it, attribute) => {
             // const varNames = new Set(this.usingThisVar(varName ?? ''));
