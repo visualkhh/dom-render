@@ -95,9 +95,8 @@ export const eventManager = new class {
 
         // attribute
         this.procAttr(elements, this.attrPrefix + 'attr', (it, attribute) => {
-            const varNames = new Set(this.usingThisVar(attribute ?? ''));
             const script = attribute;
-            if ((varName && varNames.has(varName)) || varName === undefined) {
+            if (this.isUsingThisVar(attribute, varName) || varName === undefined) {
                 // eslint-disable-next-line no-new-func
                 const data = Function(`"use strict"; ${script} `).bind(obj)() ?? {};
                 for (const [key, value] of Object.entries(data)) {
@@ -109,9 +108,8 @@ export const eventManager = new class {
         })
         // // style
         this.procAttr(elements, this.attrPrefix + 'style', (it, attribute) => {
-            const varNames = new Set(this.usingThisVar(attribute ?? ''));
             const script = attribute;
-            if ((varName && varNames.has(varName)) || varName === undefined) {
+            if (this.isUsingThisVar(attribute, varName) || varName === undefined) {
                 // eslint-disable-next-line no-new-func
                 const data = Function(`"use strict"; ${script} `).bind(obj)() ?? {};
                 for (const [key, value] of Object.entries(data)) {
@@ -179,15 +177,27 @@ export const eventManager = new class {
         }
     }
 
+    public isUsingThisVar(raws: string | null | undefined, varName: string | null | undefined): boolean {
+        if (varName && raws) {
+            for (const raw of Array.from(new Set(this.usingThisVar(varName)).values())) {
+                if (raw.startsWith(varName)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public usingThisVar(raws: string): string[] {
         const regex = /["'].*?["']/gm;
         raws = raws.replace(regex, '');
-        const varRegexStr = 'this\\.([a-zA-Z_$][a-zA-Z_.$0-9]*)';
+        const varRegexStr = 'this\\.([a-zA-Z_$][?a-zA-Z_.$0-9]*)';
         const varRegex = RegExp(varRegexStr, 'gm');
         let varExec = varRegex.exec(raws)
         const usingVars = [];
         while (varExec) {
-            usingVars.push(varExec[1]);
+            usingVars.push(varExec[1].replace('?', ''));
             varExec = varRegex.exec(varExec.input)
         }
         return usingVars;
