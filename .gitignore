@@ -15,7 +15,7 @@ local.properties
 .settings/
 .loadpath
 .recommenders
-
+./src/package.json
 # External tool builders
 .externalToolBuilders/
 
