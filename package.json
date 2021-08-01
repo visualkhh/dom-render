@@ -53,6 +53,7 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc --outDir dist --declarationDir dist && rm -rf dist/dist && rollup -c",
+    "build:ts:watch": "rm -rf dist && tsc --watch --outDir dist --declarationDir dist",
     "build:parcel": "parcel build ./src/*.ts  --out-dir=dist-parcel --out-file dom-render.js",
     "bundle": "rollup -c",
     "bundle:watch": "rollup -c -w",
@@ -67,6 +68,7 @@
     "@rollup/plugin-replace": "^2.4.2",
     "@rollup/plugin-typescript": "^8.2.1",
     "@types/jest": "^26.0.22",
+    "@types/node": "^16.4.6",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
     "eslint": "^7.21.0",
@@ -75,12 +77,12 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.3.1",
     "jest": "^26.6.3",
+    "parcel-bundler": "^1.12.5",
+    "parcel-plugin-css-to-string": "^2.5.2",
     "rollup": "^2.52.8",
     "rollup-watch": "^4.3.1",
     "supertest": "^6.1.3",
     "ts-jest": "^26.5.4",
-    "parcel-bundler": "^1.12.5",
-    "parcel-plugin-css-to-string": "^2.5.2",
     "typescript": "^4.3.5"
   }
 }
