@@ -57,6 +57,7 @@
     "bundle": "rollup -c",
     "bundle:watch": "rollup -c -w",
     "dev:start": "npm run start --workspace=dev",
+    "dev:serve": "npm run serve --workspace=dev",
     "npm-build": "npm run build && cp package.json dist && cp README.MD dist",
     "npm-publish": "npm run npm-build && npm publish ./dist",
     "tsc": "tsc",

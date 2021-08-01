@@ -23,7 +23,8 @@
   "scripts": {
     "start": "ts-node -P tsconfig.json -r tsconfig-paths/register src/indexJsdom.ts",
     "test": "jest --detectOpenHandles --forceExit",
-    "serve": "parcel --port 3000 ./index.html --open --out-dir dist-parcel",
+    "serve": "parcel --port 3000 ./index.html --out-dir dist-parcel",
+    "serve-open": "parcel --port 3000 ./index.html --open --out-dir dist-parcel",
     "build:parcel": "parcel build ./index.html --out-dir dist-parcel"
   },
   "alias": {

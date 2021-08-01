@@ -9,23 +9,25 @@ export class ScopeObject {
     public _originObj: any;
     public _calls: ScopeObjectCall[] = [];
     [name: string]: any;
-    public _writes = '';
+    public _writes = [];
 
     constructor(public _scope: Scope, public _uuid = RandomUtils.uuid()) {
     }
 
     public executeResultSet(script: string): ScopeResultSet {
         this.eval(script);
-        const templateElement = this._scope.raws.document.createElement('template');
-        templateElement.innerHTML = this._writes;
         const startComment = this._scope.raws.document.createComment('scope start ' + this._uuid)
         const endComment = this._scope.raws.document.createComment('scope end ' + this._uuid)
-        templateElement.content.childNodes.forEach(it => {
-            // Node.ELEMENT_NODE = 1
-            if (it.nodeType === 1) {
-                (it as Element).setAttribute('scope-uuid', this._uuid);
-            }
-        })
+        const templateElement = this._scope.raws.document.createElement('template');
+        if (this._writes.length) {
+            templateElement.innerHTML = this._writes.join('');
+            templateElement.content.childNodes.forEach(it => {
+                // Node.ELEMENT_NODE = 1
+                if (it.nodeType === 1) {
+                    (it as Element).setAttribute('scope-uuid', this._uuid);
+                }
+            })
+        }
         return new ScopeResultSet(this._uuid, this, templateElement.content, startComment, endComment, this._calls)
     }
 
@@ -37,7 +39,7 @@ export class ScopeObject {
         // eslint-disable-next-line no-new-func
         return Function(`"use strict";
         const write = (str) => {
-            this._appendWrite(str);
+            this._writes.push(str);
         };
         
         const include = (target) => {
@@ -57,9 +59,9 @@ export class ScopeObject {
         `).bind(scope)();
     }
 
-    private _appendWrite(str: string) {
-        this._writes += str;
-    }
+    // private _appendWrite(str: string) {
+    //    // this._writes = (this._writes ?? '') + str;
+    // }
 
     private _makeUUID() {
         return RandomUtils.uuid();

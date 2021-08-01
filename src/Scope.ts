@@ -30,7 +30,7 @@ export class Scope {
         // debugger;
         // console.log('------>', Object.create(scopeObject, obj))
 
-        scopeObject._originObj = obj;
+        scopeObject._originObj = obj;// console.log(scopeObject)
         // let object = Object.assign(scopeObject, obj) as ScopeObject
         const object = new Proxy(scopeObject, new ScopeOpjectProxy(obj))
         // console.log('exe', obj, object)
