@@ -18,6 +18,15 @@ export class DomRender {
         return DomRender.compileSet(document, target, raws, config, targetNode, uuid).rootScope;
     }
 
+    public static proxyObjectCompileRootScope<T = any>(target: T, targetNode: TargetNode): RootScope {
+        if (!('_ScopeObjectProxyHandler_isProxy' in target)) {
+            console.error('no Domrander Proxy Object -> var proxy = Domrender.proxy(target, ScopeRawSet)', target)
+            throw new Error('no Domrander compile Object');
+        }
+        const rawSet = (target as any)._ScopeObjectProxyHandler_rawSet! as RawSet
+        return DomRender.compileRootScope(targetNode.document, target, rawSet, new Config(), targetNode, RandomUtils.uuid());
+    }
+
     public static proxy<T>(target: T, raws: RawSet): T {
         let proxy;
         if ('_ScopeObjectProxyHandler_isProxy' in target) {

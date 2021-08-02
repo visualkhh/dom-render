@@ -70,7 +70,7 @@ export class ScopeObject {
     private _compileRootScope(target: any, targetNode: TargetNode, uuid: string) {
         if (!('_ScopeObjectProxyHandler_isProxy' in target)) {
             console.error('no Domrander Proxy Object -> var proxy = Domrender.proxy(target, ScopeRawSet)', target)
-            return new Error('no Domrander compile Object');
+            throw new Error('no Domrander compile Object');
         }
         const rawSet = target._ScopeObjectProxyHandler_rawSet! as RawSet;
         return DomRender.compileRootScope(this._scope.raws.document, target, rawSet, this._scope.config, targetNode, uuid);
