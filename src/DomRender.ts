@@ -3,6 +3,7 @@ import {ScopeRawSet} from './ScopeRawSet';
 import {RandomUtils} from './utils/random/RandomUtils';
 import {Config} from './Config';
 import {ScopeObjectProxyHandler} from './proxys/ScopeObjectProxyHandler';
+import { ConstructorType } from '../../simple-boot-core/dist/types/Types';
 
 export type RawSet = {template: string, styles?: string[]}
 export class DomRender {
@@ -10,7 +11,7 @@ export class DomRender {
         const proxy = DomRender.proxy(target, raws) as any;
         const scopeRaws = new ScopeRawSet(document, raws.template, raws.styles);
         const root = new RootScope(scopeRaws, proxy, uuid, config, targetNode);
-        proxy?._ScopeObjectProxyHandler?.run(proxy, target, root);
+        proxy?._ScopeObjectProxyHandler?.run(proxy, root);
         return {target: proxy, rootScope: root};
     }
 
@@ -18,21 +19,24 @@ export class DomRender {
         return DomRender.compileSet(document, target, raws, config, targetNode, uuid).rootScope;
     }
 
-    public static proxyObjectCompileRootScope<T = any>(target: T, targetNode: TargetNode): RootScope {
-        if (!('_ScopeObjectProxyHandler_isProxy' in target)) {
-            console.error('no Domrander Proxy Object -> var proxy = Domrender.proxy(target, ScopeRawSet)', target)
+    public static proxyObjectRender<T = any>(proxy: T, targetNode: TargetNode, config = new Config()) {
+        if (!('_ScopeObjectProxyHandler_isProxy' in proxy)) {
+            console.error('no Domrander Proxy Object -> var proxy = Domrender.proxy(target, ScopeRawSet)', proxy)
             throw new Error('no Domrander compile Object');
         }
-        const rawSet = (target as any)._ScopeObjectProxyHandler_rawSet! as RawSet
-        return DomRender.compileRootScope(targetNode.document, target, rawSet, new Config(), targetNode, RandomUtils.uuid());
+        const raws = (proxy as any)._ScopeObjectProxyHandler_rawSet! as RawSet
+        const rootScope = new RootScope(new ScopeRawSet(document, raws.template, raws.styles), proxy, RandomUtils.uuid(), config, targetNode);
+        (proxy as any)?._ScopeObjectProxyHandler?.run(proxy, rootScope);
+        let targetObj = (proxy as any)._ScopeObjectProxyHandler_targetOrigin ?? proxy;
+        rootScope.executeRender();
     }
 
-    public static proxy<T>(target: T, raws: RawSet): T {
+    public static proxy<T>(target: T, raws: RawSet, excludeTyps: ConstructorType<any>[] = []): T {
         let proxy;
         if ('_ScopeObjectProxyHandler_isProxy' in target) {
             proxy = target;
         } else {
-            proxy = new Proxy(target, new ScopeObjectProxyHandler(raws));
+            proxy = new Proxy(target, new ScopeObjectProxyHandler(raws, target, excludeTyps));
         }
         return proxy;
     }

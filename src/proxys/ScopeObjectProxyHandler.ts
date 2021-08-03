@@ -2,6 +2,7 @@ import {RootScope} from '../RootScope';
 import {NodeUtils} from '../utils/node/NodeUtils';
 import {Scope} from '../Scope';
 import {RawSet} from '../DomRender';
+import { ConstructorType } from '../../simple-boot-core/dist/types/Types';
 
 export type DepthType = { rootScopes: Map<string, RootScope>, rootTargetOrigin?: any, rootTargetProxy?: any, depths: string[] };
 
@@ -11,19 +12,19 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
     // private _rootScopes: RootScope[] = [];
     private _rootScopes = new Map<string, RootScope>()
     private _targetProxy?: any;
-    private _targetOrigin?: any;
+    // private _targetOrigin?: any;
 
-    constructor(public _rawSet: RawSet) {
+    constructor(public _rawSet: RawSet, private _targetOrigin: any, private _excludeTyps: ConstructorType<any>[] = []) {
+
     }
 
-    run(_targetProxy: any, _targetOrigin: any, _rootScope?: RootScope) {
+    run(_targetProxy: any, _rootScope?: RootScope) {
         this._targetProxy = _targetProxy;
-        this._targetOrigin = _targetOrigin;
         if (_rootScope) {
             this._rootScopes.set(_rootScope.uuid, _rootScope);
         }
-        const data = Object.keys(_targetOrigin) || [];
-        data.forEach(it => {
+        const data = Object.keys(this._targetOrigin) || [];
+        data.filter(it => this.isProxyTarget(this._targetOrigin[it])).forEach(it => {
             this._targetOrigin[it] = this.proxy(this._targetOrigin[it])
         })
         // console.log('proxy>', _target, typeof _target, this._refs)
@@ -39,9 +40,28 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
         // console.log('0---startproxy', target,  proto, data);
     }
 
+    public isProxyTarget(target: any) {
+        let sw = false;
+        // try {
+            if (
+                typeof target === 'object' &&
+                !('_ScopeObjectProxyHandler_isProxy' in target) &&
+                !(target instanceof Scope) &&
+                this._excludeTyps.filter(it => target instanceof it).length === 0
+            ) {
+                sw = true;
+            }
+        // } catch (e) {
+        //     return false;
+        // }
+
+        // console.log('isProxyTarget--->', target, sw)
+        return sw;
+    }
+
     public proxy(target: any) {
-        if (typeof target === 'object' && !('_ScopeObjectProxyHandler_isProxy' in target) && !(target instanceof Scope)) {
-            const scopeObjectProxyHandler = new ScopeObjectProxyHandler(this._rawSet);
+        if (this.isProxyTarget(target)) {
+            const scopeObjectProxyHandler = new ScopeObjectProxyHandler(this._rawSet, target);
             scopeObjectProxyHandler._refs.push(this._targetProxy);
             const targetProxy = new Proxy(target, scopeObjectProxyHandler);
             targetProxy?._ScopeObjectProxyHandler?.run(targetProxy, target)
@@ -123,7 +143,7 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
             obj[prop] = value;
             return true;
         }
-        // console.log('set-->', obj, ' prop:', prop, value, this._refs);
+        console.log('set-->', obj, ' prop:', prop, value, this._refs);
         obj[prop] = this.proxy(value);
         const depths = [prop];
         const parentDepths = this.goRoot(depths, obj);
@@ -133,7 +153,7 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
             const fullDepth = it.depths.join('.');
             // console.log('set--> rootScopes', fullDepth);
             it.rootScopes.forEach((rit, rkey, rmap) => {
-                // console.log('---rootScopesrootScopesrootScopes-->', this._rootScopes.values(), rit.isConnected())
+                console.log('---rootScopesrootScopesrootScopes-->', this._rootScopes, rit.isConnected())
                 if (!rit.isConnected()) {
                     this._rootScopes.delete(rit.uuid);
                     return;

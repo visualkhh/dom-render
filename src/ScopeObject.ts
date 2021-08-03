@@ -47,9 +47,8 @@ export class ScopeObject {
             const targetNode = this.getTargetNode(uuid);
             const rootScope = this._compileRootScope(target, targetNode, uuid);
             this._calls.push({name: 'include', parameter: [target], result: rootScope})
-            
             if (rootScope) {
-                this._appendWrite("<template include-scope-uuid='" + uuid + "'></template>");
+                this._writes.push("<template include-scope-uuid='" + uuid + "'></template>");
             }
         }
         
@@ -58,10 +57,6 @@ export class ScopeObject {
         ${script}
         `).bind(scope)();
     }
-
-    // private _appendWrite(str: string) {
-    //    // this._writes = (this._writes ?? '') + str;
-    // }
 
     private _makeUUID() {
         return RandomUtils.uuid();
