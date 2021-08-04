@@ -2,8 +2,9 @@ import {RootScope} from '../RootScope';
 import {NodeUtils} from '../utils/node/NodeUtils';
 import {Scope} from '../Scope';
 import {RawSet} from '../DomRender';
-import { ConstructorType } from '../../simple-boot-core/dist/types/Types';
-
+interface ConstructorType<T> {
+    new(...args: any[]): T;
+}
 export type DepthType = { rootScopes: Map<string, RootScope>, rootTargetOrigin?: any, rootTargetProxy?: any, depths: string[] };
 
 export class ScopeObjectProxyHandler implements ProxyHandler<any> {
@@ -43,14 +44,14 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
     public isProxyTarget(target: any) {
         let sw = false;
         // try {
-            if (
-                typeof target === 'object' &&
+        if (
+            typeof target === 'object' &&
                 !('_ScopeObjectProxyHandler_isProxy' in target) &&
                 !(target instanceof Scope) &&
                 this._excludeTyps.filter(it => target instanceof it).length === 0
-            ) {
-                sw = true;
-            }
+        ) {
+            sw = true;
+        }
         // } catch (e) {
         //     return false;
         // }
