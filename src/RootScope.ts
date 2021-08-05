@@ -44,7 +44,7 @@ export class RootScope extends Scope implements ChangeField {
         // console.log('change field', path)
         // 수정 포인트.
         if (this.scopeResult) {
-            eventManager.changeVar(this.obj, this.scopeResult.childNodes, path)
+            eventManager.changeVar(this.obj, this.scopeResult.childNodes, path, this.config)
         }
         // const template = this.config.document.createElement('template');
         // this?.scopeResult?.childNodes.forEach(it => {

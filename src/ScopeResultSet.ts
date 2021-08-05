@@ -50,6 +50,6 @@ export class ScopeResultSet {
     }
 
     public applyEvent() {
-        eventManager.applyEvent(this.object._originObj, this.childNodes);
+        eventManager.applyEvent(this.object._originObj, this.childNodes, this.object._scope.config);
     }
 }

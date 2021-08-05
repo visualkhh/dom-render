@@ -1,10 +1,22 @@
 import {Scope} from './Scope';
 import {ScopeObject} from './ScopeObject';
 
-export class Config {
+export type ScopeObjectFactory = (scope: Scope) => ScopeObject;
+export interface ConfigParam {
+    factoryScopeObject?: ScopeObjectFactory;
+    applyEvent?: (obj: any, elements: Element[]) => void
+    changeVar?: (obj: any, elements: Element[], varName: string) => void
+}
+
+export class Config implements ConfigParam {
     public start = '<!--%';
     public end = '%-->';
-    // public document = document;
-    constructor(public factoryScopeObject?: (scope: Scope) => ScopeObject | undefined) {
+    public factoryScopeObject?: ScopeObjectFactory;
+    public applyEvent?: (obj: any, elements: Element[]) => void;
+    public changeVar?: (obj: any, elements: Element[], varName: string) => void;
+    constructor(configPram?: ConfigParam) {
+        this.factoryScopeObject = configPram?.factoryScopeObject;
+        this.applyEvent = configPram?.applyEvent;
+        this.changeVar = configPram?.changeVar;
     }
 }

@@ -1,3 +1,5 @@
+import { Config } from 'Config';
+
 export const eventManager = new class {
     public readonly attrPrefix = 'dr-';
     public readonly eventNames = ['click', 'change', 'keyup', 'keydown', 'input'];
@@ -13,7 +15,6 @@ export const eventManager = new class {
         this.eventNames.forEach(it => {
             this.attrNames.push(this.attrPrefix + 'event-' + it);
         });
-        // console.log('attrname', this.attrNames)
     }
 
     public findAttrElements(fragment: DocumentFragment) {
@@ -28,7 +29,7 @@ export const eventManager = new class {
     }
 
     // eslint-disable-next-line no-undef
-    public applyEvent(obj: any, childNodes: ChildNode[]) {
+    public applyEvent(obj: any, childNodes: ChildNode[], config?: Config) {
         // Node.ELEMENT_NODE = 1
         const elements = childNodes.filter(it => it.nodeType === 1).map(it => it as Element);
         // event
@@ -72,11 +73,14 @@ export const eventManager = new class {
                 })
             }
         })
-        this.changeVar(obj, elements);
+        this.changeVar(obj, elements, undefined, config);
+        if (config?.applyEvent) {
+            config.applyEvent(obj, elements)
+        }
     }
 
     // eslint-disable-next-line no-undef
-    public changeVar(obj: any, elements: Element[] | ChildNode[], varName?: string) {
+    public changeVar(obj: any, elements: Element[] | ChildNode[], varName?: string, config?: Config) {
         // console.log('-changeVar-->', obj, elements, varName)
         // value-link event
         this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'value-link', (it, attribute) => {
@@ -106,7 +110,7 @@ export const eventManager = new class {
                 }
             }
         })
-        // // style
+        // style
         this.procAttr(elements, this.attrPrefix + 'style', (it, attribute) => {
             const script = attribute;
             if (this.isUsingThisVar(attribute, varName) || varName === undefined) {
@@ -119,6 +123,10 @@ export const eventManager = new class {
                 }
             }
         })
+
+        if (config?.changeVar && varName) {
+            config.changeVar(obj, elements.filter(it => it.nodeType === 1).map(it => it as Element), varName!);
+        }
     }
 
     public addDrEvent(obj: any, eventName: string, elements: Element[]) {
@@ -139,7 +147,7 @@ export const eventManager = new class {
 
     // eslint-disable-next-line no-undef
     public procAttr<T extends Element>(elements: Element[] | ChildNode[] = [], attrName: string, f: (h: T, value: string | null) => void) {
-        elements.forEach(it => {
+        elements?.forEach(it => {
             // console.log('--->type', it, it.nodeType)
             if (!it) {
                 return;
@@ -185,7 +193,6 @@ export const eventManager = new class {
                 }
             }
         }
-
         return false;
     }
 
