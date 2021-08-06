@@ -17,9 +17,9 @@ export const eventManager = new class {
         });
     }
 
-    public findAttrElements(fragment: DocumentFragment) {
+    public findAttrElements(fragment: DocumentFragment, addAttributes:string[] = []) {
         const datas: {name: string, value: string | null, element: Element}[] = [];
-        this.attrNames.forEach(attrName => {
+        addAttributes.concat(this.attrNames).forEach(attrName => {
             fragment.querySelectorAll(`[${attrName}]`).forEach(it => {
                 // console.log('find-->', it)
                 datas.push({name: attrName, value: it.getAttribute(attrName), element: it});
@@ -30,6 +30,7 @@ export const eventManager = new class {
 
     // eslint-disable-next-line no-undef
     public applyEvent(obj: any, childNodes: ChildNode[], config?: Config) {
+        // console.log('eventManager applyEvent==>', obj, childNodes, config)
         // Node.ELEMENT_NODE = 1
         const elements = childNodes.filter(it => it.nodeType === 1).map(it => it as Element);
         // event
@@ -74,9 +75,8 @@ export const eventManager = new class {
             }
         })
         this.changeVar(obj, elements, undefined, config);
-        if (config?.applyEvent) {
-            config.applyEvent(obj, elements)
-        }
+        // console.log('eventManager->', obj, elements)
+        config?.applyEvent?.(obj, elements)
     }
 
     // eslint-disable-next-line no-undef
@@ -100,6 +100,7 @@ export const eventManager = new class {
         // attribute
         this.procAttr(elements, this.attrPrefix + 'attr', (it, attribute) => {
             const script = attribute;
+            console.log('-atttt')
             if (this.isUsingThisVar(attribute, varName) || varName === undefined) {
                 // eslint-disable-next-line no-new-func
                 const data = Function(`"use strict"; ${script} `).bind(obj)() ?? {};
@@ -125,6 +126,7 @@ export const eventManager = new class {
         })
 
         if (config?.changeVar && varName) {
+            // config?.changeVar?.(obj, elements.filter(it => it.nodeType === 1).map(it => it as Element), varName!);
             config.changeVar(obj, elements.filter(it => it.nodeType === 1).map(it => it as Element), varName!);
         }
     }
@@ -187,7 +189,7 @@ export const eventManager = new class {
 
     public isUsingThisVar(raws: string | null | undefined, varName: string | null | undefined): boolean {
         if (varName && raws) {
-            for (const raw of Array.from(new Set(this.usingThisVar(varName)).values())) {
+            for (const raw of this.usingThisVar(raws)) {
                 if (raw.startsWith(varName)) {
                     return true;
                 }
@@ -202,11 +204,14 @@ export const eventManager = new class {
         const varRegexStr = 'this\\.([a-zA-Z_$][?a-zA-Z_.$0-9]*)';
         const varRegex = RegExp(varRegexStr, 'gm');
         let varExec = varRegex.exec(raws)
-        const usingVars = [];
+        const usingVars = new Set<string>();
+        // const usingVars = [];
         while (varExec) {
-            usingVars.push(varExec[1].replace('?', ''));
+            const value = varExec[1].replace(/\?/g, '');
+            usingVars.add(value);
+            value.split('.').forEach(it => usingVars.add(it))
             varExec = varRegex.exec(varExec.input)
         }
-        return usingVars;
+        return Array.from(usingVars);
     }
 }();

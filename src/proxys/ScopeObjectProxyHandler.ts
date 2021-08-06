@@ -1,7 +1,8 @@
-import {RootScope} from '../RootScope';
-import {NodeUtils} from '../utils/node/NodeUtils';
-import {Scope} from '../Scope';
-import {RawSet} from '../DomRender';
+import { RootScope } from '../RootScope';
+import { NodeUtils } from '../utils/node/NodeUtils';
+import { Scope } from '../Scope';
+import { RawSet } from '../DomRender';
+
 interface ConstructorType<T> {
     new(...args: any[]): T;
 }
@@ -45,10 +46,11 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
         let sw = false;
         // try {
         if (
+            target !== undefined && target !== null &&
             typeof target === 'object' &&
-                !('_ScopeObjectProxyHandler_isProxy' in target) &&
-                !(target instanceof Scope) &&
-                this._excludeTyps.filter(it => target instanceof it).length === 0
+            !('_ScopeObjectProxyHandler_isProxy' in target) &&
+            !(target instanceof Scope) &&
+            this._excludeTyps.filter(it => target instanceof it).length === 0
         ) {
             sw = true;
         }
@@ -144,7 +146,7 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
             obj[prop] = value;
             return true;
         }
-        console.log('set-->', obj, ' prop:', prop, value, this._refs);
+        // console.log('set-->', obj, ' prop:', prop, value, this._refs);
         obj[prop] = this.proxy(value);
         const depths = [prop];
         const parentDepths = this.goRoot(depths, obj);
@@ -154,7 +156,7 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
             const fullDepth = it.depths.join('.');
             // console.log('set--> rootScopes', fullDepth);
             it.rootScopes.forEach((rit, rkey, rmap) => {
-                console.log('---rootScopesrootScopesrootScopes-->', this._rootScopes, rit.isConnected())
+                // console.log('---rootScopesrootScopesrootScopes-->', this._rootScopes, rit.isConnected())
                 if (!rit.isConnected()) {
                     this._rootScopes.delete(rit.uuid);
                     return;

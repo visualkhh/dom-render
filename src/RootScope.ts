@@ -89,7 +89,7 @@ export class RootScope extends Scope implements ChangeField {
         fragment.prepend(startComment)
         fragment.appendChild(endComment)
         childNodes.push((this.targetNode.node ?? this.raws.document.body) as Element)
-        eventManager.findAttrElements(fragment).forEach(it => {
+        eventManager.findAttrElements(fragment, this.config.targetAttributeNames).forEach(it => {
             childNodes.push(it.element)
         })
         const scopeObject = new ScopeObject(this);
