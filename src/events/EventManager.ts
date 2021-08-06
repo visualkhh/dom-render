@@ -1,4 +1,4 @@
-import { Config } from 'Config';
+import { Config } from '../Config';
 
 export const eventManager = new class {
     public readonly attrPrefix = 'dr-';
