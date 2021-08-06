@@ -3,7 +3,7 @@ import {ScopeRawSet} from './ScopeRawSet';
 import {RandomUtils} from './utils/random/RandomUtils';
 import {Config} from './Config';
 import {ScopeObjectProxyHandler} from './proxys/ScopeObjectProxyHandler';
-import { ConstructorType } from '../../simple-boot-core/dist/types/Types';
+import {ConstructorType} from './types/Types';
 
 export type RawSet = {template: string, styles?: string[]}
 export class DomRender {
@@ -27,7 +27,7 @@ export class DomRender {
         const raws = (proxy as any)._ScopeObjectProxyHandler_rawSet! as RawSet
         const rootScope = new RootScope(new ScopeRawSet(document, raws.template, raws.styles), proxy, RandomUtils.uuid(), config, targetNode);
         (proxy as any)?._ScopeObjectProxyHandler?.run(proxy, rootScope);
-        let targetObj = (proxy as any)._ScopeObjectProxyHandler_targetOrigin ?? proxy;
+        // const targetObj = (proxy as any)._ScopeObjectProxyHandler_targetOrigin ?? proxy;
         rootScope.executeRender();
     }
 
