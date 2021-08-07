@@ -55,6 +55,9 @@ export class RootScope extends Scope implements ChangeField {
     }
 
     executeRender(option?: ScopeOption) {
+        // if (this.targetNode.node?.nodeType === 1 && !(this.targetNode.node as Element).getAttribute('scope-container-id')) {
+        //     (this.targetNode.node as Element).setAttribute('scope-container-id', RandomUtils.uuid())
+        // }
         this.executeFragment(option);
         if (this.obj.onReady) {
             this.obj.onReady(this.raws.node);
