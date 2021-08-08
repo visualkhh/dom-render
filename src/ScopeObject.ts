@@ -38,8 +38,34 @@ export class ScopeObject {
     private scopeEval(scope: any, script: string) {
         // eslint-disable-next-line no-new-func
         return Function(`"use strict";
+        
+        const element = (tag, attrOrContent, content) => {
+            let attrs = '';
+            if (typeof attrOrContent === 'object') {
+                Object.keys(attrOrContent).forEach(it => {
+                    attrs += (it + "='" + attrOrContent[it] + "' ");
+                });    
+                
+            } else if (typeof attrOrContent === 'string') {
+                content = attrOrContent;
+            }
+            this._writes.push('<'+tag+' '+attrs+'>' + content + '</'+tag+'>');
+        };
+        
         const write = (str) => {
             this._writes.push(str);
+        };
+        
+        const ifWrite = (sw, str) => {
+            if(sw) {
+                this._writes.push(str);
+            }
+        };
+        
+        const forWrite = (cnt, str) => {
+            for(var i = 0 ; i < cnt ; i ++) {
+                this._writes.push(str);
+            }
         };
         
         const include = (target) => {

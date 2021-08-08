@@ -103,7 +103,7 @@ export const eventManager = new class {
             console.log('-atttt')
             if (this.isUsingThisVar(attribute, varName) || varName === undefined) {
                 // eslint-disable-next-line no-new-func
-                const data = Function(`"use strict"; ${script} `).bind(obj)() ?? {};
+                const data = Function(`"use strict"; $target=it; ${script} `).bind(obj)() ?? {};
                 for (const [key, value] of Object.entries(data)) {
                     if (typeof value === 'string') {
                         it.setAttribute(key, value);
@@ -116,7 +116,7 @@ export const eventManager = new class {
             const script = attribute;
             if (this.isUsingThisVar(attribute, varName) || varName === undefined) {
                 // eslint-disable-next-line no-new-func
-                const data = Function(`"use strict"; ${script} `).bind(obj)() ?? {};
+                const data = Function(`"use strict"; $target=it; ${script} `).bind(obj)() ?? {};
                 for (const [key, value] of Object.entries(data)) {
                     if (typeof value === 'string' && it instanceof HTMLElement) {
                         (it.style as any)[key] = value;
@@ -140,7 +140,7 @@ export const eventManager = new class {
             const script = attribute;
             it.addEventListener(eventName, (event) => {
                 // eslint-disable-next-line no-new-func
-                const f = Function(`"use strict"; const $event=event; ${script} `);
+                const f = Function(`"use strict"; const $target=event.target; const $event=event; ${script} `);
                 // eslint-disable-next-line no-unused-vars
                 const data = f.bind(Object.assign(obj))() ?? {};
             })

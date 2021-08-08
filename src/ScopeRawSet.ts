@@ -14,23 +14,40 @@ export class ScopeRawSet {
         } else {
             this.node = this.raw;
         }
+        let nodeIterator = this.findScopeElementTagName('scope');
+        let node: Node | null;
 
+        const nodes: Element[] = [];
+        // eslint-disable-next-line no-cond-assign
+        while (node = nodeIterator.nextNode()) {
+            nodes.push(node as Element);
+        }
+        nodes.reverse().forEach(element => {
+            let content = `write(\`${element.innerHTML}\`)`;
+            const ifStatement = element.getAttribute('if');
+            if (ifStatement) {
+                console.log('---fif', ifStatement)
+                content = `ifWrite(${ifStatement},\`${element.innerHTML}\`)`;
+            }
+            const forStatement = element.getAttribute('forOf');
+            if (forStatement) {
+                content = 'for(const it of ' + forStatement + '){' + content + '}'
+            }
+
+            const newComment = document.createComment('%' + content + '%')
+            console.log('----->', newComment)
+            element.parentNode?.replaceChild(newComment, element);
+            // NodeUtils.replaceNode(node, newComment);
+        })
         // style
         // Node.ELEMENT_NODE = 1, DOCUMENT_FRAGMENT = 11
-        // if (this.styles.length > 0 && (this.node.nodeType === 1 || this.node.nodeType === 11)) {
-        //     const fragment = this.makeFragment(this.styles.join(' '));
-        //     const style = document.createElement('style')
-        //     style.appendChild(fragment);
-        //     (this.node as Element).prepend(style);
-        // }
         if (this.styles.length > 0 && (this.node.nodeType === 1 || this.node.nodeType === 11)) {
             const style = document.createElement('style')
             style.innerHTML = this.styles.join(' ');
             (this.node as Element).prepend(style);
         }
 
-        const nodeIterator = this.findScopeElementTagName('STYLE')
-        let node: Node | null;
+        nodeIterator = this.findScopeElementTagName('STYLE')
         // eslint-disable-next-line no-cond-assign
         while (node = nodeIterator.nextNode()) {
             const style = node as Element;
