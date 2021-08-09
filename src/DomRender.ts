@@ -31,6 +31,10 @@ export class DomRender {
         rootScope.executeRender();
     }
 
+    public static create<T>(target: T, raws: RawSet, excludeTyps: ConstructorType<any>[] = []): T {
+        return this.proxy(target, raws, excludeTyps);
+    }
+
     public static proxy<T>(target: T, raws: RawSet, excludeTyps: ConstructorType<any>[] = []): T {
         let proxy;
         if ('_ScopeObjectProxyHandler_isProxy' in target) {

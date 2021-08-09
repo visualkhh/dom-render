@@ -37,8 +37,7 @@ export class ScopeObject {
 
     private scopeEval(scope: any, script: string) {
         // eslint-disable-next-line no-new-func
-        return Function(`"use strict";
-        
+        const f = Function(`"use strict";
         const element = (tag, attrOrContent, content) => {
             let attrs = '';
             if (typeof attrOrContent === 'object') {
@@ -68,10 +67,11 @@ export class ScopeObject {
             }
         };
         
-        const include = (target) => {
+        const include = (target, rawSet) => {
+            console.log('include-->', target);
             const uuid = this._makeUUID();
             const targetNode = this.getTargetNode(uuid);
-            const rootScope = this._compileRootScope(target, targetNode, uuid);
+            const rootScope = this._compileRootScope(target, targetNode, uuid, rawSet);
             this._calls.push({name: 'include', parameter: [target], result: rootScope})
             if (rootScope) {
                 this._writes.push("<template include-scope-uuid='" + uuid + "'></template>");
@@ -81,19 +81,20 @@ export class ScopeObject {
         ${this.customScript()}
         
         ${script}
-        `).bind(scope)();
+        `);
+        return f.bind(scope)() ?? {};
     }
 
     private _makeUUID() {
         return RandomUtils.uuid();
     }
 
-    private _compileRootScope(target: any, targetNode: TargetNode, uuid: string) {
-        if (!('_ScopeObjectProxyHandler_isProxy' in target)) {
+    private _compileRootScope(target: any, targetNode: TargetNode, uuid: string, raws?: RawSet) {
+        if (!('_ScopeObjectProxyHandler_isProxy' in (target === this ? this._originObj : target))) {
             console.error('no Domrander Proxy Object -> var proxy = Domrender.proxy(target, ScopeRawSet)', target)
             throw new Error('no Domrander compile Object');
         }
-        const rawSet = target._ScopeObjectProxyHandler_rawSet! as RawSet;
+        const rawSet = raws ?? target._ScopeObjectProxyHandler_rawSet! as RawSet;
         return DomRender.compileRootScope(this._scope.raws.document, target, rawSet, this._scope.config, targetNode, uuid);
     }
 

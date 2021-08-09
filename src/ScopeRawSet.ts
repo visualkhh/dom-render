@@ -5,6 +5,11 @@ import {NodeUtils} from './utils/node/NodeUtils';
 export class ScopeRawSet {
     public node: DocumentFragment | Node;
     public usingVars: string[] = [];
+    public static readonly DR_IF_NAME = 'dr-if';
+    public static readonly DR_FOR_OF_NAME = 'dr-for-of';
+    public static readonly DR_INCLUDE_NAME = 'dr-include';
+    public static readonly DR_REPLACE_NAME = 'dr-replace';
+    public static readonly DR_ATTRIBUTES = [ScopeRawSet.DR_IF_NAME, ScopeRawSet.DR_FOR_OF_NAME, ScopeRawSet.DR_INCLUDE_NAME, ScopeRawSet.DR_REPLACE_NAME];
 
     constructor(public document: Document, public raw: string | Node, public styles: string[] = []) {
         if (typeof this.raw === 'string') {
@@ -14,69 +19,58 @@ export class ScopeRawSet {
         } else {
             this.node = this.raw;
         }
-        let nodeIterator = this.findScopeElementTagName('scope');
-        let node: Node | null;
-        const nodes: Element[] = [];
-        // eslint-disable-next-line no-cond-assign
-        while (node = nodeIterator.nextNode()) {
-            nodes.push(node as Element);
-        }
-        nodes.reverse().forEach(element => {
-            let content = `write(\`${element.innerHTML}\`)`;
-            const ifStatement = element.getAttribute('if');
-            if (ifStatement) {
-                console.log('---fif', ifStatement)
-                content = `ifWrite(${ifStatement},\`${element.innerHTML}\`)`;
-            }
-            const forStatement = element.getAttribute('forOf');
-            if (forStatement) {
-                content = 'for(const it of ' + forStatement + '){' + content + '}'
-            }
 
-            const newComment = document.createComment('%' + content + '%')
-            console.log('----->', newComment)
-            element.parentNode?.replaceChild(newComment, element);
-            // NodeUtils.replaceNode(node, newComment);
-        })
-
+        // let nodeIterator = this.findScopeElementTagName('scope');
+        // let node: Node | null;
+        // const nodes: Element[] = [];
+        // // eslint-disable-next-line no-cond-assign
+        // while (node = nodeIterator.nextNode()) {
+        //     nodes.push(node as Element);
+        // }
+        // nodes.reverse().forEach(element => {
+        //     let content = `write(\`${element.innerHTML}\`)`;
+        //     const ifStatement = element.getAttribute('if');
+        //     if (ifStatement) {
+        //         console.log('---fif', ifStatement)
+        //         content = `ifWrite(${ifStatement},\`${element.innerHTML}\`)`;
+        //     }
+        //     const forStatement = element.getAttribute('forOf');
+        //     if (forStatement) {
+        //         content = 'for(const it of ' + forStatement + '){' + content + '}'
+        //     }
         //
-        nodeIterator = this.findScopeElement({
-            acceptNode(node: Element): number {
-                // NodeFilter.FILTER_ACCEPT: 1, NodeFilter.FILTER_REJECT: 2
-                const attributeNames = node.getAttributeNames();
-                return attributeNames.includes('dr-if') || attributeNames.includes('dr-for-of')
-                    ? 1 : 2
-            }
-        });
-        nodes.length = 0
-        // eslint-disable-next-line no-cond-assign
-        while (node = nodeIterator.nextNode()) {
-            nodes.push(node as Element);
-        }
-        nodes.reverse().forEach(element => {
-            const html = element.outerHTML.replace(/\r?\n/g, '');
-            let content = `write('${html}')`;
-            const ifStatement = element.getAttribute('dr-if');
-            if (ifStatement) {
-                console.log('---fif', ifStatement)
-                content = `writeIf(${ifStatement},'${html}')`;
-            }
-            const forStatement = element.getAttribute('dr-for-of');
-            if (forStatement) {
-                content = `(() => {var temp=''; for(const it of ${forStatement}){ temp+='${html}' } return(temp); })()`
-            }
-
-            content = content.replace(/<!--%/g, "'+").replace(/%-->/g, "+'")
-            content = content.replace(/(\$\{)(.*?)(\})/g, "'+$2+'")
-            // content = content.replace(/\$\{/g, "'+").replace(/\}/g, "+'")
-            // if (!content.startsWith('write')) {
-            //     content = `write(${content});`
-            // }
-            const newComment = document.createComment('%' + content + '%')
-            console.log('----->', newComment)
-            element.parentNode?.replaceChild(newComment, element);
-        })
-
+        //     const newComment = document.createComment('%' + content + '%')
+        //     console.log('----->', newComment)
+        //     element.parentNode?.replaceChild(newComment, element);
+        //     // NodeUtils.replaceNode(node, newComment);
+        // })
+        //
+        // //
+        // const nodes = this.findScopeElementTagNames('');
+        // nodes.reverse().forEach(element => {
+        //     const html = element.outerHTML.replace(/\r?\n/g, '');
+        //     let content = `write('${html}')`;
+        //     const ifStatement = element.getAttribute('dr-if');
+        //     if (ifStatement) {
+        //         console.log('---fif', ifStatement)
+        //         content = `writeIf(${ifStatement},'${html}')`;
+        //     }
+        //     const forStatement = element.getAttribute('dr-for-of');
+        //     if (forStatement) {
+        //         content = `(() => {var temp=''; for(const it of ${forStatement}){ temp+='${html}' } return(temp); })()`
+        //     }
+        //
+        //     content = content.replace(/<!--%/g, "'+").replace(/%-->/g, "+'")
+        //     content = content.replace(/(\$\{)(.*?)(\})/g, "'+$2+'")
+        //     // content = content.replace(/\$\{/g, "'+").replace(/\}/g, "+'")
+        //     // if (!content.startsWith('write')) {
+        //     //     content = `write(${content});`
+        //     // }
+        //     const newComment = document.createComment('%' + content + '%')
+        //     console.log('----->', newComment)
+        //     element.parentNode?.replaceChild(newComment, element);
+        // })
+       this.changeElementToScope(this.node)
         // style
         // Node.ELEMENT_NODE = 1, DOCUMENT_FRAGMENT = 11
         if (this.styles.length > 0 && (this.node.nodeType === 1 || this.node.nodeType === 11)) {
@@ -85,7 +79,8 @@ export class ScopeRawSet {
             (this.node as Element).prepend(style);
         }
 
-        nodeIterator = this.findScopeElementTagName('STYLE')
+        const nodeIterator = this.findScopeElementTagName('STYLE')
+        let node: Node | null;
         // eslint-disable-next-line no-cond-assign
         while (node = nodeIterator.nextNode()) {
             const style = node as Element;
@@ -106,6 +101,64 @@ export class ScopeRawSet {
             nodeIterator.nextNode();
         }
         this.usingVars = this.usingThisVar(this.node.textContent ?? '');
+    }
+
+    changeElementToScope(rootNode: Node) {
+        const nodeIterator = this.findScopeElement({
+            acceptNode(node: Element): number {
+                // console.log('node-->', node, rootNode)
+                if (node === rootNode) {
+                    return 2;
+                }
+                // NodeFilter.FILTER_ACCEPT: 1, NodeFilter.FILTER_REJECT: 2
+                return ScopeRawSet.DR_ATTRIBUTES.filter(it => node.getAttribute(it)).length > 0 ? 1 : 2
+            }
+        }, rootNode);
+
+        // nodeIterator.forEach(element => {
+        //     const html = element.outerHTML;
+        //     const newComment = document.createComment(`%include(this, {template: \`${html}\`})%`);
+        //     element.parentNode?.replaceChild(newComment, element);
+        //     console.log('--->', element)
+        // })
+
+        let node: Node | null;
+        // eslint-disable-next-line no-cond-assign
+        while (node = nodeIterator.nextNode()) {
+            const element = node as Element;
+            const ifAttribute = element.getAttribute(ScopeRawSet.DR_IF_NAME);
+            const forOfAttribute = element.getAttribute(ScopeRawSet.DR_FOR_OF_NAME);
+            const include = element.getAttribute(ScopeRawSet.DR_INCLUDE_NAME);
+            const replace = element.getAttribute(ScopeRawSet.DR_REPLACE_NAME);
+            let content = '';
+            if (ifAttribute) {
+                element.removeAttribute(ScopeRawSet.DR_IF_NAME);
+                const html = this.escapeContent(element.outerHTML);
+                content = ` if(${ifAttribute}){ include(this, {template: '${html}'}) } `;
+            }
+            if (forOfAttribute) {
+                element.removeAttribute(ScopeRawSet.DR_FOR_OF_NAME);
+                const html = this.escapeContent(element.outerHTML);
+                content = ` for(const it of ${forOfAttribute}){ include(this, {template: '${html}'}) } `;
+            }
+            if (include) {
+                element.removeAttribute(ScopeRawSet.DR_INCLUDE_NAME);
+                const html = this.escapeContent(element.outerHTML);
+                content = ` const it = ${include}; include(this, {template: '${html}'}) `;
+            }
+            if (replace) {
+                element.removeAttribute(ScopeRawSet.DR_REPLACE_NAME);
+                const html = this.escapeContent(element.innerHTML);
+                content = ` const it = ${replace}; include(this, {template: '${html}'}) `;
+            }
+            this.changeElementToScope(element);
+            const newComment = document.createComment('%' + content + '%')
+            element.parentNode?.replaceChild(newComment, element);
+        }
+    }
+
+    escapeContent(content: string) {
+        return content.replace(/\r?\n/g, '').replace(/'/g, '\\\'').replace(/\$\{(.*?)\}/g, '\'+($1)+\'');
     }
 
     makeFragment(str: string): DocumentFragment {
@@ -132,6 +185,17 @@ export class ScopeRawSet {
         return nodeIterator;
     }
 
+    findScopeElementTagNames(tagName: string) {
+        const nodes: Element[] = [];
+        const nodeIterator = this.findScopeElementTagName(tagName);
+        let node: Node | null;
+        // eslint-disable-next-line no-cond-assign
+        while (node = nodeIterator.nextNode()) {
+            nodes.push(node as Element);
+        }
+        return nodes;
+    }
+
     findScopeElementTagName(tagName: string) {
         const nodeIterator = this.document.createNodeIterator(
             this.node,
@@ -149,8 +213,20 @@ export class ScopeRawSet {
         return nodeIterator;
     }
 
-    findScopeElement(filter?: NodeFilter) {
-        return this.document.createNodeIterator(this.node, 1, filter)
+    findScopeElements(filter?: NodeFilter, rootNode = this.node) {
+        const nodes: Element[] = [];
+        const nodeIterator = this.document.createNodeIterator(rootNode, 1, filter);
+        let node: Node | null;
+        // eslint-disable-next-line no-cond-assign
+        while (node = nodeIterator.nextNode()) {
+            nodes.push(node as Element);
+        }
+        return nodes;
+    }
+
+    findScopeElement(filter?: NodeFilter, node = this.node) {
+        // whatToShow https://developer.mozilla.org/en-US/docs/Web/API/Document/createNodeIterator
+        return this.document.createNodeIterator(node, 1, filter)
     }
 
     public getScopeCommentData() {
@@ -167,16 +243,5 @@ export class ScopeRawSet {
 
     private usingThisVar(raws: string): string[] {
         return eventManager.usingThisVar(raws)
-        // const regex = /["'].*["']/gm;
-        // raws = raws.replace(regex, '');
-        // const varRegexStr = 'this\\.([a-zA-Z_$][a-zA-Z_.$0-9]*)';
-        // const varRegex = RegExp(varRegexStr, 'gm');
-        // let varExec = varRegex.exec(raws)
-        // const usingVars = [];
-        // while (varExec) {
-        //     usingVars.push(varExec[1]);
-        //     varExec = varRegex.exec(varExec.input)
-        // }
-        // return usingVars;
     }
 }

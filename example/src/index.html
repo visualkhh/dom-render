@@ -1,12 +1,34 @@
 
-<!--
-for(var i = 0 ; i < this.cnt ; i ++) {
-  write(`<div>${i}</div>`);
-  write(`<div>${i}: <input type="text" dr-on-init="e${i+1}"><div>`);
-}
--->
-<!--%write('---')%-->
-<div>
+<div id="tt">
     <button dr-event-click="this.cc()">ㄴㄴㄴㄴㄴ</button>
 </div>
 
+<!--%write(this.friends?.name);%-->
+<div id="xzzz" dr-if="this.cnt1===1">
+    햇살 눈이부신 날 이별을 해봤니?
+    <div dr-if="this.cnt2===1">
+        111${this.friends.name}
+        <div dr-if="this.cnt3===1">333</div>
+        1111
+    </div>
+</div>
+
+include<br/>
+<!--<div wow='z' dr-include="this.friends">friend ${this.cnt}, ${it.name}</div>-->
+
+
+<!--replace<br/>-->
+<!--<div dr-replace="this.friends">-->
+
+<!--    zzzzzz-->
+<!--    friend ${this.cnt}, ${it.name}-->
+<!--    asdasdsa-->
+<!--</div>-->
+
+
+
+<button dr-event-click="this.cnt1++"> cnt1 </button>
+<button dr-event-click="this.cnt2++"> cnt2 </button>
+<button dr-event-click="this.cnt3++"> cnt2 </button>
+<button dr-event-click="this.changeFriendName()"> change Friend </button>
+<button dr-event-click="this.createFriend()"> create Friend </button>

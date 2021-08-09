@@ -1,7 +1,7 @@
-import { RootScope } from '../RootScope';
-import { NodeUtils } from '../utils/node/NodeUtils';
-import { Scope } from '../Scope';
-import { RawSet } from '../DomRender';
+import {RootScope} from '../RootScope';
+import {NodeUtils} from '../utils/node/NodeUtils';
+import {Scope} from '../Scope';
+import {RawSet} from '../DomRender';
 
 interface ConstructorType<T> {
     new(...args: any[]): T;
@@ -10,7 +10,8 @@ export type DepthType = { rootScopes: Map<string, RootScope>, rootTargetOrigin?:
 
 export class ScopeObjectProxyHandler implements ProxyHandler<any> {
     // public _SimObjectProxyHandler_ref = new Map<string, any>();
-    public _refs: any[] = [];
+    // public _refs: any[] = [];
+    public _refs = new Set<any>();
     // private _rootScopes: RootScope[] = [];
     private _rootScopes = new Map<string, RootScope>()
     private _targetProxy?: any;
@@ -26,9 +27,20 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
             this._rootScopes.set(_rootScope.uuid, _rootScope);
         }
         const data = Object.keys(this._targetOrigin) || [];
+        // ref걸어줘야해서..포록시만 처리할순없다.
         data.filter(it => this.isProxyTarget(this._targetOrigin[it])).forEach(it => {
-            this._targetOrigin[it] = this.proxy(this._targetOrigin[it])
+        // data.forEach(it => {
+            const proxy1 = this.proxy(this._targetOrigin[it]);
+            if (this._targetOrigin[it] !== proxy1) {
+                this._targetOrigin[it] = proxy1
+            }
         })
+
+        // data.filter(it => this._targetOrigin[it] !== undefined && this._targetOrigin[it] !== null && typeof this._targetOrigin[it] === 'object' && ('_ScopeObjectProxyHandler_isProxy' in this._targetOrigin[it]))
+        //     .map(it => this._targetOrigin[it]._ScopeObjectProxyHandler_refs).forEach((it: Set<any>) => {
+        //         it.add(this._targetProxy);
+        //         console.log('--', it);
+        //     })
         // console.log('proxy>', _target, typeof _target, this._refs)
         // if (!('_ScopeObjectProxyHandler_isProxy' in _targetProxy)) {
         //     const data = Object.keys(_targetOrigin) || [];
@@ -46,8 +58,7 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
         let sw = false;
         // try {
         if (
-            target !== undefined && target !== null &&
-            typeof target === 'object' &&
+            target !== undefined && target !== null && typeof target === 'object' &&
             !('_ScopeObjectProxyHandler_isProxy' in target) &&
             !(target instanceof Scope) &&
             this._excludeTyps.filter(it => target instanceof it).length === 0
@@ -65,10 +76,12 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
     public proxy(target: any) {
         if (this.isProxyTarget(target)) {
             const scopeObjectProxyHandler = new ScopeObjectProxyHandler(this._rawSet, target);
-            scopeObjectProxyHandler._refs.push(this._targetProxy);
+            scopeObjectProxyHandler._refs.add(this._targetProxy);
             const targetProxy = new Proxy(target, scopeObjectProxyHandler);
             targetProxy?._ScopeObjectProxyHandler?.run(targetProxy, target)
             return targetProxy;
+        } else if (target !== undefined && target !== null && typeof target === 'object' && ('_ScopeObjectProxyHandler_isProxy' in target)) {
+            target._ScopeObjectProxyHandler._refs.add(this._targetProxy);
         }
         return target;
     }
@@ -107,6 +120,7 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
                 });
             })
         });
+        console.log('getRefsProxyProp-->', fields)
         return fields;
     }
 
