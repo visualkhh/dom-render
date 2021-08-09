@@ -16,7 +16,6 @@ export class ScopeRawSet {
         }
         let nodeIterator = this.findScopeElementTagName('scope');
         let node: Node | null;
-
         const nodes: Element[] = [];
         // eslint-disable-next-line no-cond-assign
         while (node = nodeIterator.nextNode()) {
@@ -39,6 +38,45 @@ export class ScopeRawSet {
             element.parentNode?.replaceChild(newComment, element);
             // NodeUtils.replaceNode(node, newComment);
         })
+
+        //
+        nodeIterator = this.findScopeElement({
+            acceptNode(node: Element): number {
+                // NodeFilter.FILTER_ACCEPT: 1, NodeFilter.FILTER_REJECT: 2
+                const attributeNames = node.getAttributeNames();
+                return attributeNames.includes('dr-if') || attributeNames.includes('dr-for-of')
+                    ? 1 : 2
+            }
+        });
+        nodes.length = 0
+        // eslint-disable-next-line no-cond-assign
+        while (node = nodeIterator.nextNode()) {
+            nodes.push(node as Element);
+        }
+        nodes.reverse().forEach(element => {
+            const html = element.outerHTML.replace(/\r?\n/g, '');
+            let content = `write('${html}')`;
+            const ifStatement = element.getAttribute('dr-if');
+            if (ifStatement) {
+                console.log('---fif', ifStatement)
+                content = `writeIf(${ifStatement},'${html}')`;
+            }
+            const forStatement = element.getAttribute('dr-for-of');
+            if (forStatement) {
+                content = `(() => {var temp=''; for(const it of ${forStatement}){ temp+='${html}' } return(temp); })()`
+            }
+
+            content = content.replace(/<!--%/g, "'+").replace(/%-->/g, "+'")
+            content = content.replace(/(\$\{)(.*?)(\})/g, "'+$2+'")
+            // content = content.replace(/\$\{/g, "'+").replace(/\}/g, "+'")
+            // if (!content.startsWith('write')) {
+            //     content = `write(${content});`
+            // }
+            const newComment = document.createComment('%' + content + '%')
+            console.log('----->', newComment)
+            element.parentNode?.replaceChild(newComment, element);
+        })
+
         // style
         // Node.ELEMENT_NODE = 1, DOCUMENT_FRAGMENT = 11
         if (this.styles.length > 0 && (this.node.nodeType === 1 || this.node.nodeType === 11)) {
@@ -109,6 +147,10 @@ export class ScopeRawSet {
             }
         )
         return nodeIterator;
+    }
+
+    findScopeElement(filter?: NodeFilter) {
+        return this.document.createNodeIterator(this.node, 1, filter)
     }
 
     public getScopeCommentData() {

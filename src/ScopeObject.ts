@@ -56,7 +56,7 @@ export class ScopeObject {
             this._writes.push(str);
         };
         
-        const ifWrite = (sw, str) => {
+        const writeIf = (sw, str) => {
             if(sw) {
                 this._writes.push(str);
             }
