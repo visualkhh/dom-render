@@ -1,39 +1,38 @@
-<scope dr-replace="this">
-    ${this.cnt2}
-    <div id="tt">
-        <button dr-event-click="this.cc()">ㄴㄴㄴㄴㄴ</button>
-    </div>
+${this.cnt2}
+<div id="tt#{this.cnt2}">
+    ${this.cnt3}
+    <button dr-event-click="this.cc()">ㄴㄴㄴㄴㄴ</button>
+</div>
 
-    <div dr-include="{name:111, age:66}">
-        111 #{it.name} ${this.cnt1}  11
-        <div dr-include="{name:11441, age:6644}">
-            111 ${this.cnt1} 11
-            111 #{it.age} 11
-        </div>
+<div dr-include="{name:111, age:66}">
+    111 #{it.name} ${this.cnt1} 11
+    <div dr-include="{name:11441, age:6644}">
+        111 ${this.cnt1} 11
+        111 #{it.age} 11
     </div>
-    <div id="xzzz" dr-if="this.cnt1===1">
-        햇살 눈이부신 날 이별을 해봤니?
-            ${this.friends.name}
-        <div dr-if="this.cnt2===1">
-            111${this.friends.name}
-            1111
+</div>
+<div id="xzzz" dr-if="this.cnt1===1">
+    햇살 눈이부신 날 이별을 해봤니?
+    ${this.friends.name}
+    <div dr-if="this.cnt2===1">
+        111${this.friends.name}
+        1111
+        <div dr-if="this.cnt3===1">
+            333
             <div dr-if="this.cnt3===1">
-                333
-                <div dr-if="this.cnt3===1">
-                    dd
-                </div>
-
+                dd
             </div>
+
         </div>
     </div>
+</div>
 
-    <div dr-for="for(var i = 0 ; i < 10; i++)">sss ${this.cnt1} #{i}</div>
-    <div dr-for-of="[2,7,8]">#{it}</div>
+<div dr-for="for(var i = 0 ; i < 10; i++)">sss ${this.cnt1} #{i}</div>
+<div dr-for-of="[2,7,8]">#{it}</div>
 
-    <button dr-event-click="console.log('this print-->','22222')"> this.print </button>
-    <button dr-event-click="this.cnt1++"> cnt1 </button>
-    <button dr-event-click="this.cnt2++"> cnt2 </button>
-    <button dr-event-click="this.cnt3++"> cnt2 </button>
-    <button dr-event-click="this.changeFriendName()"> change Friend </button>
-    <button dr-event-click="this.createFriend()"> create Friend </button>
-</scope>
+<button dr-event-click="console.log('this print-->','22222')"> this.print</button>
+<button dr-event-click="this.cnt1++"> cnt1</button>
+<button dr-event-click="this.cnt2++"> cnt2</button>
+<button dr-event-click="this.cnt3++"> cnt2</button>
+<button dr-event-click="this.changeFriendName()"> change Friend</button>
+<button dr-event-click="this.createFriend()"> create Friend</button>

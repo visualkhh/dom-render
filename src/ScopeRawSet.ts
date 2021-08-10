@@ -87,27 +87,27 @@ export class ScopeRawSet {
                 element.removeAttribute(ScopeRawSet.DR_IF_NAME);
                 // const html = this.escapeContent(element.outerHTML);
                 const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
-                content = ` if(${ifAttribute}){ includeDhis(this, {template: '${html}'}) } `;
+                content = `const dhis = this; if(${ifAttribute}){ includeDhis(this, {template: '${html}'}) } `;
             }
             if (forOfAttribute) {
                 element.removeAttribute(ScopeRawSet.DR_FOR_OF_NAME);
                 const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
-                content = ` for(const it of ${forOfAttribute}){ includeDhis(this, {template: '${html}'}) } `;
+                content = `const dhis = this; for(const it of ${forOfAttribute}){ includeDhis(this, {template: '${html}'}) } `;
             }
             if (include) {
                 element.removeAttribute(ScopeRawSet.DR_INCLUDE_NAME);
                 const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
-                content = ` const it = ${include}; includeDhis(this, {template: '${html}'}) `;
+                content = `const dhis = this; const it = ${include}; includeDhis(this, {template: '${html}'}) `;
             }
             if (replace) {
                 element.removeAttribute(ScopeRawSet.DR_REPLACE_NAME);
                 const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, false));
-                content = ` const it = ${replace}; includeDhis(this, {template: '${html}'}) `;
+                content = `const dhis = this; const it = ${replace}; includeDhis(this, {template: '${html}'}) `;
             }
             if (forr) {
                 element.removeAttribute(ScopeRawSet.DR_FOR_NAME);
                 const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
-                content = ` ${forr}{ includeDhis(this, {template: '${html}'}) } `;
+                content = `const dhis = this; ${forr}{ includeDhis(this, {template: '${html}'}) } `;
             }
             // this.changeElementToScope(element);
             const newComment = document.createComment('%' + content + '%')
@@ -130,12 +130,12 @@ export class ScopeRawSet {
                     html += this.escapeNoExpressionContent(element.outerHTML ?? '')
                 } else {
                     const genData = this.escapeContent(element.outerHTML ?? '');
-                    this.usingVars.push(...this.usingThisVar(genData))
+                    // this.usingVars.push(...this.usingThisVar(genData))
                     html += genData
                 }
             } else if (n.nodeType === 3) {
                 const text = (n as Text).data ?? '';
-                this.usingVars.push(...this.usingThisVar(text))
+                // this.usingVars.push(...this.usingThisVar(text))
                 html += this.escapeContent(text)
             }
         })
