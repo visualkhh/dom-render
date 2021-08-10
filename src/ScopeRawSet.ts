@@ -87,7 +87,6 @@ export class ScopeRawSet {
                 element.removeAttribute(ScopeRawSet.DR_IF_NAME);
                 // const html = this.escapeContent(element.outerHTML);
                 const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
-                console.log('----------', html)
                 content = ` if(${ifAttribute}){ includeDhis(this, {template: '${html}'}) } `;
             }
             if (forOfAttribute) {
@@ -131,19 +130,16 @@ export class ScopeRawSet {
                     html += this.escapeNoExpressionContent(element.outerHTML ?? '')
                 } else {
                     const genData = this.escapeContent(element.outerHTML ?? '');
-                    console.log('genHTML--->', genData)
                     this.usingVars.push(...this.usingThisVar(genData))
                     html += genData
                 }
             } else if (n.nodeType === 3) {
                 const text = (n as Text).data ?? '';
-                console.log('genHTML --->', text)
                 this.usingVars.push(...this.usingThisVar(text))
                 html += this.escapeContent(text)
             }
         })
         html += (isOuter ? `</${element.tagName}>` : '');
-        console.log(html)
         return html;
     }
 

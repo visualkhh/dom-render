@@ -41,7 +41,7 @@ export class RootScope extends Scope implements ChangeField {
     }
 
     changeField(path: string): void {
-        console.log('change field', path)
+        // console.log('change field', path)
         // 수정 포인트.
         if (this.scopeResult) {
             eventManager.changeVar(this.obj, this.scopeResult.childNodes, path, this.config)
@@ -115,8 +115,8 @@ export class RootScope extends Scope implements ChangeField {
             if (it.raws.node) {
                 const fragment = this.raws.window.document.createDocumentFragment();
                 fragment.append(childScopeObject.startComment, childScopeObject.fragment, childScopeObject.endComment)
-                NodeUtils.addNode(it.raws.node, fragment);
-                // NodeUtils.replaceNode(it.raws.node, fragment);
+                // NodeUtils.addNode(it.raws.node, fragment);
+                NodeUtils.replaceNode(it.raws.node, fragment);
             }
             // const childScopeObject = it.scopeResult!
             // const currentNode = this.extracted(rawFragment, it, childScopeObject);

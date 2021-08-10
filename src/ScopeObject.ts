@@ -69,7 +69,6 @@ export class ScopeObject {
         };
         
         const include = (target, rawSet) => {
-            console.log('include-->', target);
             const uuid = this._makeUUID();
             const targetNode = this.getTargetNode(uuid);
             const rootScope = this._compileRootScope(target, targetNode, uuid, rawSet);
@@ -111,7 +110,6 @@ export class ScopeObject {
             throw new Error('no Domrander compile Object');
         }
         const rawSet = raws ?? target._ScopeObjectProxyHandler_rawSet! as RawSet;
-        console.log('rawset--->', rawSet)
         return DomRender.compileRootScope(this._scope.raws.window, target._ScopeOpjectProxy_targetOrigin ?? target, rawSet, this._scope.config, targetNode, uuid);
     }
 
