@@ -36,11 +36,11 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
             }
         })
 
-        // data.filter(it => this._targetOrigin[it] !== undefined && this._targetOrigin[it] !== null && typeof this._targetOrigin[it] === 'object' && ('_ScopeObjectProxyHandler_isProxy' in this._targetOrigin[it]))
-        //     .map(it => this._targetOrigin[it]._ScopeObjectProxyHandler_refs).forEach((it: Set<any>) => {
-        //         it.add(this._targetProxy);
-        //         console.log('--', it);
-        //     })
+        data.filter(it => this._targetOrigin[it] !== undefined && this._targetOrigin[it] !== null && typeof this._targetOrigin[it] === 'object' && ('_ScopeObjectProxyHandler_isProxy' in this._targetOrigin[it]))
+            .map(it => this._targetOrigin[it]._ScopeObjectProxyHandler_refs).forEach((it: Set<any>) => {
+                it.add(this._targetProxy);
+                console.log('--', it);
+            })
         // console.log('proxy>', _target, typeof _target, this._refs)
         // if (!('_ScopeObjectProxyHandler_isProxy' in _targetProxy)) {
         //     const data = Object.keys(_targetOrigin) || [];
@@ -155,12 +155,12 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
     }
 
     public set(obj: any, prop: string, value: any): boolean {
+        console.log('set-->', obj, ' prop:', prop, value, this._refs);
         const ignoreFields = ['_originObj', '_calls', '_writes', '_raws', '_uuid'];
         if (ignoreFields.includes(prop)) {
             obj[prop] = value;
             return true;
         }
-        // console.log('set-->', obj, ' prop:', prop, value, this._refs);
         obj[prop] = this.proxy(value);
         const depths = [prop];
         const parentDepths = this.goRoot(depths, obj);

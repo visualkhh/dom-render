@@ -36,12 +36,12 @@ export class TargetNode {
 }
 
 export class RootScope extends Scope implements ChangeField {
-    constructor(raws: ScopeRawSet, obj: any, uuid = RandomUtils.uuid(), config = new Config(), public targetNode = new TargetNode(raws.document)) {
+    constructor(raws: ScopeRawSet, obj: any, uuid = RandomUtils.uuid(), config = new Config(), public targetNode = new TargetNode(raws.window.document)) {
         super(raws, obj, uuid, config);
     }
 
     changeField(path: string): void {
-        // console.log('change field', path)
+        console.log('change field', path)
         // 수정 포인트.
         if (this.scopeResult) {
             eventManager.changeVar(this.obj, this.scopeResult.childNodes, path, this.config)
@@ -87,11 +87,11 @@ export class RootScope extends Scope implements ChangeField {
     execRoot(fragment: DocumentFragment) {
         // eslint-disable-next-line no-undef
         const childNodes: ChildNode[] = [];
-        const startComment = this.raws.document.createComment('rootScope start');
-        const endComment = this.raws.document.createComment('rootScope end');
+        const startComment = this.raws.window.document.createComment('rootScope start');
+        const endComment = this.raws.window.document.createComment('rootScope end');
         fragment.prepend(startComment)
         fragment.appendChild(endComment)
-        childNodes.push((this.targetNode.node ?? this.raws.document.body) as Element)
+        childNodes.push((this.targetNode.node ?? this.raws.window.document.body) as Element)
         eventManager.findAttrElements(fragment, this.config.targetAttributeNames).forEach(it => {
             childNodes.push(it.element)
         })
@@ -113,9 +113,10 @@ export class RootScope extends Scope implements ChangeField {
         this.childs.forEach(it => {
             const childScopeObject = it.exec().result;
             if (it.raws.node) {
-                const fragment = this.raws.document.createDocumentFragment();
+                const fragment = this.raws.window.document.createDocumentFragment();
                 fragment.append(childScopeObject.startComment, childScopeObject.fragment, childScopeObject.endComment)
-                NodeUtils.replaceNode(it.raws.node, fragment);
+                NodeUtils.addNode(it.raws.node, fragment);
+                // NodeUtils.replaceNode(it.raws.node, fragment);
             }
             // const childScopeObject = it.scopeResult!
             // const currentNode = this.extracted(rawFragment, it, childScopeObject);

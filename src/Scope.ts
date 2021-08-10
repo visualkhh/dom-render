@@ -51,7 +51,7 @@ export class Scope {
         while (node = nodeIterator.nextNode()) {
             // console.log('node Iterator-->', node, node.nodeType)
             // const targetNode = node as Comment;
-            const scopeRawSet = new ScopeRawSet(this.raws.document, node)
+            const scopeRawSet = new ScopeRawSet(this.raws.window, node)
             const scope = new Scope(scopeRawSet, this.obj, RandomUtils.uuid(), this.config);
             // const script = scope.raws.getScopeCommentScript();
             // console.log('nodeIterator-->', script, scopeRawSet.usingVars, scopeRawSet, scope)

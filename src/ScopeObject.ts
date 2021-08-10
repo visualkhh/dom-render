@@ -4,6 +4,7 @@ import {TargetNode, TargetNodeMode} from './RootScope';
 import {DomRender, RawSet} from './DomRender';
 import {Scope} from './Scope';
 import {ScopeObjectCall} from './ScopeObjectCall';
+import {ScopeRawSet} from './ScopeRawSet';
 
 export class ScopeObject {
     public _originObj: any;
@@ -16,9 +17,9 @@ export class ScopeObject {
 
     public executeResultSet(script: string): ScopeResultSet {
         this.eval(script);
-        const startComment = this._scope.raws.document.createComment('scope start ' + this._uuid)
-        const endComment = this._scope.raws.document.createComment('scope end ' + this._uuid)
-        const templateElement = this._scope.raws.document.createElement('template');
+        const startComment = this._scope.raws.window.document.createComment('scope start ' + this._uuid)
+        const endComment = this._scope.raws.window.document.createComment('scope end ' + this._uuid)
+        const templateElement = this._scope.raws.window.document.createElement('template');
         if (this._writes.length) {
             templateElement.innerHTML = this._writes.join('');
             templateElement.content.childNodes.forEach(it => {
@@ -77,7 +78,9 @@ export class ScopeObject {
                 this._writes.push("<template include-scope-uuid='" + uuid + "'></template>");
             }
         }
-        
+        const includeDhis = (target, rawSet) => {
+            include(target, this._replaceDhisToThis(rawSet));    
+        }
         ${this.customScript()}
         
         ${script}
@@ -89,17 +92,31 @@ export class ScopeObject {
         return RandomUtils.uuid();
     }
 
+    private _replaceDhisToThis(raws: RawSet) {
+        return {
+            template: ScopeRawSet.replaceDhisToThis(raws.template),
+            styles: raws.styles?.map(it => ScopeRawSet.replaceDhisToThis(it))
+        }
+    }
+    // private _decoding(raws: RawSet) {
+    //     return {
+    //         template: decodeURIComponent(this._scope.raws.window.atob(raws.template)),
+    //         styles: raws.styles?.map(it => decodeURIComponent(this._scope.raws.window.atob(it)))
+    //     }
+    // }
+
     private _compileRootScope(target: any, targetNode: TargetNode, uuid: string, raws?: RawSet) {
-        if (!('_ScopeObjectProxyHandler_isProxy' in (target === this ? this._originObj : target))) {
+        if (!raws && !('_ScopeObjectProxyHandler_isProxy' in (target === this ? this._originObj : target))) {
             console.error('no Domrander Proxy Object -> var proxy = Domrender.proxy(target, ScopeRawSet)', target)
             throw new Error('no Domrander compile Object');
         }
         const rawSet = raws ?? target._ScopeObjectProxyHandler_rawSet! as RawSet;
-        return DomRender.compileRootScope(this._scope.raws.document, target, rawSet, this._scope.config, targetNode, uuid);
+        console.log('rawset--->', rawSet)
+        return DomRender.compileRootScope(this._scope.raws.window, target._ScopeOpjectProxy_targetOrigin ?? target, rawSet, this._scope.config, targetNode, uuid);
     }
 
     private getTargetNode(uuid: string) {
-        return new TargetNode(`[include-scope-uuid='${uuid}']`, TargetNodeMode.replace, this._scope.raws.document);
+        return new TargetNode(`[include-scope-uuid='${uuid}']`, TargetNodeMode.replace, this._scope.raws.window.document);
     }
 
     protected customScript() {

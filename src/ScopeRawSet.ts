@@ -1,6 +1,4 @@
 import {eventManager} from './events/EventManager';
-import {RandomUtils} from './utils/random/RandomUtils';
-import {NodeUtils} from './utils/node/NodeUtils';
 
 export class ScopeRawSet {
     public node: DocumentFragment | Node;
@@ -9,68 +7,19 @@ export class ScopeRawSet {
     public static readonly DR_FOR_OF_NAME = 'dr-for-of';
     public static readonly DR_INCLUDE_NAME = 'dr-include';
     public static readonly DR_REPLACE_NAME = 'dr-replace';
-    public static readonly DR_ATTRIBUTES = [ScopeRawSet.DR_IF_NAME, ScopeRawSet.DR_FOR_OF_NAME, ScopeRawSet.DR_INCLUDE_NAME, ScopeRawSet.DR_REPLACE_NAME];
+    public static readonly DR_FOR_NAME = 'dr-for';
+    public static readonly DR_ATTRIBUTES = [ScopeRawSet.DR_IF_NAME, ScopeRawSet.DR_FOR_OF_NAME, ScopeRawSet.DR_INCLUDE_NAME, ScopeRawSet.DR_REPLACE_NAME, ScopeRawSet.DR_FOR_NAME];
 
-    constructor(public document: Document, public raw: string | Node, public styles: string[] = []) {
+    constructor(public window: Window, public raw: string | Node, public styles: string[] = []) {
         if (typeof this.raw === 'string') {
-            const template = this.document.createElement('template');
+            const template = this.window.document.createElement('template');
             template.innerHTML = this.raw;
             this.node = template.content
         } else {
             this.node = this.raw;
         }
-
-        // let nodeIterator = this.findScopeElementTagName('scope');
-        // let node: Node | null;
-        // const nodes: Element[] = [];
-        // // eslint-disable-next-line no-cond-assign
-        // while (node = nodeIterator.nextNode()) {
-        //     nodes.push(node as Element);
-        // }
-        // nodes.reverse().forEach(element => {
-        //     let content = `write(\`${element.innerHTML}\`)`;
-        //     const ifStatement = element.getAttribute('if');
-        //     if (ifStatement) {
-        //         console.log('---fif', ifStatement)
-        //         content = `ifWrite(${ifStatement},\`${element.innerHTML}\`)`;
-        //     }
-        //     const forStatement = element.getAttribute('forOf');
-        //     if (forStatement) {
-        //         content = 'for(const it of ' + forStatement + '){' + content + '}'
-        //     }
-        //
-        //     const newComment = document.createComment('%' + content + '%')
-        //     console.log('----->', newComment)
-        //     element.parentNode?.replaceChild(newComment, element);
-        //     // NodeUtils.replaceNode(node, newComment);
-        // })
-        //
-        // //
-        // const nodes = this.findScopeElementTagNames('');
-        // nodes.reverse().forEach(element => {
-        //     const html = element.outerHTML.replace(/\r?\n/g, '');
-        //     let content = `write('${html}')`;
-        //     const ifStatement = element.getAttribute('dr-if');
-        //     if (ifStatement) {
-        //         console.log('---fif', ifStatement)
-        //         content = `writeIf(${ifStatement},'${html}')`;
-        //     }
-        //     const forStatement = element.getAttribute('dr-for-of');
-        //     if (forStatement) {
-        //         content = `(() => {var temp=''; for(const it of ${forStatement}){ temp+='${html}' } return(temp); })()`
-        //     }
-        //
-        //     content = content.replace(/<!--%/g, "'+").replace(/%-->/g, "+'")
-        //     content = content.replace(/(\$\{)(.*?)(\})/g, "'+$2+'")
-        //     // content = content.replace(/\$\{/g, "'+").replace(/\}/g, "+'")
-        //     // if (!content.startsWith('write')) {
-        //     //     content = `write(${content});`
-        //     // }
-        //     const newComment = document.createComment('%' + content + '%')
-        //     console.log('----->', newComment)
-        //     element.parentNode?.replaceChild(newComment, element);
-        // })
-       this.changeElementToScope(this.node)
+        this.usingVars = [];
+        this.changeElementToScope(this.node)
         // style
         // Node.ELEMENT_NODE = 1, DOCUMENT_FRAGMENT = 11
         if (this.styles.length > 0 && (this.node.nodeType === 1 || this.node.nodeType === 11)) {
@@ -97,10 +46,12 @@ export class ScopeRawSet {
             const fragment = this.makeFragment(text);
             const newStyle = document.createElement('style')
             newStyle.appendChild(fragment);
+            console.log('style-->', style.outerHTML)
             style.parentNode?.replaceChild(newStyle, style);
             nodeIterator.nextNode();
         }
         this.usingVars = this.usingThisVar(this.node.textContent ?? '');
+        // console.log('usingVar2', this.usingVars, this.node.textContent)
     }
 
     changeElementToScope(rootNode: Node) {
@@ -130,45 +81,98 @@ export class ScopeRawSet {
             const forOfAttribute = element.getAttribute(ScopeRawSet.DR_FOR_OF_NAME);
             const include = element.getAttribute(ScopeRawSet.DR_INCLUDE_NAME);
             const replace = element.getAttribute(ScopeRawSet.DR_REPLACE_NAME);
+            const forr = element.getAttribute(ScopeRawSet.DR_FOR_NAME);
             let content = '';
             if (ifAttribute) {
                 element.removeAttribute(ScopeRawSet.DR_IF_NAME);
-                const html = this.escapeContent(element.outerHTML);
-                content = ` if(${ifAttribute}){ include(this, {template: '${html}'}) } `;
+                // const html = this.escapeContent(element.outerHTML);
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
+                console.log('----------', html)
+                content = ` if(${ifAttribute}){ includeDhis(this, {template: '${html}'}) } `;
             }
             if (forOfAttribute) {
                 element.removeAttribute(ScopeRawSet.DR_FOR_OF_NAME);
-                const html = this.escapeContent(element.outerHTML);
-                content = ` for(const it of ${forOfAttribute}){ include(this, {template: '${html}'}) } `;
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
+                content = ` for(const it of ${forOfAttribute}){ includeDhis(this, {template: '${html}'}) } `;
             }
             if (include) {
                 element.removeAttribute(ScopeRawSet.DR_INCLUDE_NAME);
-                const html = this.escapeContent(element.outerHTML);
-                content = ` const it = ${include}; include(this, {template: '${html}'}) `;
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
+                content = ` const it = ${include}; includeDhis(this, {template: '${html}'}) `;
             }
             if (replace) {
                 element.removeAttribute(ScopeRawSet.DR_REPLACE_NAME);
-                const html = this.escapeContent(element.innerHTML);
-                content = ` const it = ${replace}; include(this, {template: '${html}'}) `;
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, false));
+                content = ` const it = ${replace}; includeDhis(this, {template: '${html}'}) `;
             }
-            this.changeElementToScope(element);
+            if (forr) {
+                element.removeAttribute(ScopeRawSet.DR_FOR_NAME);
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
+                content = ` ${forr}{ includeDhis(this, {template: '${html}'}) } `;
+            }
+            // this.changeElementToScope(element);
             const newComment = document.createComment('%' + content + '%')
+            // console.log('---------------createComment', newComment.data)
             element.parentNode?.replaceChild(newComment, element);
         }
     }
 
+    genHTML(element: Element, isOuter = true) {
+        const attributeNames = element.getAttributeNames();
+        for (let i = 0; i < attributeNames.length; i++) {
+            attributeNames[i] += `="${element.getAttribute(attributeNames[i])}"`
+        }
+
+        let html = isOuter ? `<${element.tagName} ${attributeNames.join(' ')}>` : '';
+        element.childNodes.forEach((n, k) => {
+            if (n.nodeType === 1) {
+                const element = n as Element;
+                if (ScopeRawSet.DR_ATTRIBUTES.filter(it => element.getAttribute(it)).length > 0) {
+                    html += this.escapeNoExpressionContent(element.outerHTML ?? '')
+                } else {
+                    const genData = this.escapeContent(element.outerHTML ?? '');
+                    console.log('genHTML--->', genData)
+                    this.usingVars.push(...this.usingThisVar(genData))
+                    html += genData
+                }
+            } else if (n.nodeType === 3) {
+                const text = (n as Text).data ?? '';
+                console.log('genHTML --->', text)
+                this.usingVars.push(...this.usingThisVar(text))
+                html += this.escapeContent(text)
+            }
+        })
+        html += (isOuter ? `</${element.tagName}>` : '');
+        console.log(html)
+        return html;
+    }
+
+    public static replaceThisToDhis(content: string) {
+        return content.replace(/this\./g, 'dhis.')
+    }
+
+    public static replaceDhisToThis(content: string) {
+        return content.replace(/dhis\./g, 'this.')
+    }
+
     escapeContent(content: string) {
-        return content.replace(/\r?\n/g, '').replace(/'/g, '\\\'').replace(/\$\{(.*?)\}/g, '\'+($1)+\'');
+        return this.escapeNoExpressionContent(content)
+            .replace(/\$\{(.*?)\}/g, '<!--%write($1)%-->')
+            .replace(/#\{(.*?)\}/g, '\'+($1)+\'');
+    }
+
+    escapeNoExpressionContent(content: string) {
+        return content.replace(/\r?\n/g, '').replace(/'/g, '\\\'');
     }
 
     makeFragment(str: string): DocumentFragment {
-        const template = this.document.createElement('template');
+        const template = this.window.document.createElement('template');
         template.innerHTML = str;
         return template.content;
     }
 
     findScopeComment() {
-        const nodeIterator = this.document.createNodeIterator(
+        const nodeIterator = this.window.document.createNodeIterator(
             this.node,
             // https://developer.mozilla.org/ko/docs/Web/API/Document/createTreeWalker
             // NodeFilter.SHOW_COMMENT: 128
@@ -197,7 +201,7 @@ export class ScopeRawSet {
     }
 
     findScopeElementTagName(tagName: string) {
-        const nodeIterator = this.document.createNodeIterator(
+        const nodeIterator = this.window.document.createNodeIterator(
             this.node,
             // https://developer.mozilla.org/ko/docs/Web/API/Document/createTreeWalker
             // NodeFilter.SHOW_ELEMENT: 1
@@ -215,7 +219,7 @@ export class ScopeRawSet {
 
     findScopeElements(filter?: NodeFilter, rootNode = this.node) {
         const nodes: Element[] = [];
-        const nodeIterator = this.document.createNodeIterator(rootNode, 1, filter);
+        const nodeIterator = this.window.document.createNodeIterator(rootNode, 1, filter);
         let node: Node | null;
         // eslint-disable-next-line no-cond-assign
         while (node = nodeIterator.nextNode()) {
@@ -226,7 +230,7 @@ export class ScopeRawSet {
 
     findScopeElement(filter?: NodeFilter, node = this.node) {
         // whatToShow https://developer.mozilla.org/en-US/docs/Web/API/Document/createNodeIterator
-        return this.document.createNodeIterator(node, 1, filter)
+        return this.window.document.createNodeIterator(node, 1, filter)
     }
 
     public getScopeCommentData() {

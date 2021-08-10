@@ -21,6 +21,7 @@ class User {
         this.name = 'zz'
         this.cnt = cnt;
         this.color = RandomUtils.getRandomColor();
+        this.friends = friends;
     }
 
     cc($event) {
@@ -54,13 +55,15 @@ class User {
 
 const config = new Config();
 
-let user = new User(1);
+// let user = new User(1, DomRender.create(new User(255), {template: '<div><!--%write(this.cnt)%--></div>'}));
+let user = new User(1, new User(255));
+// let user = new User(1, {} as User);
 // console.log(user)
 const body = document.querySelector('#app');
 const targetNode = new TargetNode(body, TargetNodeMode.replace)
 const raw = {template: html};
 
-user = DomRender.render(document, user, raw, config, targetNode);
+user = DomRender.render(window, user, raw, config, targetNode);
 // user.friends = DomRender.create(new User(255), {template: '<div><!--%write(this.cnt)%--></div>'});
 
 // setTimeout(() => {

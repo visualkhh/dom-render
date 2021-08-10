@@ -199,7 +199,9 @@ export const eventManager = new class {
     }
 
     public usingThisVar(raws: string): string[] {
-        const regex = /["'].*?["']/gm;
+        let regex = /include\(.*\)/gm;
+        // raws = raws.replace(regex, '');
+        regex = /["'].*?["']/gm;
         raws = raws.replace(regex, '');
         const varRegexStr = 'this\\.([a-zA-Z_$][?a-zA-Z_.$0-9]*)';
         const varRegex = RegExp(varRegexStr, 'gm');

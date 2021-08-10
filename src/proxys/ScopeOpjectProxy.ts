@@ -1,5 +1,5 @@
 export class ScopeOpjectProxy implements ProxyHandler<any> {
-    constructor(public origin: any) {
+    constructor(public _origin: any) {
     }
 
     apply(target: any, thisArg: any, argArray?: any): any {
@@ -12,13 +12,17 @@ export class ScopeOpjectProxy implements ProxyHandler<any> {
 
     set(target: any, p: string | symbol, value: any, receiver: any): boolean {
         // console.log('set--->', target, p, value, receiver)
-        this.origin[p] = value;
+        this._origin[p] = value;
         target[p] = value;
         return true;
     }
 
-    get(target: any, p: string | symbol, receiver: any): any {
+    get(target: any, name: string | symbol, receiver: any): any {
         // console.log('get--->', target, p, receiver)
-        return target[p] ?? this.origin[p];
+        if (name === '_ScopeOpjectProxy_targetOrigin') {
+            return this._origin;
+        } else {
+            return target[name] ?? this._origin[name];
+        }
     }
 }

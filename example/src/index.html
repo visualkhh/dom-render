@@ -3,29 +3,24 @@
     <button dr-event-click="this.cc()">ㄴㄴㄴㄴㄴ</button>
 </div>
 
-<!--%write(this.friends?.name);%-->
 <div id="xzzz" dr-if="this.cnt1===1">
     햇살 눈이부신 날 이별을 해봤니?
+        ${this.friends.name}
     <div dr-if="this.cnt2===1">
         111${this.friends.name}
-        <div dr-if="this.cnt3===1">333</div>
         1111
+        <div dr-if="this.cnt3===1">
+            333
+            <div dr-if="this.cnt3===1">
+                dd
+            </div>
+
+        </div>
     </div>
 </div>
 
-include<br/>
-<!--<div wow='z' dr-include="this.friends">friend ${this.cnt}, ${it.name}</div>-->
-
-
-<!--replace<br/>-->
-<!--<div dr-replace="this.friends">-->
-
-<!--    zzzzzz-->
-<!--    friend ${this.cnt}, ${it.name}-->
-<!--    asdasdsa-->
-<!--</div>-->
-
-
+<div dr-for="for(var i = 0 ; i < 10; i++)">sss ${this.cnt1} #{i}</div>
+<div dr-for-of="[2,7,8]">#{it}</div>
 
 <button dr-event-click="this.cnt1++"> cnt1 </button>
 <button dr-event-click="this.cnt2++"> cnt2 </button>

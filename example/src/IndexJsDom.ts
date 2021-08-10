@@ -4,7 +4,7 @@ import {RandomUtils} from 'dom-render/utils/random/RandomUtils';
 import {Config} from 'dom-render/Config';
 import {DomRender} from 'dom-render/DomRender';
 import {ScopeObject} from 'dom-render/ScopeObject';
-import {Scope} from "dom-render/Scope";
+import {Scope} from 'dom-render/Scope';
 const dom = new JSDOM(`
 <!doctype html>
 <html lang="en">
@@ -150,7 +150,7 @@ const body = document.querySelector('#app');
 const targetNode = new TargetNode(body, TargetNodeMode.replace)
 const raw = {template: html, styles: ['div {color: <!--%write(this.color)%-->}']};
 
-user = DomRender.render(document, user, raw, config, targetNode);
+user = DomRender.render(window, user, raw, config, targetNode);
 setTimeout(() => {
     user.name = RandomUtils.getRandomColor();
     user.color = RandomUtils.getRandomColor();
