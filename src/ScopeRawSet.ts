@@ -95,13 +95,13 @@ export class ScopeRawSet {
             }
             if (include) {
                 element.removeAttribute(ScopeRawSet.DR_INCLUDE_NAME);
-                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true).replace(/it\./g, include + '.'));
-                content = `const it = ${include}; includeDhis(this, {template: '${html}'}, '${include}') `; // const dhis = this;
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true).replace(/\(it/g, '('+include));
+                content = `const it = ${include}; includeDhis(this, {template: '${html}'}) `; // const dhis = this;
             }
             if (replace) {
                 element.removeAttribute(ScopeRawSet.DR_REPLACE_NAME);
-                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, false).replace(/it\./g, replace + '.'));
-                content = `const it = ${replace}; includeDhis(this, {template: '${html}'}, '${replace}') `; // const dhis = this;
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, false).replace(/\(it/g, '('+replace));
+                content = `const it = ${replace}; includeDhis(this, {template: '${html}'}) `; // const dhis = this;
             }
             if (statement) {
                 element.removeAttribute(ScopeRawSet.DR_STATEMENT_NAME);
