@@ -9,7 +9,6 @@ export type RawSet = {template: string, styles?: string[]}
 export class DomRender {
     public static compileSet<T>(window: Window, target: T, raws: RawSet, config?: Config, targetNode?: TargetNode, uuid = RandomUtils.uuid()): {target: T, rootScope: RootScope} {
         const proxy = DomRender.proxy(target, raws) as any;
-        console.log('--->',raws.template)
         // '<scope dr-replace="this">'+raws.template+'</scope>'
         const scopeRaws = new ScopeRawSet(window, raws.template, raws.styles);
         const root = new RootScope(scopeRaws, proxy, uuid, config, targetNode);
@@ -17,7 +16,7 @@ export class DomRender {
         return {target: proxy, rootScope: root};
     }
 
-    public static compileRootScope<T>(window: Window, target: T, raws: RawSet, config: Config, targetNode?: TargetNode, uuid?: string): RootScope {
+    public static compileRootScope<T>(window: Window, target: T, raws: RawSet, config: Config, targetNode?: TargetNode, uuid = RandomUtils.uuid()): RootScope {
         return DomRender.compileSet(window, target, raws, config, targetNode, uuid).rootScope;
     }
 
@@ -42,7 +41,8 @@ export class DomRender {
         if ('_ScopeObjectProxyHandler_isProxy' in target) {
             proxy = target;
         } else {
-            raws.template = `<scope dr-replace="this">${raws.template}</scope>`;
+            // default wrapper
+            // raws.template = `<scope dr-replace="this">${raws.template}</scope>`;
             proxy = new Proxy(target, new ScopeObjectProxyHandler(raws, target, excludeTyps));
         }
         return proxy;

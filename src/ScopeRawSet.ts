@@ -8,7 +8,9 @@ export class ScopeRawSet {
     public static readonly DR_INCLUDE_NAME = 'dr-include';
     public static readonly DR_REPLACE_NAME = 'dr-replace';
     public static readonly DR_FOR_NAME = 'dr-for';
-    public static readonly DR_ATTRIBUTES = [ScopeRawSet.DR_IF_NAME, ScopeRawSet.DR_FOR_OF_NAME, ScopeRawSet.DR_INCLUDE_NAME, ScopeRawSet.DR_REPLACE_NAME, ScopeRawSet.DR_FOR_NAME];
+    public static readonly DR_STATEMENT_NAME = 'dr-statement';
+    public static readonly DR_IT_OPTIONNAME = 'dr-it';
+    public static readonly DR_ATTRIBUTES = [ScopeRawSet.DR_IF_NAME, ScopeRawSet.DR_FOR_OF_NAME, ScopeRawSet.DR_INCLUDE_NAME, ScopeRawSet.DR_REPLACE_NAME, ScopeRawSet.DR_FOR_NAME, ScopeRawSet.DR_STATEMENT_NAME];
 
     constructor(public window: Window, public raw: string | Node, public styles: string[] = []) {
         if (typeof this.raw === 'string') {
@@ -82,32 +84,52 @@ export class ScopeRawSet {
             const include = element.getAttribute(ScopeRawSet.DR_INCLUDE_NAME);
             const replace = element.getAttribute(ScopeRawSet.DR_REPLACE_NAME);
             const forr = element.getAttribute(ScopeRawSet.DR_FOR_NAME);
+            const statement = element.getAttribute(ScopeRawSet.DR_STATEMENT_NAME);
+            const drIt = element.getAttribute(ScopeRawSet.DR_IT_OPTIONNAME);
             let content = '';
             if (ifAttribute) {
                 element.removeAttribute(ScopeRawSet.DR_IF_NAME);
                 // const html = this.escapeContent(element.outerHTML);
                 const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
-                content = `const dhis = this; if(${ifAttribute}){ includeDhis(this, {template: '${html}'}) } `;
-            }
-            if (forOfAttribute) {
-                element.removeAttribute(ScopeRawSet.DR_FOR_OF_NAME);
-                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
-                content = `const dhis = this; for(const it of ${forOfAttribute}){ includeDhis(this, {template: '${html}'}) } `;
+                content = `if(${ifAttribute}){ includeDhis(this, {template: '${html}'}) } `; // const dhis = this;
             }
             if (include) {
                 element.removeAttribute(ScopeRawSet.DR_INCLUDE_NAME);
-                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
-                content = `const dhis = this; const it = ${include}; includeDhis(this, {template: '${html}'}) `;
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true).replace(/it\./g, include + '.'));
+                content = `const it = ${include}; includeDhis(this, {template: '${html}'}, '${include}') `; // const dhis = this;
             }
             if (replace) {
                 element.removeAttribute(ScopeRawSet.DR_REPLACE_NAME);
-                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, false));
-                content = `const dhis = this; const it = ${replace}; includeDhis(this, {template: '${html}'}) `;
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, false).replace(/it\./g, replace + '.'));
+                content = `const it = ${replace}; includeDhis(this, {template: '${html}'}, '${replace}') `; // const dhis = this;
+            }
+            if (statement) {
+                element.removeAttribute(ScopeRawSet.DR_STATEMENT_NAME);
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
+                content = `${statement}{
+                    const destHtml = '${html}'.replace(/\\(it/g, '('+${drIt});
+                    includeDhis(this, {template: destHtml})
+                } `; // const dhis = this;
             }
             if (forr) {
                 element.removeAttribute(ScopeRawSet.DR_FOR_NAME);
                 const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
-                content = `const dhis = this; ${forr}{ includeDhis(this, {template: '${html}'}) } `;
+                content = `for(${forr}){
+                    const destHtml = '${html}'.replace(/\\(it/g, '('+${drIt});
+                    includeDhis(this, {template: destHtml})
+                } `; // const dhis = this;
+            }
+            if (forOfAttribute) {
+                element.removeAttribute(ScopeRawSet.DR_FOR_OF_NAME);
+                // const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true).replace(/it([.\\[])/g, forOfAttribute + '$1'));
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
+                content = `const datas = ${forOfAttribute}; for(var i = 0; i < datas.length; i++){ 
+                    const paths = '${forOfAttribute}['+i+']';
+                    const destHtml = '${html}'.replace(/\\(it/g, '('+paths);
+                    // console.log('---', paths, destHtml)
+                    includeDhis(this, {template: destHtml})
+                } `; // const dhis = this;
+                // content = `for(const it of ${forOfAttribute}){ includeDhis(this, {template: '${html}'}) } `; // const dhis = this;
             }
             // this.changeElementToScope(element);
             const newComment = document.createComment('%' + content + '%')
@@ -144,21 +166,27 @@ export class ScopeRawSet {
     }
 
     public static replaceThisToDhis(content: string) {
-        return content.replace(/this\./g, 'dhis.')
+        return content
+            // .replace(/it\./g, 'dit.')
+            .replace(/this\./g, 'dhis.')
     }
 
     public static replaceDhisToThis(content: string) {
-        return content.replace(/dhis\./g, 'this.')
+        return content
+            // .replace(/dit\./g, 'it.')
+            .replace(/dhis\./g, 'this.')
     }
 
     escapeContent(content: string) {
         return this.escapeNoExpressionContent(content)
+            // .replace(/\$\$\{(.*?)\}/g, '\\<\\!\\-\\-%write($1)%\\-\\-\\>')
             .replace(/\$\{(.*?)\}/g, '<!--%write($1)%-->')
             .replace(/#\{(.*?)\}/g, '\'+($1)+\'');
     }
 
     escapeNoExpressionContent(content: string) {
-        return content.replace(/\r?\n/g, '').replace(/'/g, '\\\'');
+        return content.replace(/\r?\n/g, '')
+            .replace(/'/g, '\\\'');
     }
 
     makeFragment(str: string): DocumentFragment {

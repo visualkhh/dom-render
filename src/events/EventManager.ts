@@ -204,6 +204,8 @@ export const eventManager = new class {
         regex = /["'].*?["']/gm;
         raws = raws.replace(regex, '');
         const varRegexStr = 'this\\.([a-zA-Z_$][?a-zA-Z_.$0-9]*)';
+        // const varRegexStr = '(?:this|it)\\.([a-zA-Z_$][?a-zA-Z_.$0-9]*)';
+        // const varRegexStr = 'this\\.([a-zA-Z_$][?\\[\\]a-zA-Z_.$0-9]*)';
         const varRegex = RegExp(varRegexStr, 'gm');
         let varExec = varRegex.exec(raws)
         const usingVars = new Set<string>();
@@ -214,6 +216,8 @@ export const eventManager = new class {
             value.split('.').forEach(it => usingVars.add(it))
             varExec = varRegex.exec(varExec.input)
         }
-        return Array.from(usingVars);
+        const strings = Array.from(usingVars);
+        // console.log('usingVar-->', strings)
+        return strings;
     }
 }();

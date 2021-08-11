@@ -77,7 +77,7 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
             const scopeObjectProxyHandler = new ScopeObjectProxyHandler(this._rawSet, target);
             scopeObjectProxyHandler._refs.add(this._targetProxy);
             const targetProxy = new Proxy(target, scopeObjectProxyHandler);
-            targetProxy?._ScopeObjectProxyHandler?.run(targetProxy, target)
+            targetProxy?._ScopeObjectProxyHandler?.run(targetProxy)
             return targetProxy;
         } else if (target !== undefined && target !== null && typeof target === 'object' && ('_ScopeObjectProxyHandler_isProxy' in target)) {
             target._ScopeObjectProxyHandler._refs.add(this._targetProxy);
@@ -109,6 +109,9 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
 
     public getRefsProxyProp(obj: any) {
         const fields: { parent: any, name: string, fieldValue: any }[] = [];
+        // 자기자신은 제외
+        // this._refs.delete(this._targetProxy);
+        this._refs.delete(undefined);
         this._refs.forEach((it: any) => {
             const data = Object.keys(it) || [];
             data.filter(sit => typeof it[sit] === 'object' && ('_ScopeObjectProxyHandler_isProxy' in it[sit]) && obj === it[sit]._ScopeObjectProxyHandler_targetOrigin).forEach(sit => {
@@ -163,10 +166,24 @@ export class ScopeObjectProxyHandler implements ProxyHandler<any> {
         obj[prop] = this.proxy(value);
         const depths = [prop];
         const parentDepths = this.goRoot(depths, obj);
+        // 자기자신도 포함된다.
+        const find = parentDepths.find((v) => v.rootTargetOrigin === this._targetOrigin);
+        if (!find) {
+            parentDepths.push({rootScopes: this._rootScopes, rootTargetOrigin: this._targetOrigin, rootTargetProxy: this._targetProxy, depths: [prop]})
+        }
         // console.log('set--> parentDepths', parentDepths);
         // console.dir(parentDepths);
         parentDepths.filter(it => it.rootScopes.size > 0).forEach(it => {
-            const fullDepth = it.depths.join('.');
+            // array때문에..
+            const destDepth: string[] = [];
+            for (const i of it.depths) {
+                if (isNaN(Number(i))) {
+                    destDepth.push(i)
+                } else {
+                    break;
+                }
+            }
+            const fullDepth = destDepth.join('.');
             // console.log('set--> rootScopes', fullDepth);
             it.rootScopes.forEach((rit, rkey, rmap) => {
                 // console.log('---rootScopesrootScopesrootScopes-->', this._rootScopes, rit.isConnected())

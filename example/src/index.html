@@ -1,38 +1,34 @@
-${this.cnt2}
-<div id="tt#{this.cnt2}">
-    ${this.cnt3}
-    <button dr-event-click="this.cc()">ㄴㄴㄴㄴㄴ</button>
-</div>
-
-<div dr-include="{name:111, age:66}">
-    111 #{it.name} ${this.cnt1} 11
-    <div dr-include="{name:11441, age:6644}">
-        111 ${this.cnt1} 11
-        111 #{it.age} 11
+<div dr-replace="this.friends">
+    ff
+    <div dr-if="this.cnt > 2">
+    <dl>
+        <dt>$_it</dt>
+        <dd>${it.cnt}</dd>
+        <dd>${this.cnt}</dd>
+        <dd>${this.data.name}</dd>
+    </dl>
     </div>
-</div>
-<div id="xzzz" dr-if="this.cnt1===1">
-    햇살 눈이부신 날 이별을 해봤니?
-    ${this.friends.name}
-    <div dr-if="this.cnt2===1">
-        111${this.friends.name}
-        1111
-        <div dr-if="this.cnt3===1">
-            333
-            <div dr-if="this.cnt3===1">
-                dd
-            </div>
-
-        </div>
+    <button dr-event-click="this.data.name='zzzz'; console.log(this)"> nnn </button>
+    <hr>
+    <div dr-include="this.friends">
+        <div>${it.cnt}</div>
     </div>
 </div>
 
-<div dr-for="for(var i = 0 ; i < 10; i++)">sss ${this.cnt1} #{i}</div>
-<div dr-for-of="[2,7,8]">#{it}</div>
+<div dr-for-of="this.friends">
+    ${it.name}
+</div>
+<div dr-for="var i = 0 ; i < [1,6].length; i++" dr-it="i">
+    ${it}
+</div>
+<div dr-statement="for(var i = 0 ; i < [1,6].length; i++)", dr-it="i">
+    ${it}
+</div>
 
-<button dr-event-click="console.log('this print-->','22222')"> this.print</button>
-<button dr-event-click="this.cnt1++"> cnt1</button>
-<button dr-event-click="this.cnt2++"> cnt2</button>
-<button dr-event-click="this.cnt3++"> cnt2</button>
-<button dr-event-click="this.changeFriendName()"> change Friend</button>
-<button dr-event-click="this.createFriend()"> create Friend</button>
+<div dr-for-of="[1,6,45]"></div>
+<button dr-event-click="console.log('---'); this.friends.cnt = 55555"> create Friend</button>
+<!--<button dr-event-click="this.createFriend()"> create Friend</button>-->
+<button dr-event-click="this.cnt = 5"> cnt1</button>
+<button dr-event-click="this.data.name='z11zzz'; console.log(this)"> n11nn </button>
+<!--<button dr-event-click="console.log('-&#45;&#45;&#45;&#45;',this.friends); this.friends.cnt = 55555"> create Friend</button>-->
+

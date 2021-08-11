@@ -15,10 +15,11 @@ class User {
     cnt1 = 0;
     cnt2 = 0;
     cnt3 = 0;
-    friends?: User;
+    data = {name: 'good'}
+    friends?: User[];
 
-    constructor(cnt, friends?: User) {
-        this.name = 'zz'
+    constructor(cnt: number, name: string, friends?: User[]) {
+        this.name = name;
         this.cnt = cnt;
         this.color = RandomUtils.getRandomColor();
         this.friends = friends;
@@ -44,19 +45,20 @@ class User {
         // this.cnt = RandomUtils.random(0,5);
         // this.cnt1 = RandomUtils.random(0,5);
         // this.cnt2 = RandomUtils.random(0,5);
-        this.friends.name = RandomUtils.getRandomColor();
+        // this.friends.name = RandomUtils.getRandomColor();
         console.log('-->', this.friends);
     }
 
     createFriend() {
-        this.friends = DomRender.create(new User(255), {template: '<div><!--%write(this.cnt)%--></div>'});
+        // this.friends = DomRender.create(new User(RandomUtils.random(4, 77)), {template: '<div><!--%write(this.cnt)%--></div>'});
     }
 }
 
 const config = new Config();
 
 // let user = new User(1, DomRender.create(new User(255), {template: '<div><!--%write(this.cnt)%--></div>'}));
-let user = new User(1, new User(255));
+let user = new User(1, 'root', [new User(255, 'f1'), new User(255, 'f2')]);
+user.name = 'root'
 // let user = new User(1, {} as User);
 // console.log(user)
 const body = document.querySelector('#app');
@@ -66,13 +68,14 @@ const raw = {template: html};
 user = DomRender.render(window, user, raw, config, targetNode);
 // user.friends = DomRender.create(new User(255), {template: '<div><!--%write(this.cnt)%--></div>'});
 
-// setTimeout(() => {
-//     // user.friends.push(2)
-//     user.cnt = 2;
-//     user.changeFriendName()
-//     console.log('-->user.cnt', user, user.cnt)
-//     // user.friends = [2,3,4];
-// }, 5000)
+setTimeout(() => {
+    // user.friends.push(2)
+    // user.cnt = 2;
+    // user.changeFriendName()
+    user.friends[1].name = RandomUtils.getRandomColor();
+    // console.log('-->user.cnt', user, user.cnt)
+    // user.friends = [2,3,4];
+}, 5000)
 // setTimeout(() => {
 //     console.log('iii-->', user);
 //     user.childs = ['1', '2', '3']

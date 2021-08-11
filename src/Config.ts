@@ -16,6 +16,7 @@ export class Config implements ConfigParam {
     public applyEvent?: (obj: any, elements: Element[]) => void;
     public changeVar?: (obj: any, elements: Element[], varName: string) => void;
     targetAttributeNames?: string[];
+    // public itPath?: string;
     constructor(configPram?: ConfigParam) {
         this.factoryScopeObject = configPram?.factoryScopeObject;
         this.applyEvent = configPram?.applyEvent;

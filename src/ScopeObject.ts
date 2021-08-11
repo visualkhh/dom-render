@@ -37,6 +37,7 @@ export class ScopeObject {
     }
 
     private scopeEval(scope: any, script: string) {
+        // console.log('eval--itPath-->', this._scope.config.itPath)
         // eslint-disable-next-line no-new-func
         const f = Function(`"use strict";
         const element = (tag, attrOrContent, content) => {
@@ -110,7 +111,22 @@ export class ScopeObject {
             throw new Error('no Domrander compile Object');
         }
         const rawSet = raws ?? target._ScopeObjectProxyHandler_rawSet! as RawSet;
-        return DomRender.compileRootScope(this._scope.raws.window, target._ScopeOpjectProxy_targetOrigin ?? target, rawSet, this._scope.config, targetNode, uuid);
+        // console.log('-----include compile', rawSet)
+        const destTarget = (target._ScopeOpjectProxy_targetOrigin ?? target);
+        // if (itPath) {
+        //     // eslint-disable-next-line no-new-func
+        //     destTarget = Function(`"use strict";  return ${itPath} `).bind(target)();
+        // }
+        // if (!destTarget) {
+        //     destTarget = (target._ScopeOpjectProxy_targetOrigin ?? target)
+        // } else {
+        //     destTarget.super = {name: 444};
+        //     destTarget = (destTarget._ScopeOpjectProxy_targetOrigin ?? destTarget)
+        // }
+        // const config = Object.assign(new Config(), this._scope.config);
+        // config.itPath = itPath ?? config.itPath;
+        // console.log('-->', config.itPath)
+        return DomRender.compileRootScope(this._scope.raws.window, destTarget, rawSet, this._scope.config, targetNode, uuid);
     }
 
     private getTargetNode(uuid: string) {
