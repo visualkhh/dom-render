@@ -9,7 +9,10 @@ export class ScopeRawSet {
     public static readonly DR_REPLACE_NAME = 'dr-replace';
     public static readonly DR_FOR_NAME = 'dr-for';
     public static readonly DR_STATEMENT_NAME = 'dr-statement';
+
     public static readonly DR_IT_OPTIONNAME = 'dr-it';
+    public static readonly DR_THIS_OPTIONNAME = 'dr-this';
+    public static readonly DR_CONTENT_OPTIONNAME = 'dr-content';
     public static readonly DR_ATTRIBUTES = [ScopeRawSet.DR_IF_NAME, ScopeRawSet.DR_FOR_OF_NAME, ScopeRawSet.DR_INCLUDE_NAME, ScopeRawSet.DR_REPLACE_NAME, ScopeRawSet.DR_FOR_NAME, ScopeRawSet.DR_STATEMENT_NAME];
 
     constructor(public window: Window, public raw: string | Node, public styles: string[] = [], public itPath?: string) {
@@ -21,7 +24,7 @@ export class ScopeRawSet {
             this.node = this.raw;
         }
         this.usingVars = [];
-        this.changeElementToScope(this.node)
+        this.changeElementAttrToScope(this.node)
         // style
         // Node.ELEMENT_NODE = 1, DOCUMENT_FRAGMENT = 11
         if (this.styles.length > 0 && (this.node.nodeType === 1 || this.node.nodeType === 11)) {
@@ -56,7 +59,7 @@ export class ScopeRawSet {
         // console.log('usingVar2', this.usingVars, this.node.textContent)
     }
 
-    changeElementToScope(rootNode: Node) {
+    changeElementAttrToScope(rootNode: Node) {
         const nodeIterator = this.findScopeElement({
             acceptNode(node: Element): number {
                 // console.log('node-->', node, rootNode)
@@ -86,6 +89,8 @@ export class ScopeRawSet {
             const forr = element.getAttribute(ScopeRawSet.DR_FOR_NAME);
             const statement = element.getAttribute(ScopeRawSet.DR_STATEMENT_NAME);
             const drIt = element.getAttribute(ScopeRawSet.DR_IT_OPTIONNAME);
+            const drThis = element.getAttribute(ScopeRawSet.DR_THIS_OPTIONNAME);
+            const drContent = element.getAttribute(ScopeRawSet.DR_CONTENT_OPTIONNAME);
             let content = '';
             if (ifAttribute) {
                 element.removeAttribute(ScopeRawSet.DR_IF_NAME);
@@ -98,14 +103,17 @@ export class ScopeRawSet {
             }
             if (include) {
                 element.removeAttribute(ScopeRawSet.DR_INCLUDE_NAME);
+                element.removeAttribute(ScopeRawSet.DR_THIS_OPTIONNAME);
+                element.removeAttribute(ScopeRawSet.DR_CONTENT_OPTIONNAME);
                 const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
-                content = `includeDhis(this, {template: '${html}'}, '${include}') `; // const dhis = this;
+                content = `includeDhis(${drThis ?? 'this'}, ${drContent}?._ScopeObjectProxyHandler_rawSet ?? {template: '${html}'}, '${drThis ? 'this' : include}') `;
             }
             if (replace) {
                 element.removeAttribute(ScopeRawSet.DR_REPLACE_NAME);
-                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, false)
-                    .replace(/\(it/g, '(' + replace));
-                content = `includeDhis(this, {template: '${html}'}, '${replace}') `; // const dhis = this;
+                element.removeAttribute(ScopeRawSet.DR_THIS_OPTIONNAME);
+                element.removeAttribute(ScopeRawSet.DR_CONTENT_OPTIONNAME);
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, false));
+                content = `includeDhis(${drThis ?? 'this'}, ${drContent}?._ScopeObjectProxyHandler_rawSet ?? {template: '${html}'}, '${drThis ? 'this' : replace}') `; // const dhis = this;
             }
             if (statement) {
                 element.removeAttribute(ScopeRawSet.DR_STATEMENT_NAME);
@@ -163,6 +171,7 @@ export class ScopeRawSet {
         element.childNodes.forEach((n, k) => {
             if (n.nodeType === 1) {
                 const element = n as Element;
+                console.log('---------', element)
                 if (ScopeRawSet.DR_ATTRIBUTES.filter(it => element.getAttribute(it)).length > 0) {
                     html += this.escapeNoExpressionContent(element.outerHTML ?? '')
                 } else {
@@ -177,6 +186,7 @@ export class ScopeRawSet {
             }
         })
         html += (isOuter ? `</${element.tagName}>` : '');
+        console.log('--------hhh-', html)
         return html;
     }
 

@@ -18,7 +18,7 @@ class User {
     data = {name: 'good'}
     friends?: User[];
 
-    constructor(cnt: number, name: string, friends?: User[]) {
+    constructor(cnt: number, name: string, friends?: User[], public parent?: User) {
         this.name = name;
         this.cnt = cnt;
         this.color = RandomUtils.getRandomColor();
@@ -56,8 +56,14 @@ class User {
 
 const config = new Config();
 
+const parent = DomRender.create(new User(255, 'parent'), {template: '<div><!--%write(this.name)%-->, <!--%write(this.cnt)%--></div>'});
 // let user = new User(1, DomRender.create(new User(255), {template: '<div><!--%write(this.cnt)%--></div>'}));
-let user = new User(1, 'root', [new User(255, 'f1'), new User(200, 'f2')]);
+let user = new User(
+    1,
+    'root',
+    [new User(255, 'f1'), new User(200, 'f2')],
+    parent
+);
 user.name = 'root'
 // let user = new User(1, {} as User);
 // console.log(user)

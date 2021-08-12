@@ -42,7 +42,7 @@ export class DomRender {
             proxy = target;
         } else {
             // default wrapper
-            // raws.template = `<scope dr-replace="this">${raws.template}</scope>`;
+            raws.template = `<scope dr-replace="this">${raws.template}</scope>`;
             proxy = new Proxy(target, new ScopeObjectProxyHandler(raws, target, excludeTyps));
         }
         return proxy;
