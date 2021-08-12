@@ -1,31 +1,6 @@
-<div dr-replace="this.friends">
-    ff
-    <div dr-if="this.cnt > 2">
-    <dl>
-        <dt>$_it</dt>
-        <dd>${it.cnt}</dd>
-        <dd>${this.cnt}</dd>
-        <dd>${this.data.name}</dd>
-    </dl>
-    </div>
-    <button dr-event-click="this.data.name='zzzz'; console.log(this)"> nnn </button>
-    <hr>
-    <div dr-include="this.friends">
-        <div>${it.cnt}</div>
-    </div>
-</div>
-
-<div dr-for-of="this.friends">
+<div dr-include="this.friends[0]">
     ${it.name}
 </div>
-<div dr-for="var i = 0 ; i < [1,6].length; i++" dr-it="i">
-    ${it}
-</div>
-<div dr-statement="for(var i = 0 ; i < [1,6].length; i++)", dr-it="i">
-    ${it}
-</div>
-
-<div dr-for-of="[1,6,45]"></div>
 <button dr-event-click="console.log('---'); this.friends.cnt = 55555"> create Friend</button>
 <!--<button dr-event-click="this.createFriend()"> create Friend</button>-->
 <button dr-event-click="this.cnt = 5"> cnt1</button>
