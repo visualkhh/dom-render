@@ -57,7 +57,7 @@ class User {
 const config = new Config();
 
 // let user = new User(1, DomRender.create(new User(255), {template: '<div><!--%write(this.cnt)%--></div>'}));
-let user = new User(1, 'root', [new User(255, 'f1'), new User(255, 'f2')]);
+let user = new User(1, 'root', [new User(255, 'f1'), new User(200, 'f2')]);
 user.name = 'root'
 // let user = new User(1, {} as User);
 // console.log(user)
@@ -68,14 +68,14 @@ const raw = {template: html};
 user = DomRender.render(window, user, raw, config, targetNode);
 // user.friends = DomRender.create(new User(255), {template: '<div><!--%write(this.cnt)%--></div>'});
 
-setTimeout(() => {
-    // user.friends.push(2)
-    // user.cnt = 2;
-    // user.changeFriendName()
-    user.friends[1].name = RandomUtils.getRandomColor();
-    // console.log('-->user.cnt', user, user.cnt)
-    // user.friends = [2,3,4];
-}, 5000)
+// setTimeout(() => {
+//     // user.friends.push(2)
+//     // user.cnt = 2;
+//     // user.changeFriendName()
+//     user.friends[1].name = RandomUtils.getRandomColor();
+//     // console.log('-->user.cnt', user, user.cnt)
+//     // user.friends = [2,3,4];
+// }, 5000)
 // setTimeout(() => {
 //     console.log('iii-->', user);
 //     user.childs = ['1', '2', '3']

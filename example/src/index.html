@@ -1,18 +1,15 @@
-<div dr-replace="this.friends[0]">
-    ${it.name}
+<div dr-include="this">
+    ${it}
+    ${this}
+    <div a='1' dr-for="var i = 0 ; i < it.friends.length; i++" dr-it="it.friends[i]">
+        555555${it.name}
+        <div dr-if="it.cnt === 200">
+            xz
+        </div>
+    </div>
 </div>
 
-<div dr-for-of="[1,6,45]">
-    ${it}
-</div>
 
-<hr/>
-<div dr-for-of="this.friends">
-    ${it}
-</div>
-<div dr-for-of="[this.friends[0]]">
-    ${it}
-</div>
 <button dr-event-click="console.log('---'); this.friends.cnt = 55555"> create Friend</button>
 <!--<button dr-event-click="this.createFriend()"> create Friend</button>-->
 <button dr-event-click="this.cnt = 5"> cnt1</button>

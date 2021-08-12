@@ -12,7 +12,7 @@ export class ScopeRawSet {
     public static readonly DR_IT_OPTIONNAME = 'dr-it';
     public static readonly DR_ATTRIBUTES = [ScopeRawSet.DR_IF_NAME, ScopeRawSet.DR_FOR_OF_NAME, ScopeRawSet.DR_INCLUDE_NAME, ScopeRawSet.DR_REPLACE_NAME, ScopeRawSet.DR_FOR_NAME, ScopeRawSet.DR_STATEMENT_NAME];
 
-    constructor(public window: Window, public raw: string | Node, public styles: string[] = []) {
+    constructor(public window: Window, public raw: string | Node, public styles: string[] = [], public itPath?: string) {
         if (typeof this.raw === 'string') {
             const template = this.window.document.createElement('template');
             template.innerHTML = this.raw;
@@ -89,19 +89,23 @@ export class ScopeRawSet {
             let content = '';
             if (ifAttribute) {
                 element.removeAttribute(ScopeRawSet.DR_IF_NAME);
-                // const html = this.escapeContent(element.outerHTML);
                 const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
-                content = `if(${ifAttribute}){ includeDhis(this, {template: '${html}'}) } `; // const dhis = this;
+                let destIf = ifAttribute;
+                if (this.itPath) {
+                    destIf = destIf.replace(/it/g, this.itPath)
+                }
+                content = `if(${destIf}){ includeDhis(this, {template: '${html}'}) } `; // const dhis = this;
             }
             if (include) {
                 element.removeAttribute(ScopeRawSet.DR_INCLUDE_NAME);
-                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true).replace(/\(it/g, '('+include));
-                content = `const it = ${include}; includeDhis(this, {template: '${html}'}) `; // const dhis = this;
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
+                content = `includeDhis(this, {template: '${html}'}, '${include}') `; // const dhis = this;
             }
             if (replace) {
                 element.removeAttribute(ScopeRawSet.DR_REPLACE_NAME);
-                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, false).replace(/\(it/g, '('+replace));
-                content = `const it = ${replace}; includeDhis(this, {template: '${html}'}) `; // const dhis = this;
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, false)
+                    .replace(/\(it/g, '(' + replace));
+                content = `includeDhis(this, {template: '${html}'}, '${replace}') `; // const dhis = this;
             }
             if (statement) {
                 element.removeAttribute(ScopeRawSet.DR_STATEMENT_NAME);
@@ -113,21 +117,32 @@ export class ScopeRawSet {
             }
             if (forr) {
                 element.removeAttribute(ScopeRawSet.DR_FOR_NAME);
+                element.removeAttribute(ScopeRawSet.DR_IT_OPTIONNAME);
                 const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
-                content = `for(${forr}){
-                    const destHtml = '${html}'.replace(/\\(it/g, '('+${drIt});
-                    includeDhis(this, {template: destHtml})
+                let destFor = forr;
+                let destIt = drIt ?? '';
+                if (this.itPath) {
+                    destFor = destFor.replace(/it/g, this.itPath)
+                    destIt = destIt.replace(/it/g, this.itPath)
+                }
+                content = `for(${destFor}){
+                    const currentThis = '${destIt.replace(/\[(.*)\]/g, '[\'+$1+\']')}'
+                    includeDhis(this, {template: '${html}'}, currentThis)
                 } `; // const dhis = this;
             }
             if (forOfAttribute) {
                 element.removeAttribute(ScopeRawSet.DR_FOR_OF_NAME);
-                // const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true).replace(/it([.\\[])/g, forOfAttribute + '$1'));
+                element.removeAttribute(ScopeRawSet.DR_IT_OPTIONNAME);
+                let destFor = forOfAttribute;
+                let destIt = drIt ?? '';
+                if (this.itPath) {
+                    destFor = destFor.replace(/it/g, this.itPath)
+                    destIt = destIt.replace(/it/g, this.itPath)
+                }
                 const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
-                content = `const datas = ${forOfAttribute}; for(var i = 0; i < datas.length; i++){ 
-                    const paths = '${forOfAttribute}['+i+']';
-                    const destHtml = '${html}'.replace(/\\(it/g, '('+paths);
-                    // console.log('---', paths, destHtml)
-                    includeDhis(this, {template: destHtml})
+                content = `const datas = ${destFor}; for(var i = 0; i < datas.length; i++){ 
+                    const paths = '${destFor}['+i+']';
+                    includeDhis(this, {template: '${html}', paths})
                 } `; // const dhis = this;
                 // content = `for(const it of ${forOfAttribute}){ includeDhis(this, {template: '${html}'}) } `; // const dhis = this;
             }

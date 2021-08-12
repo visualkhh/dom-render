@@ -69,17 +69,17 @@ export class ScopeObject {
             }
         };
         
-        const include = (target, rawSet) => {
+        const include = (target, rawSet, itPath) => {
             const uuid = this._makeUUID();
             const targetNode = this.getTargetNode(uuid);
-            const rootScope = this._compileRootScope(target, targetNode, uuid, rawSet);
+            const rootScope = this._compileRootScope(target, targetNode, uuid, rawSet, itPath);
             this._calls.push({name: 'include', parameter: [target], result: rootScope})
             if (rootScope) {
                 this._writes.push("<template include-scope-uuid='" + uuid + "'></template>");
             }
         }
-        const includeDhis = (target, rawSet) => {
-            include(target, this._replaceDhisToThis(rawSet));    
+        const includeDhis = (target, rawSet, itPath) => {
+            include(target, this._replaceDhisToThis(rawSet), itPath);    
         }
         ${this.customScript()}
         
@@ -105,7 +105,7 @@ export class ScopeObject {
     //     }
     // }
 
-    private _compileRootScope(target: any, targetNode: TargetNode, uuid: string, raws?: RawSet) {
+    private _compileRootScope(target: any, targetNode: TargetNode, uuid: string, raws?: RawSet, itPath?: string) {
         if (!raws && !('_ScopeObjectProxyHandler_isProxy' in (target === this ? this._originObj : target))) {
             console.error('no Domrander Proxy Object -> var proxy = Domrender.proxy(target, ScopeRawSet)', target)
             throw new Error('no Domrander compile Object');
@@ -113,10 +113,12 @@ export class ScopeObject {
         const rawSet = raws ?? target._ScopeObjectProxyHandler_rawSet! as RawSet;
         // console.log('-----include compile', rawSet)
         const destTarget = (target._ScopeOpjectProxy_targetOrigin ?? target);
-        // if (itPath) {
+        if (itPath) {
+            rawSet.template = rawSet.template.replace(/\(it/g, '(' + itPath);
+            rawSet.itPath = itPath;
         //     // eslint-disable-next-line no-new-func
         //     destTarget = Function(`"use strict";  return ${itPath} `).bind(target)();
-        // }
+        }
         // if (!destTarget) {
         //     destTarget = (target._ScopeOpjectProxy_targetOrigin ?? target)
         // } else {
