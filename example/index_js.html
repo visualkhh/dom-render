@@ -59,7 +59,7 @@
     const targetNode = new TargetNode(app, TargetNodeMode.replace)
     let user = new User(1);
     const raw = {template: app.innerHTML, styles: ['p {color: /*%write(this.color)%*/}']};
-    user = DomRender.render(document, user, raw, config, targetNode);
+    user = DomRender.render(window, user, raw, config, targetNode);
     setTimeout(() => {
         // user.friends.push(2)
         user.cnt = 2;

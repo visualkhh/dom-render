@@ -56,7 +56,7 @@ export class DomRender {
         return dest.target;
     }
 
-    public static renderTarget<T>(target: T, window: Window, selector: string): T {
+    public static renderTarget<T>(window: Window, target: T, selector: string): T {
         const app = document.querySelector(selector)!
         const raw = {template: app.innerHTML};
         app.innerHTML = '';

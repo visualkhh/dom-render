@@ -166,9 +166,9 @@ export class ScopeRawSet {
         for (let i = 0; i < attributeNames.length; i++) {
             attributeNames[i] += `="${element.getAttribute(attributeNames[i])}"`
         }
-
         let html = isOuter ? `<${element.tagName} ${attributeNames.join(' ')}>` : '';
         element.childNodes.forEach((n, k) => {
+            // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
             if (n.nodeType === 1) {
                 const element = n as Element;
                 console.log('---------', element)
@@ -183,6 +183,12 @@ export class ScopeRawSet {
                 const text = (n as Text).data ?? '';
                 // this.usingVars.push(...this.usingThisVar(text))
                 html += this.escapeContent(text)
+            } else if (n.nodeType === 8) {
+                const text = (n as Comment).data;
+                if (text.startsWith('%') && text.endsWith('%')) {
+                    html += `<!--${this.escapeNoExpressionContent(text)}-->`
+                    console.log('--->', html)
+                }
             }
         })
         html += (isOuter ? `</${element.tagName}>` : '');

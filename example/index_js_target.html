@@ -7,8 +7,8 @@
 </head>
 <body>
 <div id="app">
-
-
+${this.cnt}
+<!--%write(this.cnt)%-->
     <!--%
   for(var i = 0 ; i < this.cnt ; i ++) {
       write(`<div>${i}</div>`);
@@ -77,10 +77,10 @@
             console.log('ele', $element);
         }
     }
-   const user = DomRender.renderTarget(new User(1), document, "#app");
-    // setTimeout(() => {
-    //     user.cnt = 2;
-    // }, 3000)
+   const user = DomRender.renderTarget(window, new User(1), "#app");
+    setTimeout(() => {
+        user.cnt = 2;
+    }, 3000)
 </script>
 </html>
 
