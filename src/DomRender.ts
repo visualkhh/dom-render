@@ -41,8 +41,10 @@ export class DomRender {
         if ('_ScopeObjectProxyHandler_isProxy' in target) {
             proxy = target;
         } else {
-            // default wrapper
-            raws.template = `<scope dr-replace="this">${raws.template}</scope>`;
+            if (!raws.itPath) {
+                // default wrapper
+                raws.template = `<scope dr-replace="this">${raws.template}</scope>`;
+            }
             proxy = new Proxy(target, new ScopeObjectProxyHandler(raws, target, excludeTyps));
         }
         return proxy;
