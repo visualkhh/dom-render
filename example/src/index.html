@@ -1,7 +1,12 @@
-<div dr-for="var i = 0 ; i < 2 ; i++" dr-it="this.friends[#{i}]" dr-strip="true">
-    wow ${it.name}
-</div>
+${it.name} --
 
-<div dr-for="var i = 0 ; i < 2 ; i++" dr-it="#{i}" dr-strip="tru3e">
-    wow  ${it}
+<div dr-if="true">
+    ssss
+    <div dr-for="var i = 0 ; i < 2 ; i++" dr-it="this.friends[#{i}]">
+        wow ${it.name}
+    </div>
+
+    <div dr-for="var i = 0 ; i < 2 ; i++" dr-it="#{i}">
+        wow  ${it}
+    </div>
 </div>
