@@ -10,7 +10,12 @@ export class ScopeRawSet {
     public static readonly DR_FOR_NAME = 'dr-for';
     public static readonly DR_STATEMENT_NAME = 'dr-statement';
 
+    public static readonly DR_SCRIPT_ELEMENTNAME = 'dr-script';
+    public static readonly DR_ELEMENTS = [ScopeRawSet.DR_SCRIPT_ELEMENTNAME];
+
+    public static readonly DR_PARAMETER_OPTIONNAME = 'dr-parameter';
     public static readonly DR_IT_OPTIONNAME = 'dr-it';
+    public static readonly DR_STRIP_OPTIONNAME = 'dr-strip';
     public static readonly DR_THIS_OPTIONNAME = 'dr-this';
     public static readonly DR_CONTENT_OPTIONNAME = 'dr-content';
     public static readonly DR_ATTRIBUTES = [ScopeRawSet.DR_IF_NAME, ScopeRawSet.DR_FOR_OF_NAME, ScopeRawSet.DR_INCLUDE_NAME, ScopeRawSet.DR_REPLACE_NAME, ScopeRawSet.DR_FOR_NAME, ScopeRawSet.DR_STATEMENT_NAME];
@@ -24,7 +29,12 @@ export class ScopeRawSet {
             this.node = this.raw;
         }
         this.usingVars = [];
-        this.changeElementAttrToScope(this.node)
+        this.changeElementScript(this.node);
+        this.changeElementAttrToScope(this.node);
+        this.changeElementStyle();
+    }
+
+    private changeElementStyle() {
         // style
         // Node.ELEMENT_NODE = 1, DOCUMENT_FRAGMENT = 11
         if (this.styles.length > 0 && (this.node.nodeType === 1 || this.node.nodeType === 11)) {
@@ -51,12 +61,41 @@ export class ScopeRawSet {
             const fragment = this.makeFragment(text);
             const newStyle = document.createElement('style')
             newStyle.appendChild(fragment);
-            console.log('style-->', style.outerHTML)
+            // console.log('style-->', style.outerHTML)
             style.parentNode?.replaceChild(newStyle, style);
             nodeIterator.nextNode();
         }
         this.usingVars = this.usingThisVar(this.node.textContent ?? '');
         // console.log('usingVar2', this.usingVars, this.node.textContent)
+    }
+
+    changeElementScript(rootNode: Node) {
+        const nodeIterator = this.findScopeElement({
+            acceptNode(node: Element): number {
+                // console.log('changeElementScript node-->', node, rootNode, node === rootNode)
+                if (node === rootNode) {
+                    return 2;
+                }
+                // NodeFilter.FILTER_ACCEPT: 1, NodeFilter.FILTER_REJECT: 2
+                return ScopeRawSet.DR_ELEMENTS.includes(node.tagName.toLowerCase()) ? 1 : 2;
+            }
+        }, rootNode);
+
+        let content = '';
+        let node: Node | null;
+        // eslint-disable-next-line no-cond-assign
+        while (node = nodeIterator.nextNode()) {
+            const element = node as Element;
+            // const drParameter = element.getAttribute(ScopeRawSet.DR_PARAMETER_OPTIONNAME);
+            console.log('element--->', element)
+            if (ScopeRawSet.DR_SCRIPT_ELEMENTNAME === element.tagName.toLowerCase()) {
+                content = element.innerHTML;
+            }
+            const newComment = document.createComment('%' + content + '%')
+            // console.log('---------------createComment', newComment.data)
+            element.parentNode?.replaceChild(newComment, element);
+        }
+
     }
 
     changeElementAttrToScope(rootNode: Node) {
@@ -91,6 +130,7 @@ export class ScopeRawSet {
             const drIt = element.getAttribute(ScopeRawSet.DR_IT_OPTIONNAME);
             const drThis = element.getAttribute(ScopeRawSet.DR_THIS_OPTIONNAME);
             const drContent = element.getAttribute(ScopeRawSet.DR_CONTENT_OPTIONNAME);
+            const drStrip = element.getAttribute(ScopeRawSet.DR_STRIP_OPTIONNAME);
             let content = '';
             if (ifAttribute) {
                 element.removeAttribute(ScopeRawSet.DR_IF_NAME);
@@ -126,15 +166,19 @@ export class ScopeRawSet {
             if (forr) {
                 element.removeAttribute(ScopeRawSet.DR_FOR_NAME);
                 element.removeAttribute(ScopeRawSet.DR_IT_OPTIONNAME);
-                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
+                element.removeAttribute(ScopeRawSet.DR_STRIP_OPTIONNAME);
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, !Boolean(drStrip)));
                 let destFor = forr;
                 let destIt = drIt ?? '';
+                console.log('itPath--->', this.itPath)
                 if (this.itPath) {
                     destFor = destFor.replace(/it/g, this.itPath)
                     destIt = destIt.replace(/it/g, this.itPath)
                 }
                 content = `for(${destFor}){
-                    const currentThis = '${destIt.replace(/\[(.*)\]/g, '[\'+$1+\']')}'
+                    const currentThis = '${destIt.replace(/\[(.*)\]/g, '[\'+$1+\']')}';
+                    // const currentThis = String(${destIt})
+                    // console.log('-->', eval(currentThis))
                     includeDhis(this, {template: '${html}'}, currentThis)
                 } `; // const dhis = this;
             }
@@ -171,7 +215,7 @@ export class ScopeRawSet {
             // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
             if (n.nodeType === 1) {
                 const element = n as Element;
-                console.log('---------', element)
+                // console.log('---------', element)
                 if (ScopeRawSet.DR_ATTRIBUTES.filter(it => element.getAttribute(it)).length > 0) {
                     html += this.escapeNoExpressionContent(element.outerHTML ?? '')
                 } else {
@@ -192,7 +236,7 @@ export class ScopeRawSet {
             }
         })
         html += (isOuter ? `</${element.tagName}>` : '');
-        console.log('--------hhh-', html)
+        // console.log('--------hhh-', html)
         return html;
     }
 
