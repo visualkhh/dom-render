@@ -70,12 +70,14 @@ export class ScopeObject {
         };
         
         const include = (target, rawSet, itPath) => {
-            const uuid = this._makeUUID();
-            const targetNode = this.getTargetNode(uuid);
-            const rootScope = this._compileRootScope(target, targetNode, uuid, rawSet, itPath);
-            this._calls.push({name: 'include', parameter: [target], result: rootScope})
-            if (rootScope) {
-                this._writes.push("<template include-scope-uuid='" + uuid + "'></template>");
+            if(target) {
+                const uuid = this._makeUUID();
+                const targetNode = this.getTargetNode(uuid);
+                const rootScope = this._compileRootScope(target, targetNode, uuid, rawSet, itPath);
+                this._calls.push({name: 'include', parameter: [target], result: rootScope})
+                if (rootScope) {
+                    this._writes.push("<template include-scope-uuid='" + uuid + "'></template>");
+                }
             }
         }
         const includeDhis = (target, rawSet, itPath) => {

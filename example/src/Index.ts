@@ -61,8 +61,7 @@ const parent = DomRender.create(new User(255, 'parent'), {template: '<div><!--%w
 let user = new User(
     1,
     'root',
-    [new User(255, 'f1'), new User(200, 'f2')],
-    parent
+    [new User(255, 'f1'), new User(200, 'f2')]
 );
 user.name = 'root'
 // let user = new User(1, {} as User);
@@ -74,14 +73,18 @@ const raw = {template: html};
 user = DomRender.render(window, user, raw, config, targetNode);
 // user.friends = DomRender.create(new User(255), {template: '<div><!--%write(this.cnt)%--></div>'});
 
-// setTimeout(() => {
-//     // user.friends.push(2)
-//     // user.cnt = 2;
-//     // user.changeFriendName()
-//     user.friends[1].name = RandomUtils.getRandomColor();
-//     // console.log('-->user.cnt', user, user.cnt)
-//     // user.friends = [2,3,4];
-// }, 5000)
+setTimeout(() => {
+    user.parent = parent;
+}, 1000);
+setTimeout(() => {
+    user.parent = DomRender.create(new User(255, 'pare222nt'), {template: '<div><!--%write(this.name)%-->, <!--%write(this.cnt)%--></div>'});
+    // user.friends.push(2)
+    // user.cnt = 2;
+    // user.changeFriendName()
+    // user.friends[1].name = RandomUtils.getRandomColor();
+    // console.log('-->user.cnt', user, user.cnt)
+    // user.friends = [2,3,4];
+}, 5000)
 // setTimeout(() => {
 //     console.log('iii-->', user);
 //     user.childs = ['1', '2', '3']
