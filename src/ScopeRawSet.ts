@@ -189,7 +189,7 @@ export class ScopeRawSet {
                     destFor = destFor.replace(/it/g, this.itPath)
                     destIt = destIt.replace(/it/g, this.itPath)
                 }
-                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, !(drStrip === 'true')));
                 content = `const datas = ${destFor}; for(var i = 0; i < datas.length; i++){ 
                     const paths = '${destFor}['+i+']';
                     includeDhis(this, {template: '${html}'}, paths)
