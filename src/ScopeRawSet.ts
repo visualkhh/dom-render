@@ -192,7 +192,7 @@ export class ScopeRawSet {
                 const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
                 content = `const datas = ${destFor}; for(var i = 0; i < datas.length; i++){ 
                     const paths = '${destFor}['+i+']';
-                    includeDhis(this, {template: '${html}', paths})
+                    includeDhis(this, {template: '${html}'}, paths)
                 } `;
             }
             // this.changeElementToScope(element);

@@ -1,11 +1,3 @@
-${it.name}
-<scope dr-include="this.parent">[${it.name}]</scope>
-<main>
-    <div dr-for="var i = 0 ; i < 2 ; i++" dr-it="this.friends[#{i}]">
-        wow ${it.name}
-    </div>
-
-    <div dr-for="var i = 0 ; i < 2 ; i++" dr-it="#{i}">
-        wow  ${it}
-    </div>
-</main>
+<div dr-for-of="[1,2,3]" >
+    wow${it}
+</div>
