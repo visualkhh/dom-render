@@ -212,11 +212,13 @@ export class ScopeRawSet {
             // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
             if (n.nodeType === 1) {
                 const element = n as Element;
-                // console.log('---------', element)
+                console.log('---------', element)
                 if (ScopeRawSet.DR_ATTRIBUTES.filter(it => element.getAttribute(it)).length > 0) {
                     html += this.escapeNoExpressionContent(element.outerHTML ?? '')
+                    console.log('--------->>', 'attribu')
                 } else {
-                    const genData = this.escapeContent(element.outerHTML ?? '');
+                    const genData = this.escapeNoExpressionContent(element.outerHTML ?? '');
+                    console.log('--------->>', 'no attribu', element.outerHTML)
                     // this.usingVars.push(...this.usingThisVar(genData))
                     html += genData
                 }
@@ -233,7 +235,7 @@ export class ScopeRawSet {
             }
         })
         html += (isOuter ? `</${element.tagName}>` : '');
-        // console.log('--------hhh-', html)
+        console.log('--------hhh-', html)
         return html;
     }
 

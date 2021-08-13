@@ -61,7 +61,8 @@ const parent = DomRender.create(new User(255, 'parent'), {template: '<div><!--%w
 let user = new User(
     1,
     'root',
-    [new User(255, 'f1'), new User(200, 'f2')]
+    [new User(255, 'f1'), new User(200, 'f2')],
+    parent
 );
 user.name = 'root'
 // let user = new User(1, {} as User);
