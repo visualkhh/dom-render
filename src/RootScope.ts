@@ -115,7 +115,7 @@ export class RootScope extends Scope implements ChangeField {
             if (it.raws.node) {
                 const fragment = this.raws.window.document.createDocumentFragment();
                 fragment.append(childScopeObject.startComment, childScopeObject.fragment, childScopeObject.endComment)
-                // debgging! mode
+                // debugging! mode
                 // NodeUtils.addNode(it.raws.node, fragment);
                 NodeUtils.replaceNode(it.raws.node, fragment);
             }

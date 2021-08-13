@@ -161,26 +161,24 @@ export class ScopeRawSet {
                 content = `${statement}{
                     const destHtml = '${html}'.replace(/\\(it/g, '('+${drIt});
                     includeDhis(this, {template: destHtml})
-                } `; // const dhis = this;
+                } `;
             }
             if (forr) {
                 element.removeAttribute(ScopeRawSet.DR_FOR_NAME);
                 element.removeAttribute(ScopeRawSet.DR_IT_OPTIONNAME);
                 element.removeAttribute(ScopeRawSet.DR_STRIP_OPTIONNAME);
-                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, !Boolean(drStrip)));
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, !(drStrip === 'true')));
                 let destFor = forr;
-                let destIt = drIt ?? '';
-                console.log('itPath--->', this.itPath)
+                let destIt = drIt ?? 'this';
                 if (this.itPath) {
                     destFor = destFor.replace(/it/g, this.itPath)
                     destIt = destIt.replace(/it/g, this.itPath)
                 }
                 content = `for(${destFor}){
-                    const currentThis = '${destIt.replace(/\[(.*)\]/g, '[\'+$1+\']')}';
-                    // const currentThis = String(${destIt})
-                    // console.log('-->', eval(currentThis))
+                    const currentThis = '${destIt.replace(/#\{(.*)\}/g, '\'+$1+\'')}';
+                    console.log('currentThis', currentThis);
                     includeDhis(this, {template: '${html}'}, currentThis)
-                } `; // const dhis = this;
+                } `;
             }
             if (forOfAttribute) {
                 element.removeAttribute(ScopeRawSet.DR_FOR_OF_NAME);
@@ -195,8 +193,7 @@ export class ScopeRawSet {
                 content = `const datas = ${destFor}; for(var i = 0; i < datas.length; i++){ 
                     const paths = '${destFor}['+i+']';
                     includeDhis(this, {template: '${html}', paths})
-                } `; // const dhis = this;
-                // content = `for(const it of ${forOfAttribute}){ includeDhis(this, {template: '${html}'}) } `; // const dhis = this;
+                } `;
             }
             // this.changeElementToScope(element);
             const newComment = document.createComment('%' + content + '%')
@@ -256,7 +253,7 @@ export class ScopeRawSet {
         return this.escapeNoExpressionContent(content)
             // .replace(/\$\$\{(.*?)\}/g, '\\<\\!\\-\\-%write($1)%\\-\\-\\>')
             .replace(/\$\{(.*?)\}/g, '<!--%write($1)%-->')
-            .replace(/#\{(.*?)\}/g, '\'+($1)+\'');
+            // .replace(/#\{(.*?)\}/g, '\'+($1)+\'');
     }
 
     escapeNoExpressionContent(content: string) {
