@@ -139,21 +139,21 @@ export class ScopeRawSet {
                 if (this.itPath) {
                     destIf = destIf.replace(/it/g, this.itPath)
                 }
-                content = `if(${destIf}){ includeDhis(this, {template: '${html}'}) } `; // const dhis = this;
+                content = `if(${destIf}){ includeDhis(this, {template: '${this.escapeSingleQuoteContent(html)}'}) } `; // const dhis = this;
             }
             if (include) {
                 element.removeAttribute(ScopeRawSet.DR_INCLUDE_NAME);
                 element.removeAttribute(ScopeRawSet.DR_THIS_OPTIONNAME);
                 element.removeAttribute(ScopeRawSet.DR_CONTENT_OPTIONNAME);
                 const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
-                content = `includeDhis(${drThis ?? 'this'}, ${drContent}?._ScopeObjectProxyHandler_rawSet ?? {template: '${html}'}, '${drThis ? 'this' : include}') `;
+                content = `includeDhis(${drThis ?? 'this'}, ${drContent}?._ScopeObjectProxyHandler_rawSet ?? {template: '${this.escapeSingleQuoteContent(html)}'}, '${drThis ? 'this' : include}') `;
             }
             if (replace) {
                 element.removeAttribute(ScopeRawSet.DR_REPLACE_NAME);
                 element.removeAttribute(ScopeRawSet.DR_THIS_OPTIONNAME);
                 element.removeAttribute(ScopeRawSet.DR_CONTENT_OPTIONNAME);
                 const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, false));
-                content = `includeDhis(${drThis ?? 'this'}, ${drContent}?._ScopeObjectProxyHandler_rawSet ?? {template: '${html}'}, '${drThis ? 'this' : replace}') `; // const dhis = this;
+                content = `includeDhis(${drThis ?? 'this'}, ${drContent}?._ScopeObjectProxyHandler_rawSet ?? {template: '${this.escapeSingleQuoteContent(html)}'}, '${drThis ? 'this' : replace}') `; // const dhis = this;
             }
             if (statement) {
                 element.removeAttribute(ScopeRawSet.DR_STATEMENT_NAME);
@@ -177,7 +177,7 @@ export class ScopeRawSet {
                 content = `for(${destFor}){
                     const currentThis = '${destIt.replace(/#\{(.*)\}/g, '\'+$1+\'')}';
                     console.log('currentThis', currentThis);
-                    includeDhis(this, {template: '${html}'}, currentThis)
+                    includeDhis(this, {template: '${this.escapeSingleQuoteContent(html)}'}, currentThis)
                 } `;
             }
             if (forOfAttribute) {
@@ -192,7 +192,7 @@ export class ScopeRawSet {
                 const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, !(drStrip === 'true')));
                 content = `const datas = ${destFor}; for(var i = 0; i < datas.length; i++){ 
                     const paths = '${destFor}['+i+']';
-                    includeDhis(this, {template: '${html}'}, paths)
+                    includeDhis(this, {template: '${this.escapeSingleQuoteContent(html)}'}, paths)
                 } `;
             }
             // this.changeElementToScope(element);
@@ -213,15 +213,15 @@ export class ScopeRawSet {
             if (n.nodeType === 1) {
                 const element = n as Element;
                 console.log('---------', element)
-                if (ScopeRawSet.DR_ATTRIBUTES.filter(it => element.getAttribute(it)).length > 0) {
-                    html += this.escapeNoExpressionContent(element.outerHTML ?? '')
-                    console.log('--------->>', 'attribu')
-                } else {
-                    const genData = this.escapeNoExpressionContent(element.outerHTML ?? '');
-                    console.log('--------->>', 'no attribu', element.outerHTML)
-                    // this.usingVars.push(...this.usingThisVar(genData))
-                    html += genData
-                }
+                html += this.escapeNoExpressionContent(element.outerHTML ?? '')
+                console.log('--------->>', 'attribu', element.outerHTML)
+                // if (ScopeRawSet.DR_ATTRIBUTES.filter(it => element.getAttribute(it)).length > 0) {
+                // } else {
+                //     const genData = this.escapeNoExpressionContent(element.outerHTML ?? '');
+                //     console.log('--------->>', 'no attribu', element.outerHTML)
+                //     // this.usingVars.push(...this.usingThisVar(genData))
+                //     html += genData
+                // }
             } else if (n.nodeType === 3) {
                 const text = (n as Text).data ?? '';
                 // this.usingVars.push(...this.usingThisVar(text))
@@ -249,6 +249,10 @@ export class ScopeRawSet {
         return content
             // .replace(/dit\./g, 'it.')
             .replace(/dhis\./g, 'this.')
+    }
+
+    escapeSingleQuoteContent(content: string) {
+        return content.replace(/(?<!\\)'/g, '\\\'')
     }
 
     escapeContent(content: string) {

@@ -1,3 +1,7 @@
-<div dr-for-of="[1,2,3]" >
-    wow${it}
+<div dr-for-of="[1,2,3]" dr-strip="true" >
+    <button dr-event-click="console.log('zzz')">22</button>
 </div>
+<hr>
+<button dr-for-of="[1,2,3]"  dr-event-click="console.log('22')" >
+    22
+</button>
