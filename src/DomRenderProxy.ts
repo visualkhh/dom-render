@@ -1,8 +1,10 @@
+import {RawSet} from './RawSet';
+
 export type RefType = { obj: object };
 
 export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     public _domRender_ref = new Map<object, Set<string>>()
-
+    public _rawSets = new Map<string, Set<RawSet>>()
     constructor(public _domRender_origin: T, selector?: string) {
 
     }
@@ -114,6 +116,13 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             this._domRender_ref.set(parent, new Set<string>());
         }
         this._domRender_ref.get(parent)?.add(path)
+    }
+
+    public addRawSet(path: string, rawSet: RawSet) {
+        if (!this._rawSets.get(path)) {
+            this._rawSets.set(path, new Set<RawSet>());
+        }
+        this._rawSets.get(path)?.add(rawSet)
     }
 
 // public static compileSet<T>(window: Window, target: T, raws: RawSet, config?: Config, targetNode?: TargetNode, uuid = RandomUtils.uuid()): {target: T, rootScope: RootScope} {
