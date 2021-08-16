@@ -1,6 +1,6 @@
 import {Config} from '../src/Config';
 import {ScopeObject} from '../src/ScopeObject';
-import {DomRender} from '../src/DomRender';
+import {DomRenderProxy} from '../src/DomRenderProxy';
 import {ScopeRawSet} from '../src/ScopeRawSet';
 describe('Test', () => {
     test('test', async (done) => {

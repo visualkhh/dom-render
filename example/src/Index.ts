@@ -1,4 +1,5 @@
 import {RandomUtils} from 'dom-render/utils/random/RandomUtils';
+import {DomRenderProxy} from 'dom-render/DomRenderProxy';
 import {DomRender} from 'dom-render/DomRender';
 
 class User {
@@ -34,63 +35,24 @@ class User {
 }
 
 const user = new User(255, 'parent');
-const domRender = new DomRender(user);
-const destUser = new Proxy(user, domRender)
-domRender.run(destUser);
-// domRender.createAddTemplate(document.querySelector('#app'));
-console.log('destUser', destUser)
-console.log('destUser', destUser._DomRender_proxy)
-setTimeout(() => {
-    // destUser.data.name = '55';
-    destUser.cnt1 = 55
-    // destUser.data = {name: 'vvvv', addr: {first: 'z', last: 'vv', street: 'aa'}}
-    console.log('pp', destUser)
-    // destUser.data.addr.last = '55';
-    // destUser.data1.addr.first = '5255';
-}, 3000);
-setTimeout(() => {
-    // destUser.data.name = '55';
-    destUser.cnt1 = 15
-    // destUser.data = {name: 'vvvv', addr: {first: 'z', last: 'vv', street: 'aa'}}
-    console.log('pp', destUser)
-    // destUser.data.addr.last = '55';
-    // destUser.data1.addr.first = '5255';
-}, 2000);
-
-//
-// const config = new Config();
-//
-// const parent = DomRender.create(new User(255, 'parent'), {template: '<div><!--%write(this.name)%-->, <!--%write(this.cnt)%--></div>'});
-// // let user = new User(1, DomRender.create(new User(255), {template: '<div><!--%write(this.cnt)%--></div>'}));
-// let user = new User(
-//     1,
-//     'root',
-//     [new User(255, 'f1'), new User(200, 'f2')],
-//     parent
-// );
-// user.name = 'root'
-// // let user = new User(1, {} as User);
-// // console.log(user)
-// const body = document.querySelector('#app');
-// const targetNode = new TargetNode(body, TargetNodeMode.replace)
-// const raw = {template: html};
-//
-// user = DomRender.render(window, user, raw, config, targetNode);
-// // user.friends = DomRender.create(new User(255), {template: '<div><!--%write(this.cnt)%--></div>'});
-//
-// setTimeout(() => {
-//     user.parent = parent;
-// }, 1000);
-// setTimeout(() => {
-//     user.parent = DomRender.create(new User(255, 'pare222nt'), {template: '<div><!--%write(this.name)%-->, <!--%write(this.cnt)%--></div>'});
-//     // user.friends.push(2)
-//     // user.cnt = 2;
-//     // user.changeFriendName()
-//     // user.friends[1].name = RandomUtils.getRandomColor();
-//     // console.log('-->user.cnt', user, user.cnt)
-//     // user.friends = [2,3,4];
-// }, 5000)
-// // setTimeout(() => {
-// //     console.log('iii-->', user);
-// //     user.childs = ['1', '2', '3']
-// // }, 3000)
+const target = document.querySelector('#app')
+if (target) {
+    const dest = DomRender.run(user, target);
+    console.log('destUser', dest)
+    setTimeout(() => {
+        // destUser.data.name = '55';
+        dest.cnt1 = 55
+        // destUser.data = {name: 'vvvv', addr: {first: 'z', last: 'vv', street: 'aa'}}
+        console.log('pp', dest)
+        // destUser.data.addr.last = '55';
+        // destUser.data1.addr.first = '5255';
+    }, 3000);
+    setTimeout(() => {
+        // destUser.data.name = '55';
+        dest.cnt1 = 15
+        // destUser.data = {name: 'vvvv', addr: {first: 'z', last: 'vv', street: 'aa'}}
+        console.log('pp', dest)
+        // destUser.data.addr.last = '55';
+        // destUser.data1.addr.first = '5255';
+    }, 2000);
+}

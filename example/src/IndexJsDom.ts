@@ -2,7 +2,7 @@ import {JSDOM} from 'jsdom';
 import {TargetNode, TargetNodeMode} from 'dom-render/RootScope';
 import {RandomUtils} from 'dom-render/utils/random/RandomUtils';
 import {Config} from 'dom-render/Config';
-import {DomRender} from 'dom-render/DomRender';
+import {DomRenderProxy} from 'dom-render/DomRenderProxy';
 import {ScopeObject} from 'dom-render/ScopeObject';
 import {Scope} from 'dom-render/Scope';
 const dom = new JSDOM(`
@@ -144,13 +144,13 @@ const fraw = {template: `
 <div>friend<!--%write(this.name)%--><button dr-event-click="console.log($event)">----</button></div>
 <hr>
 `, styles: []};
-userFriend = DomRender.proxy(userFriend, fraw);
+userFriend = DomRenderProxy.proxy(userFriend, fraw);
 let user = new User('visualkhh', 55, 22, userFriend);
 const body = document.querySelector('#app');
 const targetNode = new TargetNode(body, TargetNodeMode.replace)
 const raw = {template: html, styles: ['div {color: <!--%write(this.color)%-->}']};
 
-user = DomRender.render(window, user, raw, config, targetNode);
+user = DomRenderProxy.render(window, user, raw, config, targetNode);
 setTimeout(() => {
     user.name = RandomUtils.getRandomColor();
     user.color = RandomUtils.getRandomColor();

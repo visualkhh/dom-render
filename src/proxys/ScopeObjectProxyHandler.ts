@@ -1,7 +1,7 @@
 import {RootScope} from '../RootScope';
 import {NodeUtils} from '../utils/node/NodeUtils';
 import {Scope} from '../Scope';
-import {RawSet} from '../DomRender';
+import {RawSet} from '../DomRenderProxy';
 
 interface ConstructorType<T> {
     new(...args: any[]): T;

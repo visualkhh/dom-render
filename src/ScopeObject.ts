@@ -1,7 +1,7 @@
 import {ScopeResultSet} from './ScopeResultSet';
 import {RandomUtils} from './utils/random/RandomUtils';
 import {TargetNode, TargetNodeMode} from './RootScope';
-import {DomRender, RawSet} from './DomRender';
+import {DomRenderProxy, RawSet} from './DomRenderProxy';
 import {Scope} from './Scope';
 import {ScopeObjectCall} from './ScopeObjectCall';
 import {ScopeRawSet} from './ScopeRawSet';
@@ -170,7 +170,7 @@ export class ScopeObject {
         // const config = Object.assign(new Config(), this._scope.config);
         // config.itPath = itPath ?? config.itPath;
         // console.log('-->', config.itPath)
-        return DomRender.compileRootScope(this._scope.raws.window, destTarget, rawSet, this._scope.config, targetNode, uuid);
+        return DomRenderProxy.compileRootScope(this._scope.raws.window, destTarget, rawSet, this._scope.config, targetNode, uuid);
     }
 
     private getTargetNode(uuid: string) {

@@ -29,6 +29,7 @@ dom-render
 <script>
     console.log('-----')
     const app = document.querySelector('#app');
+
     class User {
         friends;
         color;
@@ -59,11 +60,15 @@ dom-render
             console.log('ele', $element);
         }
     }
+
     const config = new Config();
     const targetNode = new TargetNode(app, TargetNodeMode.replace)
     let user = new User(1);
-    const raw = {template: app.innerHTML, styles: ['p {color: /*%write(this.color)%*/}']};
-    user = DomRender.render(document, user, raw, config, targetNode);
+    const raw = {
+        template: app.innerHTML,
+        styles: ['p {color: /*%write(this.color)%*/}']
+    };
+    user = DomRenderProxy.render(document, user, raw, config, targetNode);
     setTimeout(() => {
         // user.friends.push(2)
         user.cnt = 2;
