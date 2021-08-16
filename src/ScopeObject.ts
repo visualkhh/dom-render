@@ -69,19 +69,19 @@ export class ScopeObject {
             }
         };
         
-        const include = (target, rawSet, itPath) => {
+        const include = (target, rawSet, itPath, superPath) => {
             if(target) {
                 const uuid = this._makeUUID();
                 const targetNode = this.getTargetNode(uuid);
-                const rootScope = this._compileRootScope(target, targetNode, uuid, rawSet, itPath);
+                const rootScope = this._compileRootScope(target, targetNode, uuid, rawSet, itPath, superPath);
                 this._calls.push({name: 'include', parameter: [target], result: rootScope})
                 if (rootScope) {
                     this._writes.push("<template include-scope-uuid='" + uuid + "'></template>");
                 }
             }
         }
-        const includeDhis = (target, rawSet, itPath) => {
-            include(target, this._replaceDhisToThis(rawSet), itPath);    
+        const includeDhis = (target, rawSet, itPath, superPath) => {
+            include(target, this._replaceDhisToThis(rawSet), itPath, superPath);    
         }
         ${this.customScript()}
         
@@ -107,20 +107,60 @@ export class ScopeObject {
     //     }
     // }
 
-    private _compileRootScope(target: any, targetNode: TargetNode, uuid: string, raws?: RawSet, itPath?: string) {
+    private _compileRootScope(target: any, targetNode: TargetNode, uuid: string, raws?: RawSet, itPath?: string, superPath?: string) {
         if (!raws && !('_ScopeObjectProxyHandler_isProxy' in (target === this ? this._originObj : target))) {
             console.error('no Domrander Proxy Object -> var proxy = Domrender.proxy(target, ScopeRawSet)', target)
             throw new Error('no Domrander compile Object');
         }
         const rawSet = raws ?? target._ScopeObjectProxyHandler_rawSet! as RawSet;
-        // console.log('-----include compile', rawSet)
         const destTarget = (target._ScopeOpjectProxy_targetOrigin ?? target);
-        if (itPath) {
-            rawSet.template = rawSet.template.replace(/\(it/g, '(' + itPath);
-            rawSet.itPath = itPath;
-        //     // eslint-disable-next-line no-new-func
-        //     destTarget = Function(`"use strict";  return ${itPath} `).bind(target)();
+        const varRegex = /<!--%write\((.*?)\)%-->/gm;
+        let varExec = varRegex.exec(rawSet.template)
+        console.log('--2222--->', itPath, superPath)
+        while (varExec) {
+            if (itPath) {
+                varExec[1] = varExec[1].replace(/it/g, itPath)
+            }
+            console.log('super------->', superPath)
+            if (superPath) {
+                varExec[1] = varExec[1].replace(/super/g, superPath)
+            }
+            rawSet.template = rawSet.template.replace(varExec[0], '<!--%write(' + varExec[1] + ')%-->')
+            console.log('--333333--->', rawSet.template)
+            varExec = varRegex.exec(varExec.input)
         }
+
+        console.log('--*********--->', rawSet.template)
+        if (itPath) {
+            rawSet.itPath = itPath;
+        }
+        if (superPath) {
+            rawSet.superPath = superPath;
+        }
+        // if (itPath) {
+        //     // rawSet.template = rawSet.template.replace(/it/g, itPath);
+        //     // rawSet.template = rawSet.template.replace(/it/g, itPath);
+        //     rawSet.template = rawSet.template.replace(/\(it/g, '(' + itPath);
+        //     rawSet.itPath = itPath;
+        // }
+        // if (superPath) {
+        //     // rawSet.template = rawSet.template.replace(/super/g, superPath);
+        //     // rawSet.template = rawSet.template.replace(/super/g, superPath);
+        //     rawSet.template = rawSet.template.replace(/\(super/g, '(' + superPath);
+        //     rawSet.superPath = superPath;
+        // }
+        // if (pipe) {
+        //     pipe?.forEach(it => {
+        //         const key = it.split('|')[0];
+        //         let value = it.split('|')[1];
+        //         if (key || value) {
+        //             value = value.replace(/\(it/g, '(' + itPath);
+        //             rawSet.template = rawSet.template.replace(RegExp('\\(' + key, 'gm'), '(' + value);
+        //         }
+        //     })
+        //     rawSet.pipe = pipe;
+        // }
+
         // if (!destTarget) {
         //     destTarget = (target._ScopeOpjectProxy_targetOrigin ?? target)
         // } else {

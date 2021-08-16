@@ -14,6 +14,21 @@ describe('Test', () => {
         expect(200).toBe(200)
         done()
     })
+    test('regex1', async (done) => {
+        let text = '-dr-pipe-> <DIV >       <!--%write(super)%--> * <!--%write(it)%--> = <!--%write(super * it)%-->    </DIV>'
+        console.log(text)
+        const varRegex = /<!--%write\((.*?)\)%-->/gm;
+        let varExec = varRegex.exec(text)
+        const usingVars = [];
+        while (varExec) {
+            // text = text.replace(varExec[0], '<!--%' + varExec[1] + '%-->');
+            // usingVars.push(varExec[1]);
+            console.log(varExec[0], varExec[1])
+            varExec = varRegex.exec(varExec.input)
+        }
+        expect(200).toBe(200)
+        done()
+    })
 
     test('regex', async (done) => {
         console.log('-->', 'good')

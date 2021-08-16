@@ -8,6 +8,7 @@ export class ScopeRawSet {
     public static readonly DR_INCLUDE_NAME = 'dr-include';
     public static readonly DR_REPLACE_NAME = 'dr-replace';
     public static readonly DR_FOR_NAME = 'dr-for';
+    public static readonly DR_DETECT_NAME = 'dr-detect';
     public static readonly DR_STATEMENT_NAME = 'dr-statement';
 
     public static readonly DR_SCRIPT_ELEMENTNAME = 'dr-script';
@@ -15,12 +16,13 @@ export class ScopeRawSet {
 
     public static readonly DR_PARAMETER_OPTIONNAME = 'dr-parameter';
     public static readonly DR_IT_OPTIONNAME = 'dr-it';
+    public static readonly DR_PIPE_OPTIONNAME = 'dr-pipe';
     public static readonly DR_STRIP_OPTIONNAME = 'dr-strip';
     public static readonly DR_THIS_OPTIONNAME = 'dr-this';
     public static readonly DR_CONTENT_OPTIONNAME = 'dr-content';
-    public static readonly DR_ATTRIBUTES = [ScopeRawSet.DR_IF_NAME, ScopeRawSet.DR_FOR_OF_NAME, ScopeRawSet.DR_INCLUDE_NAME, ScopeRawSet.DR_REPLACE_NAME, ScopeRawSet.DR_FOR_NAME, ScopeRawSet.DR_STATEMENT_NAME];
+    public static readonly DR_ATTRIBUTES = [ScopeRawSet.DR_IF_NAME, ScopeRawSet.DR_FOR_OF_NAME, ScopeRawSet.DR_INCLUDE_NAME, ScopeRawSet.DR_REPLACE_NAME, ScopeRawSet.DR_FOR_NAME, ScopeRawSet.DR_DETECT_NAME, ScopeRawSet.DR_STATEMENT_NAME];
 
-    constructor(public window: Window, public raw: string | Node, public styles: string[] = [], public itPath?: string) {
+    constructor(public window: Window, public raw: string | Node, public styles: string[] = [], public itPath?: string, public superPath?: string) {
         if (typeof this.raw === 'string') {
             const template = this.window.document.createElement('template');
             template.innerHTML = this.raw;
@@ -95,7 +97,6 @@ export class ScopeRawSet {
             // console.log('---------------createComment', newComment.data)
             element.parentNode?.replaceChild(newComment, element);
         }
-
     }
 
     changeElementAttrToScope(rootNode: Node) {
@@ -126,8 +127,11 @@ export class ScopeRawSet {
             const include = element.getAttribute(ScopeRawSet.DR_INCLUDE_NAME);
             const replace = element.getAttribute(ScopeRawSet.DR_REPLACE_NAME);
             const forr = element.getAttribute(ScopeRawSet.DR_FOR_NAME);
+            const detect = element.getAttribute(ScopeRawSet.DR_DETECT_NAME);
             const statement = element.getAttribute(ScopeRawSet.DR_STATEMENT_NAME);
+
             const drIt = element.getAttribute(ScopeRawSet.DR_IT_OPTIONNAME);
+            const drPipe = element.getAttribute(ScopeRawSet.DR_PIPE_OPTIONNAME);
             const drThis = element.getAttribute(ScopeRawSet.DR_THIS_OPTIONNAME);
             const drContent = element.getAttribute(ScopeRawSet.DR_CONTENT_OPTIONNAME);
             const drStrip = element.getAttribute(ScopeRawSet.DR_STRIP_OPTIONNAME);
@@ -167,6 +171,7 @@ export class ScopeRawSet {
                 element.removeAttribute(ScopeRawSet.DR_FOR_NAME);
                 element.removeAttribute(ScopeRawSet.DR_IT_OPTIONNAME);
                 element.removeAttribute(ScopeRawSet.DR_STRIP_OPTIONNAME);
+                element.removeAttribute(ScopeRawSet.DR_PIPE_OPTIONNAME);
                 const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, !(drStrip === 'true')));
                 let destFor = forr;
                 let destIt = drIt ?? 'this';
@@ -174,10 +179,15 @@ export class ScopeRawSet {
                     destFor = destFor.replace(/it/g, this.itPath)
                     destIt = destIt.replace(/it/g, this.itPath)
                 }
+                // if (this.superPath) {
+                //     destFor = destFor.replace(/super/g, this.superPath)
+                //     destIt = destIt.replace(/super/g, this.superPath)
+                // }
                 content = `for(${destFor}){
-                    const currentThis = '${destIt.replace(/#\{(.*)\}/g, '\'+$1+\'')}';
-                    console.log('currentThis', currentThis);
-                    includeDhis(this, {template: '${this.escapeSingleQuoteContent(html)}'}, currentThis)
+                    const currentThis = '${destIt.replace(/#\{(.*?)\}/gm, '\'+$1+\'')}';
+                    // const currentPipe = '${(drPipe?.replace(/#\{(.*?)\}/gm, '\'+$1+\'')) ?? ''}'.split(',');
+                    // console.log('currentThis', currentThis, '[',currentPipe,']');
+                    includeDhis(this, {template: '${this.escapeSingleQuoteContent(html)}'.replace(/super/g, '${this.superPath ?? 'super'}').replace(/${this.itPath ?? 'this'}/g, currentThis)}, currentThis, '${this.itPath ?? ''}')
                 } `;
             }
             if (forOfAttribute) {
@@ -195,6 +205,11 @@ export class ScopeRawSet {
                     includeDhis(this, {template: '${this.escapeSingleQuoteContent(html)}'}, paths)
                 } `;
             }
+            if (detect) {
+                element.removeAttribute(ScopeRawSet.DR_DETECT_NAME);
+                const html = ScopeRawSet.replaceThisToDhis(this.genHTML(element, true));
+                content = `${detect}; includeDhis(this, {template: '${this.escapeSingleQuoteContent(html)}'}, 'this')`;
+            }
             // this.changeElementToScope(element);
             const newComment = document.createComment('%' + content + '%')
             // console.log('---------------createComment', newComment.data)
@@ -210,10 +225,11 @@ export class ScopeRawSet {
         let html = isOuter ? `<${element.tagName} ${attributeNames.join(' ')}>` : '';
         element.childNodes.forEach((n, k) => {
             // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
+            // Node.ELEMENT_NODE
             if (n.nodeType === 1) {
                 const element = n as Element;
                 console.log('---------', element)
-                html += this.escapeNoExpressionContent(element.outerHTML ?? '')
+                html += this.escapeContent(element.outerHTML ?? '')
                 console.log('--------->>', 'attribu', element.outerHTML)
                 // if (ScopeRawSet.DR_ATTRIBUTES.filter(it => element.getAttribute(it)).length > 0) {
                 // } else {
@@ -222,10 +238,15 @@ export class ScopeRawSet {
                 //     // this.usingVars.push(...this.usingThisVar(genData))
                 //     html += genData
                 // }
+            // Node.TEXT_NODE
             } else if (n.nodeType === 3) {
                 const text = (n as Text).data ?? '';
+                if (text.startsWith('module.exports')) {
+                    html += this.escapeContent(text.replace(/\r?\n/g, '').replace(/module.exports.*"(.*)"/, '$1'))
+                } else {
+                    html += this.escapeContent(text)
+                }
                 // this.usingVars.push(...this.usingThisVar(text))
-                html += this.escapeContent(text)
             } else if (n.nodeType === 8) {
                 const text = (n as Comment).data;
                 if (text.startsWith('%') && text.endsWith('%')) {
@@ -235,7 +256,7 @@ export class ScopeRawSet {
             }
         })
         html += (isOuter ? `</${element.tagName}>` : '');
-        console.log('--------hhh-', html)
+        console.log('--------hhh-', element.outerHTML,'-----', html)
         return html;
     }
 
@@ -243,12 +264,14 @@ export class ScopeRawSet {
         return content
             // .replace(/it\./g, 'dit.')
             .replace(/this\./g, 'dhis.')
+            // .replace(/super/g, 'duper')
     }
 
     public static replaceDhisToThis(content: string) {
         return content
             // .replace(/dit\./g, 'it.')
             .replace(/dhis\./g, 'this.')
+            // .replace(/duper/g, 'super')
     }
 
     escapeSingleQuoteContent(content: string) {

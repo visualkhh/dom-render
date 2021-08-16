@@ -5,12 +5,12 @@ import {Config} from './Config';
 import {ScopeObjectProxyHandler} from './proxys/ScopeObjectProxyHandler';
 import {ConstructorType} from './types/Types';
 
-export type RawSet = {template: string, styles?: string[], itPath?: string}
+export type RawSet = {template: string, styles?: string[], itPath?: string, superPath?: string}
 export class DomRender {
     public static compileSet<T>(window: Window, target: T, raws: RawSet, config?: Config, targetNode?: TargetNode, uuid = RandomUtils.uuid()): {target: T, rootScope: RootScope} {
         const proxy = DomRender.proxy(target, raws) as any;
         // '<scope dr-replace="this">'+raws.template+'</scope>'
-        const scopeRaws = new ScopeRawSet(window, raws.template, raws.styles, raws.itPath);
+        const scopeRaws = new ScopeRawSet(window, raws.template, raws.styles, raws.itPath, raws.superPath);
         const root = new RootScope(scopeRaws, proxy, uuid, config, targetNode);
         proxy?._ScopeObjectProxyHandler?.run(proxy, root);
         return {target: proxy, rootScope: root};

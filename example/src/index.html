@@ -1,7 +1,8 @@
-<div dr-for-of="[1,2,3]" dr-strip="true" >
-    <button dr-event-click="console.log('zzz')">22</button>
+
+
+<div dr-for="var i = 1 ; i <= 9 ; i++ " dr-it="#{i}">
+    ${it}
+    <span dr-for="var y = 5 ; y <= 9 ; y++ " dr-it="#{y}">
+     ${it} - [${super}]
+    </span>
 </div>
-<hr>
-<button dr-for-of="[1,2,3]"  dr-event-click="console.log('22')" >
-    22
-</button>

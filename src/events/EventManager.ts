@@ -103,7 +103,7 @@ export const eventManager = new class {
             console.log('-atttt')
             if (this.isUsingThisVar(attribute, varName) || varName === undefined) {
                 // eslint-disable-next-line no-new-func
-                const data = Function(`"use strict"; $target=it; ${script} `).bind(obj)() ?? {};
+                const data = Function(`"use strict"; const $target=this.$target; ${script} `).bind(Object.assign({$target: it}, obj))() ?? {};
                 for (const [key, value] of Object.entries(data)) {
                     if (typeof value === 'string') {
                         it.setAttribute(key, value);
@@ -116,7 +116,7 @@ export const eventManager = new class {
             const script = attribute;
             if (this.isUsingThisVar(attribute, varName) || varName === undefined) {
                 // eslint-disable-next-line no-new-func
-                const data = Function(`"use strict"; $target=it; ${script} `).bind(obj)() ?? {};
+                const data = Function(`"use strict"; const $target = this.$target;  ${script} `).bind(Object.assign({$target: it}, obj))() ?? {};
                 for (const [key, value] of Object.entries(data)) {
                     if (typeof value === 'string' && it instanceof HTMLElement) {
                         (it.style as any)[key] = value;
