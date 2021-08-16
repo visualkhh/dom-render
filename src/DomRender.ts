@@ -18,18 +18,23 @@ export class DomRender<T extends object> implements ProxyHandler<T> {
         }
     }
 
-    public root(paths: string[]) {
+    public root(paths: string[], value: any) {
         if (this._domRender_ref.size > 0) {
             this._domRender_ref.forEach((it, key) => {
                 if ('_DomRender_isProxy' in key) {
                     it.forEach(sit => {
-                        (key as any)._DomRender_proxy?.root(paths.concat(sit))
+                        (key as any)._DomRender_proxy?.root(paths.concat(sit), value)
                     })
                 }
             })
             console.log('----->')
         } else {
-            console.log('-->root-->', paths.reverse().join('.'))
+            const pathString = paths.reverse().join('.');
+            const querySelector = document.querySelector(`[dr-value='${pathString}']`);
+            if (querySelector) {
+                querySelector.innerHTML = value + ''
+            }
+            console.log('-->root-->', pathString)
         }
     }
 
@@ -57,7 +62,7 @@ export class DomRender<T extends object> implements ProxyHandler<T> {
         }
         (target as any)[p] = value;
         if (typeof p === 'string') {
-            this.root([p]);
+            this.root([p], value);
         }
         return true;
     }

@@ -42,12 +42,20 @@ console.log('destUser', destUser)
 console.log('destUser', destUser._DomRender_proxy)
 setTimeout(() => {
     // destUser.data.name = '55';
-    // destUser.cnt1 = 55
-    destUser.data = {name: 'vvvv', addr: {first: 'z', last: 'vv', street: 'aa'}}
+    destUser.cnt1 = 55
+    // destUser.data = {name: 'vvvv', addr: {first: 'z', last: 'vv', street: 'aa'}}
     console.log('pp', destUser)
     // destUser.data.addr.last = '55';
     // destUser.data1.addr.first = '5255';
 }, 3000);
+setTimeout(() => {
+    // destUser.data.name = '55';
+    destUser.cnt1 = 15
+    // destUser.data = {name: 'vvvv', addr: {first: 'z', last: 'vv', street: 'aa'}}
+    console.log('pp', destUser)
+    // destUser.data.addr.last = '55';
+    // destUser.data1.addr.first = '5255';
+}, 2000);
 
 //
 // const config = new Config();
