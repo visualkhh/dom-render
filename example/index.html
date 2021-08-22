@@ -6,26 +6,20 @@
     <meta name="description" content="">
     <title>simple-boot-front</title>
 </head>
-<body>
-<div id="app">
-    <div dr-if="true">
-        aa
+<body id="app">
+    <div>
+        <div dr-if="true">
+            aa [${this.cnt1}]
+        </div>
+        <button dr-event-click="alert(this.cnt)">ss ${this.cnt} ssss</button>
+        <div dr-for-of="[1,2,3]">
+            <div>
+            <button dr-event-click="alert(1)">ss #it# ssss</button>
+            </div>
+             ${this.cnt} #it#
+            <div dr-if="this.cnt === 646">666</div>
+        </div>
     </div>
-<!--   <div dr-for-of="[this.friends[0], this.friends[1]]">-->
-<!--       <div>${#it#.cnt}</div>-->
-<!--       zz-->
-<!--   </div>-->
-<!--   <div dr-for-of="['vv', 'gg']">-->
-<!--       <div>#it#</div>-->
-<!--   </div>-->
-   <div dr-for-of="[55, 22]">
-       <div>#it#</div>
-   </div>
-<!--   <div dr-for-of="['this.friends[0]', 'this.friends[1]']">-->
-<!--&lt;!&ndash;      <div>${#it#.cnt</div>&ndash;&gt;-->
-<!--      <div>${#it#.cnt}</div>-->
-<!--   </div>-->
-</div>
 <script src="./src/index.ts"></script>
 </body>
 </html>

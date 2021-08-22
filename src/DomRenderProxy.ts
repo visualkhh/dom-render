@@ -1,4 +1,5 @@
 import {RawSet} from './RawSet';
+import {eventManager} from './events/EventManager';
 
 export type RefType = { obj: object };
 
@@ -31,9 +32,11 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             // while (currentNode = nodeIterator.nextNode()) {
             //     console.log('--->', currentNode, nodeIterator.pointerBeforeReferenceNode)
             // }
-
+            // const fag = document.createDocumentFragment()
+            // fag.append(this.target)
             const rawSets = RawSet.checkPointCreates(this.target);
-            console.log('domRender start run -> ', rawSets)
+            const findAttrElements = eventManager.findAttrElements(this.target as Element).map(it => it.element);
+            eventManager.applyEvent(obj, findAttrElements)
             rawSets.forEach(it => {
                 const strings = it.usingTriggerVariables;
                 if (strings.size <= 0) {
@@ -56,7 +59,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
 
     public render(raws: RawSet[]) {
         raws.forEach(it => {
-            console.log('render--->', raws, it.point.start.isConnected, it.point.start.isConnected)
+            // console.log('render--->', raws, it.point.start.isConnected, it.point.start.isConnected)
             it.usingTriggerVariables.forEach(path => this.addRawSet(path, it))
             if (it.point.start.isConnected && it.point.start.isConnected) {
                 const rawSets = it.render(this._domRender_proxy);
@@ -81,8 +84,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             for (let i = strings.length; i >= 0; i--) {
                 const pathString = strings.slice(0, i).join('.');
                 // const pathString = strings.join('.');
-                console.log('change var path', value, pathString, this._rawSets.get(pathString))
-
+                // console.log('change var path', value, pathString, this._rawSets.get(pathString))
                 const iterable = this._rawSets.get(pathString);
                 if (iterable) {
                     this.render(Array.from(iterable));

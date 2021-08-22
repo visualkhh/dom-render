@@ -1,4 +1,4 @@
-import { Config } from '../Config';
+// import { Config } from '../Config';
 
 export const eventManager = new class {
     public readonly attrPrefix = 'dr-';
@@ -17,7 +17,7 @@ export const eventManager = new class {
         });
     }
 
-    public findAttrElements(fragment: DocumentFragment, addAttributes:string[] = []) {
+    public findAttrElements(fragment: DocumentFragment | Element, addAttributes:string[] = []) {
         const datas: {name: string, value: string | null, element: Element}[] = [];
         addAttributes.concat(this.attrNames).forEach(attrName => {
             fragment.querySelectorAll(`[${attrName}]`).forEach(it => {
@@ -29,7 +29,7 @@ export const eventManager = new class {
     }
 
     // eslint-disable-next-line no-undef
-    public applyEvent(obj: any, childNodes: ChildNode[], config?: Config) {
+    public applyEvent(obj: any, childNodes: ChildNode[]) {
         // console.log('eventManager applyEvent==>', obj, childNodes, config)
         // Node.ELEMENT_NODE = 1
         const elements = childNodes.filter(it => it.nodeType === 1).map(it => it as Element);
@@ -74,13 +74,13 @@ export const eventManager = new class {
                 })
             }
         })
-        this.changeVar(obj, elements, undefined, config);
+        this.changeVar(obj, elements, undefined);
         // console.log('eventManager->', obj, elements)
-        config?.applyEvent?.(obj, elements)
+        // config?.applyEvent?.(obj, elements)
     }
 
     // eslint-disable-next-line no-undef
-    public changeVar(obj: any, elements: Element[] | ChildNode[], varName?: string, config?: Config) {
+    public changeVar(obj: any, elements: Element[] | ChildNode[], varName?: string) { // , config?: Config
         // console.log('-changeVar-->', obj, elements, varName)
         // value-link event
         this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'value-link', (it, attribute) => {
@@ -125,10 +125,10 @@ export const eventManager = new class {
             }
         })
 
-        if (config?.changeVar && varName) {
-            // config?.changeVar?.(obj, elements.filter(it => it.nodeType === 1).map(it => it as Element), varName!);
-            config.changeVar(obj, elements.filter(it => it.nodeType === 1).map(it => it as Element), varName!);
-        }
+        // if (config?.changeVar && varName) {
+        //     // config?.changeVar?.(obj, elements.filter(it => it.nodeType === 1).map(it => it as Element), varName!);
+        //     config.changeVar(obj, elements.filter(it => it.nodeType === 1).map(it => it as Element), varName!);
+        // }
     }
 
     public addDrEvent(obj: any, eventName: string, elements: Element[]) {
