@@ -43,7 +43,9 @@ if (target) {
     //     // destUser.data.name = '55';
     //     dest.cnt = 55
         dest.cnt = 4
-        dest.friends[0].cnt=66
+        dest.cnt1 = 44
+        dest.friends[0].cnt = 66
+        dest.friends[1].cnt = 646
         dest.friends.push(new User(7, '77'))
         // dest.cnt1 = 55
     //     // destUser.data = {name: 'vvvv', addr: {first: 'z', last: 'vv', street: 'aa'}}
@@ -54,7 +56,7 @@ if (target) {
 
     setTimeout(() => {
         dest.cnt = 10
-        dest.cnt1 = 0
+        dest.cnt1 = 50
     }, 6000);
     // setTimeout(() => {
     //     // destUser.data.name = '55';

@@ -78,10 +78,24 @@ export class RawSet {
                 }
 
                 if (drForOf) {
-                    ScriptUtils.eval(`for(const it of ${drForOf}) {
+                    ScriptUtils.eval(`var i = 0; for(const it of ${drForOf}) {
+                        var destIt = it;
+                        var forOfStr = \`${drForOf}\`;
+                        if (/,/g.test(forOfStr)) {
+                            if (typeof it === 'string') {
+                                destIt = it;
+                            } else {
+                                destIt = forOfStr.substring(1, forOfStr.length-1).split(',')[i];
+                            }
+                            console.log('--ttggggggggggtttt')
+                        } else {
+                            destIt = forOfStr + '[' + i +']'
+                        }
+                        // console.log('--??????')
                         const n = this.__element.cloneNode(true);
-                        n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, it);
-                        this.__fag.append(n) 
+                        n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
+                        this.__fag.append(n);
+                        i++;
                     }`, Object.assign({__fag: fag, __element: element}, obj));
                     const rr = RawSet.checkPointCreates(fag)
                     element.parentNode?.replaceChild(fag, element);
