@@ -1,7 +1,6 @@
-import {Config} from '../src/Config';
-import {ScopeObject} from '../src/ScopeObject';
-import {DomRenderProxy} from '../src/DomRenderProxy';
-import {ScopeRawSet} from '../src/ScopeRawSet';
+import {ScriptUtils} from '../src/utils/script/ScriptUtils';
+import {StringUtils} from '../src/utils/string/StringUtils';
+
 describe('Test', () => {
     test('test', async (done) => {
         // console.log('-->', 'good')
@@ -14,10 +13,24 @@ describe('Test', () => {
         expect(200).toBe(200)
         done()
     })
+
+    test('proxy', async (done) => {
+        const user = {name: 'nane', age: 4, addrs: ['2', '3'], friend: {name: 'zz', age: 55}};
+
+        // const usingVars = ScriptUtils.getVariablePaths(`if(true){ this.age; } this[1+2]; this.friend.name; this.friend.age; this.friend.age; this.friend.name.replace('a','a')`)
+        const usingVars = ScriptUtils.getVariablePaths('\`${this.friend.name}; ${this.friend.age + this.friend.age2}; ${this.friend.name.replace(1,2)}\`')
+        console.log('----->', usingVars);
+        // console.log(destUser.addrs[1]);
+        // console.log(destUser.friend.name);
+
+        expect(200).toBe(200)
+        done()
+    })
+
     test('regex1', async (done) => {
-        let text = '-dr-pipe-> <DIV >       <!--%write(super)%--> * <!--%write(it)%--> = <!--%write(super * it)%-->    </DIV>'
+        let text = '${asd}    ㅁㄴㅇㅁㄴㅇ ㅁㄴ ${asdasd}';
         console.log(text)
-        const varRegex = /<!--%write\((.*?)\)%-->/gm;
+        const varRegex = /(?<=\$\{).*?(?=\})/gm;
         let varExec = varRegex.exec(text)
         const usingVars = [];
         while (varExec) {
@@ -26,6 +39,18 @@ describe('Test', () => {
             console.log(varExec[0], varExec[1])
             varExec = varRegex.exec(varExec.input)
         }
+        expect(200).toBe(200)
+        done()
+    })
+    /*
+    search()  - 첫번째로 매칭되는것의 인덱스를 반환하며, 일치하는 부분이 없다면 -1 리턴
+    test()  - 매칭되는것이 있다면 true 없다면 false 리턴
+    match() - 매칭되는것이 있다면 매칭된 문자열 출력
+    */
+    test('regex-utile', async (done) => {
+        const text = '${asd}    ㅁㄴㅇㅁㄴㅇ ㅁㄴ ${asdasd}';
+        const a = StringUtils.regexExec(/\$\{.*?\}/g, text);
+        console.log(a)
         expect(200).toBe(200)
         done()
     })

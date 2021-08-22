@@ -8,16 +8,14 @@
 </head>
 <body>
 <div id="app">
-    <div dr-for="b"></div>
-    <div dr-if="a"></div>
-
-    <div id="zz">
-        ${asd
-        }
-        <zz></zz>
-        ddd
+    <div dr-if="true">
+        aa
     </div>
-    <div dr-value="cnt1"></div>
+   <div dr-for="var i = 0 ; i < this.cnt ; i++">
+       <div dr-if="this.cnt > 0">
+           a22222a     ${this.cnt}
+       </div>
+   </div>
 </div>
 <script src="./src/index.ts"></script>
 </body>

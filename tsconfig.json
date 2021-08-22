@@ -30,6 +30,7 @@
       "dom",
       "es5",
       "es2015",
+      "es2019",
       "scripthost",
       "es2015.proxy",
       "es2015.collection"

@@ -5,19 +5,64 @@ export type RefType = { obj: object };
 export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     public _domRender_ref = new Map<object, Set<string>>()
     public _rawSets = new Map<string, Set<RawSet>>()
-    constructor(public _domRender_origin: T, selector?: string) {
+    public _domRender_proxy?: T;
+
+    // public _rawsSetAll: RawSet[] = [];
+    constructor(public _domRender_origin: T, public target?: Node) {
 
     }
 
     public run(objProxy: T) {
+        this._domRender_proxy = objProxy;
         const obj = (objProxy as any)._DomRender_origin;
         if (obj) {
             Object.keys(obj).forEach(it => {
-                console.log(obj, it, (obj as any)[it]);
+                // console.log(obj, it, (obj as any)[it]);
                 const proxyAfter = this.proxy(objProxy, (obj as any)[it], it);
                 (obj as any)[it] = proxyAfter;
             })
         }
+
+        if (this.target) {
+            // RawSet.targetPintCheckNodes(this.target);
+            // const nodeIterator = RawSet.targetNodeIterator(this.target);
+            // let currentNode;
+            // // eslint-disable-next-line no-cond-assign
+            // while (currentNode = nodeIterator.nextNode()) {
+            //     console.log('--->', currentNode, nodeIterator.pointerBeforeReferenceNode)
+            // }
+
+            const rawSets = RawSet.checkPointCreates(this.target);
+            console.log('domRender start run -> ', rawSets)
+            rawSets.forEach(it => {
+                const strings = it.usingTriggerVariables;
+                if (strings.size <= 0) {
+                    this.addRawSet('', it)
+                } else {
+                    strings.forEach(sit => {
+                        this.addRawSet(sit, it)
+                    })
+                }
+            })
+
+            this._rawSets.forEach((v, k) => {
+                this.render(Array.from(v));
+            })
+            // this._rawsSetAll.push()
+            //     console.log('fragment->', rawSets);
+            //     console.log('---**-->', raws)
+        }
+    }
+
+    public render(raws: RawSet[]) {
+        raws.forEach(it => {
+            console.log('render--->', raws, it.point.start.isConnected, it.point.start.isConnected)
+            it.usingTriggerVariables.forEach(path => this.addRawSet(path, it))
+            if (it.point.start.isConnected && it.point.start.isConnected) {
+                const rawSets = it.render(this._domRender_proxy);
+                this.render(rawSets);
+            }
+        })
     }
 
     public root(paths: string[], value: any) {
@@ -29,14 +74,10 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                     })
                 }
             })
-            console.log('----->')
         } else {
             const pathString = paths.reverse().join('.');
-            const querySelector = document.querySelector(`[dr-value='${pathString}']`);
-            if (querySelector) {
-                querySelector.innerHTML = value + ''
-            }
-            console.log('-->root-->', pathString)
+            console.log('change var path', pathString, this._rawSets.get(pathString))
+            this._rawSets.get(pathString)?.forEach(it => it.render(this._domRender_proxy))
         }
     }
 
@@ -58,7 +99,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     // }
 
     public set(target: T, p: string | symbol, value: any, receiver: T): boolean {
-        console.log('set-->', target, p, value, receiver);
+        // console.log('set-->', target, p, value, receiver);
         if (typeof p === 'string') {
             value = this.proxy(target, value, p);
         }

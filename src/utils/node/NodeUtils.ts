@@ -20,6 +20,7 @@ export class NodeUtils {
         return targetNode.parentNode?.insertBefore(newNode, targetNode.nextSibling);
     }
 
+
     // static childNodes(): ChildNode[] {
     //     return Array.prototype.slice.call(element.querySelectorAll(selector));
     // }
