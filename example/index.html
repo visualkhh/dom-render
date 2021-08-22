@@ -11,10 +11,9 @@
     <div dr-if="true">
         aa
     </div>
-   <div dr-for="var i = 0 ; i < this.cnt ; i++">
-       <div dr-if="this.cnt > 0">
-           a22222a     ${this.cnt}
-       </div>
+   <div dr-for-of="['this.friends[0]', 'this.friends[1]']">
+<!--      <div>${#it#.cnt</div>-->
+      <div>${#it#.cnt}</div>
    </div>
 </div>
 <script src="./src/index.ts"></script>

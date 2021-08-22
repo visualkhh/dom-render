@@ -36,7 +36,7 @@ export class RawSet {
                 ScriptUtils.getVariablePaths(`\`${(cNode as Text).textContent ?? ''}\``).forEach(it => usingTriggerVariables.add(it));
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
-                ScriptUtils.getVariablePaths(RawSet.DR_ATTRIBUTES.map(it => (element.getAttribute(it) ?? '')).join(';')).forEach(it => usingTriggerVariables.add(it));
+                ScriptUtils.getVariablePaths(RawSet.DR_ATTRIBUTES.map(it => (element.getAttribute(it))).filter(it => it).join(';')).forEach(it => usingTriggerVariables.add(it));
             }
         })
         // console.log('----->', usingVars);
@@ -55,10 +55,9 @@ export class RawSet {
                 cNode.parentNode?.replaceChild(n, cNode)
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
-                const drIf = element.getAttribute(RawSet.DR_IF_NAME);
-                const drFor = element.getAttribute(RawSet.DR_FOR_NAME);
-                element.removeAttribute(RawSet.DR_IF_NAME);
-                element.removeAttribute(RawSet.DR_FOR_NAME);
+                const drIf = this.getAttributeAndDelete(element, RawSet.DR_IF_NAME);
+                const drFor = this.getAttributeAndDelete(element, RawSet.DR_FOR_NAME);
+                const drForOf = this.getAttributeAndDelete(element, RawSet.DR_FOR_OF_NAME);
                 if (drIf) {
                     const r = ScriptUtils.eval(`return ${drIf}`, obj);
                     if (r) {
@@ -71,10 +70,20 @@ export class RawSet {
                     }
                 }
                 if (drFor) {
-                    // const copyElement = element.cloneNode(true)
-                    ScriptUtils.eval(`for(${drFor}) { this.__fag.append(this.__element.cloneNode(true)) }`, Object.assign({__fag: fag, __element: element}, obj));
+                    ScriptUtils.eval(`for(${drFor}) { this.__fag.append(this.__element.cloneNode(true)) }`,
+                        Object.assign({__fag: fag, __element: element}, obj));
                     const rr = RawSet.checkPointCreates(fag)
-                    console.log('-----rr', rr)
+                    element.parentNode?.replaceChild(fag, element);
+                    raws.push(...rr)
+                }
+
+                if (drForOf) {
+                    ScriptUtils.eval(`for(const it of ${drForOf}) {
+                        const n = this.__element.cloneNode(true);
+                        n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, it);
+                        this.__fag.append(n) 
+                    }`, Object.assign({__fag: fag, __element: element}, obj));
+                    const rr = RawSet.checkPointCreates(fag)
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr)
                 }
@@ -84,6 +93,12 @@ export class RawSet {
         return raws;
 
         // return this.make(obj);
+    }
+
+    public getAttributeAndDelete(element: Element, attr: string) {
+        const data = element.getAttribute(attr)
+        element.removeAttribute(attr);
+        return data;
     }
 
     public replaceBody(genNode: Node) {

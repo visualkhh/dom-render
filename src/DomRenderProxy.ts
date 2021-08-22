@@ -61,6 +61,8 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             if (it.point.start.isConnected && it.point.start.isConnected) {
                 const rawSets = it.render(this._domRender_proxy);
                 this.render(rawSets);
+            } else {
+                this.removeRawSet(it)
             }
         })
     }
@@ -75,9 +77,18 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                 }
             })
         } else {
-            const pathString = paths.reverse().join('.');
-            console.log('change var path', pathString, this._rawSets.get(pathString))
-            this._rawSets.get(pathString)?.forEach(it => it.render(this._domRender_proxy))
+            const strings = paths.reverse();
+            for (let i = strings.length; i >= 0; i--) {
+                const pathString = strings.slice(0, i).join('.');
+                // const pathString = strings.join('.');
+                console.log('change var path', value, pathString, this._rawSets.get(pathString))
+
+                const iterable = this._rawSets.get(pathString);
+                if (iterable) {
+                    this.render(Array.from(iterable));
+                    break;
+                }
+            }
         }
     }
 
@@ -166,62 +177,9 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         this._rawSets.get(path)?.add(rawSet)
     }
 
-// public static compileSet<T>(window: Window, target: T, raws: RawSet, config?: Config, targetNode?: TargetNode, uuid = RandomUtils.uuid()): {target: T, rootScope: RootScope} {
-    //     const proxy = DomRender.proxy(target, raws) as any;
-    //     // '<scope dr-replace="this">'+raws.template+'</scope>'
-    //     const scopeRaws = new ScopeRawSet(window, raws.template, raws.styles, raws.itPath, raws.superPath);
-    //     const root = new RootScope(scopeRaws, proxy, uuid, config, targetNode);
-    //     proxy?._ScopeObjectProxyHandler?.run(proxy, root);
-    //     return {target: proxy, rootScope: root};
-    // }
-    //
-    // public static compileRootScope<T>(window: Window, target: T, raws: RawSet, config: Config, targetNode?: TargetNode, uuid = RandomUtils.uuid()): RootScope {
-    //     return DomRender.compileSet(window, target, raws, config, targetNode, uuid).rootScope;
-    // }
-    //
-    // public static proxyObjectRender<T = any>(proxy: T, targetNode: TargetNode, config = new Config()) {
-    //     if (!('_ScopeObjectProxyHandler_isProxy' in proxy)) {
-    //         console.error('no Domrander Proxy Object -> var proxy = Domrender.proxy(target, ScopeRawSet)', proxy)
-    //         throw new Error('no Domrander compile Object');
-    //     }
-    //     const raws = (proxy as any)._ScopeObjectProxyHandler_rawSet! as RawSet
-    //     const rootScope = new RootScope(new ScopeRawSet(window, raws.template, raws.styles), proxy, RandomUtils.uuid(), config, targetNode);
-    //     (proxy as any)?._ScopeObjectProxyHandler?.run(proxy, rootScope);
-    //     // const targetObj = (proxy as any)._ScopeObjectProxyHandler_targetOrigin ?? proxy;
-    //     rootScope.executeRender();
-    // }
-    //
-    // public static create<T>(target: T, raws: RawSet, excludeTyps: ConstructorType<any>[] = []): T {
-    //     return this.proxy(target, raws, excludeTyps);
-    // }
-    //
-    // public static proxy<T>(target: T, raws: RawSet, excludeTyps: ConstructorType<any>[] = []): T {
-    //     let proxy;
-    //     if ('_ScopeObjectProxyHandler_isProxy' in target) {
-    //         proxy = target;
-    //     } else {
-    //         if (!raws.itPath) {
-    //             // default wrapper
-    //             raws.template = `<scope dr-replace="this">${raws.template}</scope>`;
-    //         }
-    //         proxy = new Proxy(target, new ScopeObjectProxyHandler(raws, target, excludeTyps));
-    //     }
-    //     return proxy;
-    // }
-    //
-    // public static render<T>(window: Window, target: T, raws: RawSet, config: Config, targetNode?: TargetNode): T {
-    //     const dest = DomRender.compileSet(window, target, raws, config, targetNode);
-    //     dest.rootScope.executeRender();
-    //     return dest.target;
-    // }
-    //
-    // public static renderTarget<T>(window: Window, target: T, selector: string): T {
-    //     const app = document.querySelector(selector)!
-    //     const raw = {template: app.innerHTML};
-    //     app.innerHTML = '';
-    //     const targetNode = new TargetNode(app, TargetNodeMode.appendChild)
-    //     const dest = DomRender.compileSet(window, target, raw, new Config(), targetNode);
-    //     dest.rootScope.executeRender();
-    //     return dest.target;
-    // }
+    public removeRawSet(raws: RawSet) {
+        this._rawSets.forEach(it => {
+            it.delete(raws)
+        })
+    }
 }
