@@ -8,19 +8,24 @@
 //     changeVar?: (obj: any, elements: Element[], varName: string) => void
 //     targetAttributeNames?: string[]
 // }
-//
-// export class Config implements ConfigParam {
-//     public start = '<!--%';
-//     public end = '%-->';
-//     public factoryScopeObject?: ScopeObjectFactory;
-//     public applyEvent?: (obj: any, elements: Element[]) => void;
-//     public changeVar?: (obj: any, elements: Element[], varName: string) => void;
-//     targetAttributeNames?: string[];
-//     // public itPath?: string;
-//     constructor(configPram?: ConfigParam) {
-//         this.factoryScopeObject = configPram?.factoryScopeObject;
-//         this.applyEvent = configPram?.applyEvent;
-//         this.changeVar = configPram?.changeVar;
-//         this.targetAttributeNames = configPram?.targetAttributeNames;
-//     }
-// }
+
+//fragment: DocumentFragment
+import { ConstructorType } from 'types/Types';
+
+export interface Config {
+    targets?:  {attrName: string, callBack:(target: Element, attrValue: string, obj: any) => DocumentFragment}[];
+    proxyExcludeTyps? : ConstructorType<any>[];
+    applyEvents?: {attrName: string, callBack: (elements: Element, attrValue: string, obj: any) => void}[];
+    // public start = '<!--%';
+    // public end = '%-->';
+    // public factoryScopeObject?: ScopeObjectFactory;
+    // public changeVar?: (obj: any, elements: Element[], varName: string) => void;
+    // targetAttributeNames?: string[];
+    // // public itPath?: string;
+    // constructor(configPram?: ConfigParam) {
+    //     this.factoryScopeObject = configPram?.factoryScopeObject;
+    //     this.applyEvent = configPram?.applyEvent;
+    //     this.changeVar = configPram?.changeVar;
+    //     this.targetAttributeNames = configPram?.targetAttributeNames;
+    // }
+}

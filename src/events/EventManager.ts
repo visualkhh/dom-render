@@ -1,5 +1,7 @@
 // import { Config } from '../Config';
 
+import { Config } from 'Config';
+
 export const eventManager = new class {
     public readonly attrPrefix = 'dr-';
     public readonly eventNames = ['click', 'change', 'keyup', 'keydown', 'input'];
@@ -17,11 +19,11 @@ export const eventManager = new class {
         });
     }
 
-    public findAttrElements(fragment: DocumentFragment | Element, addAttributes:string[] = []) {
+    public findAttrElements(fragment: DocumentFragment | Element,config?: Config) {
         const datas: {name: string, value: string | null, element: Element}[] = [];
+        const addAttributes = config?.applyEvents?.map(it => it.attrName) ?? [];
         addAttributes.concat(this.attrNames).forEach(attrName => {
-            fragment.querySelectorAll(`[${attrName}]`).forEach(it => {
-                // console.log('find-->', it)
+            fragment?.querySelectorAll(`[${attrName}]`).forEach(it => {
                 datas.push({name: attrName, value: it.getAttribute(attrName), element: it});
             });
         })
@@ -29,7 +31,7 @@ export const eventManager = new class {
     }
 
     // eslint-disable-next-line no-undef
-    public applyEvent(obj: any, childNodes: ChildNode[]) {
+    public applyEvent(obj: any, childNodes: ChildNode[], config?: Config) {
         // console.log('eventManager applyEvent==>', obj, childNodes, config)
         // Node.ELEMENT_NODE = 1
         const elements = childNodes.filter(it => it.nodeType === 1).map(it => it as Element);
@@ -75,8 +77,10 @@ export const eventManager = new class {
             }
         })
         this.changeVar(obj, elements, undefined);
-        // console.log('eventManager->', obj, elements)
-        // config?.applyEvent?.(obj, elements)
+        // console.log('eventManager-applyEvent-->', config?.applyEvent)
+        elements.forEach(it => {
+            config?.applyEvents?.filter(ta => it.getAttribute(ta.attrName)).forEach(ta => ta.callBack(it, it.getAttribute(ta.attrName)!, obj))
+        });
     }
 
     // eslint-disable-next-line no-undef

@@ -2,6 +2,7 @@ import {RandomUtils} from './utils/random/RandomUtils';
 import {StringUtils} from './utils/string/StringUtils';
 import {ScriptUtils} from './utils/script/ScriptUtils';
 import {eventManager} from './events/EventManager';
+import { Config } from 'Config';
 
 export class RawSet {
     public static readonly DR_IF_NAME = 'dr-if';
@@ -13,7 +14,7 @@ export class RawSet {
     // public static readonly DR_STATEMENT_NAME = 'dr-statement';
 
     // public static readonly DR_SCRIPT_ELEMENTNAME = 'dr-script';
-    // public static readonly DR_ELEMENTS = [RawSet.DR_SCRIPT_ELEMENTNAME];
+    public static readonly DR_TAGS = [];// RawSet.DR_SCRIPT_ELEMENTNAME
 
     public static readonly DR_IT_OPTIONNAME = 'dr-it';
     public static readonly DR_DECLARATION_OPTIONNAME = 'dr-declaration';
@@ -30,20 +31,21 @@ export class RawSet {
         return this.point.start.isConnected && this.point.end.isConnected;
     }
 
-    get usingTriggerVariables(): Set<string> {
+    getUsingTriggerVariables(config?: Config): Set<string> {
         const usingTriggerVariables = new Set<string>();
         this.fragment.childNodes.forEach((cNode, key) => {
             if (cNode.nodeType === Node.TEXT_NODE) {
                 ScriptUtils.getVariablePaths(`\`${(cNode as Text).textContent ?? ''}\``).forEach(it => usingTriggerVariables.add(it));
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
-                ScriptUtils.getVariablePaths(RawSet.DR_ATTRIBUTES.map(it => (element.getAttribute(it))).filter(it => it).join(';')).forEach(it => usingTriggerVariables.add(it));
+                const targetAttrNames = (config?.targets?.map(it => it.attrName) ?? []).concat(RawSet.DR_ATTRIBUTES)
+                ScriptUtils.getVariablePaths(targetAttrNames.map(it => (element.getAttribute(it))).filter(it => it).join(';')).forEach(it => usingTriggerVariables.add(it));
             }
         })
         return usingTriggerVariables;
     }
 
-    public render(obj: any) {
+    public render(obj: any, config?: Config) {
         const genNode = document.importNode(this.fragment, true);
         const raws: RawSet[] = [];
         genNode.childNodes.forEach((cNode, key) => {
@@ -154,17 +156,32 @@ export class RawSet {
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr)
                 }
+
+
+                // config detecting
+                config?.targets?.forEach(it => {
+                    const attrValue = this.getAttributeAndDelete(element, it.attrName)
+                    if (attrValue) {
+                        const documentFragment = it.callBack(element, attrValue, obj);
+                        if (documentFragment) {
+                            fag.append(documentFragment)
+                            const rr = RawSet.checkPointCreates(fag)
+                            element.parentNode?.replaceChild(fag, element);
+                            raws.push(...rr)
+                        }
+                    }
+                })
             }
         })
 
-        this.applyEvent(obj, genNode);
+        this.applyEvent(obj, genNode, config);
         this.replaceBody(genNode);
         return raws;
     }
 
-    public applyEvent(obj: any, fragment = this.fragment) {
-        const findAttrElements = eventManager.findAttrElements(fragment).map(it => it.element);
-        eventManager.applyEvent(obj, findAttrElements)
+    public applyEvent(obj: any, fragment = this.fragment, config?: Config) {
+        const findAttrElements = eventManager.findAttrElements(fragment, config).map(it => it.element);
+        eventManager.applyEvent(obj, findAttrElements, config)
     }
 
     public getAttributeAndDelete(element: Element, attr: string) {
@@ -178,14 +195,19 @@ export class RawSet {
         this.point.start.parentNode?.insertBefore(genNode, this.point.start.nextSibling);
     }
 
-    public static checkPointCreates(element: Node): RawSet[] {
+    public static checkPointCreates(element: Node, config?: Config): RawSet[] {
         const nodeIterator = document.createNodeIterator(element, NodeFilter.SHOW_ALL, {
             acceptNode(node) {
                 // console.log('node type-->', node.nodeType)
                 if (node.nodeType === Node.TEXT_NODE) {
                     return /\$\{.*?\}/g.test(StringUtils.deleteEnter((node as Text).data ?? '')) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                 } else if (node.nodeType === Node.ELEMENT_NODE) {
-                    return (node as Element).getAttributeNames().filter(it => RawSet.DR_ATTRIBUTES.includes(it.toLowerCase())).length > 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                    const element = node as Element;
+                    // const targetTagNames = (config?.targets?.map(it => it.tagName) ?? []).concat(RawSet.DR_TAGS);
+                    const targetAttrNames = (config?.targets?.map(it => it.attrName) ?? []).concat(RawSet.DR_ATTRIBUTES);
+                    const isAttr = element.getAttributeNames().filter(it => targetAttrNames.includes(it.toLowerCase())).length > 0;
+                    // const isTag = targetTagNames.includes(element.tagName.toLowerCase()); // || isTag
+                    return (isAttr) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                 }
                 return NodeFilter.FILTER_REJECT;
             }
@@ -242,31 +264,31 @@ export class RawSet {
     //     })
     // }
 
-    public static targetNodes(target: Node) {
-        const nodeIterator = this.targetNodeIterator(target);
-        const pars: Node[] = [];
-        let currentNode;
-        // eslint-disable-next-line no-cond-assign
-        while (currentNode = nodeIterator.nextNode()) {
-            pars.push(currentNode);
-        }
-        return pars;
-    }
+    // public static targetNodes(target: Node) {
+    //     const nodeIterator = this.targetNodeIterator(target);
+    //     const pars: Node[] = [];
+    //     let currentNode;
+    //     // eslint-disable-next-line no-cond-assign
+    //     while (currentNode = nodeIterator.nextNode()) {
+    //         pars.push(currentNode);
+    //     }
+    //     return pars;
+    // }
 
-    public static targetNodeIterator(target: Node) {
-        const nodeIterator = document.createNodeIterator(target, NodeFilter.SHOW_ALL, {
-            acceptNode(node) {
-                // console.log('node type-->', node.nodeType)
-                if (node.nodeType === Node.TEXT_NODE) {
-                    return /\$\{.*?\}/g.test(StringUtils.deleteEnter((node as Text).data ?? '')) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
-                } else if (node.nodeType === Node.ELEMENT_NODE) {
-                    return (node as Element).getAttributeNames().filter(it => RawSet.DR_ATTRIBUTES.includes(it.toLowerCase())).length > 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
-                }
-                return NodeFilter.FILTER_REJECT;
-            }
-        });
-        return nodeIterator;
-    }
+    // public static targetNodeIterator(target: Node) {
+    //     const nodeIterator = document.createNodeIterator(target, NodeFilter.SHOW_ALL, {
+    //         acceptNode(node) {
+    //             // console.log('node type-->', node.nodeType)
+    //             if (node.nodeType === Node.TEXT_NODE) {
+    //                 return /\$\{.*?\}/g.test(StringUtils.deleteEnter((node as Text).data ?? '')) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    //             } else if (node.nodeType === Node.ELEMENT_NODE) {
+    //                 return (node as Element).getAttributeNames().filter(it => RawSet.DR_ATTRIBUTES.includes(it.toLowerCase())).length > 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    //             }
+    //             return NodeFilter.FILTER_REJECT;
+    //         }
+    //     });
+    //     return nodeIterator;
+    // }
 
     // public static checkPointCreate(node: Node): RawSet {
     //     const uuid = RandomUtils.uuid()
