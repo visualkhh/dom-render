@@ -11,6 +11,7 @@ class User {
     // name: string;
     cnt: number = 0;
     cnt1 = 0;
+    dan = 1;
     // cnt2 = 0;
     // cnt3 = 0;
     data = {

@@ -7,20 +7,18 @@
     <title>simple-boot-front</title>
 </head>
 <body id="app">
-    <div>
-        <div dr-if="true">
-            aa [${this.cnt1}]
-        </div>
-        <button dr-event-click="alert(this.cnt)">ss ${this.cnt} ssss</button>
-        <div dr-for-of="[1,2,3]">
-            <div>
-            <button dr-event-click="alert(1)">ss #it# ssss</button>
-            </div>
-             ${this.cnt} #it#
-            <div dr-if="this.cnt === 646">666</div>
-        </div>
+    <h1>${this.dan}단</h1>
+    <div dr-for="var i = 1 ; i <= 9; i++" dr-it="i">
+        ${this.dan} * #it# = ${this.dan * #it#}
     </div>
-<script src="./src/index.ts"></script>
+
+    <div>
+        구구단
+        <select dr-event-change="this.dan = ($target.options[$target.selectedIndex].value)">
+            <option dr-for="var i = 1 ; i <= 9; i++" dr-it="i">#it#</option>
+        </select>
+    </div>
+    <script src="./src/index.ts"></script>
 </body>
 </html>
 

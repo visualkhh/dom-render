@@ -16,6 +16,7 @@ export class RawSet {
     // public static readonly DR_ELEMENTS = [RawSet.DR_SCRIPT_ELEMENTNAME];
 
     public static readonly DR_IT_OPTIONNAME = 'dr-it';
+    public static readonly DR_DECLARATION_OPTIONNAME = 'dr-declaration';
     public static readonly DR_STRIP_OPTIONNAME = 'dr-strip';
     // public static readonly DR_PARAMETER_OPTIONNAME = 'dr-parameter';
     // public static readonly DR_THIS_OPTIONNAME = 'dr-this';
@@ -58,6 +59,7 @@ export class RawSet {
                 const drForOf = this.getAttributeAndDelete(element, RawSet.DR_FOR_OF_NAME);
                 const drThis = this.getAttributeAndDelete(element, RawSet.DR_THIS_NAME);
                 const drItOption = this.getAttributeAndDelete(element, RawSet.DR_IT_OPTIONNAME);
+                const drDeclarationOption = this.getAttributeAndDelete(element, RawSet.DR_DECLARATION_OPTIONNAME);
                 const drStripOption = this.getAttributeAndDelete(element, RawSet.DR_STRIP_OPTIONNAME) === 'true';
                 if (drIf) {
                     const r = ScriptUtils.eval(`return ${drIf}`, obj);
@@ -100,6 +102,12 @@ export class RawSet {
                         if (destIt) {
                             n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
                         }
+                        var destDeclaration = ${drDeclarationOption};
+                        if (destDeclaration) {
+                            for (const [key, value] of Object.entries(destDeclaration)) {
+                                n.innerHTML = n.innerHTML.replace(RegExp('#'+key+'#', 'g'), value);
+                            }
+                        }
                         if (this.__drStripOption) {
                             Array.from(n.childNodes).forEach(it => this.__fag.append(it));
                         } else {
@@ -124,8 +132,17 @@ export class RawSet {
                         } else {
                             destIt = forOfStr + '[' + i +']'
                         }
+                        
                         const n = this.__element.cloneNode(true);
                         n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
+                        
+                        var destDeclaration = ${drDeclarationOption};
+                        if (destDeclaration) {
+                            for (const [key, value] of Object.entries(destDeclaration)) {
+                                n.innerHTML = n.innerHTML.replace(RegExp('#'+key+'#', 'g'), value);
+                            }
+                        }
+                        
                         if (this.__drStripOption) {
                             Array.from(n.childNodes).forEach(it => this.__fag.append(it));
                         } else {
