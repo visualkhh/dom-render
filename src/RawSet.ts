@@ -229,12 +229,6 @@ export class RawSet {
             const fragment = document.createDocumentFragment();
             const start = document.createComment(`start ${uuid}`)
             const end = document.createComment(`end ${uuid}`)
-            // const content = document.createComment('');
-            // if (currentNode.nodeType === Node.ELEMENT_NODE) {
-            //     content.data = (currentNode as Element).outerHTML;
-            // } else if (currentNode.nodeType === Node.TEXT_NODE) {
-            //     content.data = currentNode.textContent ?? '';
-            // }
             currentNode?.parentNode?.insertBefore(start, currentNode);
             // currentNode?.parentNode?.insertBefore(content, currentNode);
             currentNode?.parentNode?.insertBefore(end, currentNode.nextSibling);

@@ -1,6 +1,5 @@
 import {RawSet} from './RawSet';
 import {eventManager} from './events/EventManager';
-import { ConstructorType } from 'types/Types';
 import { Config } from 'Config';
 
 export type RefType = { obj: object };
@@ -9,10 +8,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     public _domRender_ref = new Map<object, Set<string>>()
     public _rawSets = new Map<string, Set<RawSet>>()
     public _domRender_proxy?: T;
-
-    // public _rawsSetAll: RawSet[] = [];
     constructor(public _domRender_origin: T, public target?: Node, private config?: Config) {
-
     }
 
     public run(objProxy: T) {
@@ -94,23 +90,6 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         }
     }
 
-    // public createAddTemplate(target: Element) {
-    //     const point = document.createComment('');
-    //     target.before(point)
-    //     this.replaceTemplate(point, this.createTemplate(target));
-    // }
-    //
-    // public createTemplate(target: Element): HTMLTemplateElement {
-    //     const template = document.createElement('template')
-    //     template.content.append(target);
-    //     return template;
-    // }
-    //
-    // public replaceTemplate(target: Node, template: HTMLTemplateElement) {
-    //     // console.log(template.innerHTML)
-    //     target.parentNode?.replaceChild(template, target);
-    // }
-
     public set(target: T, p: string | symbol, value: any, receiver: T): boolean {
         // console.log('set-->', p, target, value, receiver);
         if (typeof p === 'string') {
@@ -127,11 +106,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         // console.log('get-->', target, p, receiver);
         if (p === '_DomRender_origin') {
             return this._domRender_origin;
-        } else
-            // if (p === '_DomRender_selector') {
-            //     return this.selector;
-            // }
-        if (p === '_DomRender_ref') {
+        } else if (p === '_DomRender_ref') {
             return this._domRender_ref;
         } else if (p === '_DomRender_proxy') {
             return this;
@@ -145,21 +120,12 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     proxy(parentProxy: T, obj: T | any, p: string) {
-        // console.log('proxy-->', p)
-        // const ignoreFields = ['_domRender_ref'];
-        // if (ignoreFields.includes(p)) {
-        //     return obj;
-        // }
         if (obj !== undefined && obj !== null && typeof obj === 'object' && !('_DomRender_isProxy' in obj)) {
             const domRender = new DomRenderProxy(obj);
             domRender.addRef(parentProxy, p);
             const proxy = new Proxy(obj, domRender);
             domRender.run(proxy);
             return proxy
-            // } else if (obj !== undefined && obj !== null && typeof obj === 'object' && ('_DomRender_isProxy' in obj)) {
-            //     const d = (obj as any)._DomRender_proxy as DomRender<T>
-            //     d.addRef(parent, p);
-            //     return obj;
         } if (obj !== undefined && obj !== null && typeof obj === 'object' && ('_DomRender_isProxy' in obj)) {
             const d = (obj as any)._DomRender_proxy as DomRenderProxy<T>
             d.addRef(this._domRender_proxy!, p);

@@ -1,5 +1,4 @@
 import {DomRenderProxy} from './DomRenderProxy';
-import { ConstructorType } from 'types/Types';
 import { Config } from 'Config';
 
 export class DomRender {
@@ -9,5 +8,4 @@ export class DomRender {
         domRender.run(dest);
         return dest;
     }
-
 }

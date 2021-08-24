@@ -1,5 +1,3 @@
-// import { Config } from '../Config';
-
 import { Config } from 'Config';
 
 export const eventManager = new class {
@@ -19,7 +17,7 @@ export const eventManager = new class {
         });
     }
 
-    public findAttrElements(fragment: DocumentFragment | Element,config?: Config) {
+    public findAttrElements(fragment: DocumentFragment | Element, config?: Config) {
         const datas: {name: string, value: string | null, element: Element}[] = [];
         const addAttributes = config?.applyEvents?.map(it => it.attrName) ?? [];
         addAttributes.concat(this.attrNames).forEach(attrName => {
@@ -128,11 +126,6 @@ export const eventManager = new class {
                 }
             }
         })
-
-        // if (config?.changeVar && varName) {
-        //     // config?.changeVar?.(obj, elements.filter(it => it.nodeType === 1).map(it => it as Element), varName!);
-        //     config.changeVar(obj, elements.filter(it => it.nodeType === 1).map(it => it as Element), varName!);
-        // }
     }
 
     public addDrEvent(obj: any, eventName: string, elements: Element[]) {
@@ -172,11 +165,8 @@ export const eventManager = new class {
     }
 
     public getValue<T = any>(obj: any, name: string, value?: any): T {
-        // let r = thisAny[name] ?? this._originObj[name];
         let r = obj[name];
-        // console.log('-------r', r, obj)
         if (typeof r === 'function') {
-            // r = r.bind(thisAny[name] ? thisAny : this._originObj);
             r = r.bind(obj);
         }
         return r;
@@ -221,7 +211,6 @@ export const eventManager = new class {
             varExec = varRegex.exec(varExec.input)
         }
         const strings = Array.from(usingVars);
-        // console.log('usingVar-->', strings)
         return strings;
     }
 }();
