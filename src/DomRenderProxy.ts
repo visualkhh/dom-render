@@ -17,9 +17,14 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         if (obj) {
             Object.keys(obj).forEach(it => {
                 const target = (obj as any)[it]
-                if (this.config?.proxyExcludeTyps?.filter(it => target instanceof it).length === 0) {
-                    const proxyAfter = this.proxy(objProxy, target, it);
-                    (obj as any)[it] = proxyAfter;
+                if (target !== undefined && target !== null && typeof target === 'object') {
+                    if (this.config?.proxyExcludeTyps?.filter(it => target instanceof it).length === 0) {
+                        // console.log('proxy exclude-notAt-', target, this.config?.proxyExcludeTyps)
+                        const proxyAfter = this.proxy(objProxy, target, it);
+                        (obj as any)[it] = proxyAfter;
+                    } else {
+                        // console.log('proxy exclude-target-', target, this.config?.proxyExcludeTyps)
+                    }
                 }
             })
         }
@@ -121,6 +126,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
 
     proxy(parentProxy: T, obj: T | any, p: string) {
         if (obj !== undefined && obj !== null && typeof obj === 'object' && !('_DomRender_isProxy' in obj)) {
+            console.log('proxyyyyyyyy->', obj)
             const domRender = new DomRenderProxy(obj);
             domRender.addRef(parentProxy, p);
             const proxy = new Proxy(obj, domRender);
@@ -147,11 +153,23 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             this._rawSets.set(path, new Set<RawSet>());
         }
         this._rawSets.get(path)?.add(rawSet)
+        this.garbageRawSet();
     }
 
     public removeRawSet(raws: RawSet) {
         this._rawSets.forEach(it => {
             it.delete(raws)
+        })
+        this.garbageRawSet();
+    }
+
+    public garbageRawSet() {
+        this._rawSets.forEach(it => {
+            it.forEach(sit => {
+                if (!sit.isConnected) {
+                    it.delete(sit);
+                }
+            })
         })
     }
 }

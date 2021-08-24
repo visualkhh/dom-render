@@ -67,7 +67,7 @@ export class RawSet {
                     const r = ScriptUtils.eval(`return ${drIf}`, obj);
                     if (r) {
                         Array.from(element.childNodes).forEach(it => fag.append(it));
-                        const rr = RawSet.checkPointCreates(fag);
+                        const rr = RawSet.checkPointCreates(fag, config);
                         if (drStripOption) {
                             element.parentNode?.replaceChild(fag, element);
                         } else {
@@ -89,7 +89,7 @@ export class RawSet {
                         } else {
                             fag.append(n)
                         }
-                        const rr = RawSet.checkPointCreates(fag)
+                        const rr = RawSet.checkPointCreates(fag, config)
                         element.parentNode?.replaceChild(fag, element);
                         raws.push(...rr)
                     } else {
@@ -116,7 +116,7 @@ export class RawSet {
                             this.__fag.append(n);
                         }
                     }`, Object.assign({__drStripOption: drStripOption, __fag: fag, __element: element}, obj));
-                    const rr = RawSet.checkPointCreates(fag)
+                    const rr = RawSet.checkPointCreates(fag, config)
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr)
                 }
@@ -152,7 +152,7 @@ export class RawSet {
                         }
                         i++;
                     }`, Object.assign({__drStripOption: drStripOption, __fag: fag, __element: element}, obj));
-                    const rr = RawSet.checkPointCreates(fag)
+                    const rr = RawSet.checkPointCreates(fag, config)
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr)
                 }
@@ -165,7 +165,7 @@ export class RawSet {
                         const documentFragment = it.callBack(element, attrValue, obj);
                         if (documentFragment) {
                             fag.append(documentFragment)
-                            const rr = RawSet.checkPointCreates(fag)
+                            const rr = RawSet.checkPointCreates(fag, config)
                             element.parentNode?.replaceChild(fag, element);
                             raws.push(...rr)
                         }
