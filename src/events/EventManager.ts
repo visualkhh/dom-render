@@ -77,7 +77,7 @@ export const eventManager = new class {
             }
         })
         this.changeVar(obj, elements, undefined);
-        // console.log('eventManager-applyEvent-->', config?.applyEvent)
+        console.log('eventManager-applyEvent-->', config?.applyEvents)
         elements.forEach(it => {
             config?.applyEvents?.filter(ta => it.getAttribute(ta.attrName)).forEach(ta => ta.callBack(it, it.getAttribute(ta.attrName)!, obj))
         });

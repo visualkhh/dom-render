@@ -35,9 +35,9 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
 
     public initRender(target: Node) {
         const rawSets = RawSet.checkPointCreates(target, this.config);
-        const findAttrElements = eventManager.findAttrElements(this.target as Element, this.config).map(it => it.element);
-        // console.log('-->', this, this._domRender_proxy)
-        eventManager.applyEvent(this._domRender_proxy, findAttrElements)
+        const findAttrElements = eventManager.findAttrElements(target as Element, this.config).map(it => it.element);
+        // console.log('-initRender-->->', findAttrElements)
+        eventManager.applyEvent(this._domRender_proxy, findAttrElements, this.config)
         rawSets.forEach(it => {
             const strings = it.getUsingTriggerVariables(this.config);
             if (strings.size <= 0) {

@@ -207,6 +207,7 @@ export class RawSet {
                     const targetAttrNames = (config?.targets?.map(it => it.attrName) ?? []).concat(RawSet.DR_ATTRIBUTES);
                     const isAttr = element.getAttributeNames().filter(it => targetAttrNames.includes(it.toLowerCase())).length > 0;
                     // const isTag = targetTagNames.includes(element.tagName.toLowerCase()); // || isTag
+                    // console.log('--->', element, element.getAttributeNames(), targetAttrNames)
                     return (isAttr) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                 }
                 return NodeFilter.FILTER_REJECT;
@@ -216,9 +217,13 @@ export class RawSet {
         let currentNode;
         // eslint-disable-next-line no-cond-assign
         while (currentNode = nodeIterator.nextNode()) {
-            // console.log('checkPointCreates', element, currentNode)
+            // console.log('checkPointCreates', element, element.getAtt)
             // if (currentNode.nodeType === Node.TEXT_NODE && currentNode.textContent) {
             //     currentNode.textContent = currentNode.textContent?.replace(/\$\{.*?\}/g, '<b>$1</b>');
+            // }
+            // if (currentNode.nodeType === Node.ELEMENT_NODE) {
+            //     const element = (currentNode as Element)
+            //     console.log('checkPointCreates->', element, element.getAttributeNames())
             // }
             const uuid = RandomUtils.uuid()
             const fragment = document.createDocumentFragment();
