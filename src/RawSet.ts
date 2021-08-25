@@ -86,40 +86,7 @@ export class RawSet {
                 if (drThis) {
                     const r = ScriptUtils.eval(`return ${drThis}`, obj);
                     if (r) {
-                        const n = element.cloneNode(true) as Element;
-                        const thisRandom = RandomUtils.uuid()
-                        const thisRegex = /(?<!(dr-|\.))this(?=.?)/g;
-                        // const superRegex = /(?<!(dr-|\.))super(?=.?)/g;
-                        // const superRandom = RandomUtils.uuid()
-                        const vars = (drVarOption?.split(',') ?? []).map(it => {
-                            const s = it.trim().split('=');
-                            return {name: s[0], value: s[1], regex: RegExp('(?<!(dr-|\\.))var\\.' + s[0] + '(?=.?)', 'g'), random: RandomUtils.uuid()}
-                        })
-                        // console.log('before--', n.innerHTML, vars)
-                        n.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
-                            it.innerHTML = it.innerHTML.replace(thisRegex, thisRandom); // .replace(superRegex, superRandom);
-                            vars.filter(vit => vit.value && vit.name).forEach(vit => {
-                                it.innerHTML = it.innerHTML.replace(vit.regex, vit.random);
-                            })
-                        });
-
-                        n.innerHTML = n.innerHTML.replace(thisRegex, `${drThis}`); // .replace(superRegex, drSuperOption ?? '');
-                        vars.filter(vit => vit.value && vit.name).forEach(vit => {
-                            n.innerHTML = n.innerHTML.replace(vit.regex, vit.value);
-                        })
-
-                        n.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
-                            it.innerHTML = it.innerHTML.replace(RegExp(thisRandom, 'g'), 'this'); // .replace(RegExp(superRandom, 'g'), 'super');
-                            vars.filter(vit => vit.value && vit.name).forEach(vit => {
-                                it.innerHTML = it.innerHTML.replace(RegExp(vit.random, 'g'), vit.value);
-                            })
-                        });
-                        // console.log('after--', n.innerHTML, vars)
-                        if (drStripOption) {
-                            Array.from(n.childNodes).forEach(it => fag.append(it));
-                        } else {
-                            fag.append(n)
-                        }
+                        fag.append(RawSet.thisCreate(element, drThis, drVarOption ?? '', drStripOption, obj))
                         const rr = RawSet.checkPointCreates(fag, config)
                         element.parentNode?.replaceChild(fag, element);
                         raws.push(...rr)
@@ -386,4 +353,43 @@ export class RawSet {
     //         end
     //     }, fragment)
     // }
+    public static thisCreate(element: Element, drThis: string, drVarOption: string, drStripOption: boolean, obj: any) {
+        const fag = document.createDocumentFragment();
+        const n = element.cloneNode(true) as Element;
+        const thisRandom = RandomUtils.uuid()
+        const thisRegex = /(?<!(dr-|\.))this(?=.?)/g;
+        // const superRegex = /(?<!(dr-|\.))super(?=.?)/g;
+        // const superRandom = RandomUtils.uuid()
+        const vars = (drVarOption?.split(',') ?? []).map(it => {
+            const s = it.trim().split('=');
+            return {name: s[0], value: s[1], regex: RegExp('(?<!(dr-|\\.))var\\.' + s[0] + '(?=.?)', 'g'), random: RandomUtils.uuid()}
+        })
+        // console.log('before--', n.innerHTML, vars)
+        n.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
+            it.innerHTML = it.innerHTML.replace(thisRegex, thisRandom); // .replace(superRegex, superRandom);
+            vars.filter(vit => vit.value && vit.name).forEach(vit => {
+                it.innerHTML = it.innerHTML.replace(vit.regex, vit.random);
+            })
+        });
+
+        n.innerHTML = n.innerHTML.replace(thisRegex, `${drThis}`); // .replace(superRegex, drSuperOption ?? '');
+        vars.filter(vit => vit.value && vit.name).forEach(vit => {
+            n.innerHTML = n.innerHTML.replace(vit.regex, vit.value);
+        })
+
+        n.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
+            it.innerHTML = it.innerHTML.replace(RegExp(thisRandom, 'g'), 'this'); // .replace(RegExp(superRandom, 'g'), 'super');
+            vars.filter(vit => vit.value && vit.name).forEach(vit => {
+                it.innerHTML = it.innerHTML.replace(RegExp(vit.random, 'g'), vit.value);
+            })
+        });
+        // console.log('after--', n.innerHTML, vars)
+        if (drStripOption) {
+            Array.from(n.childNodes).forEach(it => fag.append(it));
+        } else {
+            fag.append(n)
+        }
+
+        return fag;
+    }
 }
