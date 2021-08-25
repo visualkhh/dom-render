@@ -277,20 +277,20 @@ export class RawSet {
     }
 
     // eslint-disable-next-line no-undef
-    public findChilds(callBack?: (it: ChildNode) => void) {
-        // eslint-disable-next-line no-undef
-        const nodes: ChildNode[] = [];
-        let next = this.point.start.nextSibling;
-        console.log('-vvvvv-->', this.point.start, this.point.end)
-        // while (next) {
-        //     if (next === this.point.end) {
-        //         break;
-        //     }
-        //     // nodes.push(next);
-        //     next = this.point.start.nextSibling;
-        // }
-        return nodes;
-    }
+    // public findChilds(callBack?: (it: ChildNode) => void) {
+    //     // eslint-disable-next-line no-undef
+    //     const nodes: ChildNode[] = [];
+    //     let next = this.point.start.nextSibling;
+    //     console.log('-vvvvv-->', this.point.start, this.point.end)
+    //     // while (next) {
+    //     //     if (next === this.point.end) {
+    //     //         break;
+    //     //     }
+    //     //     // nodes.push(next);
+    //     //     next = this.point.start.nextSibling;
+    //     // }
+    //     return nodes;
+    // }
 
     public childAllRemove() {
         let next = this.point.start.nextSibling;

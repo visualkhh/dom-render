@@ -44,10 +44,9 @@ export const eventManager = new class {
             const script = attribute;
             // eslint-disable-next-line no-new-func
             const data = Function(`"use strict"; ${script} `).bind(Object.assign(obj))() ?? {};
-            console.log('???????????', script, data, it.value)
             if (it.value !== data) {
+                it.value = data;
             }
-            it.value = data;
         })
 
         // on-init event
@@ -89,10 +88,10 @@ export const eventManager = new class {
 
     // eslint-disable-next-line no-undef
     public changeVar(obj: any, elements: Set<Element> | Set<ChildNode>, varName?: string) { // , config?: Config
-        console.log('-changeVar-->', obj, elements, varName)
+        // console.log('-changeVar-->', obj, elements, varName)
         // value-link event
         this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'value-link', (it, attribute) => {
-            console.log('-------?')
+            // console.log('-------?')
             if (attribute && attribute === varName) {
                 if (typeof this.getValue(obj, attribute) === 'function') {
                     this.getValue(obj, attribute)(it.value);
