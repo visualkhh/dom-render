@@ -8,6 +8,11 @@ export class ScriptUtils {
             constructor(public prefix?: string) {
             }
 
+            set(target: any, p: string | symbol, value: any, receiver: any): boolean {
+                console.log('-------set-->', target, p, value)
+                return true;
+            }
+
             get(target: any, p: string | symbol, receiver: any): any {
                 let items;
                 if (typeof p === 'string') {
@@ -29,6 +34,10 @@ export class ScriptUtils {
             console.error(e);
         }
         return usingVars;
+    }
+
+    public static evalReturn(script: string, thisTarget: any): any {
+        return this.eval('return ' + script, thisTarget);
     }
 
     public static eval(script: string, thisTarget: any): any {

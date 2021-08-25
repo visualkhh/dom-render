@@ -7,16 +7,21 @@
     <title>simple-boot-front</title>
 </head>
 <body id="app">
-    <h1>${this.dan}단</h1>
-    <div dr-for="var i = 1 ; i <= 9; i++" dr-it="i">
-        ${this.dan} * #it# = ${this.dan * #it#}
-    </div>
-
-    <div>
-        구구단
-        <select dr-event-change="this.dan = ($target.options[$target.selectedIndex].value)">
-            <option dr-for="var i = 1 ; i <= 9; i++" dr-it="i">#it#</option>
-        </select>
+    <div dr-this="this.data">
+        ${this.name}
+        <button dr-event-click="console.log(this.name); this.name ='vvv'">change</button>
+        <button dr-event-click="this.addr.first='zzzzz' ">change</button>
+<!--        <div dr-this="this.addr"></div>-->
+<!--        ${this}-->
+        <div dr-this="this.addr" dr-var="super=this">
+<!--            <hr tt="varccc.super.name">-->
+            <div dr-if="true">
+            <input type="text" dr-value="return this.first">
+            <input type="text" dr-value="return var.super.name" dr-value-link="var.super.name">
+            ${var.super.name}
+            ${this.first}
+            </div>
+        </div>
     </div>
     <script src="./src/index.ts"></script>
 </body>

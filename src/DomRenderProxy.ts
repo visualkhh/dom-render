@@ -1,6 +1,7 @@
 import {RawSet} from './RawSet';
 import {eventManager} from './events/EventManager';
 import { Config } from 'Config';
+import {ScriptUtils} from './utils/script/ScriptUtils';
 
 export type RefType = { obj: object };
 
@@ -8,7 +9,11 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     public _domRender_ref = new Map<object, Set<string>>()
     public _rawSets = new Map<string, Set<RawSet>>()
     public _domRender_proxy?: T;
-    constructor(public _domRender_origin: T, public target?: Node, private config?: Config) {
+    public _targets = new Set<Node>();
+    constructor(public _domRender_origin: T, target?: Node, private config?: Config) {
+        if (target) {
+            this._targets.add(target);
+        }
     }
 
     public run(objProxy: T) {
@@ -18,27 +23,26 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             Object.keys(obj).forEach(it => {
                 const target = (obj as any)[it]
                 if (target !== undefined && target !== null && typeof target === 'object') {
-                    if (this.config?.proxyExcludeTyps?.filter(it => target instanceof it).length === 0) {
+                    const filter = this.config?.proxyExcludeTyps?.filter(it => target instanceof it) ?? []
+                    if (filter.length === 0) {
                         // console.log('proxy exclude-notAt-', target, this.config?.proxyExcludeTyps)
                         const proxyAfter = this.proxy(objProxy, target, it);
                         (obj as any)[it] = proxyAfter;
-                    } else {
-                        // console.log('proxy exclude-target-', target, this.config?.proxyExcludeTyps)
                     }
                 }
             })
         }
 
-        if (this.target) {
-            this.initRender(this.target);
-        }
+        this._targets.forEach(target => {
+            this.initRender(target);
+        });
     }
 
     public initRender(target: Node) {
+        this._targets.add(target)
         const rawSets = RawSet.checkPointCreates(target, this.config);
-        const findAttrElements = eventManager.findAttrElements(target as Element, this.config).map(it => it.element);
         // console.log('-initRender-->->', findAttrElements)
-        eventManager.applyEvent(this._domRender_proxy, findAttrElements, this.config)
+        eventManager.applyEvent(this._domRender_proxy, eventManager.findAttrElements(target as Element, this.config), this.config)
         rawSets.forEach(it => {
             const strings = it.getUsingTriggerVariables(this.config);
             if (strings.size <= 0) {
@@ -60,6 +64,16 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             it.getUsingTriggerVariables(this.config).forEach(path => this.addRawSet(path, it))
             if (it.point.start.isConnected && it.point.start.isConnected) {
                 const rawSets = it.render(this._domRender_proxy, this.config);
+                // const thisRawSet = rawSets.filter(it => !it.thisObjPath)
+                rawSets.forEach(it => console.log('---->', it))
+                // rawSets.filter(it => it.thisObjPath).forEach(it => {
+                //     const childTarget = ScriptUtils.evalReturn(it.thisObjPath!, this._domRender_proxy);
+                //     it.thisObjPath = undefined;
+                //     console.log('objThisPath-->', it)
+                //     childTarget?._DomRender_proxy?.addRawSetAndRender('', it)
+                // })
+                // console.log('-----', thisRawSet, this._domRender_proxy)
+                // this.render(thisRawSet);
                 this.render(rawSets);
             } else {
                 this.removeRawSet(it)
@@ -80,18 +94,23 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             const strings = paths.reverse();
             for (let i = strings.length; i >= 0; i--) {
                 const pathString = strings.slice(0, i).join('.');
-                // const pathString = strings.join('.');
-                // let zi = 0;
-                // this._rawSets.forEach(it => zi++);
-                // console.log('change var path', pathString, this._domRender_ref.size, zi)
                 if (pathString) {
                     const iterable = this._rawSets.get(pathString);
                     if (iterable) {
                         this.render(Array.from(iterable));
+                        // console.log('-----change var', pathString, iterable)
                         break;
                     }
                 }
             }
+            // console.log('---targets->', this._targets)
+            const pathStr = strings.join('.');
+            this._targets.forEach(it => {
+                if (it.nodeType === Node.DOCUMENT_FRAGMENT_NODE || it.nodeType === Node.ELEMENT_NODE) {
+                    const targets = eventManager.findAttrElements((it as DocumentFragment | Element), this.config);
+                    eventManager.changeVar(this._domRender_proxy, targets, `this.${pathStr}`)
+                }
+            })
         }
     }
 
@@ -126,8 +145,8 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
 
     proxy(parentProxy: T, obj: T | any, p: string) {
         if (obj !== undefined && obj !== null && typeof obj === 'object' && !('_DomRender_isProxy' in obj)) {
-            console.log('proxyyyyyyyy->', obj)
-            const domRender = new DomRenderProxy(obj);
+            // console.log('proxyyyyyyyy->', obj)
+            const domRender = new DomRenderProxy(obj, undefined, this.config);
             domRender.addRef(parentProxy, p);
             const proxy = new Proxy(obj, domRender);
             domRender.run(proxy);
@@ -148,12 +167,16 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         this._domRender_ref.get(parent)?.add(path)
     }
 
+    public addRawSetAndRender(path: string, rawSet: RawSet) {
+        this.addRawSet(path, rawSet);
+        this.render([rawSet])
+    }
+
     public addRawSet(path: string, rawSet: RawSet) {
         if (!this._rawSets.get(path)) {
             this._rawSets.set(path, new Set<RawSet>());
         }
         this._rawSets.get(path)?.add(rawSet)
-        this.garbageRawSet();
     }
 
     public removeRawSet(raws: RawSet) {
@@ -164,6 +187,12 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public garbageRawSet() {
+        this._targets.forEach(it => {
+            if (!it.isConnected) {
+                this._targets.delete(it);
+            }
+        })
+
         this._rawSets.forEach(it => {
             it.forEach(sit => {
                 if (!sit.isConnected) {

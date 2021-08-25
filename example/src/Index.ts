@@ -40,25 +40,26 @@ const target = document.querySelector('#app')
 if (target) {
     const dest = DomRender.run(user, target);
     console.log('destUser', dest)
-    setTimeout(() => {
-    //     // destUser.data.name = '55';
-    //     dest.cnt = 55
-        dest.cnt = 4
-        dest.cnt1 = 44
-        dest.friends[0].cnt = 66
-        dest.friends[1].cnt = 646
-        dest.friends.push(new User(7, '77'))
-        // dest.cnt1 = 55
-    //     // destUser.data = {name: 'vvvv', addr: {first: 'z', last: 'vv', street: 'aa'}}
-    //     console.log('pp', dest)
-    //     // destUser.data.addr.last = '55';
-    //     // destUser.data1.addr.first = '5255';
-    }, 3000);
+    // setTimeout(() => {
+    // //     // destUser.data.name = '55';
+    // //     dest.cnt = 55
+    //     dest.cnt = 4
+    //     dest.cnt1 = 44
+    //     dest.friends[0].cnt = 66
+    //     dest.friends[1].cnt = 646
+    //     dest.friends.push(new User(7, '77'))
+    //     // dest.cnt1 = 55
+    // //     // destUser.data = {name: 'vvvv', addr: {first: 'z', last: 'vv', street: 'aa'}}
+    // //     console.log('pp', dest)
+    // //     // destUser.data.addr.last = '55';
+    // //     // destUser.data1.addr.first = '5255';
+    // }, 3000);
 
-    setTimeout(() => {
-        dest.cnt = 10
-        dest.cnt1 = 50
-    }, 6000);
+    // setTimeout(() => {
+    //     console.log('----dest', dest)
+    // //     dest.cnt = 10
+    // //     dest.cnt1 = 50
+    // }, 6000);
     // setTimeout(() => {
     //     // destUser.data.name = '55';
     //     dest.cnt1 = 15

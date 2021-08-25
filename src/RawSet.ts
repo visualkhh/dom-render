@@ -2,7 +2,7 @@ import {RandomUtils} from './utils/random/RandomUtils';
 import {StringUtils} from './utils/string/StringUtils';
 import {ScriptUtils} from './utils/script/ScriptUtils';
 import {eventManager} from './events/EventManager';
-import { Config } from 'Config';
+import {Config} from 'Config';
 
 export class RawSet {
     public static readonly DR_IF_NAME = 'dr-if';
@@ -17,14 +17,16 @@ export class RawSet {
     public static readonly DR_TAGS = [];// RawSet.DR_SCRIPT_ELEMENTNAME
 
     public static readonly DR_IT_OPTIONNAME = 'dr-it';
+    // public static readonly DR_SUPER_OPTIONNAME = 'dr-super';
     public static readonly DR_DECLARATION_OPTIONNAME = 'dr-declaration';
+    public static readonly DR_VAR_OPTIONNAME = 'dr-var';
     public static readonly DR_STRIP_OPTIONNAME = 'dr-strip';
     // public static readonly DR_PARAMETER_OPTIONNAME = 'dr-parameter';
     // public static readonly DR_THIS_OPTIONNAME = 'dr-this';
     // public static readonly DR_CONTENT_OPTIONNAME = 'dr-content';
     public static readonly DR_ATTRIBUTES = [RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME];
 
-    constructor(public point: { start: Comment, end: Comment }, public fragment: DocumentFragment) {
+    constructor(public point: { start: Comment, end: Comment }, public fragment: DocumentFragment) { // , public thisObjPath?: string
     }
 
     get isConnected() {
@@ -45,7 +47,7 @@ export class RawSet {
         return usingTriggerVariables;
     }
 
-    public render(obj: any, config?: Config) {
+    public render(obj: any, config?: Config): RawSet[] {
         const genNode = document.importNode(this.fragment, true);
         const raws: RawSet[] = [];
         genNode.childNodes.forEach((cNode, key) => {
@@ -62,9 +64,11 @@ export class RawSet {
                 const drThis = this.getAttributeAndDelete(element, RawSet.DR_THIS_NAME);
                 const drItOption = this.getAttributeAndDelete(element, RawSet.DR_IT_OPTIONNAME);
                 const drDeclarationOption = this.getAttributeAndDelete(element, RawSet.DR_DECLARATION_OPTIONNAME);
+                // const drSuperOption = this.getAttributeAndDelete(element, RawSet.DR_SUPER_OPTIONNAME);
+                const drVarOption = this.getAttributeAndDelete(element, RawSet.DR_VAR_OPTIONNAME);
                 const drStripOption = this.getAttributeAndDelete(element, RawSet.DR_STRIP_OPTIONNAME) === 'true';
                 if (drIf) {
-                    const r = ScriptUtils.eval(`return ${drIf}`, obj);
+                    const r = ScriptUtils.evalReturn(drIf, obj);
                     if (r) {
                         Array.from(element.childNodes).forEach(it => fag.append(it));
                         const rr = RawSet.checkPointCreates(fag, config);
@@ -75,7 +79,7 @@ export class RawSet {
                         }
                         raws.push(...rr)
                     } else {
-                        cNode.remove();
+                        element.remove();
                     }
                 }
 
@@ -83,7 +87,34 @@ export class RawSet {
                     const r = ScriptUtils.eval(`return ${drThis}`, obj);
                     if (r) {
                         const n = element.cloneNode(true) as Element;
-                        n.innerHTML = n.innerHTML.replace(/this/g, `${drThis}`);
+                        const thisRandom = RandomUtils.uuid()
+                        const thisRegex = /(?<!(dr-|\.))this(?=.?)/g;
+                        // const superRegex = /(?<!(dr-|\.))super(?=.?)/g;
+                        // const superRandom = RandomUtils.uuid()
+                        const vars = (drVarOption?.split(',') ?? []).map(it => {
+                            const s = it.trim().split('=');
+                            return {name: s[0], value: s[1], regex: RegExp('(?<!(dr-|\\.))var\\.' + s[0] + '(?=.?)', 'g'), random: RandomUtils.uuid()}
+                        })
+                        // console.log('before--', n.innerHTML, vars)
+                        n.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
+                            it.innerHTML = it.innerHTML.replace(thisRegex, thisRandom); // .replace(superRegex, superRandom);
+                            vars.filter(vit => vit.value && vit.name).forEach(vit => {
+                                it.innerHTML = it.innerHTML.replace(vit.regex, vit.random);
+                            })
+                        });
+
+                        n.innerHTML = n.innerHTML.replace(thisRegex, `${drThis}`); // .replace(superRegex, drSuperOption ?? '');
+                        vars.filter(vit => vit.value && vit.name).forEach(vit => {
+                            n.innerHTML = n.innerHTML.replace(vit.regex, vit.value);
+                        })
+
+                        n.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
+                            it.innerHTML = it.innerHTML.replace(RegExp(thisRandom, 'g'), 'this'); // .replace(RegExp(superRandom, 'g'), 'super');
+                            vars.filter(vit => vit.value && vit.name).forEach(vit => {
+                                it.innerHTML = it.innerHTML.replace(RegExp(vit.random, 'g'), vit.value);
+                            })
+                        });
+                        // console.log('after--', n.innerHTML, vars)
                         if (drStripOption) {
                             Array.from(n.childNodes).forEach(it => fag.append(it));
                         } else {
@@ -96,6 +127,45 @@ export class RawSet {
                         cNode.remove();
                     }
                 }
+
+                // if (drThis) {
+                //     const r = ScriptUtils.evalReturn(drThis, obj);
+                //     const thisFag = document.createDocumentFragment();
+                //     if (r) {
+                //         const n = element.cloneNode(true) as Element;
+                //         if (drStripOption) {
+                //             Array.from(n.childNodes).forEach(it => thisFag.append(it));
+                //         } else {
+                //             thisFag.append(n)
+                //         }
+                //         if ('_DomRender_isProxy' in r) {
+                //             console.log('-----thisTFag', thisFag)
+                //             r?._DomRender_proxy?.initRender(thisFag);
+                //         }
+                //     } else {
+                //         element.remove();
+                //     }
+                // }
+                // if (drThis) {
+                //     const r = ScriptUtils.evalReturn(drThis, obj);
+                //     if (r) {
+                //         const n = element.cloneNode(true) as Element;
+                //         // n.innerHTML = n.innerHTML.replace(/this/g, `${drThis}`);
+                //         if (drStripOption) {
+                //             Array.from(n.childNodes).forEach(it => fag.append(it));
+                //         } else {
+                //             fag.append(n)
+                //         }
+                //         const rr = RawSet.checkPointCreates(fag, config)
+                //         rr.filter(it => !it.thisObjPath).forEach(it => {
+                //             it.thisObjPath = drThis
+                //         });
+                //         element.parentNode?.replaceChild(fag, element);
+                //         raws.push(...rr)
+                //     } else {
+                //         cNode.remove();
+                //     }
+                // }
 
                 if (drFor) {
                     ScriptUtils.eval(`for(${drFor}) {
@@ -157,7 +227,6 @@ export class RawSet {
                     raws.push(...rr)
                 }
 
-
                 // config detecting
                 config?.targets?.forEach(it => {
                     const attrValue = this.getAttributeAndDelete(element, it.attrName)
@@ -180,8 +249,7 @@ export class RawSet {
     }
 
     public applyEvent(obj: any, fragment = this.fragment, config?: Config) {
-        const findAttrElements = eventManager.findAttrElements(fragment, config).map(it => it.element);
-        eventManager.applyEvent(obj, findAttrElements, config)
+        eventManager.applyEvent(obj, eventManager.findAttrElements(fragment, config), config)
     }
 
     public getAttributeAndDelete(element: Element, attr: string) {
@@ -239,6 +307,22 @@ export class RawSet {
             }, fragment))
         }
         return pars;
+    }
+
+    // eslint-disable-next-line no-undef
+    public findChilds(callBack?: (it: ChildNode) => void) {
+        // eslint-disable-next-line no-undef
+        const nodes: ChildNode[] = [];
+        let next = this.point.start.nextSibling;
+        console.log('-vvvvv-->', this.point.start, this.point.end)
+        // while (next) {
+        //     if (next === this.point.end) {
+        //         break;
+        //     }
+        //     // nodes.push(next);
+        //     next = this.point.start.nextSibling;
+        // }
+        return nodes;
     }
 
     public childAllRemove() {

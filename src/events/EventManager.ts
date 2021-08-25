@@ -1,4 +1,5 @@
 import { Config } from 'Config';
+import {ScriptUtils} from '../utils/script/ScriptUtils';
 
 export const eventManager = new class {
     public readonly attrPrefix = 'dr-';
@@ -18,28 +19,28 @@ export const eventManager = new class {
     }
 
     public findAttrElements(fragment: DocumentFragment | Element, config?: Config) {
-        const datas: {name: string, value: string | null, element: Element}[] = [];
+        // const datas: {name: string, value: string | null, element: Element}[] = [];
+        const elements = new Set<Element>();
         const addAttributes = config?.applyEvents?.map(it => it.attrName) ?? [];
         addAttributes.concat(this.attrNames).forEach(attrName => {
             fragment?.querySelectorAll(`[${attrName}]`).forEach(it => {
-                datas.push({name: attrName, value: it.getAttribute(attrName), element: it});
+                elements.add(it);
             });
         })
-        return datas;
+        return elements;
     }
 
     // eslint-disable-next-line no-undef
-    public applyEvent(obj: any, childNodes: ChildNode[], config?: Config) {
+    public applyEvent(obj: any, childNodes: Set<ChildNode> | Set<Element>, config?: Config) {
         // console.log('eventManager applyEvent==>', obj, childNodes, config)
         // Node.ELEMENT_NODE = 1
-        const elements = childNodes.filter(it => it.nodeType === 1).map(it => it as Element);
         // event
         this.eventNames.forEach(it => {
-            this.addDrEvent(obj, it, elements);
+            this.addDrEvent(obj, it, childNodes);
         });
 
         // value
-        this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'value', (it, attribute) => {
+        this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'value', (it, attribute) => {
             const script = attribute;
             // eslint-disable-next-line no-new-func
             const data = Function(`"use strict"; ${script} `).bind(Object.assign(obj))() ?? {};
@@ -47,7 +48,7 @@ export const eventManager = new class {
         })
 
         // on-init event
-        this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'on-init', (it, varName) => {
+        this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'on-init', (it, varName) => {
             if (varName) {
                 if (typeof this.getValue(obj, varName) === 'function') {
                     this.getValue(obj, varName)(it)
@@ -58,7 +59,7 @@ export const eventManager = new class {
         })
 
         // value-link event
-        this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'value-link', (it, varName) => {
+        this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'value-link', (it, varName) => {
             if (varName) {
                 if (typeof this.getValue(obj, varName) === 'function') {
                     this.getValue(obj, varName)(it.value)
@@ -74,19 +75,19 @@ export const eventManager = new class {
                 })
             }
         })
-        this.changeVar(obj, elements, undefined);
+        this.changeVar(obj, childNodes, undefined);
         // console.log('eventManager-applyEvent-->', config?.applyEvents)
+        const elements = Array.from(childNodes).filter(it => it.nodeType === 1).map(it => it as Element);
         elements.forEach(it => {
             config?.applyEvents?.filter(ta => it.getAttribute(ta.attrName)).forEach(ta => ta.callBack(it, it.getAttribute(ta.attrName)!, obj))
         });
     }
 
     // eslint-disable-next-line no-undef
-    public changeVar(obj: any, elements: Element[] | ChildNode[], varName?: string) { // , config?: Config
+    public changeVar(obj: any, elements: Set<Element> | Set<ChildNode>, varName?: string) { // , config?: Config
         // console.log('-changeVar-->', obj, elements, varName)
         // value-link event
         this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'value-link', (it, attribute) => {
-            // const varNames = new Set(this.usingThisVar(varName ?? ''));
             if (attribute && attribute === varName) {
                 if (typeof this.getValue(obj, attribute) === 'function') {
                     this.getValue(obj, attribute)(it.value);
@@ -102,7 +103,6 @@ export const eventManager = new class {
         // attribute
         this.procAttr(elements, this.attrPrefix + 'attr', (it, attribute) => {
             const script = attribute;
-            console.log('-atttt')
             if (this.isUsingThisVar(attribute, varName) || varName === undefined) {
                 // eslint-disable-next-line no-new-func
                 const data = Function(`"use strict"; const $target=this.$target; ${script} `).bind(Object.assign({$target: it}, obj))() ?? {};
@@ -128,12 +128,10 @@ export const eventManager = new class {
         })
     }
 
-    public addDrEvent(obj: any, eventName: string, elements: Element[]) {
+    // eslint-disable-next-line no-undef
+    public addDrEvent(obj: any, eventName: string, elements: Set<Element> | Set<ChildNode>) {
         const attr = this.attrPrefix + 'event-' + eventName
         this.procAttr<HTMLInputElement>(elements, attr, (it, attribute) => {
-            // console.log('-----ttttttttttt', attribute, obj[attribute!], obj)
-            // console.log('-----ttttttttttt', attribute, this[attribute!], this._originObj[attribute!])
-            // if (attribute && (this[attribute] || this._originObj[attribute])) {
             const script = attribute;
             it.addEventListener(eventName, (event) => {
                 // eslint-disable-next-line no-new-func
@@ -145,8 +143,8 @@ export const eventManager = new class {
     }
 
     // eslint-disable-next-line no-undef
-    public procAttr<T extends Element>(elements: Element[] | ChildNode[] = [], attrName: string, f: (h: T, value: string | null) => void) {
-        elements?.forEach(it => {
+    public procAttr<T extends Element>(elements: Set<Element> | Set<ChildNode> = new Set(), attrName: string, f: (h: T, value: string | null) => void) {
+        elements.forEach(it => {
             // console.log('--->type', it, it.nodeType)
             if (!it) {
                 return;
@@ -165,7 +163,8 @@ export const eventManager = new class {
     }
 
     public getValue<T = any>(obj: any, name: string, value?: any): T {
-        let r = obj[name];
+        // let r = obj[name];
+        let r = ScriptUtils.evalReturn(name, obj);
         if (typeof r === 'function') {
             r = r.bind(obj);
         }
@@ -173,14 +172,12 @@ export const eventManager = new class {
     }
 
     public setValue(obj: any, name: string, value?: any) {
-        const thisAnyElement = obj[name];
-        if (typeof thisAnyElement === 'number') {
-            obj[name] = Number(value);
-        } else {
-            obj[name] = value.toString();
-        }
+        ScriptUtils.eval(`this.${name} = this.value`, {this: obj, value})
     }
 
+    /**
+     * @deprecated
+     */
     public isUsingThisVar(raws: string | null | undefined, varName: string | null | undefined): boolean {
         if (varName && raws) {
             for (const raw of this.usingThisVar(raws)) {
@@ -192,6 +189,9 @@ export const eventManager = new class {
         return false;
     }
 
+    /**
+     * @deprecated
+     */
     public usingThisVar(raws: string): string[] {
         let regex = /include\(.*\)/gm;
         // raws = raws.replace(regex, '');
