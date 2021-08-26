@@ -3,8 +3,6 @@ import { eventManager } from './events/EventManager';
 import { Config } from 'Config';
 import { ScriptUtils } from './utils/script/ScriptUtils';
 
-export type RefType = { obj: object };
-
 export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     public _domRender_ref = new Map<object, Set<string>>()
     public _rawSets = new Map<string, Set<RawSet>>()
@@ -116,7 +114,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public set(target: T, p: string | symbol, value: any, receiver: T): boolean {
-        console.log('set-->', p, target, value, receiver);
+        // console.log('set-->', p, target, value, receiver);
         if (typeof p === 'string') {
             value = this.proxy(target, value, p);
         }
