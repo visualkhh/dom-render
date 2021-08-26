@@ -2,7 +2,7 @@ import {RandomUtils} from './utils/random/RandomUtils';
 import {StringUtils} from './utils/string/StringUtils';
 import {ScriptUtils} from './utils/script/ScriptUtils';
 import {eventManager} from './events/EventManager';
-import {Config} from 'Config';
+import {Config} from './Config';
 
 export class RawSet {
     public static readonly DR_IF_NAME = 'dr-if';

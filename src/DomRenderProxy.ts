@@ -1,6 +1,6 @@
 import { RawSet } from './RawSet';
 import { eventManager } from './events/EventManager';
-import { Config } from 'Config';
+import { Config } from './Config';
 import { ScriptUtils } from './utils/script/ScriptUtils';
 
 export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
