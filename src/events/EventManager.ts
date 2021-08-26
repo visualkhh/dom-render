@@ -18,7 +18,7 @@ export const eventManager = new class {
         });
     }
 
-    public findAttrElements(fragment: DocumentFragment | Element, config?: Config) {
+    public findAttrElements(fragment: DocumentFragment | Element, config?: Config): Set<Element> {
         // const datas: {name: string, value: string | null, element: Element}[] = [];
         const elements = new Set<Element>();
         const addAttributes = config?.applyEvents?.map(it => it.attrName) ?? [];
@@ -49,6 +49,7 @@ export const eventManager = new class {
             }
         })
 
+
         // on-init event
         this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'on-init', (it, varName) => {
             if (varName) {
@@ -63,8 +64,10 @@ export const eventManager = new class {
         // value-link event
         this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'value-link', (it, varName) => {
             if (varName) {
-                if (typeof this.getValue(obj, varName) === 'function') {
-                    this.getValue(obj, varName)(it.value)
+                console.log('-->', this.getValue(obj, varName))
+                const value = this.getValue(obj, varName);
+                if (typeof value === 'function' && value) {
+                    value(it.value)
                 } else {
                     this.setValue(obj, varName, it.value)
                 }
@@ -176,7 +179,7 @@ export const eventManager = new class {
     }
 
     public setValue(obj: any, name: string, value?: any) {
-        ScriptUtils.eval(`this.${name} = this.value`, {this: obj, value})
+        ScriptUtils.eval(`${name} = this.___value`, Object.assign({___value: value}, obj))
     }
 
     /**
@@ -185,11 +188,13 @@ export const eventManager = new class {
     public isUsingThisVar(raws: string | null | undefined, varName: string | null | undefined): boolean {
         // console.log('isUsingV', raws, varName)
         if (varName && raws) {
-            for (const raw of this.usingThisVar(raws)) {
-                if (raw.startsWith(varName)) {
-                    return true;
-                }
-            }
+            const variablePaths = ScriptUtils.getVariablePaths(raws ?? '');
+            return variablePaths.has(varName)
+            // for (const raw of this.usingThisVar(raws)) {
+            //     if (raw.startsWith(varName)) {
+            //         return true;
+            //     }
+            // }
         }
         return false;
     }
@@ -197,25 +202,25 @@ export const eventManager = new class {
     /**
      * @deprecated
      */
-    public usingThisVar(raws: string): string[] {
-        let regex = /include\(.*\)/gm;
-        // raws = raws.replace(regex, '');
-        regex = /["'].*?["']/gm;
-        raws = raws.replace(regex, '');
-        const varRegexStr = 'this\\.([a-zA-Z_$][?a-zA-Z_.$0-9]*)';
-        // const varRegexStr = '(?:this|it)\\.([a-zA-Z_$][?a-zA-Z_.$0-9]*)';
-        // const varRegexStr = 'this\\.([a-zA-Z_$][?\\[\\]a-zA-Z_.$0-9]*)';
-        const varRegex = RegExp(varRegexStr, 'gm');
-        let varExec = varRegex.exec(raws)
-        const usingVars = new Set<string>();
-        // const usingVars = [];
-        while (varExec) {
-            const value = varExec[1].replace(/\?/g, '');
-            usingVars.add(value);
-            value.split('.').forEach(it => usingVars.add(it))
-            varExec = varRegex.exec(varExec.input)
-        }
-        const strings = Array.from(usingVars);
-        return strings;
-    }
+    // public usingThisVar(raws: string): string[] {
+    //     let regex = /include\(.*\)/gm;
+    //     // raws = raws.replace(regex, '');
+    //     regex = /["'].*?["']/gm;
+    //     raws = raws.replace(regex, '');
+    //     const varRegexStr = 'this\\.([a-zA-Z_$][?a-zA-Z_.$0-9]*)';
+    //     // const varRegexStr = '(?:this|it)\\.([a-zA-Z_$][?a-zA-Z_.$0-9]*)';
+    //     // const varRegexStr = 'this\\.([a-zA-Z_$][?\\[\\]a-zA-Z_.$0-9]*)';
+    //     const varRegex = RegExp(varRegexStr, 'gm');
+    //     let varExec = varRegex.exec(raws)
+    //     const usingVars = new Set<string>();
+    //     // const usingVars = [];
+    //     while (varExec) {
+    //         const value = varExec[1].replace(/\?/g, '');
+    //         usingVars.add(value);
+    //         value.split('.').forEach(it => usingVars.add(it))
+    //         varExec = varRegex.exec(varExec.input)
+    //     }
+    //     const strings = Array.from(usingVars);
+    //     return strings;
+    // }
 }();

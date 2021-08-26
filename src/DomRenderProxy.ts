@@ -1,7 +1,7 @@
-import {RawSet} from './RawSet';
-import {eventManager} from './events/EventManager';
+import { RawSet } from './RawSet';
+import { eventManager } from './events/EventManager';
 import { Config } from 'Config';
-import {ScriptUtils} from './utils/script/ScriptUtils';
+import { ScriptUtils } from './utils/script/ScriptUtils';
 
 export type RefType = { obj: object };
 
@@ -92,30 +92,31 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             })
         } else {
             const strings = paths.reverse();
-            for (let i = strings.length; i >= 0; i--) {
-                const pathString = strings.slice(0, i).join('.');
-                if (pathString) {
-                    const iterable = this._rawSets.get(pathString);
-                    if (iterable) {
-                        this.render(Array.from(iterable));
-                        // console.log('-----change var', pathString, iterable)
-                        break;
-                    }
+            const fullPathStr = strings.join('.');
+            const iterable = this._rawSets.get(fullPathStr);
+            //array check
+            const front = strings.slice(0, strings.length-1).join('.')
+            const last = strings[strings.length-1]
+            if (!isNaN(Number(last)) && Array.isArray(ScriptUtils.evalReturn(front, this._domRender_proxy))) {
+                const aIterable = this._rawSets.get(front);
+                if (aIterable) {
+                    this.render(Array.from(aIterable));
                 }
+            } else if (iterable) {
+                this.render(Array.from(iterable));
             }
-            // console.log('---targets->', this._targets)
-            const pathStr = strings.join('.');
-            this._targets.forEach(it => {
-                if (it.nodeType === Node.DOCUMENT_FRAGMENT_NODE || it.nodeType === Node.ELEMENT_NODE) {
-                    const targets = eventManager.findAttrElements((it as DocumentFragment | Element), this.config);
-                    eventManager.changeVar(this._domRender_proxy, targets, `this.${pathStr}`)
-                }
-            })
+            // console.log('---targets->', fullPathStr)
+            // this._targets.forEach(it => {
+            //     if (it.nodeType === Node.DOCUMENT_FRAGMENT_NODE || it.nodeType === Node.ELEMENT_NODE) {
+            //         const targets = eventManager.findAttrElements((it as DocumentFragment | Element), this.config);
+            //         eventManager.changeVar(this._domRender_proxy, targets, `this.${fullPathStr}`)
+            //     }
+            // })
         }
     }
 
     public set(target: T, p: string | symbol, value: any, receiver: T): boolean {
-        // console.log('set-->', p, target, value, receiver);
+        console.log('set-->', p, target, value, receiver);
         if (typeof p === 'string') {
             value = this.proxy(target, value, p);
         }

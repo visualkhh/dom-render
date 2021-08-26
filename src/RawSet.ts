@@ -84,9 +84,9 @@ export class RawSet {
                 }
 
                 if (drThis) {
-                    const r = ScriptUtils.eval(`return ${drThis}`, obj);
+                    const r = ScriptUtils.evalReturn(drThis, obj);
                     if (r) {
-                        fag.append(RawSet.thisCreate(element, drThis, drVarOption ?? '', drStripOption, obj))
+                        fag.append(RawSet.drThisCreate(element, drThis, drVarOption ?? '', drStripOption, obj))
                         const rr = RawSet.checkPointCreates(fag, config)
                         element.parentNode?.replaceChild(fag, element);
                         raws.push(...rr)
@@ -94,45 +94,6 @@ export class RawSet {
                         cNode.remove();
                     }
                 }
-
-                // if (drThis) {
-                //     const r = ScriptUtils.evalReturn(drThis, obj);
-                //     const thisFag = document.createDocumentFragment();
-                //     if (r) {
-                //         const n = element.cloneNode(true) as Element;
-                //         if (drStripOption) {
-                //             Array.from(n.childNodes).forEach(it => thisFag.append(it));
-                //         } else {
-                //             thisFag.append(n)
-                //         }
-                //         if ('_DomRender_isProxy' in r) {
-                //             console.log('-----thisTFag', thisFag)
-                //             r?._DomRender_proxy?.initRender(thisFag);
-                //         }
-                //     } else {
-                //         element.remove();
-                //     }
-                // }
-                // if (drThis) {
-                //     const r = ScriptUtils.evalReturn(drThis, obj);
-                //     if (r) {
-                //         const n = element.cloneNode(true) as Element;
-                //         // n.innerHTML = n.innerHTML.replace(/this/g, `${drThis}`);
-                //         if (drStripOption) {
-                //             Array.from(n.childNodes).forEach(it => fag.append(it));
-                //         } else {
-                //             fag.append(n)
-                //         }
-                //         const rr = RawSet.checkPointCreates(fag, config)
-                //         rr.filter(it => !it.thisObjPath).forEach(it => {
-                //             it.thisObjPath = drThis
-                //         });
-                //         element.parentNode?.replaceChild(fag, element);
-                //         raws.push(...rr)
-                //     } else {
-                //         cNode.remove();
-                //     }
-                // }
 
                 if (drFor) {
                     ScriptUtils.eval(`for(${drFor}) {
@@ -159,6 +120,8 @@ export class RawSet {
                 }
 
                 if (drForOf) {
+                    const vars = RawSet.drVarEncoding(element, drVarOption ?? '');
+                    console.log('vars-->', vars, element.innerHTML)
                     ScriptUtils.eval(`var i = 0; for(const it of ${drForOf}) {
                         var destIt = it;
                         var forOfStr = \`${drForOf}\`;
@@ -189,6 +152,7 @@ export class RawSet {
                         }
                         i++;
                     }`, Object.assign({__drStripOption: drStripOption, __fag: fag, __element: element}, obj));
+                    RawSet.drVarDecoding(element, vars);
                     const rr = RawSet.checkPointCreates(fag, config)
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr)
@@ -276,22 +240,6 @@ export class RawSet {
         return pars;
     }
 
-    // eslint-disable-next-line no-undef
-    // public findChilds(callBack?: (it: ChildNode) => void) {
-    //     // eslint-disable-next-line no-undef
-    //     const nodes: ChildNode[] = [];
-    //     let next = this.point.start.nextSibling;
-    //     console.log('-vvvvv-->', this.point.start, this.point.end)
-    //     // while (next) {
-    //     //     if (next === this.point.end) {
-    //     //         break;
-    //     //     }
-    //     //     // nodes.push(next);
-    //     //     next = this.point.start.nextSibling;
-    //     // }
-    //     return nodes;
-    // }
-
     public childAllRemove() {
         let next = this.point.start.nextSibling;
         while (next) {
@@ -303,93 +251,58 @@ export class RawSet {
         }
     }
 
-    // public static targetPintCheckNodes(target: Node): {start: Comment, end: Comment, target: Node}[] {
-    //     return this.targetNodes(target).map(target => {
-    //         const uuid = RandomUtils.uuid()
-    //         const start = document.createComment(`start ${uuid}`)
-    //         const end = document.createComment(`end ${uuid}`)
-    //         target?.parentNode?.insertBefore(start, target);
-    //         target?.parentNode?.insertBefore(end, target.nextSibling);
-    //         return {start, end, target}
-    //     })
-    // }
-
-    // public static targetNodes(target: Node) {
-    //     const nodeIterator = this.targetNodeIterator(target);
-    //     const pars: Node[] = [];
-    //     let currentNode;
-    //     // eslint-disable-next-line no-cond-assign
-    //     while (currentNode = nodeIterator.nextNode()) {
-    //         pars.push(currentNode);
-    //     }
-    //     return pars;
-    // }
-
-    // public static targetNodeIterator(target: Node) {
-    //     const nodeIterator = document.createNodeIterator(target, NodeFilter.SHOW_ALL, {
-    //         acceptNode(node) {
-    //             // console.log('node type-->', node.nodeType)
-    //             if (node.nodeType === Node.TEXT_NODE) {
-    //                 return /\$\{.*?\}/g.test(StringUtils.deleteEnter((node as Text).data ?? '')) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
-    //             } else if (node.nodeType === Node.ELEMENT_NODE) {
-    //                 return (node as Element).getAttributeNames().filter(it => RawSet.DR_ATTRIBUTES.includes(it.toLowerCase())).length > 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
-    //             }
-    //             return NodeFilter.FILTER_REJECT;
-    //         }
-    //     });
-    //     return nodeIterator;
-    // }
-
-    // public static checkPointCreate(node: Node): RawSet {
-    //     const uuid = RandomUtils.uuid()
-    //     const start = document.createComment(`start ${uuid}`)
-    //     const end = document.createComment(`end ${uuid}`)
-    //     node?.parentNode?.insertBefore(start, node);
-    //     node?.parentNode?.insertBefore(end, node.nextSibling);
-    //     const fragment = document.createDocumentFragment();
-    //     fragment.append(node);
-    //     return new RawSet({
-    //         start,
-    //         end
-    //     }, fragment)
-    // }
-    public static thisCreate(element: Element, drThis: string, drVarOption: string, drStripOption: boolean, obj: any) {
-        const fag = document.createDocumentFragment();
-        const n = element.cloneNode(true) as Element;
+    public static drThisEncoding(element: Element, drThis: string) {
         const thisRandom = RandomUtils.uuid()
         const thisRegex = /(?<!(dr-|\.))this(?=.?)/g;
-        // const superRegex = /(?<!(dr-|\.))super(?=.?)/g;
-        // const superRandom = RandomUtils.uuid()
+        element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
+            it.innerHTML = it.innerHTML.replace(thisRegex, thisRandom);
+        })
+        element.innerHTML = element.innerHTML.replace(thisRegex, drThis);
+        return thisRandom;
+    }
+
+    public static drThisDecoding(element: Element, thisRandom: string) {
+        element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
+            it.innerHTML = it.innerHTML.replace(RegExp(thisRandom, 'g'), 'this');
+        });
+    }
+
+    public static drVarEncoding(element: Element, drVarOption: string) {
         const vars = (drVarOption?.split(',') ?? []).map(it => {
             const s = it.trim().split('=');
             return {name: s[0], value: s[1], regex: RegExp('(?<!(dr-|\\.))var\\.' + s[0] + '(?=.?)', 'g'), random: RandomUtils.uuid()}
         })
-        // console.log('before--', n.innerHTML, vars)
-        n.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
-            it.innerHTML = it.innerHTML.replace(thisRegex, thisRandom); // .replace(superRegex, superRandom);
+        element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
             vars.filter(vit => vit.value && vit.name).forEach(vit => {
                 it.innerHTML = it.innerHTML.replace(vit.regex, vit.random);
             })
         });
-
-        n.innerHTML = n.innerHTML.replace(thisRegex, `${drThis}`); // .replace(superRegex, drSuperOption ?? '');
         vars.filter(vit => vit.value && vit.name).forEach(vit => {
-            n.innerHTML = n.innerHTML.replace(vit.regex, vit.value);
+            element.innerHTML = element.innerHTML.replace(vit.regex, vit.value);
         })
+        return vars;
+    }
 
-        n.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
-            it.innerHTML = it.innerHTML.replace(RegExp(thisRandom, 'g'), 'this'); // .replace(RegExp(superRandom, 'g'), 'super');
+    public static drVarDecoding(element: Element,  vars: {name: string, value: string, regex: RegExp, random: string}[]) {
+        element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
             vars.filter(vit => vit.value && vit.name).forEach(vit => {
                 it.innerHTML = it.innerHTML.replace(RegExp(vit.random, 'g'), vit.value);
             })
         });
-        // console.log('after--', n.innerHTML, vars)
+    }
+
+    public static drThisCreate(element: Element, drThis: string, drVarOption: string, drStripOption: boolean, obj: any) {
+        const fag = document.createDocumentFragment();
+        const n = element.cloneNode(true) as Element;
+        const thisRandom = this.drThisEncoding(n, drThis)
+        const vars = this.drVarEncoding(n, drVarOption)
+         this.drVarDecoding(n, vars)
+        this.drThisDecoding(n, thisRandom);
         if (drStripOption) {
             Array.from(n.childNodes).forEach(it => fag.append(it));
         } else {
             fag.append(n)
         }
-
         return fag;
     }
 }
