@@ -191,7 +191,7 @@ export const eventManager = new class {
         if (varName && raws) {
             if (varName.startsWith('this.')) {
                 varName = varName.replace(/this\./,'')
-            }
+            } 
             const variablePaths = ScriptUtils.getVariablePaths(raws ?? '');
             return variablePaths.has(varName)
             // for (const raw of this.usingThisVar(raws)) {
