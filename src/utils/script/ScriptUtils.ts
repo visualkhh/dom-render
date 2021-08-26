@@ -9,7 +9,6 @@ export class ScriptUtils {
             }
 
             set(target: any, p: string | symbol, value: any, receiver: any): boolean {
-                console.log('-------set-->', target, p, value)
                 return true;
             }
 

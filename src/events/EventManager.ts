@@ -123,6 +123,7 @@ export const eventManager = new class {
         // style
         this.procAttr(elements, this.attrPrefix + 'style', (it, attribute) => {
             const script = attribute;
+            console.log('style-->', this.isUsingThisVar(attribute, varName))
             if (this.isUsingThisVar(attribute, varName) || varName === undefined) {
                 // eslint-disable-next-line no-new-func
                 const data = Function(`"use strict"; const $target = this.$target;  ${script} `).bind(Object.assign({$target: it}, obj))() ?? {};
@@ -186,8 +187,11 @@ export const eventManager = new class {
      * @deprecated
      */
     public isUsingThisVar(raws: string | null | undefined, varName: string | null | undefined): boolean {
-        // console.log('isUsingV', raws, varName)
+        console.log('isUsingV', raws, varName, ScriptUtils.getVariablePaths(raws ?? ''))
         if (varName && raws) {
+            if (varName.startsWith('this.')) {
+                varName = varName.replace(/this\./,'')
+            }
             const variablePaths = ScriptUtils.getVariablePaths(raws ?? '');
             return variablePaths.has(varName)
             // for (const raw of this.usingThisVar(raws)) {
