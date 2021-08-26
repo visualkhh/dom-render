@@ -12,7 +12,6 @@
 </div>
 </body>
 <script>
-    console.log('-----')
     const app = document.querySelector('#app');
     class User {
         friends;
@@ -26,13 +25,10 @@
             this.name = 'zz'
             this.cnt = cnt;
             this.color = RandomUtils.getRandomColor();
-            //this.friends = ['a'];
         }
 
         cc($event) {
-            // console.log('-->', $event, this.selectValue, this.textValue)
             console.log('-->', this.e1, this.e2)
-            // this.textValue = RandomUtils.getRandomColor();
         }
 
         makeRandomColor() {
@@ -46,7 +42,6 @@
     }
 
     const user = new User(255);
-    console.log('uu', user)
     const target = document.querySelector('#app')
     if (target) {
         const dest = DomRender.run(user, target);

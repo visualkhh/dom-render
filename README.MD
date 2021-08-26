@@ -7,29 +7,16 @@ dom-render
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <script src="dist/dom-render.js"></script>
+    <script src="../dist/dom-render.js"></script>
 </head>
-<body>
-<div id="app">
-
-
-    <!--%
-  for(var i = 0 ; i < this.cnt ; i ++) {
-      write(`<div>${i}</div>`);
-      write(`<div>${i}: <input type="text" dr-on-init="e${i+1}"><div>`);
-  }
-  %-->
-    <div>
-        <button dr-event-click="this.cc()">click me</button>
-    </div>
-
-
+<body id="app">
+<div>
+    ${this.name}
+    <button dr-event-click="alert(this.name)">ss ${this.cnt} ssss</button>
 </div>
 </body>
 <script>
-    console.log('-----')
     const app = document.querySelector('#app');
-
     class User {
         friends;
         color;
@@ -42,13 +29,10 @@ dom-render
             this.name = 'zz'
             this.cnt = cnt;
             this.color = RandomUtils.getRandomColor();
-            //this.friends = ['a'];
         }
 
         cc($event) {
-            // console.log('-->', $event, this.selectValue, this.textValue)
             console.log('-->', this.e1, this.e2)
-            // this.textValue = RandomUtils.getRandomColor();
         }
 
         makeRandomColor() {
@@ -61,25 +45,15 @@ dom-render
         }
     }
 
-    const config = new Config();
-    const targetNode = new TargetNode(app, TargetNodeMode.replace)
-    let user = new User(1);
-    const raw = {
-        template: app.innerHTML,
-        styles: ['p {color: /*%write(this.color)%*/}']
-    };
-    user = DomRenderProxy.render(document, user, raw, config, targetNode);
-    setTimeout(() => {
-        // user.friends.push(2)
-        user.cnt = 2;
-        // console.log('-->user.cnt', user, user.cnt)
-        // user.friends = [2,3,4];
-    }, 3000)
+    const user = new User(255);
+    const target = document.querySelector('#app')
+    if (target) {
+        const dest = DomRender.run(user, target);
+        console.log('destUser', dest)
+        setTimeout(() => {
+            dest.name = RandomUtils.uuid()
+        }, 3000);
+    }
 </script>
 </html>
-
-
-
-
-
 ```
