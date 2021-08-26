@@ -1,5 +1,5 @@
 import {DomRenderProxy} from './DomRenderProxy';
-import { Config } from 'Config';
+import {Config} from './Config';
 
 export class DomRender {
     public static run<T extends object>(obj: T, target?: Node, config?: Config): T {
