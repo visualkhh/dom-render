@@ -5,6 +5,7 @@ import {eventManager} from './events/EventManager';
 import {Config} from './Config';
 
 export class RawSet {
+    public static readonly DR = 'dr';
     public static readonly DR_IF_NAME = 'dr-if';
     public static readonly DR_FOR_OF_NAME = 'dr-for-of';
     public static readonly DR_FOR_NAME = 'dr-for';
@@ -18,13 +19,13 @@ export class RawSet {
 
     public static readonly DR_IT_OPTIONNAME = 'dr-it';
     // public static readonly DR_SUPER_OPTIONNAME = 'dr-super';
-    public static readonly DR_DECLARATION_OPTIONNAME = 'dr-declaration';
+    // public static readonly DR_DECLARATION_OPTIONNAME = 'dr-declaration';
     public static readonly DR_VAR_OPTIONNAME = 'dr-var';
     public static readonly DR_STRIP_OPTIONNAME = 'dr-strip';
     // public static readonly DR_PARAMETER_OPTIONNAME = 'dr-parameter';
     // public static readonly DR_THIS_OPTIONNAME = 'dr-this';
     // public static readonly DR_CONTENT_OPTIONNAME = 'dr-content';
-    public static readonly DR_ATTRIBUTES = [RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME];
+    public static readonly DR_ATTRIBUTES = [RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR];
 
     constructor(public point: { start: Comment, end: Comment }, public fragment: DocumentFragment) { // , public thisObjPath?: string
     }
@@ -58,35 +59,74 @@ export class RawSet {
                 cNode.parentNode?.replaceChild(n, cNode)
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
-                const drIf = this.getAttributeAndDelete(element, RawSet.DR_IF_NAME);
-                const drFor = this.getAttributeAndDelete(element, RawSet.DR_FOR_NAME);
-                const drForOf = this.getAttributeAndDelete(element, RawSet.DR_FOR_OF_NAME);
-                const drThis = this.getAttributeAndDelete(element, RawSet.DR_THIS_NAME);
-                const drItOption = this.getAttributeAndDelete(element, RawSet.DR_IT_OPTIONNAME);
-                const drDeclarationOption = this.getAttributeAndDelete(element, RawSet.DR_DECLARATION_OPTIONNAME);
-                // const drSuperOption = this.getAttributeAndDelete(element, RawSet.DR_SUPER_OPTIONNAME);
-                const drVarOption = this.getAttributeAndDelete(element, RawSet.DR_VAR_OPTIONNAME);
-                const drStripOption = this.getAttributeAndDelete(element, RawSet.DR_STRIP_OPTIONNAME) === 'true';
-                if (drIf) {
-                    const r = ScriptUtils.evalReturn(drIf, obj);
-                    if (r) {
-                        Array.from(element.childNodes).forEach(it => fag.append(it));
-                        const rr = RawSet.checkPointCreates(fag, config);
-                        if (drStripOption) {
-                            element.parentNode?.replaceChild(fag, element);
-                        } else {
-                            element.appendChild(fag);
-                        }
-                        raws.push(...rr)
-                    } else {
-                        element.remove();
-                    }
+                const drAttr = {
+                    dr: this.getAttributeAndDelete(element, RawSet.DR),
+                    drIf: this.getAttributeAndDelete(element, RawSet.DR_IF_NAME),
+                    drFor: this.getAttributeAndDelete(element, RawSet.DR_FOR_NAME),
+                    drForOf: this.getAttributeAndDelete(element, RawSet.DR_FOR_OF_NAME),
+                    drThis: this.getAttributeAndDelete(element, RawSet.DR_THIS_NAME),
+                    drItOption: this.getAttributeAndDelete(element, RawSet.DR_IT_OPTIONNAME),
+                    drVarOption: this.getAttributeAndDelete(element, RawSet.DR_VAR_OPTIONNAME),
+                    drStripOption: this.getAttributeAndDelete(element, RawSet.DR_STRIP_OPTIONNAME) === 'true'
                 }
-
-                if (drThis) {
-                    const r = ScriptUtils.evalReturn(drThis, obj);
+                if (drAttr.dr !== null && drAttr.dr.length >= 0) {
+                    const itRandom = RawSet.drItOtherEncoding(element);
+                    const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
+                    const newTemp = document.createElement('temp');
+                    ScriptUtils.eval(`
+                        const n = this.__element.cloneNode(true);
+                        var destIt = ${drAttr.drItOption};
+                        if (destIt !== undefined) {
+                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
+                        }
+                        if (this.__drStripOption) {
+                            Array.from(n.childNodes).forEach(it => this.__fag.append(it));
+                        } else {
+                            this.__fag.append(n);
+                        }`, Object.assign({
+                        __fag: newTemp, __drStripOption: drAttr.drStripOption, __element: element
+                    }, obj));
+                    RawSet.drVarDecoding(newTemp, vars);
+                    RawSet.drItOtherDecoding(newTemp, itRandom);
+                    const tempalte = document.createElement('template');
+                    tempalte.innerHTML = newTemp.innerHTML;
+                    fag.append(tempalte.content)
+                    const rr = RawSet.checkPointCreates(fag, config)
+                    element.parentNode?.replaceChild(fag, element);
+                    raws.push(...rr)
+                }
+                if (drAttr.drIf) {
+                    const itRandom = RawSet.drItOtherEncoding(element);
+                    const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
+                    const newTemp = document.createElement('temp');
+                    ScriptUtils.eval(`
+                    if(${drAttr.drIf}) {
+                        const n = this.__element.cloneNode(true);
+                        var destIt = ${drAttr.drItOption};
+                        if (destIt !== undefined) {
+                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
+                        }
+                        if (this.__drStripOption) {
+                            Array.from(n.childNodes).forEach(it => this.__fag.append(it));
+                        } else {
+                            this.__fag.append(n);
+                        }
+                    }`, Object.assign({
+                        __fag: newTemp, __drStripOption: drAttr.drStripOption, __element: element
+                    }, obj));
+                    RawSet.drVarDecoding(newTemp, vars);
+                    RawSet.drItOtherDecoding(newTemp, itRandom);
+                    const tempalte = document.createElement('template');
+                    tempalte.innerHTML = newTemp.innerHTML;
+                    fag.append(tempalte.content)
+                    const rr = RawSet.checkPointCreates(fag, config)
+                    element.parentNode?.replaceChild(fag, element);
+                    raws.push(...rr)
+                }
+                if (drAttr.drThis) {
+                    const r = ScriptUtils.evalReturn(drAttr.drThis, obj);
                     if (r) {
-                        fag.append(RawSet.drThisCreate(element, drThis, drVarOption ?? '', drStripOption, obj))
+                        fag.append(RawSet.drThisCreate(element, drAttr.drThis, drAttr.drVarOption ?? '', drAttr.drStripOption, obj))
                         const rr = RawSet.checkPointCreates(fag, config)
                         element.parentNode?.replaceChild(fag, element);
                         raws.push(...rr)
@@ -94,37 +134,43 @@ export class RawSet {
                         cNode.remove();
                     }
                 }
-
-                if (drFor) {
-                    ScriptUtils.eval(`for(${drFor}) {
+                if (drAttr.drFor) {
+                    const itRandom = RawSet.drItOtherEncoding(element);
+                    const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
+                    const newTemp = document.createElement('temp');
+                    ScriptUtils.eval(`
+                    for(${drAttr.drFor}) {
                         const n = this.__element.cloneNode(true);
-                        var destIt = ${drItOption};
-                        if (destIt) {
+                        var destIt = ${drAttr.drItOption};
+                        if (destIt !== undefined) {
                             n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
-                        }
-                        var destDeclaration = ${drDeclarationOption};
-                        if (destDeclaration) {
-                            for (const [key, value] of Object.entries(destDeclaration)) {
-                                n.innerHTML = n.innerHTML.replace(RegExp('#'+key+'#', 'g'), value);
-                            }
                         }
                         if (this.__drStripOption) {
                             Array.from(n.childNodes).forEach(it => this.__fag.append(it));
                         } else {
                             this.__fag.append(n);
                         }
-                    }`, Object.assign({__drStripOption: drStripOption, __fag: fag, __element: element}, obj));
+                    }`, Object.assign({
+                        __fag: newTemp, __drStripOption: drAttr.drStripOption, __element: element
+                    }, obj));
+                    RawSet.drVarDecoding(newTemp, vars);
+                    RawSet.drItOtherDecoding(newTemp, itRandom);
+                    const tempalte = document.createElement('template');
+                    tempalte.innerHTML = newTemp.innerHTML;
+                    fag.append(tempalte.content)
                     const rr = RawSet.checkPointCreates(fag, config)
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr)
                 }
 
-                if (drForOf) {
-                    const vars = RawSet.drVarEncoding(element, drVarOption ?? '');
-                    console.log('vars-->', vars, element.innerHTML)
-                    ScriptUtils.eval(`var i = 0; for(const it of ${drForOf}) {
+                if (drAttr.drForOf) {
+                    const itRandom = RawSet.drItOtherEncoding(element);
+                    const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
+                    const newTemp = document.createElement('temp');
+                    // console.log('vars-->', vars, element.innerHTML)
+                    ScriptUtils.eval(`var i = 0; for(const it of ${drAttr.drForOf}) {
                         var destIt = it;
-                        var forOfStr = \`${drForOf}\`;
+                        var forOfStr = \`${drAttr.drForOf}\`;
                         if (/,/g.test(forOfStr)) {
                             if (typeof it === 'string') {
                                 destIt = it;
@@ -138,21 +184,22 @@ export class RawSet {
                         const n = this.__element.cloneNode(true);
                         n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
                         
-                        var destDeclaration = ${drDeclarationOption};
-                        if (destDeclaration) {
-                            for (const [key, value] of Object.entries(destDeclaration)) {
-                                n.innerHTML = n.innerHTML.replace(RegExp('#'+key+'#', 'g'), value);
-                            }
-                        }
-                        
                         if (this.__drStripOption) {
                             Array.from(n.childNodes).forEach(it => this.__fag.append(it));
                         } else {
                             this.__fag.append(n);
                         }
                         i++;
-                    }`, Object.assign({__drStripOption: drStripOption, __fag: fag, __element: element}, obj));
-                    RawSet.drVarDecoding(element, vars);
+                    }`, Object.assign({
+                        __drStripOption: drAttr.drStripOption,
+                        __fag: newTemp,
+                        __element: element
+                    }, obj));
+                    RawSet.drVarDecoding(newTemp, vars);
+                    RawSet.drItOtherDecoding(newTemp, itRandom);
+                    const tempalte = document.createElement('template');
+                    tempalte.innerHTML = newTemp.innerHTML;
+                    fag.append(tempalte.content)
                     const rr = RawSet.checkPointCreates(fag, config)
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr)
@@ -216,26 +263,61 @@ export class RawSet {
         let currentNode;
         // eslint-disable-next-line no-cond-assign
         while (currentNode = nodeIterator.nextNode()) {
-            // console.log('checkPointCreates', element, element.getAtt)
-            // if (currentNode.nodeType === Node.TEXT_NODE && currentNode.textContent) {
-            //     currentNode.textContent = currentNode.textContent?.replace(/\$\{.*?\}/g, '<b>$1</b>');
-            // }
-            // if (currentNode.nodeType === Node.ELEMENT_NODE) {
-            //     const element = (currentNode as Element)
-            //     console.log('checkPointCreates->', element, element.getAttributeNames())
-            // }
-            const uuid = RandomUtils.uuid()
-            const fragment = document.createDocumentFragment();
-            const start = document.createComment(`start ${uuid}`)
-            const end = document.createComment(`end ${uuid}`)
-            currentNode?.parentNode?.insertBefore(start, currentNode);
-            // currentNode?.parentNode?.insertBefore(content, currentNode);
-            currentNode?.parentNode?.insertBefore(end, currentNode.nextSibling);
-            fragment.append(currentNode);
-            pars.push(new RawSet({
-                start,
-                end
-            }, fragment))
+            if (currentNode.nodeType === Node.TEXT_NODE) {
+                let text = (currentNode as Text).textContent ?? '';
+                const template = document.createElement('template');
+                const a = StringUtils.regexExec(/\$\{.*?\}/g, text);
+                const map = a.reverse().map(it => { return {uuid: '', content: '', regexArr: it} });
+                map.forEach(it => {
+                    const uuid = RandomUtils.uuid()
+                    it.uuid = uuid
+                    it.content = it.regexArr[0]
+                    text = text.substr(0, it.regexArr.index) + text.substr(it.regexArr.index).replace(it.regexArr[0], `<!--start text ${uuid}--><!--end text ${uuid}-->`);
+                })
+                template.innerHTML = text;
+
+                map.forEach(it => {
+                    const subNodeIterator = document.createNodeIterator(template.content, NodeFilter.SHOW_COMMENT, {
+                        acceptNode(node) {
+                            const text = (node as Text).textContent;
+                            return (text === `start text ${it.uuid}` || text === `end text ${it.uuid}`) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                        }
+                    })
+                    let start: Comment | undefined;
+                    let end: Comment | undefined;
+                    let subNode;
+                    // eslint-disable-next-line no-cond-assign
+                    while (subNode = subNodeIterator.nextNode()) {
+                        if ((subNode.textContent ?? '').startsWith('start')) {
+                            start = subNode as Comment;
+                        }
+                        if ((subNode.textContent ?? '').startsWith('end')) {
+                            end = subNode as Comment;
+                        }
+                    }
+                    if (start && end) {
+                        const fragment = document.createDocumentFragment();
+                        fragment.append(document.createTextNode(it.content))
+                        pars.push(new RawSet({
+                            start,
+                            end
+                        }, fragment))
+                    }
+                })
+                currentNode?.parentNode?.replaceChild(template.content, currentNode);
+            } else {
+                const uuid = RandomUtils.uuid()
+                const fragment = document.createDocumentFragment();
+                const start = document.createComment(`start ${uuid}`)
+                const end = document.createComment(`end ${uuid}`)
+                currentNode?.parentNode?.insertBefore(start, currentNode);
+                currentNode?.parentNode?.insertBefore(end, currentNode.nextSibling);
+                fragment.append(currentNode);
+                pars.push(new RawSet({
+                    start,
+                    end
+                }, fragment))
+            }
         }
         return pars;
     }
@@ -249,6 +331,50 @@ export class RawSet {
             next.remove();
             next = this.point.start.nextSibling;
         }
+    }
+
+    public static drItOtherEncoding(element: Element | DocumentFragment) {
+        const random = RandomUtils.uuid();
+        const regex = /#it#/g;
+        element.querySelectorAll(`[${RawSet.DR_IT_OPTIONNAME}]`).forEach(it => {
+            it.innerHTML = it.innerHTML.replace(regex, random);
+        });
+        return random;
+    }
+
+    public static drItOtherDecoding(element: Element | DocumentFragment, random: string) {
+        element.querySelectorAll(`[${RawSet.DR_IT_OPTIONNAME}]`).forEach(it => {
+            it.innerHTML = it.innerHTML.replace(RegExp(random, 'g'), '#it#');
+        });
+    }
+
+    public static drDVarEncoding(element: Element, drVarOption: string) {
+        const vars = (drVarOption?.split(',') ?? []).map(it => {
+            const s = it.trim().split('=');
+            return {
+                name: s[0],
+                value: s[1],
+                regex: RegExp('(?<!(dr-|\\.))var\\.' + s[0] + '(?=.?)', 'g'),
+                random: RandomUtils.uuid()
+            }
+        })
+        element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
+            vars.filter(vit => vit.value && vit.name).forEach(vit => {
+                it.innerHTML = it.innerHTML.replace(vit.regex, vit.random);
+            })
+        });
+        vars.filter(vit => vit.value && vit.name).forEach(vit => {
+            element.innerHTML = element.innerHTML.replace(vit.regex, vit.value);
+        })
+        return vars;
+    }
+
+    public static drDVarDecoding(element: Element, vars: { name: string, value: string, regex: RegExp, random: string }[]) {
+        element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
+            vars.filter(vit => vit.value && vit.name).forEach(vit => {
+                it.innerHTML = it.innerHTML.replace(RegExp(vit.random, 'g'), vit.value);
+            })
+        });
     }
 
     public static drThisEncoding(element: Element, drThis: string) {
@@ -270,9 +396,15 @@ export class RawSet {
     public static drVarEncoding(element: Element, drVarOption: string) {
         const vars = (drVarOption?.split(',') ?? []).map(it => {
             const s = it.trim().split('=');
-            return {name: s[0], value: s[1], regex: RegExp('(?<!(dr-|\\.))var\\.' + s[0] + '(?=.?)', 'g'), random: RandomUtils.uuid()}
+            return {
+                name: s[0],
+                value: s[1],
+                regex: RegExp('(?<!(dr-|\\.))var\\.' + s[0] + '(?=.?)', 'g'),
+                random: RandomUtils.uuid()
+            }
         })
-        element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
+        // element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
+        element.querySelectorAll(`[${RawSet.DR_VAR_OPTIONNAME}]`).forEach(it => {
             vars.filter(vit => vit.value && vit.name).forEach(vit => {
                 it.innerHTML = it.innerHTML.replace(vit.regex, vit.random);
             })
@@ -283,7 +415,7 @@ export class RawSet {
         return vars;
     }
 
-    public static drVarDecoding(element: Element,  vars: {name: string, value: string, regex: RegExp, random: string}[]) {
+    public static drVarDecoding(element: Element, vars: { name: string, value: string, regex: RegExp, random: string }[]) {
         element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
             vars.filter(vit => vit.value && vit.name).forEach(vit => {
                 it.innerHTML = it.innerHTML.replace(RegExp(vit.random, 'g'), vit.value);
@@ -296,7 +428,7 @@ export class RawSet {
         const n = element.cloneNode(true) as Element;
         const thisRandom = this.drThisEncoding(n, drThis)
         const vars = this.drVarEncoding(n, drVarOption)
-         this.drVarDecoding(n, vars)
+        this.drVarDecoding(n, vars)
         this.drThisDecoding(n, thisRandom);
         if (drStripOption) {
             Array.from(n.childNodes).forEach(it => fag.append(it));

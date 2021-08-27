@@ -55,6 +55,23 @@ describe('Test', () => {
         done()
     })
 
+    test('regex-replace', async (done) => {
+        let text = '${this.name}  = ${this.name} ${this.name + \'zzz\'} ${this.name}  = ${this.name}';
+        const a = StringUtils.regexExec(/\$\{.*?\}/g, text);
+
+        const az = {
+            name: 'z'
+        }
+        a.reverse().map(it => { return {start: '', end: '', regexArr: it} }).forEach(it => {
+            text = text.substr(0, it.regexArr.index) + text.substr(it.regexArr.index).replace(it.regexArr[0], `<zzz>${it.regexArr[0]}</zzz>`);
+        })
+
+        console.log(text)
+
+        expect(200).toBe(200)
+        done()
+    })
+
     test('regex', async (done) => {
         console.log('-->', 'good')
         const node = {

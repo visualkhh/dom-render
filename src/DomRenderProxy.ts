@@ -30,7 +30,6 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                 }
             })
         }
-
         this._targets.forEach(target => {
             this.initRender(target);
         });
@@ -63,7 +62,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             if (it.point.start.isConnected && it.point.start.isConnected) {
                 const rawSets = it.render(this._domRender_proxy, this.config);
                 // const thisRawSet = rawSets.filter(it => !it.thisObjPath)
-                rawSets.forEach(it => console.log('---->', it))
+                // rawSets.forEach(it => console.log('---->', it))
                 // rawSets.filter(it => it.thisObjPath).forEach(it => {
                 //     const childTarget = ScriptUtils.evalReturn(it.thisObjPath!, this._domRender_proxy);
                 //     it.thisObjPath = undefined;
@@ -92,9 +91,9 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             const strings = paths.reverse();
             const fullPathStr = strings.join('.');
             const iterable = this._rawSets.get(fullPathStr);
-            //array check
-            const front = strings.slice(0, strings.length-1).join('.')
-            const last = strings[strings.length-1]
+            // array check
+            const front = strings.slice(0, strings.length - 1).join('.')
+            const last = strings[strings.length - 1]
             if (!isNaN(Number(last)) && Array.isArray(ScriptUtils.evalReturn(front, this._domRender_proxy))) {
                 const aIterable = this._rawSets.get(front);
                 if (aIterable) {
@@ -114,7 +113,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public set(target: T, p: string | symbol, value: any, receiver: T): boolean {
-        // console.log('set-->', p, target, value, receiver);
+        console.log('set-->', p, target, value, receiver);
         if (typeof p === 'string') {
             value = this.proxy(target, value, p);
         }

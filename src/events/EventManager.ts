@@ -49,14 +49,13 @@ export const eventManager = new class {
             }
         })
 
-
         // on-init event
         this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'on-init', (it, varName) => {
             if (varName) {
                 if (typeof this.getValue(obj, varName) === 'function') {
                     this.getValue(obj, varName)(it)
                 } else {
-                    obj[varName] = it;
+                    this.setValue(obj, varName, it)
                 }
             }
         })
@@ -72,6 +71,7 @@ export const eventManager = new class {
                     this.setValue(obj, varName, it.value)
                 }
                 it.addEventListener('input', (eit) => {
+                    console.log('input change--->link')
                     if (typeof this.getValue(obj, varName) === 'function') {
                         this.getValue(obj, varName)(it.value, eit)
                     } else {
@@ -113,23 +113,22 @@ export const eventManager = new class {
             if (this.isUsingThisVar(attribute, varName) || varName === undefined) {
                 // eslint-disable-next-line no-new-func
                 const data = Function(`"use strict"; const $target=this.$target; ${script} `).bind(Object.assign({$target: it}, obj))() ?? {};
+                console.log('--', data)
                 for (const [key, value] of Object.entries(data)) {
-                    if (typeof value === 'string') {
-                        it.setAttribute(key, value);
-                    }
+                    it.setAttribute(key, String(value));
                 }
             }
         })
         // style
         this.procAttr(elements, this.attrPrefix + 'style', (it, attribute) => {
             const script = attribute;
-            console.log('style-->', this.isUsingThisVar(attribute, varName))
+            // console.log('style-->', this.isUsingThisVar(attribute, varName), varName)
             if (this.isUsingThisVar(attribute, varName) || varName === undefined) {
                 // eslint-disable-next-line no-new-func
                 const data = Function(`"use strict"; const $target = this.$target;  ${script} `).bind(Object.assign({$target: it}, obj))() ?? {};
                 for (const [key, value] of Object.entries(data)) {
-                    if (typeof value === 'string' && it instanceof HTMLElement) {
-                        (it.style as any)[key] = value;
+                    if (it instanceof HTMLElement) {
+                        (it.style as any)[key] = String(value);
                     }
                 }
             }
@@ -180,7 +179,7 @@ export const eventManager = new class {
     }
 
     public setValue(obj: any, name: string, value?: any) {
-        ScriptUtils.eval(`${name} = this.___value`, Object.assign({___value: value}, obj))
+        ScriptUtils.eval(`this.${name} = this.value`, {this: obj, value: value})
     }
 
     /**
@@ -191,7 +190,7 @@ export const eventManager = new class {
         if (varName && raws) {
             if (varName.startsWith('this.')) {
                 varName = varName.replace(/this\./,'')
-            } 
+            }
             const variablePaths = ScriptUtils.getVariablePaths(raws ?? '');
             return variablePaths.has(varName)
             // for (const raw of this.usingThisVar(raws)) {
