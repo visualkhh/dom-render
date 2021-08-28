@@ -5,6 +5,7 @@ class User {
     age: number;
     gender: string;
     friends: User[];
+    birth = new Date();
     office = {
         name: 'guro',
         addr: {

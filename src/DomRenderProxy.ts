@@ -23,7 +23,6 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                 if (target !== undefined && target !== null && typeof target === 'object') {
                     const filter = this.config?.proxyExcludeTyps?.filter(it => target instanceof it) ?? []
                     if (filter.length === 0) {
-                        // console.log('proxy exclude-notAt-', target, this.config?.proxyExcludeTyps)
                         const proxyAfter = this.proxy(objProxy, target, it);
                         (obj as any)[it] = proxyAfter;
                     }
@@ -102,7 +101,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             } else if (iterable) {
                 this.render(Array.from(iterable));
             }
-            console.log('---targets->', fullPathStr)
+            // console.log('---targets->', fullPathStr)
             this._targets.forEach(it => {
                 if (it.nodeType === Node.DOCUMENT_FRAGMENT_NODE || it.nodeType === Node.ELEMENT_NODE) {
                     const targets = eventManager.findAttrElements((it as DocumentFragment | Element), this.config);
@@ -113,7 +112,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public set(target: T, p: string | symbol, value: any, receiver: T): boolean {
-        console.log('set-->', p, target, value, receiver);
+        // console.log('set-->', p, target, value, receiver);
         if (typeof p === 'string') {
             value = this.proxy(target, value, p);
         }

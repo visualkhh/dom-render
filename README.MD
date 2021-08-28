@@ -43,15 +43,15 @@ dom-render
     
     <h2>dr-value, value-link</h2>
     <div>
-        dr-value: <input type="text" dr-value="return this.office.name"> <br>
+        dr-value: <input type="text" dr-value="this.office.name"> <br>
         dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
     </div>
     
     <h1>attribute</h1>
     <h2>dr-attr</h2>
-    <textarea dr-attr="return {rows: this.age/2, cols: this.age}"></textarea>
+    <textarea dr-attr="{rows: this.age/2, cols: this.age}"></textarea>
     <h2>dr-style</h2>
-    <div dr-style="return {fontSize: this.age+'px'}"> style </div>
+    <div dr-style="{fontSize: this.age+'px'}"> style </div>
     <button dr-event-click="this.age = Math.floor(Math.random() * 20)"> change age</button>
     
     <h1>lifeCycle</h1>

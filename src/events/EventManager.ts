@@ -1,4 +1,4 @@
-import { Config } from 'Config';
+import {Config} from 'Config';
 import {ScriptUtils} from '../utils/script/ScriptUtils';
 
 export const eventManager = new class {
@@ -42,10 +42,11 @@ export const eventManager = new class {
         // value
         this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'value', (it, attribute) => {
             const script = attribute;
-            // eslint-disable-next-line no-new-func
-            const data = Function(`"use strict"; ${script} `).bind(Object.assign(obj))() ?? {};
-            if (it.value !== data) {
-                it.value = data;
+            if (script) {
+                const data = ScriptUtils.evalReturn(script, obj);
+                if (it.value !== data) {
+                    it.value = data;
+                }
             }
         })
 
@@ -63,7 +64,7 @@ export const eventManager = new class {
         // value-link event
         this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'value-link', (it, varName) => {
             if (varName) {
-                console.log('-->', this.getValue(obj, varName))
+                // console.log('-->', this.getValue(obj, varName))
                 const value = this.getValue(obj, varName);
                 if (typeof value === 'function' && value) {
                     value(it.value)
@@ -109,11 +110,13 @@ export const eventManager = new class {
 
         // attribute
         this.procAttr(elements, this.attrPrefix + 'attr', (it, attribute) => {
-            const script = attribute;
-            if (this.isUsingThisVar(attribute, varName) || varName === undefined) {
+            let script = attribute;
+            if (script) {
+                script = 'return ' + script;
+            }
+            if (this.isUsingThisVar(script, varName) || varName === undefined) {
                 // eslint-disable-next-line no-new-func
                 const data = Function(`"use strict"; const $target=this.$target; ${script} `).bind(Object.assign({$target: it}, obj))() ?? {};
-                console.log('--', data)
                 for (const [key, value] of Object.entries(data)) {
                     it.setAttribute(key, String(value));
                 }
@@ -121,9 +124,11 @@ export const eventManager = new class {
         })
         // style
         this.procAttr(elements, this.attrPrefix + 'style', (it, attribute) => {
-            const script = attribute;
-            // console.log('style-->', this.isUsingThisVar(attribute, varName), varName)
-            if (this.isUsingThisVar(attribute, varName) || varName === undefined) {
+            let script = attribute;
+            if (script) {
+                script = 'return ' + script;
+            }
+            if (this.isUsingThisVar(script, varName) || varName === undefined) {
                 // eslint-disable-next-line no-new-func
                 const data = Function(`"use strict"; const $target = this.$target;  ${script} `).bind(Object.assign({$target: it}, obj))() ?? {};
                 for (const [key, value] of Object.entries(data)) {
@@ -179,32 +184,25 @@ export const eventManager = new class {
     }
 
     public setValue(obj: any, name: string, value?: any) {
-        ScriptUtils.eval(`this.${name} = this.value`, {this: obj, value: value})
+        ScriptUtils.eval(`this.${name} = this.value`, {
+            this: obj,
+            value: value
+        })
     }
 
-    /**
-     * @deprecated
-     */
     public isUsingThisVar(raws: string | null | undefined, varName: string | null | undefined): boolean {
-        console.log('isUsingV', raws, varName, ScriptUtils.getVariablePaths(raws ?? ''))
+        // console.log('isUsingV', raws)
+        // console.log('isUsingV', raws, varName, ScriptUtils.getVariablePaths(raws ?? ''))
         if (varName && raws) {
             if (varName.startsWith('this.')) {
-                varName = varName.replace(/this\./,'')
+                varName = varName.replace(/this\./, '')
             }
             const variablePaths = ScriptUtils.getVariablePaths(raws ?? '');
             return variablePaths.has(varName)
-            // for (const raw of this.usingThisVar(raws)) {
-            //     if (raw.startsWith(varName)) {
-            //         return true;
-            //     }
-            // }
         }
         return false;
     }
 
-    /**
-     * @deprecated
-     */
     // public usingThisVar(raws: string): string[] {
     //     let regex = /include\(.*\)/gm;
     //     // raws = raws.replace(regex, '');

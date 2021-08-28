@@ -16,6 +16,7 @@ export class ScriptUtils {
                 let items;
                 if (typeof p === 'string') {
                     items = this.prefix ? this.prefix + '.' + p : p;
+                    // console.log('add?', items)
                     this.usingVars.add(items)
                 }
                 return new Proxy(() => {
@@ -28,7 +29,7 @@ export class ScriptUtils {
 
         try {
             // eslint-disable-next-line no-new-func,no-unused-expressions
-            Function(`"use strict"; ${script} `).bind(destUser)();
+            Function(`"use strict"; ${script}; `).bind(destUser)();
         } catch (e) {
             console.error(e);
         }
