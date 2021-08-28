@@ -112,7 +112,6 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public set(target: T, p: string | symbol, value: any, receiver: T): boolean {
-        // console.log('set-->', p, target, value, receiver);
         if (typeof p === 'string') {
             value = this.proxy(target, value, p);
         }
@@ -132,7 +131,24 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         } else if (p === '_DomRender_proxy') {
             return this;
         } else {
-            return (target as any)[p]
+            // Date라던지 이런놈들은-_-프록시가 이상하게 동작해서
+            // console.log('--->', p, target, target.bind, 'bind' in target)
+            // if ((p in target) && ('bind' in target)) {
+            //     try{
+            //     return (target as any)[p].bind(target);
+            //     }catch (e) {
+            //         console.error(e)
+            //     }
+            // } else {
+            //     return (target as any)[p]
+            // }
+            // return (p in target) ? (target as any)[p].bind(target) : (target as any)[p]
+            // return (target as any)[p]
+            try {
+                return (p in target) ? (target as any)[p].bind(target) : undefined
+            } catch (e) {
+                return (target as any)[p]
+            }
         }
     }
 

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head></head>
+<body>
+    <custom-ele title="WC"></custom-ele>
+    <div>
+        <button id="delete-wc">제거</button>
+    </div>
+</body>
+<script> class CustomEle extends HTMLElement {
+    // 생성자 에서는 보통 해당 엘리먼트에 포함된 함수를 초기화 한다.
+    constructor() {
+        super();
+    } // 커스텀 엘리먼트가 생성될때 실행된다.
+    connectedCallback() {
+        this.render();
+    } // 해당요소가 새로운 문서로 이동 될 때마다 호출 된다.
+    adoptCallback() {
+    }
+
+// 요소의 속성이 추가, 제거, 업데이트, 교체되는 부분을 관찰하고 호출된다.
+// 이때 observedAttributes 속성에 나열된 특성에서만 호출된다.
+    attributeChangedCallback(attrName, oldVal, newVal) {
+        this.render();
+    }
+
+//attributeChangedCallback 에서 관찰하는 항목을 리턴한다.
+    static get observedAttributes() {
+        return ['title'];
+    }
+
+    get title() {
+        return this.getAttribute('title');
+    }
+
+// custom element 가 제거될때 호출된다.
+    disconnectedCallback() {
+        alert('bye bye');
+    }
+
+// custom method
+    render() {
+        this.innerHTML = ` <h1>${this.title}</h1> `
+    }
+}
+
+window.customElements.define('custom-ele', CustomEle); </script>
+</html>

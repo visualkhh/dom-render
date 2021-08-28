@@ -55,7 +55,10 @@ export class RawSet {
             const fag = document.createDocumentFragment()
             if (cNode.nodeType === Node.TEXT_NODE) {
                 const textContent = cNode.textContent;
+                // console.log('---log--->', obj, obj?._DomRender_origin??  obj)
                 const n = document.createTextNode(ScriptUtils.eval(`return \`${textContent}\``, obj))
+                // const n = document.createTextNode(ScriptUtils.eval(`return \`${textContent}\``, obj?._DomRender_origin ?? obj))
+                // console.log('------>', n)
                 cNode.parentNode?.replaceChild(n, cNode)
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;

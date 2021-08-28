@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head></head>
+<body>
+    <custom-ele title="WC">
+        <h1 slot="second">Custom Content</h1>
+        <h1 slot="first">Custom Content</h1>
+    </custom-ele>
+</body>
+<script> class CustomEle extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({mode: 'open'});
+        this.shadowRoot.innerHTML = ` <slot name="first"></slot> <slot name="second"></slot> `
+    }
+}
+
+window.customElements.define('custom-ele', CustomEle); </script>
+</html>

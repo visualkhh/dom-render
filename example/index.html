@@ -19,7 +19,7 @@
 
     <h2>df-for, of</h2>
     <div dr-for="var i = 0; i < this.friends.length; i++"> friend</div>
-    <div dr-for-of="this.friends"> ${#it#.name}</div>
+    <div dr-for-of="this.friends"> friend name: ${#it#.name}</div>
     <div dr-for="var i = 1 ; i <= 9 ; i++" dr-it="i">
         ${#it#} *
         <scope dr-for="var y = 1 ; y <= 9 ; y++" dr-it="y" dr-var="superIt=#it#" dr-strip="true">
@@ -30,8 +30,8 @@
     <h1>event</h1>
     <h2>dr-event, click, change, input, keyup, keydown</h2>
     <div>
-        click:
-        <button dr-event-click="this.name = 'name' + new Date()">click ${this.name}</button>
+        click: ${this.birth}
+        <button dr-event-click="this.birth = Date()">click ${this.birth}</button>
         <br>
         change: <input type="text" dr-event-change="this.name = $target.value"> <br>
         input: <input type="text" dr-event-input="this.name = $target.value"> <br>
@@ -42,7 +42,7 @@
     <h2>dr-value, value-link</h2>
     <div>
         dr-value: <input type="text" dr-value="this.office.name"> <br>
-        dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
+        dr-value-link: <input type="text" dr-value-link="this.office.addr.street">${this.office.addr.street}<br>
     </div>
 
     <h1>attribute</h1>
