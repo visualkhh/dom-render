@@ -8,3 +8,5 @@ regex
   - https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_templates_and_slots
   - https://github.com/mdn/web-components-examples/tree/master/element-details
   - https://alexband.tistory.com/53
+- custom tag
+  - https://github.com/mdn/web-components-examples/blob/master/popup-info-box-web-component/index.html
