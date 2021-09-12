@@ -51,6 +51,7 @@ export class RawSet {
     public render(obj: any, config?: Config): RawSet[] {
         const genNode = document.importNode(this.fragment, true);
         const raws: RawSet[] = [];
+        const onInitCallBack: {attrName: string, attrValue: string, obj: any}[] = [];
         genNode.childNodes.forEach((cNode, key) => {
             const fag = document.createDocumentFragment()
             if (cNode.nodeType === Node.TEXT_NODE) {
@@ -210,14 +211,16 @@ export class RawSet {
 
                 // config detecting
                 config?.targets?.forEach(it => {
-                    const attrValue = this.getAttributeAndDelete(element, it.attrName)
-                    if (attrValue) {
+                    const attrName = it.attrName;
+                    const attrValue = this.getAttributeAndDelete(element, attrName)
+                    if (attrValue && attrName) {
                         const documentFragment = it.callBack(element, attrValue, obj);
                         if (documentFragment) {
                             fag.append(documentFragment)
                             const rr = RawSet.checkPointCreates(fag, config)
                             element.parentNode?.replaceChild(fag, element);
                             raws.push(...rr);
+                            onInitCallBack.push({attrName, attrValue, obj});
                             it?.complete?.(element, attrValue, obj);
                         }
                     }
@@ -227,6 +230,7 @@ export class RawSet {
 
         this.applyEvent(obj, genNode, config);
         this.replaceBody(genNode);
+        onInitCallBack.forEach(it => config?.onInit?.(it.attrName, it.attrValue, obj))
         return raws;
     }
 
