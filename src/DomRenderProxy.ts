@@ -8,6 +8,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     public _rawSets = new Map<string, Set<RawSet>>()
     public _domRender_proxy?: T;
     public _targets = new Set<Node>();
+
     constructor(public _domRender_origin: T, target?: Node, private config?: Config) {
         if (target) {
             this._targets.add(target);
@@ -144,11 +145,19 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             // }
             // return (p in target) ? (target as any)[p].bind(target) : (target as any)[p]
             // return (target as any)[p]
-            try {
-                return (p in target) ? (target as any)[p].bind(target) : undefined
-            } catch (e) {
-                return (target as any)[p]
+            const it = (target as any)[p];
+            if (it && typeof it === 'object' && ('_DomRender_isProxy' in it) && Object.prototype.toString.call(it._DomRender_origin) === '[object Date]') {
+                return it._DomRender_origin;
+            } else {
+                return it;
             }
+            // return it;
+
+            // try {
+            //     return (p in target) ? (target as any)[p].bind(target) : undefined
+            // } catch (e) {
+            //     return (target as any)[p]
+            // }
         }
     }
 
@@ -164,7 +173,8 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             const proxy = new Proxy(obj, domRender);
             domRender.run(proxy);
             return proxy
-        } if (obj !== undefined && obj !== null && typeof obj === 'object' && ('_DomRender_isProxy' in obj)) {
+        }
+        if (obj !== undefined && obj !== null && typeof obj === 'object' && ('_DomRender_isProxy' in obj)) {
             const d = (obj as any)._DomRender_proxy as DomRenderProxy<T>
             d.addRef(this._domRender_proxy!, p);
             return obj;
