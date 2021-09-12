@@ -217,7 +217,8 @@ export class RawSet {
                             fag.append(documentFragment)
                             const rr = RawSet.checkPointCreates(fag, config)
                             element.parentNode?.replaceChild(fag, element);
-                            raws.push(...rr)
+                            raws.push(...rr);
+                            it.complete(element, attrValue, obj);
                         }
                     }
                 })
