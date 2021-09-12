@@ -218,7 +218,7 @@ export class RawSet {
                             const rr = RawSet.checkPointCreates(fag, config)
                             element.parentNode?.replaceChild(fag, element);
                             raws.push(...rr);
-                            it.complete(element, attrValue, obj);
+                            it?.complete?.(element, attrValue, obj);
                         }
                     }
                 })
