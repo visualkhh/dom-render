@@ -44,7 +44,7 @@ export const eventManager = new class {
 
     // eslint-disable-next-line no-undef
     public applyEvent(obj: any, childNodes: Set<ChildNode> | Set<Element>, config?: Config) {
-        // console.log('eventManager applyEvent==>', obj, childNodes, config)
+        console.log('eventManager applyEvent==>', obj, childNodes, config)
         // Node.ELEMENT_NODE = 1
         // event
         this.eventNames.forEach(it => {
@@ -181,6 +181,7 @@ export const eventManager = new class {
     public addDrEvent(obj: any, eventName: string, elements: Set<Element> | Set<ChildNode>) {
         const attr = this.attrPrefix + 'event-' + eventName
         this.procAttr<HTMLInputElement>(elements, attr, (it, attribute) => {
+            console.log('-------?', elements, it)
             const script = attribute;
             it.addEventListener(eventName, (event) => {
                 // eslint-disable-next-line no-new-func
@@ -192,7 +193,8 @@ export const eventManager = new class {
     }
 
     // eslint-disable-next-line no-undef
-    public procAttr<T extends Element>(elements: Set<Element> | Set<ChildNode> = new Set(), attrName: string, f: (h: T, value: string | null) => void) {
+    public procAttr<T extends Element = Element>(elements: Set<Element> | Set<ChildNode> = new Set(), attrName: string, callBack: (h: T, value: string) => void) {
+        const sets = new Set<Element>();
         elements.forEach(it => {
             // console.log('--->type', it, it.nodeType)
             if (!it) {
@@ -201,14 +203,19 @@ export const eventManager = new class {
             // Node.ELEMENT_NODE = 1
             if (it.nodeType === 1) {
                 const e = it as Element;
-                if (e.getAttribute(attrName)) {
-                    f(it as T, e.getAttribute(attrName));
-                }
+                sets.add(e);
                 e.querySelectorAll<T>(`[${attrName}]`).forEach(it => {
-                    f(it, it.getAttribute(attrName));
+                    sets.add(it);
                 })
             }
         });
+
+        sets.forEach(it => {
+            const attr = it.getAttribute(attrName);
+            if (attr) {
+                callBack(it as T, attr);
+            }
+        })
     }
 
     public getValue<T = any>(obj: any, name: string, value?: any): T {
