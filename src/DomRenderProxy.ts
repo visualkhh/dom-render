@@ -24,8 +24,10 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                 if (target !== undefined && target !== null && typeof target === 'object') {
                     const filter = this.config?.proxyExcludeTyps?.filter(it => target instanceof it) ?? []
                     if (filter.length === 0) {
-                        const proxyAfter = this.proxy(objProxy, target, it);
-                        (obj as any)[it] = proxyAfter;
+                        if (!Object.isFrozen(obj)) {
+                            const proxyAfter = this.proxy(objProxy, target, it);
+                            (obj as any)[it] = proxyAfter;
+                        }
                     }
                 }
             })
@@ -36,23 +38,23 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public initRender(target: Node) {
-        this._targets.add(target)
+        this._targets.add(target);
         const rawSets = RawSet.checkPointCreates(target, this.config);
-        // console.log('-initRender-->->', findAttrElements)
-        eventManager.applyEvent(this._domRender_proxy, eventManager.findAttrElements(target as Element, this.config), this.config)
+        eventManager.applyEvent(this._domRender_proxy, eventManager.findAttrElements(target as Element, this.config), this.config);
         rawSets.forEach(it => {
             const strings = it.getUsingTriggerVariables(this.config);
             if (strings.size <= 0) {
-                this.addRawSet('', it)
+                this.addRawSet('', it);
             } else {
                 strings.forEach(sit => {
-                    this.addRawSet(sit, it)
+                    this.addRawSet(sit, it);
                 })
             }
         })
         this._rawSets.forEach((v, k) => {
             this.render(Array.from(v));
-        })
+        });
+        (this._domRender_proxy as any)?.onInitRender?.();
     }
 
     public render(raws: RawSet[]) {
@@ -144,6 +146,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             //     return (target as any)[p]
             // }
             // return (p in target) ? (target as any)[p].bind(target) : (target as any)[p]
+            // console.log('-->', p, Object.prototype.toString.call((target as any)[p]), (target as any)[p])
             // return (target as any)[p]
             const it = (target as any)[p];
             if (it && typeof it === 'object' && ('_DomRender_isProxy' in it) && Object.prototype.toString.call(it._DomRender_origin) === '[object Date]') {

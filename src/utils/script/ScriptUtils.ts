@@ -47,4 +47,37 @@ export class ScriptUtils {
         // eslint-disable-next-line no-new-func,no-unused-expressions
         return Function(`"use strict"; ${script} `).bind(thisTarget)();
     }
+
+    public static loadElement(name: string, attribute: {[key:string]: string}, target: Element = document.head) {
+        return new Promise((resolve, reject) => {
+            const tag = document.createElement(name)
+            tag.onload = resolve
+            tag.onerror = reject
+            for (const [key, value] of Object.entries(attribute)) {
+                tag.setAttribute(key, value);
+            }
+            target.append(tag)
+        });
+    }
+
+    public static loadStyleSheet(href: string, attribute: {[key:string]: string} = {}) {
+        // const tag = document.createElement('link');
+        // tag.type = 'text/css';
+        // tag.setAttribute('rel', 'stylesheet');
+        // tag.href = href;
+        // for (const [key, value] of Object.entries(attribute)) {
+        //     tag.setAttribute(key, value);
+        // }
+        // target.append(tag)
+        attribute.type = 'text/css';
+        attribute.rel = 'stylesheet';
+        attribute.href = href;
+        return ScriptUtils.loadElement('link', attribute);
+    }
+
+    public static loadScript(src: string, attribute: {[key:string]: string} = {}) {
+        attribute.type = 'text/javascript';
+        attribute.src = src;
+        return ScriptUtils.loadElement('script', attribute);
+    }
 }

@@ -9,6 +9,8 @@ export const eventManager = new class {
         this.attrPrefix + 'value-link',
         this.attrPrefix + 'attr',
         this.attrPrefix + 'style',
+        this.attrPrefix + 'class',
+        this.attrPrefix + 'window-event-popstate',
         this.attrPrefix + 'on-init'
     ];
 
@@ -16,6 +18,16 @@ export const eventManager = new class {
         this.eventNames.forEach(it => {
             this.attrNames.push(this.attrPrefix + 'event-' + it);
         });
+
+        window.addEventListener('popstate', (e) => {
+            document.querySelectorAll('[dr-window-event-popstate]').forEach(it => {
+                const script = it.getAttribute('dr-window-event-popstate')
+                if (script) {
+                    // eslint-disable-next-line no-new-func,no-unused-expressions
+                    Function(`"use strict"; const $target = this.$target;  ${script} `).bind(Object.assign({$target: it}, (it as any).obj))() ?? {};
+                }
+            })
+        })
     }
 
     public findAttrElements(fragment: DocumentFragment | Element, config?: Config): Set<Element> {
@@ -49,6 +61,11 @@ export const eventManager = new class {
                 }
             }
         })
+        // popstate
+        this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'window-event-popstate', (it, attribute) => {
+            (it as any).obj = obj;
+            console.log('-->', it, (it as any).obj)
+        })
 
         // on-init event
         this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'on-init', (it, varName) => {
@@ -72,7 +89,7 @@ export const eventManager = new class {
                     this.setValue(obj, varName, it.value)
                 }
                 it.addEventListener('input', (eit) => {
-                    console.log('input change--->link')
+                    // console.log('input change--->link')
                     if (typeof this.getValue(obj, varName) === 'function') {
                         this.getValue(obj, varName)(it.value, eit)
                     } else {
@@ -134,6 +151,26 @@ export const eventManager = new class {
                 for (const [key, value] of Object.entries(data)) {
                     if (it instanceof HTMLElement) {
                         (it.style as any)[key] = String(value);
+                    }
+                }
+            }
+        })
+        // class
+        this.procAttr(elements, this.attrPrefix + 'class', (it, attribute) => {
+            let script = attribute;
+            if (script) {
+                script = 'return ' + script;
+            }
+            if (this.isUsingThisVar(script, varName) || varName === undefined) {
+                // eslint-disable-next-line no-new-func
+                const data = Function(`"use strict"; const $target = this.$target;  ${script} `).bind(Object.assign({$target: it}, obj))() ?? {};
+                for (const [key, value] of Object.entries(data)) {
+                    if (it instanceof HTMLElement) {
+                        if (value) {
+                            it.classList.add(key);
+                        } else {
+                            it.classList.remove(key);
+                        }
                     }
                 }
             }

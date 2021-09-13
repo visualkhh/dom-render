@@ -1,7 +1,7 @@
 // import {Scope} from './Scope';
 //
-// export interface LifeCycle {
-//     onReady(data: HTMLFrameElement): void;
+export interface DomRenderLifeCycle {
+    onInitRender(): void;
 //     onRenderd(data: HTMLFrameElement): void;
 //     onScopeMaked(data: Scope): void;
-// }
+}
