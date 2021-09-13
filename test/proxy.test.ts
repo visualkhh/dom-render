@@ -15,6 +15,8 @@ describe('Test', () => {
         const date1 = new Date(); // {setDate: (n: number) => {}};
         const date = new Proxy(date1, new TestProxyHandler())
         date.setDate(555)
+        console.log(date instanceof Date)
+        console.log(date instanceof TestProxyHandler)
         // date.toString = () => {
         //     return date1.toString();
         // }

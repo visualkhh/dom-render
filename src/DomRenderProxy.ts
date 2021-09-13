@@ -15,19 +15,29 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         }
     }
 
+    public static final<T = any> (obj: T) {
+        return new Proxy(obj as any, {
+            has(target: any, p: string | symbol): boolean {
+                return p === '_DomRender_isFinal' || p in target;
+            }
+        })
+    }
+
+    public static isFinal<T = any> (obj: T) {
+        return '_DomRender_isFinal' in obj;
+    }
+
     public run(objProxy: T) {
         this._domRender_proxy = objProxy;
         const obj = (objProxy as any)._DomRender_origin;
         if (obj) {
             Object.keys(obj).forEach(it => {
                 const target = (obj as any)[it]
-                if (target !== undefined && target !== null && typeof target === 'object') {
+                if (target !== undefined && target !== null && typeof target === 'object' && !DomRenderProxy.isFinal(target) && !Object.isFrozen(target)) {
                     const filter = this.config?.proxyExcludeTyps?.filter(it => target instanceof it) ?? []
                     if (filter.length === 0) {
-                        if (!Object.isFrozen(obj)) {
-                            const proxyAfter = this.proxy(objProxy, target, it);
-                            (obj as any)[it] = proxyAfter;
-                        }
+                        const proxyAfter = this.proxy(objProxy, target, it);
+                        (obj as any)[it] = proxyAfter;
                     }
                 }
             })
@@ -169,7 +179,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     proxy(parentProxy: T, obj: T | any, p: string) {
-        if (obj !== undefined && obj !== null && typeof obj === 'object' && !('_DomRender_isProxy' in obj)) {
+        if (obj !== undefined && obj !== null && typeof obj === 'object' && !('_DomRender_isProxy' in obj) && !DomRenderProxy.isFinal(obj) && !Object.isFrozen(obj)) {
             // console.log('proxyyyyyyyy->', obj)
             const domRender = new DomRenderProxy(obj, undefined, this.config);
             domRender.addRef(parentProxy, p);
@@ -177,7 +187,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             domRender.run(proxy);
             return proxy
         }
-        if (obj !== undefined && obj !== null && typeof obj === 'object' && ('_DomRender_isProxy' in obj)) {
+        if (obj !== undefined && obj !== null && typeof obj === 'object' && ('_DomRender_isProxy' in obj) && !DomRenderProxy.isFinal(obj) && !Object.isFrozen(obj)) {
             const d = (obj as any)._DomRender_proxy as DomRenderProxy<T>
             d.addRef(this._domRender_proxy!, p);
             return obj;
