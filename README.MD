@@ -1,6 +1,10 @@
 dom-render
 ===
-
+## view template engine
+### web component 이용 dom 제어 및 render
+```shell
+npm install dom-render
+````
 ```html
 <!doctype html>
 <html lang="en">

@@ -56,7 +56,8 @@ describe('Test', () => {
     })
 
     test('regex-replace', async (done) => {
-        let text = '${this.name}  = ${this.name} ${this.name + \'zzz\'} ${this.name}  = ${this.name}';
+        // let text = '${this.name}  = ${this.name} ${this.name + \'zzz\'} ${this.name}  = ${this.name <= 1 ? 1 : 2}';
+        let text = '${#it# <= 5 ? \'1\' : \'2\'}';
         const a = StringUtils.regexExec(/\$\{.*?\}/g, text);
 
         const az = {

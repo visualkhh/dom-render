@@ -44,7 +44,7 @@ export const eventManager = new class {
 
     // eslint-disable-next-line no-undef
     public applyEvent(obj: any, childNodes: Set<ChildNode> | Set<Element>, config?: Config) {
-        console.log('eventManager applyEvent==>', obj, childNodes, config)
+        // console.log('eventManager applyEvent==>', obj, childNodes, config)
         // Node.ELEMENT_NODE = 1
         // event
         this.eventNames.forEach(it => {
@@ -181,7 +181,7 @@ export const eventManager = new class {
     public addDrEvent(obj: any, eventName: string, elements: Set<Element> | Set<ChildNode>) {
         const attr = this.attrPrefix + 'event-' + eventName
         this.procAttr<HTMLInputElement>(elements, attr, (it, attribute) => {
-            console.log('-------?', elements, it)
+            // console.log('-------?', elements, it)
             const script = attribute;
             it.addEventListener(eventName, (event) => {
                 // eslint-disable-next-line no-new-func

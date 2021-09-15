@@ -138,6 +138,7 @@ export class RawSet {
                         cNode.remove();
                     }
                 }
+
                 if (drAttr.drFor) {
                     const itRandom = RawSet.drItOtherEncoding(element);
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
@@ -273,6 +274,7 @@ export class RawSet {
         while (currentNode = nodeIterator.nextNode()) {
             if (currentNode.nodeType === Node.TEXT_NODE) {
                 let text = (currentNode as Text).textContent ?? '';
+                console.log('->', text)
                 const template = document.createElement('template');
                 const a = StringUtils.regexExec(/\$\{.*?\}/g, text);
                 const map = a.reverse().map(it => { return {uuid: '', content: '', regexArr: it} });
@@ -281,7 +283,9 @@ export class RawSet {
                     it.uuid = uuid
                     it.content = it.regexArr[0]
                     text = text.substr(0, it.regexArr.index) + text.substr(it.regexArr.index).replace(it.regexArr[0], `<!--start text ${uuid}--><!--end text ${uuid}-->`);
+                    console.log('-->', text)
                 })
+                console.log('--->', text)
                 template.innerHTML = text;
 
                 map.forEach(it => {
