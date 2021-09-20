@@ -348,14 +348,14 @@ export class RawSet {
     public static drItOtherEncoding(element: Element | DocumentFragment) {
         const random = RandomUtils.uuid();
         const regex = /#it#/g;
-        element.querySelectorAll(`[${RawSet.DR_IT_OPTIONNAME}]`).forEach(it => {
+        element.querySelectorAll(`[${RawSet.DR_IT_OPTIONNAME}], [${RawSet.DR_FOR_OF_NAME}]`).forEach(it => {
             it.innerHTML = it.innerHTML.replace(regex, random);
         });
         return random;
     }
 
     public static drItOtherDecoding(element: Element | DocumentFragment, random: string) {
-        element.querySelectorAll(`[${RawSet.DR_IT_OPTIONNAME}]`).forEach(it => {
+        element.querySelectorAll(`[${RawSet.DR_IT_OPTIONNAME}], [${RawSet.DR_FOR_OF_NAME}]`).forEach(it => {
             it.innerHTML = it.innerHTML.replace(RegExp(random, 'g'), '#it#');
         });
     }
