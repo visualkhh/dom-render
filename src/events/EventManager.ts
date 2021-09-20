@@ -64,7 +64,7 @@ export const eventManager = new class {
         // popstate
         this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'window-event-popstate', (it, attribute) => {
             (it as any).obj = obj;
-            console.log('-->', it, (it as any).obj)
+            //console.log('-->', it, (it as any).obj)
         })
 
         // on-init event
