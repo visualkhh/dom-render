@@ -106,4 +106,20 @@ describe('Test', () => {
         expect(200).toBe(200)
         done()
     })
+
+    test('regex-change-this', async (done) => {
+        const thisStr = 'vivi';
+        // eslint-disable-next-line no-template-curly-in-string
+        let message = 'this.v ${dr-this=\'this.asdasd\'} <div>${this.name}</div>';
+        // const a = StringUtils.regexExec(/([^(dr\-)])?this(?=.?)/g, message);
+        const a = StringUtils.regexExec(/([^(dr\-)])?this(?=.?)/g, message);
+
+        a.reverse().forEach(it => {
+            console.log(it, it.index)
+            message = message.substr(0, it.index) + message.substr(it.index).replace(it[0], `${it[1] ?? ''}${thisStr}`);
+        })
+        console.log(message)
+        expect(200).toBe(200)
+        done()
+    })
 })

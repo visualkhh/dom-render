@@ -389,12 +389,22 @@ export class RawSet {
     public static drThisEncoding(element: Element, drThis: string) {
         const thisRandom = RandomUtils.uuid()
         // const thisRegex = /(?<!(dr-|\.))this(?=.?)/g;
+        // const thisRegex = /[^(dr\-)]this(?=.?)/g;
         // const thisRegex = /[^(dr\-)]this\./g;
-        const thisRegex = /[^(dr\-)]this(?=.?)/g;
+        // safari 때문에 전위 검색 regex가 안됨 아 짜증나서 이걸로함.
         element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
-            it.innerHTML = it.innerHTML.replace(thisRegex, thisRandom);
+            let message = it.innerHTML;
+            StringUtils.regexExec(/([^(dr\-)])?this(?=.?)/g, message).reverse().forEach(it => {
+                message = message.substr(0, it.index) + message.substr(it.index).replace(it[0], `${it[1] ?? ''}${drThis}`);
+            })
+            it.innerHTML = message;
         })
-        element.innerHTML = element.innerHTML.replace(thisRegex, drThis);
+
+        let message = element.innerHTML;
+        StringUtils.regexExec(/([^(dr\-)])?this(?=.?)/g, message).reverse().forEach(it => {
+            message = message.substr(0, it.index) + message.substr(it.index).replace(it[0], `${it[1] ?? ''}${drThis}`);
+        })
+        element.innerHTML = message;
         return thisRandom;
     }
 
