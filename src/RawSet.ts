@@ -394,7 +394,7 @@ export class RawSet {
         element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
             it.innerHTML = it.innerHTML.replace(thisRegex, thisRandom);
         })
-        element.innerHTML = element.innerHTML.replace(thisRegex, drThis);alert(1)
+        element.innerHTML = element.innerHTML.replace(thisRegex, drThis);
         return thisRandom;
     }
 
