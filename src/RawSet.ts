@@ -274,7 +274,6 @@ export class RawSet {
         while (currentNode = nodeIterator.nextNode()) {
             if (currentNode.nodeType === Node.TEXT_NODE) {
                 let text = (currentNode as Text).textContent ?? '';
-                //console.log('->', text)
                 const template = document.createElement('template');
                 const a = StringUtils.regexExec(/\$\{.*?\}/g, text);
                 const map = a.reverse().map(it => { return {uuid: '', content: '', regexArr: it} });
@@ -283,9 +282,7 @@ export class RawSet {
                     it.uuid = uuid
                     it.content = it.regexArr[0]
                     text = text.substr(0, it.regexArr.index) + text.substr(it.regexArr.index).replace(it.regexArr[0], `<!--start text ${uuid}--><!--end text ${uuid}-->`);
-                    //console.log('-->', text)
                 })
-                //console.log('--->', text)
                 template.innerHTML = text;
 
                 map.forEach(it => {
@@ -360,42 +357,44 @@ export class RawSet {
         });
     }
 
-    public static drDVarEncoding(element: Element, drVarOption: string) {
-        const vars = (drVarOption?.split(',') ?? []).map(it => {
-            const s = it.trim().split('=');
-            return {
-                name: s[0],
-                value: s[1],
-                regex: RegExp('(?<!(dr-|\\.))var\\.' + s[0] + '(?=.?)', 'g'),
-                random: RandomUtils.uuid()
-            }
-        })
-        element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
-            vars.filter(vit => vit.value && vit.name).forEach(vit => {
-                it.innerHTML = it.innerHTML.replace(vit.regex, vit.random);
-            })
-        });
-        vars.filter(vit => vit.value && vit.name).forEach(vit => {
-            element.innerHTML = element.innerHTML.replace(vit.regex, vit.value);
-        })
-        return vars;
-    }
-
-    public static drDVarDecoding(element: Element, vars: { name: string, value: string, regex: RegExp, random: string }[]) {
-        element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
-            vars.filter(vit => vit.value && vit.name).forEach(vit => {
-                it.innerHTML = it.innerHTML.replace(RegExp(vit.random, 'g'), vit.value);
-            })
-        });
-    }
+    // public static drDVarEncoding(element: Element, drVarOption: string) {
+    //     const vars = (drVarOption?.split(',') ?? []).map(it => {
+    //         const s = it.trim().split('=');
+    //         return {
+    //             name: s[0],
+    //             value: s[1],
+    //             regex: RegExp('(?<!(dr-|\\.))var\\.' + s[0] + '(?=.?)', 'g'),
+    //             random: RandomUtils.uuid()
+    //         }
+    //     })
+    //     element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
+    //         vars.filter(vit => vit.value && vit.name).forEach(vit => {
+    //             it.innerHTML = it.innerHTML.replace(vit.regex, vit.random);
+    //         })
+    //     });
+    //     vars.filter(vit => vit.value && vit.name).forEach(vit => {
+    //         element.innerHTML = element.innerHTML.replace(vit.regex, vit.value);
+    //     })
+    //     return vars;
+    // }
+    //
+    // public static drDVarDecoding(element: Element, vars: { name: string, value: string, regex: RegExp, random: string }[]) {
+    //     element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
+    //         vars.filter(vit => vit.value && vit.name).forEach(vit => {
+    //             it.innerHTML = it.innerHTML.replace(RegExp(vit.random, 'g'), vit.value);
+    //         })
+    //     });
+    // }
 
     public static drThisEncoding(element: Element, drThis: string) {
         const thisRandom = RandomUtils.uuid()
-        const thisRegex = /(?<!(dr-|\.))this(?=.?)/g;
+        // const thisRegex = /(?<!(dr-|\.))this(?=.?)/g;
+        // const thisRegex = /[^(dr\-)]this\./g;
+        const thisRegex = /[^(dr\-)]this(?=.?)/g;
         element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
             it.innerHTML = it.innerHTML.replace(thisRegex, thisRandom);
         })
-        element.innerHTML = element.innerHTML.replace(thisRegex, drThis);
+        element.innerHTML = element.innerHTML.replace(thisRegex, drThis);alert(1)
         return thisRandom;
     }
 
@@ -411,7 +410,8 @@ export class RawSet {
             return {
                 name: s[0],
                 value: s[1],
-                regex: RegExp('(?<!(dr-|\\.))var\\.' + s[0] + '(?=.?)', 'g'),
+                // regex: RegExp('(?<!(dr-|\\.))var\\.' + s[0] + '(?=.?)', 'g'),
+                regex: RegExp('var\\.' + s[0] + '(?=.?)', 'g'),
                 random: RandomUtils.uuid()
             }
         })
