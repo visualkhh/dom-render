@@ -27,7 +27,7 @@ export class RawSet {
     // public static readonly DR_CONTENT_OPTIONNAME = 'dr-content';
     public static readonly DR_ATTRIBUTES = [RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR];
 
-    constructor(public point: { start: Comment, end: Comment }, public fragment: DocumentFragment) { // , public thisObjPath?: string
+    constructor(public point: { start: Comment, end: Comment }, public fragment: DocumentFragment, public data: any = {}) { // , public thisObjPath?: string
     }
 
     get isConnected() {
@@ -41,7 +41,7 @@ export class RawSet {
                 ScriptUtils.getVariablePaths(`\`${(cNode as Text).textContent ?? ''}\``).forEach(it => usingTriggerVariables.add(it));
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
-                const targetAttrNames = (config?.targets?.map(it => it.attrName) ?? []).concat(RawSet.DR_ATTRIBUTES)
+                const targetAttrNames = (config?.targetAttrs?.map(it => it.name) ?? []).concat(RawSet.DR_ATTRIBUTES)
                 ScriptUtils.getVariablePaths(targetAttrNames.map(it => (element.getAttribute(it))).filter(it => it).join(';')).forEach(it => usingTriggerVariables.add(it));
             }
         })
@@ -51,7 +51,8 @@ export class RawSet {
     public render(obj: any, config?: Config): RawSet[] {
         const genNode = document.importNode(this.fragment, true);
         const raws: RawSet[] = [];
-        const onInitCallBack: {attrName: string, attrValue: string, obj: any}[] = [];
+        const onAttrInitCallBack: {attrName: string, attrValue: string, obj: any}[] = [];
+        const onElementInitCallBack: {name: string, obj: any}[] = [];
         genNode.childNodes.forEach((cNode, key) => {
             const fag = document.createDocumentFragment()
             if (cNode.nodeType === Node.TEXT_NODE) {
@@ -211,8 +212,22 @@ export class RawSet {
                 }
 
                 // config detecting
-                config?.targets?.forEach(it => {
-                    const attrName = it.attrName;
+                config?.targetElements?.forEach(it => {
+                    const name = it.name;
+                    if (name === element.tagName) {
+                        const documentFragment = it.callBack(element, obj);
+                        if (documentFragment) {
+                            fag.append(documentFragment)
+                            const rr = RawSet.checkPointCreates(fag, config)
+                            element.parentNode?.replaceChild(fag, element);
+                            raws.push(...rr);
+                            onElementInitCallBack.push({name, obj});
+                            it?.complete?.(element, obj);
+                        }
+                    }
+                })
+                config?.targetAttrs?.forEach(it => {
+                    const attrName = it.name;
                     const attrValue = this.getAttributeAndDelete(element, attrName)
                     if (attrValue && attrName) {
                         const documentFragment = it.callBack(element, attrValue, obj);
@@ -221,7 +236,7 @@ export class RawSet {
                             const rr = RawSet.checkPointCreates(fag, config)
                             element.parentNode?.replaceChild(fag, element);
                             raws.push(...rr);
-                            onInitCallBack.push({attrName, attrValue, obj});
+                            onAttrInitCallBack.push({attrName, attrValue, obj});
                             it?.complete?.(element, attrValue, obj);
                         }
                     }
@@ -231,7 +246,8 @@ export class RawSet {
 
         this.applyEvent(obj, genNode, config);
         this.replaceBody(genNode);
-        onInitCallBack.forEach(it => config?.onInit?.(it.attrName, it.attrValue, obj))
+        onElementInitCallBack.forEach(it => config?.onElementInit?.(it.name, obj))
+        onAttrInitCallBack.forEach(it => config?.onAttrInit?.(it.attrName, it.attrValue, obj))
         return raws;
     }
 
@@ -253,17 +269,14 @@ export class RawSet {
     public static checkPointCreates(element: Node, config?: Config): RawSet[] {
         const nodeIterator = document.createNodeIterator(element, NodeFilter.SHOW_ALL, {
             acceptNode(node) {
-                // console.log('node type-->', node.nodeType)
                 if (node.nodeType === Node.TEXT_NODE) {
                     return /\$\{.*?\}/g.test(StringUtils.deleteEnter((node as Text).data ?? '')) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                 } else if (node.nodeType === Node.ELEMENT_NODE) {
                     const element = node as Element;
-                    // const targetTagNames = (config?.targets?.map(it => it.tagName) ?? []).concat(RawSet.DR_TAGS);
-                    const targetAttrNames = (config?.targets?.map(it => it.attrName) ?? []).concat(RawSet.DR_ATTRIBUTES);
+                    const isElement = (config?.targetElements?.map(it => it.name) ?? []).includes(element.tagName);
+                    const targetAttrNames = (config?.targetAttrs?.map(it => it.name) ?? []).concat(RawSet.DR_ATTRIBUTES);
                     const isAttr = element.getAttributeNames().filter(it => targetAttrNames.includes(it.toLowerCase())).length > 0;
-                    // const isTag = targetTagNames.includes(element.tagName.toLowerCase()); // || isTag
-                    // console.log('--->', element, element.getAttributeNames(), targetAttrNames)
-                    return (isAttr) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                    return (isAttr || isElement) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                 }
                 return NodeFilter.FILTER_REJECT;
             }

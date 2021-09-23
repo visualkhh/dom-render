@@ -12,4 +12,11 @@ export class StringUtils {
         }
         return usingVars;
     }
+
+    // public static betweenReplace(start: string, end: string, message: string, replace: string) {
+    //     const regex = RegExp('([^(dr\\-)])?this(?=.?)', 'gm');
+    //     StringUtils.regexExec(regex, message).reverse().forEach(it => {
+    //         message = message.substr(0, it.index) + message.substr(it.index).replace(it[0], `${it[1] ?? ''}${drThis}`);
+    //     })
+    // }
 }

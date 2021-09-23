@@ -128,6 +128,7 @@ class User extends Person {
     random() {
         return RandomUtils.random();
     }
+
     randomRgb() {
         return RandomUtils.getRandomColor();
     }
