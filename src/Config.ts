@@ -1,8 +1,12 @@
 import {ConstructorType} from './types/Types';
+import { RawSet } from 'RawSet';
+
+export type TargetElement = { name: string, callBack: (target: Element, obj: any, rawSet: RawSet) => DocumentFragment, complete?: (target: Element, obj: any) => void };
+export type TargetAttr = { name: string, callBack: (target: Element, attrValue: string, obj: any, rawSet: RawSet) => DocumentFragment, complete?: (target: Element, attrValue: string, obj: any) => void };
 
 export interface Config {
-    targetElements?: { name: string, callBack: (target: Element, obj: any) => DocumentFragment, complete?:(target: Element, obj: any) => void}[];
-    targetAttrs?: { name: string, callBack: (target: Element, attrValue: string, obj: any) => DocumentFragment, complete?:(target: Element, attrValue: string, obj: any) => void}[];
+    targetElements?: TargetElement[];
+    targetAttrs?: TargetAttr[];
     onElementInit?:(name: string, obj: any) => void;
     onAttrInit?:(name: string, attrValue: string, obj: any) => void;
     proxyExcludeTyps?: ConstructorType<any>[];

@@ -92,8 +92,10 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public root(paths: string[], value: any) {
+        console.log('ppppppp',this._domRender_ref, paths, value)
         if (this._domRender_ref.size > 0) {
             this._domRender_ref.forEach((it, key) => {
+                console.log('isis==?', ('_DomRender_isProxy' in key))
                 if ('_DomRender_isProxy' in key) {
                     it.forEach(sit => {
                         (key as any)._DomRender_proxy?.root(paths.concat(sit), value)
@@ -101,6 +103,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                 }
             })
         } else {
+            console.log('********ppppppp',this._domRender_ref, paths, value)
             const strings = paths.reverse();
             const fullPathStr = strings.join('.');
             const iterable = this._rawSets.get(fullPathStr);
@@ -115,7 +118,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             } else if (iterable) {
                 this.render(Array.from(iterable));
             }
-            // console.log('---targets->', fullPathStr)
+            console.log('---targets->', fullPathStr)
             this._targets.forEach(it => {
                 if (it.nodeType === Node.DOCUMENT_FRAGMENT_NODE || it.nodeType === Node.ELEMENT_NODE) {
                     const targets = eventManager.findAttrElements((it as DocumentFragment | Element), this.config);
@@ -126,9 +129,11 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public set(target: T, p: string | symbol, value: any, receiver: T): boolean {
+        console.log('set--?', p, target, value);
         if (typeof p === 'string') {
             value = this.proxy(target, value, p);
         }
+        console.log('set-----?', p, target, value);
         (target as any)[p] = value;
         if (typeof p === 'string') {
             this.root([p], value);

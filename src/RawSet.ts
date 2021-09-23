@@ -27,7 +27,7 @@ export class RawSet {
     // public static readonly DR_CONTENT_OPTIONNAME = 'dr-content';
     public static readonly DR_ATTRIBUTES = [RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR];
 
-    constructor(public point: { start: Comment, end: Comment }, public fragment: DocumentFragment, public data: any = {}) { // , public thisObjPath?: string
+    constructor(public uuid: string, public point: { start: Comment, end: Comment }, public fragment: DocumentFragment, public data: any = {}) { // , public thisObjPath?: string
     }
 
     get isConnected() {
@@ -214,8 +214,8 @@ export class RawSet {
                 // config detecting
                 config?.targetElements?.forEach(it => {
                     const name = it.name;
-                    if (name === element.tagName) {
-                        const documentFragment = it.callBack(element, obj);
+                    if (name.toLowerCase() === element.tagName.toLowerCase()) {
+                        const documentFragment = it.callBack(element, obj, this);
                         if (documentFragment) {
                             fag.append(documentFragment)
                             const rr = RawSet.checkPointCreates(fag, config)
@@ -230,7 +230,7 @@ export class RawSet {
                     const attrName = it.name;
                     const attrValue = this.getAttributeAndDelete(element, attrName)
                     if (attrValue && attrName) {
-                        const documentFragment = it.callBack(element, attrValue, obj);
+                        const documentFragment = it.callBack(element, attrValue, obj, this);
                         if (documentFragment) {
                             fag.append(documentFragment)
                             const rr = RawSet.checkPointCreates(fag, config)
@@ -273,7 +273,8 @@ export class RawSet {
                     return /\$\{.*?\}/g.test(StringUtils.deleteEnter((node as Text).data ?? '')) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                 } else if (node.nodeType === Node.ELEMENT_NODE) {
                     const element = node as Element;
-                    const isElement = (config?.targetElements?.map(it => it.name) ?? []).includes(element.tagName);
+                    const isElement = (config?.targetElements?.map(it => it.name.toLowerCase()) ?? []).includes(element.tagName.toLowerCase());
+                    // console.log('element filter-->', isElement, element.tagName)
                     const targetAttrNames = (config?.targetAttrs?.map(it => it.name) ?? []).concat(RawSet.DR_ATTRIBUTES);
                     const isAttr = element.getAttributeNames().filter(it => targetAttrNames.includes(it.toLowerCase())).length > 0;
                     return (isAttr || isElement) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
@@ -320,10 +321,7 @@ export class RawSet {
                     if (start && end) {
                         const fragment = document.createDocumentFragment();
                         fragment.append(document.createTextNode(it.content))
-                        pars.push(new RawSet({
-                            start,
-                            end
-                        }, fragment))
+                        pars.push(new RawSet(it.uuid, {start: start, end}, fragment))
                     }
                 })
                 currentNode?.parentNode?.replaceChild(template.content, currentNode);
@@ -335,10 +333,7 @@ export class RawSet {
                 currentNode?.parentNode?.insertBefore(start, currentNode);
                 currentNode?.parentNode?.insertBefore(end, currentNode.nextSibling);
                 fragment.append(currentNode);
-                pars.push(new RawSet({
-                    start,
-                    end
-                }, fragment))
+                pars.push(new RawSet(uuid, {start, end}, fragment))
             }
         }
         return pars;
@@ -405,6 +400,7 @@ export class RawSet {
         // const thisRegex = /[^(dr\-)]this(?=.?)/g;
         // const thisRegex = /[^(dr\-)]this\./g;
         // safari 때문에 전위 검색 regex가 안됨 아 짜증나서 이걸로함.
+        // console.log('--->', element.innerHTML, drThis)
         element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
             let message = it.innerHTML;
             StringUtils.regexExec(/([^(dr\-)])?this(?=.?)/g, message).reverse().forEach(it => {
@@ -461,6 +457,7 @@ export class RawSet {
     public static drThisCreate(element: Element, drThis: string, drVarOption: string, drStripOption: boolean, obj: any) {
         const fag = document.createDocumentFragment();
         const n = element.cloneNode(true) as Element;
+        console.log('drThisCreateee------->', drThis)
         const thisRandom = this.drThisEncoding(n, drThis)
         const vars = this.drVarEncoding(n, drVarOption)
         this.drVarDecoding(n, vars)
