@@ -1,7 +1,7 @@
 dom-render
 ===
 ## view template engine
-### web component 이용 dom 제어 및 render
+### Dom control and reorder using web component
 ```shell
 npm install dom-render
 ````
