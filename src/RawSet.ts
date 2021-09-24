@@ -220,9 +220,13 @@ export class RawSet {
                             fag.append(documentFragment)
                             const rr = RawSet.checkPointCreates(fag, config)
                             element.parentNode?.replaceChild(fag, element);
+                            const onInit = element.getAttribute('dr-on-init-component');
+                            if (onInit) {
+                                ScriptUtils.evalReturn(onInit, obj)(obj?.__componentInstances[this.uuid], this);
+                            }
                             raws.push(...rr);
                             onElementInitCallBack.push({name, obj});
-                            it?.complete?.(element, obj);
+                            it?.complete?.(element, obj, this);
                         }
                     }
                 })
@@ -237,7 +241,7 @@ export class RawSet {
                             element.parentNode?.replaceChild(fag, element);
                             raws.push(...rr);
                             onAttrInitCallBack.push({attrName, attrValue, obj});
-                            it?.complete?.(element, attrValue, obj);
+                            it?.complete?.(element, attrValue, obj, this);
                         }
                     }
                 })
@@ -246,8 +250,8 @@ export class RawSet {
 
         this.applyEvent(obj, genNode, config);
         this.replaceBody(genNode);
-        onElementInitCallBack.forEach(it => config?.onElementInit?.(it.name, obj))
-        onAttrInitCallBack.forEach(it => config?.onAttrInit?.(it.attrName, it.attrValue, obj))
+        onElementInitCallBack.forEach(it => config?.onElementInit?.(it.name, obj, this))
+        onAttrInitCallBack.forEach(it => config?.onAttrInit?.(it.attrName, it.attrValue, obj, this))
         return raws;
     }
 
@@ -457,7 +461,6 @@ export class RawSet {
     public static drThisCreate(element: Element, drThis: string, drVarOption: string, drStripOption: boolean, obj: any) {
         const fag = document.createDocumentFragment();
         const n = element.cloneNode(true) as Element;
-        console.log('drThisCreateee------->', drThis)
         const thisRandom = this.drThisEncoding(n, drThis)
         const vars = this.drVarEncoding(n, drVarOption)
         this.drVarDecoding(n, vars)
