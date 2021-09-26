@@ -42,7 +42,9 @@ npm install dom-render
         change: <input type="text" dr-event-change="this.name = $target.value"> <br>
         input: <input type="text" dr-event-input="this.name = $target.value"> <br>
         keyup: <input type="text" dr-event-keyup="this.name = $target.value"> <br>
-        keydown: <input type="text" dr-event-keydown="this.name = $target.value">
+        keydown: <input type="text" dr-event-keydown="this.name = $target.value"><br>
+        submit: <form dr-event-submit="console.log($event); $event.preventDefault();"><input type="text"> <button type="submit">submit</button></form><br>
+        window-event-popstate: <input type="text" dr-window-event-popstate="alert(this.name)"><br>
     </div>
     
     <h2>dr-value, value-link</h2>
