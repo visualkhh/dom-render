@@ -3,7 +3,7 @@ import {ScriptUtils} from '../utils/script/ScriptUtils';
 
 export const eventManager = new class {
     public readonly attrPrefix = 'dr-';
-    public readonly eventNames = ['click', 'change', 'keyup', 'keydown', 'input'];
+    public readonly eventNames = ['click', 'change', 'keyup', 'keydown', 'input', 'submit'];
     public readonly attrNames = [
         this.attrPrefix + 'value',
         this.attrPrefix + 'value-link',
