@@ -10,6 +10,8 @@ export class RawSet {
     public static readonly DR_FOR_OF_NAME = 'dr-for-of';
     public static readonly DR_FOR_NAME = 'dr-for';
     public static readonly DR_THIS_NAME = 'dr-this';
+    public static readonly DR_INNERHTML_NAME = 'dr-inner-html';
+    public static readonly DR_INNERTEXT_NAME = 'dr-inner-text';
     // public static readonly DR_INCLUDE_NAME = 'dr-include';
     // public static readonly DR_REPLACE_NAME = 'dr-replace';
     // public static readonly DR_STATEMENT_NAME = 'dr-statement';
@@ -25,7 +27,7 @@ export class RawSet {
     // public static readonly DR_PARAMETER_OPTIONNAME = 'dr-parameter';
     // public static readonly DR_THIS_OPTIONNAME = 'dr-this';
     // public static readonly DR_CONTENT_OPTIONNAME = 'dr-content';
-    public static readonly DR_ATTRIBUTES = [RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR];
+    public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME];
 
     constructor(public uuid: string, public point: { start: Comment, end: Comment }, public fragment: DocumentFragment, public data: any = {}) { // , public thisObjPath?: string
     }
@@ -70,6 +72,8 @@ export class RawSet {
                     drFor: this.getAttributeAndDelete(element, RawSet.DR_FOR_NAME),
                     drForOf: this.getAttributeAndDelete(element, RawSet.DR_FOR_OF_NAME),
                     drThis: this.getAttributeAndDelete(element, RawSet.DR_THIS_NAME),
+                    drInnerHTML: this.getAttributeAndDelete(element, RawSet.DR_INNERHTML_NAME),
+                    drInnerText: this.getAttributeAndDelete(element, RawSet.DR_INNERTEXT_NAME),
                     drItOption: this.getAttributeAndDelete(element, RawSet.DR_IT_OPTIONNAME),
                     drVarOption: this.getAttributeAndDelete(element, RawSet.DR_VAR_OPTIONNAME),
                     drStripOption: this.getAttributeAndDelete(element, RawSet.DR_STRIP_OPTIONNAME) === 'true'
@@ -100,6 +104,7 @@ export class RawSet {
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr)
                 }
+
                 if (drAttr.drIf) {
                     const itRandom = RawSet.drItOtherEncoding(element);
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
@@ -128,6 +133,7 @@ export class RawSet {
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr)
                 }
+
                 if (drAttr.drThis) {
                     const r = ScriptUtils.evalReturn(drAttr.drThis, obj);
                     if (r) {
@@ -138,6 +144,50 @@ export class RawSet {
                     } else {
                         cNode.remove();
                     }
+                }
+
+                if (drAttr.drInnerText) {
+                    const data = ScriptUtils.evalReturn(drAttr.drInnerText, obj);
+                    const newTemp = document.createElement('temp');
+                    ScriptUtils.eval(`
+                        const n = this.__element.cloneNode(true);
+                        n.innerText = this.__data;
+                        if (this.__drStripOption) {
+                            Array.from(n.childNodes).forEach(it => this.__fag.append(it));
+                        } else {
+                            this.__fag.append(n);
+                        }
+                    `, Object.assign({
+                        __fag: newTemp, __drStripOption: drAttr.drStripOption, __data: data, __element: element
+                    }, obj));
+                    const tempalte = document.createElement('template');
+                    tempalte.innerHTML = newTemp.innerHTML;
+                    fag.append(tempalte.content);
+                    const rr = RawSet.checkPointCreates(fag, config);
+                    element.parentNode?.replaceChild(fag, element);
+                    raws.push(...rr);
+                }
+
+                if (drAttr.drInnerHTML) {
+                    const data = ScriptUtils.evalReturn(drAttr.drInnerHTML, obj);
+                    const newTemp = document.createElement('temp');
+                    ScriptUtils.eval(`
+                        const n = this.__element.cloneNode(true);
+                        n.innerHTML = this.__data;
+                        if (this.__drStripOption) {
+                            Array.from(n.childNodes).forEach(it => this.__fag.append(it));
+                        } else {
+                            this.__fag.append(n);
+                        }
+                    `, Object.assign({
+                        __fag: newTemp, __drStripOption: drAttr.drStripOption, __data: data, __element: element
+                    }, obj));
+                    const tempalte = document.createElement('template');
+                    tempalte.innerHTML = newTemp.innerHTML;
+                    fag.append(tempalte.content);
+                    const rr = RawSet.checkPointCreates(fag, config);
+                    element.parentNode?.replaceChild(fag, element);
+                    raws.push(...rr);
                 }
 
                 if (drAttr.drFor) {

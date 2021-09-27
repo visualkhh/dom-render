@@ -37,9 +37,9 @@ export class ScriptUtils {
     }
 
     public static evalReturn(script: string, thisTarget: any): any {
-        if (!script.startsWith('this.')) {
-            script = 'this.' + script;
-        }
+        // if (!script.startsWith('this.')) {
+        //     script = 'this.' + script;
+        // }
         return this.eval('return ' + script + ';', thisTarget);
     }
 

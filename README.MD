@@ -34,7 +34,13 @@ npm install dom-render
             #it# = ${var.superIt * #it#}
         </scope>
     </div>
-    
+
+    <h2>df-inner-text</h2>
+    <div dr-strip="true" dr-inner-text="'<b>aa</b> <button dr-event-click=\'alert(1)\'>aa</button>'" > friend</div>
+
+    <h2>df-inner-html</h2>
+    <div dr-strip="true" dr-inner-html="'<b>aa</b> <button dr-event-click=\'alert(1)\'>aa</button>'" > friend</div>
+
     <h1>event</h1>
     <h2>dr-event, click, change, input, keyup, keydown</h2>
     <div>
