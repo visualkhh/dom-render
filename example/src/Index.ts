@@ -1,8 +1,11 @@
 import {DomRender} from 'dom-render/DomRender';
 import {ScriptUtils} from 'dom-render/utils/script/ScriptUtils';
-import {DomRenderProxy} from 'dom-render/DomRenderProxy';
 import {Shield} from 'dom-render/Shield';
+import {RawSet} from 'dom-render/RawSet';
+import {DomRenderProxy} from 'dom-render/DomRenderProxy';
+
 declare const naver: any;
+
 class User {
     name: string;
     age: number;
@@ -19,6 +22,7 @@ class User {
     };
 
     shield: any = new Shield();
+
     // map?: any = {};
 
     constructor(name: string, age: number, gender: string, friends: User[] = []) {
@@ -29,6 +33,7 @@ class User {
     }
 
     async onInitRender() {
+        return;
         // const tt = await ScriptUtils.loadStyleSheet('https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css', {integrity: 'sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU', crossorigin: 'anonymous'})
         // console.log('-->', tt)
         const data = await ScriptUtils.loadScript('https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=83bfuniegk&amp;submodules=panorama,geocoder,drawing,visualization')
@@ -73,7 +78,8 @@ class User {
                         infowindow.setContent('<div style="padding:20px;">' + 'geolocation.getCurrentPosition() 위치' + '</div>');
                         infowindow.open(this.shield.map, location);
                         // console.log('Coordinates: ' + location.toString());
-                    }, () => {});
+                    }, () => {
+                    });
                 }
                 // map.setCenter(new naver.maps.LatLng(37.3595953, 127.1053971));
             });
@@ -91,9 +97,39 @@ class User {
     sayName() {
         console.log(this.name)
     }
+
+    getName() {
+        console.log('getNamegetNamegetNamegetName', 'getName');
+        return (this.name)
+    }
 }
+
 const friends = [new User('friend1', 15, 'M'), new User('friend2', 16, 'F')]
 const target = document.querySelector('#app');
 if (target) {
-    const user = DomRender.run(new User('parent', 10, 'M', friends), target);
+    const user = DomRender.run(new User('parent', 10, 'M', friends), target,
+        {
+            scripts: {
+                say: (m: string, t: RawSet) => {
+                    new Promise((resolve, reject) => {
+                        // We call resolve(...) when what we were doing asynchronously was successful, and reject(...) when it failed.
+                        // In this example, we use setTimeout(...) to simulate async code.
+                        // In reality, you will probably be using something like XHR or an HTML5 API.
+                        setTimeout(() => {
+                            resolve(m);
+                        }, 5000);
+                    }).then(it => {
+                        t.childAllRemove();
+                        console.log('--->', it)
+                    });
+                    console.log('---------sssau', m, t);
+                    return true;
+                }
+            }
+        }
+    );
+    setTimeout(() => {
+        ((user as any)._DomRender_proxy as DomRenderProxy<any>).render();
+        // console.log((user as any)._DomRender_proxy)
+    }, 10000)
 }

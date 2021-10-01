@@ -10,5 +10,6 @@ export interface Config {
     onElementInit?:(name: string, obj: any, rawSet: RawSet) => void;
     onAttrInit?:(name: string, attrValue: string, obj: any, rawSet: RawSet) => void;
     proxyExcludeTyps?: ConstructorType<any>[];
+    scripts?: { [n: string]: any };
     applyEvents?: { attrName: string, callBack: (elements: Element, attrValue: string, obj: any) => void }[];
 }

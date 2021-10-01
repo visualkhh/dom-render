@@ -29,6 +29,8 @@ export class RawSet {
     // public static readonly DR_CONTENT_OPTIONNAME = 'dr-content';
     public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME];
 
+    public static readonly SCRIPTS_VARNAME = '$scripts';
+    public static readonly RAWSET_VARNAME = '$rawset';
     constructor(public uuid: string, public point: { start: Comment, end: Comment }, public fragment: DocumentFragment, public data: any = {}) { // , public thisObjPath?: string
     }
 
@@ -39,12 +41,18 @@ export class RawSet {
     getUsingTriggerVariables(config?: Config): Set<string> {
         const usingTriggerVariables = new Set<string>();
         this.fragment.childNodes.forEach((cNode, key) => {
+            let script = '';
             if (cNode.nodeType === Node.TEXT_NODE) {
-                ScriptUtils.getVariablePaths(`\`${(cNode as Text).textContent ?? ''}\``).forEach(it => usingTriggerVariables.add(it));
+                script = `\`${(cNode as Text).textContent ?? ''}\``;
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
                 const targetAttrNames = (config?.targetAttrs?.map(it => it.name) ?? []).concat(RawSet.DR_ATTRIBUTES)
-                ScriptUtils.getVariablePaths(targetAttrNames.map(it => (element.getAttribute(it))).filter(it => it).join(';')).forEach(it => usingTriggerVariables.add(it));
+                script = targetAttrNames.map(it => (element.getAttribute(it))).filter(it => it).join(';');
+            }
+            if (script) {
+                script = script.replace(RegExp(RawSet.SCRIPTS_VARNAME.replace('$', '\\$'), 'g'), `this?.___${RawSet.SCRIPTS_VARNAME}`); // .replace(/(\$scripts)/g, 'this?.___$1');
+                script = script.replace(RegExp(RawSet.RAWSET_VARNAME.replace('$', '\\$'), 'g'), `this?.___${RawSet.RAWSET_VARNAME}`); // .replace(/(\$scripts)/g, 'this?.___$1');
+                Array.from(ScriptUtils.getVariablePaths(script)).filter(it => !it.startsWith(`___${RawSet.SCRIPTS_VARNAME}`) && !it.startsWith(`___${RawSet.SCRIPTS_VARNAME}`)).forEach(it => usingTriggerVariables.add(it));
             }
         })
         return usingTriggerVariables;
@@ -59,10 +67,14 @@ export class RawSet {
             const fag = document.createDocumentFragment()
             if (cNode.nodeType === Node.TEXT_NODE) {
                 const textContent = cNode.textContent;
-                // console.log('---log--->', obj, obj?._DomRender_origin??  obj)
-                const n = document.createTextNode(ScriptUtils.eval(`return \`${textContent}\``, obj))
-                // const n = document.createTextNode(ScriptUtils.eval(`return \`${textContent}\``, obj?._DomRender_origin ?? obj))
-                // console.log('------>', n)
+                const n = document.createTextNode(ScriptUtils.eval(
+                    `
+                    const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
+                    const ${RawSet.RAWSET_VARNAME} = this.__render.rawset;
+                    return \`${textContent}\`
+                    `,
+                    config?.scripts ? Object.assign(obj, {__render: Object.freeze({rawset: this, scripts: config?.scripts})}) : obj)
+                )
                 cNode.parentNode?.replaceChild(n, cNode)
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
@@ -83,18 +95,18 @@ export class RawSet {
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
                     const newTemp = document.createElement('temp');
                     ScriptUtils.eval(`
-                        const n = this.__element.cloneNode(true);
+                        const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
+                        const ${RawSet.RAWSET_VARNAME} = this.__render.rawset;
+                        const n = this.__render.element.cloneNode(true);
                         var destIt = ${drAttr.drItOption};
                         if (destIt !== undefined) {
                             n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
                         }
-                        if (this.__drStripOption) {
+                        if (this.__render.drStripOption) {
                             Array.from(n.childNodes).forEach(it => this.__fag.append(it));
                         } else {
-                            this.__fag.append(n);
-                        }`, Object.assign({
-                        __fag: newTemp, __drStripOption: drAttr.drStripOption, __element: element
-                    }, obj));
+                            this.__render.fag.append(n);
+                        }`, Object.assign(obj, {__render: Object.freeze({fag: newTemp, drStripOption: drAttr.drStripOption, element: element, rawset: this, scripts: config?.scripts})}));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
                     const tempalte = document.createElement('template');
@@ -110,28 +122,32 @@ export class RawSet {
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
                     const newTemp = document.createElement('temp');
                     ScriptUtils.eval(`
+                    const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
+                    const ${RawSet.RAWSET_VARNAME} = this.__render.rawset;
                     if(${drAttr.drIf}) {
-                        const n = this.__element.cloneNode(true);
+                        const n = this.__render.element.cloneNode(true);
                         var destIt = ${drAttr.drItOption};
                         if (destIt !== undefined) {
                             n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
                         }
-                        if (this.__drStripOption) {
-                            Array.from(n.childNodes).forEach(it => this.__fag.append(it));
+                        if (this.__render.drStripOption) {
+                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
                         } else {
-                            this.__fag.append(n);
+                            this.__render.fag.append(n);
                         }
-                    }`, Object.assign({
-                        __fag: newTemp, __drStripOption: drAttr.drStripOption, __element: element
-                    }, obj));
+                    }`, Object.assign(obj,
+                        {__render: Object.freeze({fag: newTemp, drStripOption: drAttr.drStripOption, element: element, rawset: this, scripts: config?.scripts})}
+                    ));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
                     const tempalte = document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
                     fag.append(tempalte.content)
                     const rr = RawSet.checkPointCreates(fag, config)
+                    // console.log('----->if', rr, Array.from(fag.childNodes))
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr)
+                    // console.log('----->if', raws, rr)
                 }
 
                 if (drAttr.drThis) {
@@ -195,20 +211,19 @@ export class RawSet {
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
                     const newTemp = document.createElement('temp');
                     ScriptUtils.eval(`
+                     const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
                     for(${drAttr.drFor}) {
-                        const n = this.__element.cloneNode(true);
+                        const n = this.__render.element.cloneNode(true);
                         var destIt = ${drAttr.drItOption};
                         if (destIt !== undefined) {
                             n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
                         }
-                        if (this.__drStripOption) {
-                            Array.from(n.childNodes).forEach(it => this.__fag.append(it));
+                        if (this.__render.drStripOption) {
+                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
                         } else {
-                            this.__fag.append(n);
+                            this.__render.fag.append(n);
                         }
-                    }`, Object.assign({
-                        __fag: newTemp, __drStripOption: drAttr.drStripOption, __element: element
-                    }, obj));
+                    }`, Object.assign(obj, {__render: Object.freeze({fag: newTemp, drStripOption: drAttr.drStripOption, element: element, scripts: config?.scripts})}));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
                     const tempalte = document.createElement('template');
@@ -224,7 +239,10 @@ export class RawSet {
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
                     const newTemp = document.createElement('temp');
                     // console.log('vars-->', vars, element.innerHTML)
-                    ScriptUtils.eval(`var i = 0; for(const it of ${drAttr.drForOf}) {
+                    ScriptUtils.eval(`
+                    const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
+                    var i = 0; 
+                    for(const it of ${drAttr.drForOf}) {
                         var destIt = it;
                         var forOfStr = \`${drAttr.drForOf}\`;
                         if (/,/g.test(forOfStr)) {
@@ -237,26 +255,23 @@ export class RawSet {
                             destIt = forOfStr + '[' + i +']'
                         }
                         
-                        const n = this.__element.cloneNode(true);
+                        const n = this.__render.element.cloneNode(true);
                         n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
                         
-                        if (this.__drStripOption) {
-                            Array.from(n.childNodes).forEach(it => this.__fag.append(it));
+                        if (this.__render.drStripOption) {
+                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
                         } else {
-                            this.__fag.append(n);
+                            this.__render.fag.append(n);
                         }
                         i++;
-                    }`, Object.assign({
-                        __drStripOption: drAttr.drStripOption,
-                        __fag: newTemp,
-                        __element: element
-                    }, obj));
+                    }`, Object.assign(obj, {__render: Object.freeze({drStripOption: drAttr.drStripOption, fag: newTemp, element: element})}));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
                     const tempalte = document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
                     fag.append(tempalte.content)
                     const rr = RawSet.checkPointCreates(fag, config)
+                    // console.log(Array.from(fag.childNodes))
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr)
                 }
@@ -336,48 +351,35 @@ export class RawSet {
                 return NodeFilter.FILTER_REJECT;
             }
         });
+
         const pars: RawSet[] = [];
         let currentNode;
         // eslint-disable-next-line no-cond-assign
         while (currentNode = nodeIterator.nextNode()) {
             if (currentNode.nodeType === Node.TEXT_NODE) {
-                let text = (currentNode as Text).textContent ?? '';
+                const text = (currentNode as Text).textContent ?? '';
                 const template = document.createElement('template');
                 const a = StringUtils.regexExec(/\$\{.*?\}/g, text);
-                const map = a.reverse().map(it => { return {uuid: '', content: '', regexArr: it} });
+                const map = a.map(it => { return {uuid: RandomUtils.uuid(), content: it[0], regexArr: it} });
+                let lasterIndex = 0;
                 map.forEach(it => {
-                    const uuid = RandomUtils.uuid()
-                    it.uuid = uuid
-                    it.content = it.regexArr[0]
-                    text = text.substr(0, it.regexArr.index) + text.substr(it.regexArr.index).replace(it.regexArr[0], `<!--start text ${uuid}--><!--end text ${uuid}-->`);
-                })
-                template.innerHTML = text;
+                    const regexArr = it.regexArr;
+                    const preparedText = regexArr.input.substring(lasterIndex, regexArr.index);
+                    const start = document.createComment(`start text ${it.uuid}`);
+                    const end = document.createComment(`end text ${it.uuid}`);
+                    // layout setting
+                    template.content.append(document.createTextNode(preparedText));
+                    template.content.append(start);
+                    template.content.append(end);
 
-                map.forEach(it => {
-                    const subNodeIterator = document.createNodeIterator(template.content, NodeFilter.SHOW_COMMENT, {
-                        acceptNode(node) {
-                            const text = (node as Text).textContent;
-                            return (text === `start text ${it.uuid}` || text === `end text ${it.uuid}`) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
-                        }
-                    })
-                    let start: Comment | undefined;
-                    let end: Comment | undefined;
-                    let subNode;
-                    // eslint-disable-next-line no-cond-assign
-                    while (subNode = subNodeIterator.nextNode()) {
-                        if ((subNode.textContent ?? '').startsWith('start')) {
-                            start = subNode as Comment;
-                        }
-                        if ((subNode.textContent ?? '').startsWith('end')) {
-                            end = subNode as Comment;
-                        }
-                    }
-                    if (start && end) {
-                        const fragment = document.createDocumentFragment();
-                        fragment.append(document.createTextNode(it.content))
-                        pars.push(new RawSet(it.uuid, {start: start, end}, fragment))
-                    }
+                    // content
+                    const fragment = document.createDocumentFragment();
+                    fragment.append(document.createTextNode(it.content))
+                    pars.push(new RawSet(it.uuid, {start, end}, fragment))
+
+                    lasterIndex = regexArr.index + it.content.length;
                 })
+                template.content.append(document.createTextNode(text.substring(lasterIndex, text.length)));
                 currentNode?.parentNode?.replaceChild(template.content, currentNode);
             } else {
                 const uuid = RandomUtils.uuid()

@@ -62,18 +62,29 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                 })
             }
         })
-        this._rawSets.forEach((v, k) => {
-            this.render(Array.from(v));
-        });
+        this.render(this.getRawSets());
         (this._domRender_proxy as any)?.onInitRender?.();
     }
 
-    public render(raws: RawSet[]) {
-        raws.forEach(it => {
+    public getRawSets() {
+        const set = new Set<RawSet>();
+        this._rawSets.forEach((v, k) => {
+            v.forEach(it => set.add(it));
+        });
+        return Array.from(set);
+    }
+
+    public render(raws?: RawSet[]) {
+        // console.log('render-->raws', raws, new Set(raws))
+        (raws ?? this.getRawSets()).forEach(it => {
             // console.log('render--->', raws, it.point.start.isConnected, it.point.start.isConnected)
-            it.getUsingTriggerVariables(this.config).forEach(path => this.addRawSet(path, it))
+            // TODO: 여기 이걸 왜넣었는지... 확인필요함
+            // it.getUsingTriggerVariables(this.config).forEach(path => this.addRawSet(path, it))
             if (it.point.start.isConnected && it.point.start.isConnected) {
+                // console.log('render-->');
+                // alert(1)
                 const rawSets = it.render(this._domRender_proxy, this.config);
+                // alert(1)
                 // const thisRawSet = rawSets.filter(it => !it.thisObjPath)
                 // rawSets.forEach(it => console.log('---->', it))
                 // rawSets.filter(it => it.thisObjPath).forEach(it => {
@@ -210,10 +221,12 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public addRawSet(path: string, rawSet: RawSet) {
+        // console.log('???????????????????', path, rawSet)
         if (!this._rawSets.get(path)) {
             this._rawSets.set(path, new Set<RawSet>());
         }
-        this._rawSets.get(path)?.add(rawSet)
+        this._rawSets.get(path)?.add(rawSet);
+        // console.log('--->', this._rawSets)
     }
 
     public removeRawSet(raws: RawSet) {
