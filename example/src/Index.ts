@@ -110,26 +110,27 @@ if (target) {
     const user = DomRender.run(new User('parent', 10, 'M', friends), target,
         {
             scripts: {
-                say: (m: string, t: RawSet) => {
-                    new Promise((resolve, reject) => {
-                        // We call resolve(...) when what we were doing asynchronously was successful, and reject(...) when it failed.
-                        // In this example, we use setTimeout(...) to simulate async code.
-                        // In reality, you will probably be using something like XHR or an HTML5 API.
-                        setTimeout(() => {
-                            resolve(m);
-                        }, 5000);
-                    }).then(it => {
-                        t.childAllRemove();
-                        console.log('--->', it)
-                    });
-                    console.log('---------sssau', m, t);
+                say: function(m: string, t: RawSet) {
+                    console.log('------', this)
+                    // new Promise((resolve, reject) => {
+                    //     // We call resolve(...) when what we were doing asynchronously was successful, and reject(...) when it failed.
+                    //     // In this example, we use setTimeout(...) to simulate async code.
+                    //     // In reality, you will probably be using something like XHR or an HTML5 API.
+                    //     setTimeout(() => {
+                    //         resolve(m);
+                    //     }, 5000);
+                    // }).then(it => {
+                    //     t.childAllRemove();
+                    //     console.log('--->', it)
+                    // });
+                    // console.log('---------sssau', m, t);
                     return true;
                 }
             }
         }
     );
-    setTimeout(() => {
-        ((user as any)._DomRender_proxy as DomRenderProxy<any>).render();
-        // console.log((user as any)._DomRender_proxy)
-    }, 10000)
+    // setTimeout(() => {
+    //     ((user as any)._DomRender_proxy as DomRenderProxy<any>).render();
+    //     // console.log((user as any)._DomRender_proxy)
+    // }, 10000)
 }

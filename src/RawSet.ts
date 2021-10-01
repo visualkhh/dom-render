@@ -31,6 +31,7 @@ export class RawSet {
 
     public static readonly SCRIPTS_VARNAME = '$scripts';
     public static readonly RAWSET_VARNAME = '$rawset';
+
     constructor(public uuid: string, public point: { start: Comment, end: Comment }, public fragment: DocumentFragment, public data: any = {}) { // , public thisObjPath?: string
     }
 
@@ -61,8 +62,8 @@ export class RawSet {
     public render(obj: any, config?: Config): RawSet[] {
         const genNode = document.importNode(this.fragment, true);
         const raws: RawSet[] = [];
-        const onAttrInitCallBack: {attrName: string, attrValue: string, obj: any}[] = [];
-        const onElementInitCallBack: {name: string, obj: any}[] = [];
+        const onAttrInitCallBack: { attrName: string, attrValue: string, obj: any }[] = [];
+        const onElementInitCallBack: { name: string, obj: any }[] = [];
         genNode.childNodes.forEach((cNode, key) => {
             const fag = document.createDocumentFragment()
             if (cNode.nodeType === Node.TEXT_NODE) {
@@ -73,7 +74,12 @@ export class RawSet {
                     const ${RawSet.RAWSET_VARNAME} = this.__render.rawset;
                     return \`${textContent}\`
                     `,
-                    config?.scripts ? Object.assign(obj, {__render: Object.freeze({rawset: this, scripts: config?.scripts})}) : obj)
+                    Object.assign(obj, {
+                        __render: Object.freeze({
+                            rawset: this,
+                            scripts: this.setBindProperty(config?.scripts, obj)
+                        })
+                    }))
                 )
                 cNode.parentNode?.replaceChild(n, cNode)
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
@@ -106,7 +112,15 @@ export class RawSet {
                             Array.from(n.childNodes).forEach(it => this.__fag.append(it));
                         } else {
                             this.__render.fag.append(n);
-                        }`, Object.assign(obj, {__render: Object.freeze({fag: newTemp, drStripOption: drAttr.drStripOption, element: element, rawset: this, scripts: config?.scripts})}));
+                        }`, Object.assign(obj, {
+                        __render: Object.freeze({
+                            fag: newTemp,
+                            drStripOption: drAttr.drStripOption,
+                            element: element,
+                            rawset: this,
+                            scripts: this.setBindProperty(config?.scripts, obj)
+                        })
+                    }));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
                     const tempalte = document.createElement('template');
@@ -136,7 +150,15 @@ export class RawSet {
                             this.__render.fag.append(n);
                         }
                     }`, Object.assign(obj,
-                        {__render: Object.freeze({fag: newTemp, drStripOption: drAttr.drStripOption, element: element, rawset: this, scripts: config?.scripts})}
+                        {
+                            __render: Object.freeze({
+                                fag: newTemp,
+                                drStripOption: drAttr.drStripOption,
+                                element: element,
+                                rawset: this,
+                                scripts: this.setBindProperty(config?.scripts, obj)
+                            })
+                        }
                     ));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
@@ -174,7 +196,10 @@ export class RawSet {
                             this.__fag.append(n);
                         }
                     `, Object.assign({
-                        __fag: newTemp, __drStripOption: drAttr.drStripOption, __data: data, __element: element
+                        __fag: newTemp,
+                        __drStripOption: drAttr.drStripOption,
+                        __data: data,
+                        __element: element
                     }, obj));
                     const tempalte = document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
@@ -196,7 +221,10 @@ export class RawSet {
                             this.__fag.append(n);
                         }
                     `, Object.assign({
-                        __fag: newTemp, __drStripOption: drAttr.drStripOption, __data: data, __element: element
+                        __fag: newTemp,
+                        __drStripOption: drAttr.drStripOption,
+                        __data: data,
+                        __element: element
                     }, obj));
                     const tempalte = document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
@@ -223,7 +251,14 @@ export class RawSet {
                         } else {
                             this.__render.fag.append(n);
                         }
-                    }`, Object.assign(obj, {__render: Object.freeze({fag: newTemp, drStripOption: drAttr.drStripOption, element: element, scripts: config?.scripts})}));
+                    }`, Object.assign(obj, {
+                        __render: Object.freeze({
+                            fag: newTemp,
+                            drStripOption: drAttr.drStripOption,
+                            element: element,
+                            scripts: this.setBindProperty(config?.scripts, obj)
+                        })
+                    }));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
                     const tempalte = document.createElement('template');
@@ -264,7 +299,14 @@ export class RawSet {
                             this.__render.fag.append(n);
                         }
                         i++;
-                    }`, Object.assign(obj, {__render: Object.freeze({drStripOption: drAttr.drStripOption, fag: newTemp, element: element})}));
+                    }`, Object.assign(obj, {
+                        __render: Object.freeze({
+                            drStripOption: drAttr.drStripOption,
+                            fag: newTemp,
+                            element: element,
+                            scripts: this.setBindProperty(config?.scripts, obj)
+                        })
+                    }));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
                     const tempalte = document.createElement('template');
@@ -290,7 +332,10 @@ export class RawSet {
                                 ScriptUtils.evalReturn(onInit, obj)(obj?.__componentInstances[this.uuid], this);
                             }
                             raws.push(...rr);
-                            onElementInitCallBack.push({name, obj});
+                            onElementInitCallBack.push({
+                                name,
+                                obj
+                            });
                             it?.complete?.(element, obj, this);
                         }
                     }
@@ -305,7 +350,11 @@ export class RawSet {
                             const rr = RawSet.checkPointCreates(fag, config)
                             element.parentNode?.replaceChild(fag, element);
                             raws.push(...rr);
-                            onAttrInitCallBack.push({attrName, attrValue, obj});
+                            onAttrInitCallBack.push({
+                                attrName,
+                                attrValue,
+                                obj
+                            });
                             it?.complete?.(element, attrValue, obj, this);
                         }
                     }
@@ -360,7 +409,13 @@ export class RawSet {
                 const text = (currentNode as Text).textContent ?? '';
                 const template = document.createElement('template');
                 const a = StringUtils.regexExec(/\$\{.*?\}/g, text);
-                const map = a.map(it => { return {uuid: RandomUtils.uuid(), content: it[0], regexArr: it} });
+                const map = a.map(it => {
+                    return {
+                        uuid: RandomUtils.uuid(),
+                        content: it[0],
+                        regexArr: it
+                    }
+                });
                 let lasterIndex = 0;
                 map.forEach(it => {
                     const regexArr = it.regexArr;
@@ -375,7 +430,10 @@ export class RawSet {
                     // content
                     const fragment = document.createDocumentFragment();
                     fragment.append(document.createTextNode(it.content))
-                    pars.push(new RawSet(it.uuid, {start, end}, fragment))
+                    pars.push(new RawSet(it.uuid, {
+                        start,
+                        end
+                    }, fragment))
 
                     lasterIndex = regexArr.index + it.content.length;
                 })
@@ -389,7 +447,10 @@ export class RawSet {
                 currentNode?.parentNode?.insertBefore(start, currentNode);
                 currentNode?.parentNode?.insertBefore(end, currentNode.nextSibling);
                 fragment.append(currentNode);
-                pars.push(new RawSet(uuid, {start, end}, fragment))
+                pars.push(new RawSet(uuid, {
+                    start,
+                    end
+                }, fragment))
             }
         }
         return pars;
@@ -523,5 +584,20 @@ export class RawSet {
             fag.append(n)
         }
         return fag;
+    }
+
+    private setBindProperty(scripts: { [p: string]: any } | undefined, obj: any): { [p: string]: any } | undefined {
+        if (scripts) {
+            // const newScripts = Object.assign({}, scripts)
+            const newScripts = Object.assign({}, scripts)
+            for (const [key, value] of Object.entries(newScripts)) {
+                // console.log(typeof value, value, value.bind(obj))
+                if (typeof value === 'function') {
+                    newScripts[key] = value.bind(obj);
+                }
+            }
+            // console.log('setBind-->', newScripts, obj)
+            return newScripts;
+        }
     }
 }
