@@ -75,7 +75,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public render(raws?: RawSet[]) {
-        // console.log('render-->raws', raws, new Set(raws))
+        console.log('render-->raws', raws);
         (raws ?? this.getRawSets()).forEach(it => {
             // console.log('render--->', raws, it.point.start.isConnected, it.point.start.isConnected)
             // TODO: 여기 이걸 왜넣었는지... 확인필요함

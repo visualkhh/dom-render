@@ -601,3 +601,9 @@ export class RawSet {
         }
     }
 }
+
+export type Render = {
+    rawset: RawSet;
+    scripts: {[n: string]: any};
+    [n: string]: any
+}

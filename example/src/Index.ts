@@ -1,7 +1,7 @@
 import {DomRender} from 'dom-render/DomRender';
 import {ScriptUtils} from 'dom-render/utils/script/ScriptUtils';
 import {Shield} from 'dom-render/Shield';
-import {RawSet} from 'dom-render/RawSet';
+import {RawSet, Render} from 'dom-render/RawSet';
 import {DomRenderProxy} from 'dom-render/DomRenderProxy';
 
 declare const naver: any;
@@ -110,21 +110,32 @@ if (target) {
     const user = DomRender.run(new User('parent', 10, 'M', friends), target,
         {
             scripts: {
-                say: function(m: string, t: RawSet) {
-                    console.log('------', this)
-                    // new Promise((resolve, reject) => {
-                    //     // We call resolve(...) when what we were doing asynchronously was successful, and reject(...) when it failed.
-                    //     // In this example, we use setTimeout(...) to simulate async code.
-                    //     // In reality, you will probably be using something like XHR or an HTML5 API.
-                    //     setTimeout(() => {
-                    //         resolve(m);
-                    //     }, 5000);
-                    // }).then(it => {
-                    //     t.childAllRemove();
-                    //     console.log('--->', it)
-                    // });
+                say: function(m: string) {
+                    const render = this.__render as Render;
+                    // console.log('------', m, this.i18n, render)
+                    if (!this.__i18n) {
+                        this.__i18n = {};
+                    }
+                    if (!this.__i18n?.[m]) {
+                        new Promise((resolve, reject) => {
+                            // We call resolve(...) when what we were doing asynchronously was successful, and reject(...) when it failed.
+                            // In this example, we use setTimeout(...) to simulate async code.
+                            // In reality, you will probably be using something like XHR or an HTML5 API.
+                            setTimeout(() => {
+                                resolve(m);
+                            }, 5000);
+                        }).then(it => {
+                            // t.childAllRemove();
+                            this.__i18n[m] = 'nnnnnn';
+                            // console.log('-??????-->', this, it, render);
+                            (this._DomRender_proxy as DomRenderProxy<any>).render([render.rawset]);
+                        });
+                    } else {
+                        // console.log('---------sssau', this, this.__i18n);
+                        return this.__i18n[m];
+                    }
                     // console.log('---------sssau', m, t);
-                    return true;
+                    return m;
                 }
             }
         }
