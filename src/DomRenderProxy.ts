@@ -16,7 +16,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         }
     }
 
-    public static final<T = any> (obj: T) {
+    public static final<T = any> (obj: T): T {
         return new Proxy(obj as any, {
             has(target: any, p: string | symbol): boolean {
                 return p === '_DomRender_isFinal' || p in target;
@@ -75,7 +75,6 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public render(raws?: RawSet[]) {
-        console.log('render-->raws', raws);
         (raws ?? this.getRawSets()).forEach(it => {
             // console.log('render--->', raws, it.point.start.isConnected, it.point.start.isConnected)
             // TODO: 여기 이걸 왜넣었는지... 확인필요함
@@ -191,7 +190,8 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     proxy(parentProxy: T, obj: T | any, p: string) {
-        if (obj !== undefined && obj !== null && typeof obj === 'object' && !('_DomRender_isProxy' in obj) && !DomRenderProxy.isFinal(obj) && !Object.isFrozen(obj) && !(obj instanceof Shield)) {
+        const proxyTarget = (this.config?.proxyExcludeTyps?.filter(it => obj instanceof it) ?? []).length <= 0;
+        if (proxyTarget && obj !== undefined && obj !== null && typeof obj === 'object' && !('_DomRender_isProxy' in obj) && !DomRenderProxy.isFinal(obj) && !Object.isFrozen(obj) && !(obj instanceof Shield)) {
             // console.log('proxyyyyyyyy->', obj)
             const domRender = new DomRenderProxy(obj, undefined, this.config);
             domRender.addRef(parentProxy, p);
@@ -199,7 +199,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             domRender.run(proxy);
             return proxy
         }
-        if (obj !== undefined && obj !== null && typeof obj === 'object' && ('_DomRender_isProxy' in obj) && !DomRenderProxy.isFinal(obj) && !Object.isFrozen(obj) && !(obj instanceof Shield)) {
+        if (proxyTarget && obj !== undefined && obj !== null && typeof obj === 'object' && ('_DomRender_isProxy' in obj) && !DomRenderProxy.isFinal(obj) && !Object.isFrozen(obj) && !(obj instanceof Shield)) {
             const d = (obj as any)._DomRender_proxy as DomRenderProxy<T>
             d.addRef(this._domRender_proxy!, p);
             return obj;

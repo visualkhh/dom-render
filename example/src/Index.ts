@@ -23,6 +23,9 @@ class User {
 
     shield: any = new Shield();
 
+    nullValue = null;
+    inputElement?: HTMLInputElement;
+    canvasElement?: HTMLCanvasElement;
     // map?: any = {};
 
     constructor(name: string, age: number, gender: string, friends: User[] = []) {
@@ -50,7 +53,7 @@ class User {
                 //     position: naver.maps.Position.CENTER_LEFT
             }
         }));
-        var locationBtnHtml = '<a href="#" class="btn_mylct"><span class="spr_trff spr_ico_mylct">NAVER 그린팩토리</span></a>';
+        const locationBtnHtml = '<a href="#" class="btn_mylct"><span class="spr_trff spr_ico_mylct">NAVER 그린팩토리</span></a>';
         naver.maps.Event.once(this.shield.map, 'init_stylemap', () => {
             // customControl 객체 이용하기
             const customControl = new naver.maps.CustomControl(locationBtnHtml, {
@@ -71,8 +74,8 @@ class User {
                      * chrome.exe --unsafely-treat-insecure-origin-as-secure="http://example.com"
                      */
                     navigator.geolocation.getCurrentPosition((position) => {
-                        var infowindow = new naver.maps.InfoWindow();
-                        var location = new naver.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                        const infowindow = new naver.maps.InfoWindow();
+                        const location = new naver.maps.LatLng(position.coords.latitude, position.coords.longitude);
                         this.shield.map.setCenter(location); // 얻은 좌표를 지도의 중심으로 설정합니다.
                         this.shield.map.setZoom(18); // 지도의 줌 레벨을 변경합니다.
                         infowindow.setContent('<div style="padding:20px;">' + 'geolocation.getCurrentPosition() 위치' + '</div>');
@@ -87,7 +90,16 @@ class User {
     }
 
     onInitElement(e: HTMLInputElement) {
-        console.log('inputElement onInit', e.value)
+        this.inputElement = e;
+        this.inputElement.value = '100';
+        // console.log('inputElement onInit', e.value)
+    }
+
+    onInitCanvasElement(e: HTMLCanvasElement) {
+        this.canvasElement = e;
+        console.log('---canvas->', this.canvasElement instanceof HTMLCanvasElement);
+        const context = this.canvasElement.getContext('2d');
+        context.fillRect(0, 0, 10, 10);
     }
 
     getOfficeFullAddr() {
@@ -109,6 +121,7 @@ const target = document.querySelector('#app');
 if (target) {
     const user = DomRender.run(new User('parent', 10, 'M', friends), target,
         {
+            proxyExcludeTyps: [HTMLCanvasElement],
             scripts: {
                 say: function(m: string) {
                     const render = this.__render as Render;

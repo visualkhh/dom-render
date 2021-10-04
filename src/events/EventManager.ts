@@ -3,7 +3,11 @@ import {ScriptUtils} from '../utils/script/ScriptUtils';
 
 export const eventManager = new class {
     public readonly attrPrefix = 'dr-';
-    public readonly eventNames = ['click', 'change', 'keyup', 'keydown', 'input', 'submit'];
+    public readonly eventNames = [
+        'click', 'mousedown', 'mouseup', 'dblclick', 'mouseover', 'mouseout', 'mousemove', 'mouseenter', 'mouseleave', 'contextmenu',
+        'keyup', 'keydown', 'keypress',
+        'change', 'input', 'submit', 'resize'];
+
     public readonly attrNames = [
         this.attrPrefix + 'value',
         this.attrPrefix + 'value-link',
@@ -64,7 +68,6 @@ export const eventManager = new class {
         // popstate
         this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'window-event-popstate', (it, attribute) => {
             (it as any).obj = obj;
-            //console.log('-->', it, (it as any).obj)
         })
 
         // on-init event
