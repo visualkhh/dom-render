@@ -1,7 +1,7 @@
 import {DomRender} from 'dom-render/DomRender';
 import {ScriptUtils} from 'dom-render/utils/script/ScriptUtils';
 import {Shield} from 'dom-render/Shield';
-import {RawSet, Render} from 'dom-render/RawSet';
+import {Render} from 'dom-render/RawSet';
 import {DomRenderProxy} from 'dom-render/DomRenderProxy';
 
 declare const naver: any;
@@ -98,7 +98,7 @@ class User {
     onInitCanvasElement(e: HTMLCanvasElement) {
         this.canvasElement = e;
         console.log('---canvas->', this.canvasElement instanceof HTMLCanvasElement);
-        const context = this.canvasElement.getContext('2d');
+        const context = this.canvasElement.getContext('2d')!;
         context.fillRect(0, 0, 10, 10);
     }
 

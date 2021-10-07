@@ -1,4 +1,4 @@
-import {Config} from 'Config';
+import {Config} from '../Config';
 import {ScriptUtils} from '../utils/script/ScriptUtils';
 
 export const eventManager = new class {
