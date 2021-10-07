@@ -78,7 +78,8 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         (raws ?? this.getRawSets()).forEach(it => {
             // console.log('render--->', raws, it.point.start.isConnected, it.point.start.isConnected)
             // TODO: 여기 이걸 왜넣었는지... 확인필요함
-            // it.getUsingTriggerVariables(this.config).forEach(path => this.addRawSet(path, it))
+            // it.getUsingTriggerVariables(this.config); //.forEach(path => console.log('--->',path))
+            it.getUsingTriggerVariables(this.config).forEach(path => this.addRawSet(path, it))
             if (it.point.start.isConnected && it.point.start.isConnected) {
                 // console.log('render-->');
                 // alert(1)
@@ -117,7 +118,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             // array check
             const front = strings.slice(0, strings.length - 1).join('.')
             const last = strings[strings.length - 1]
-            if (!isNaN(Number(last)) && Array.isArray(ScriptUtils.evalReturn(front, this._domRender_proxy))) {
+            if (!isNaN(Number(last)) && Array.isArray(ScriptUtils.evalReturn('this.'+ front, this._domRender_proxy))) {
                 const aIterable = this._rawSets.get(front);
                 if (aIterable) {
                     this.render(Array.from(aIterable));
