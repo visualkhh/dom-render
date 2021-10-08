@@ -4,6 +4,21 @@ import {ScriptUtils} from './utils/script/ScriptUtils';
 import {eventManager} from './events/EventManager';
 import {Config} from './Config';
 
+type Attrs = {
+    dr: string | null
+    drIf: string | null
+    drFor: string | null
+    drForOf: string | null
+    drThis: string | null
+    drInnerHTML: string | null
+    drInnerText: string | null
+    drItOption: string | null
+    drVarOption: string | null
+    drAfterOption: string | null
+    drBeforeOption: string | null
+    drCompleteOption: string | null
+    drStripOption: boolean
+}
 export class RawSet {
     public static readonly DR = 'dr';
     public static readonly DR_IF_NAME = 'dr-if';
@@ -12,16 +27,13 @@ export class RawSet {
     public static readonly DR_THIS_NAME = 'dr-this';
     public static readonly DR_INNERHTML_NAME = 'dr-inner-html';
     public static readonly DR_INNERTEXT_NAME = 'dr-inner-text';
-    // public static readonly DR_INCLUDE_NAME = 'dr-include';
-    // public static readonly DR_REPLACE_NAME = 'dr-replace';
-    // public static readonly DR_STATEMENT_NAME = 'dr-statement';
 
-    // public static readonly DR_SCRIPT_ELEMENTNAME = 'dr-script';
-    public static readonly DR_TAGS = [];// RawSet.DR_SCRIPT_ELEMENTNAME
+    public static readonly DR_TAGS = [];
 
     public static readonly DR_IT_OPTIONNAME = 'dr-it';
-    // public static readonly DR_SUPER_OPTIONNAME = 'dr-super';
-    // public static readonly DR_DECLARATION_OPTIONNAME = 'dr-declaration';
+    public static readonly DR_AFTER_OPTIONNAME = 'dr-after';
+    public static readonly DR_BEFORE_OPTIONNAME = 'dr-before';
+    public static readonly DR_COMPLETE_OPTIONNAME = 'dr-complete';
     public static readonly DR_VAR_OPTIONNAME = 'dr-var';
     public static readonly DR_STRIP_OPTIONNAME = 'dr-strip';
     // public static readonly DR_PARAMETER_OPTIONNAME = 'dr-parameter';
@@ -30,6 +42,7 @@ export class RawSet {
     public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME];
 
     public static readonly SCRIPTS_VARNAME = '$scripts';
+    public static readonly FAG_VARNAME = '$fag';
     public static readonly RAWSET_VARNAME = '$rawset';
 
     constructor(public uuid: string, public point: { start: Comment, end: Comment }, public fragment: DocumentFragment, public data: any = {}) { // , public thisObjPath?: string
@@ -64,6 +77,7 @@ export class RawSet {
         const raws: RawSet[] = [];
         const onAttrInitCallBack: { attrName: string, attrValue: string, obj: any }[] = [];
         const onElementInitCallBack: { name: string, obj: any }[] = [];
+        const drAttrs: Attrs[] = [];
         genNode.childNodes.forEach((cNode, key) => {
             const fag = document.createDocumentFragment()
             if (cNode.nodeType === Node.TEXT_NODE) {
@@ -78,6 +92,7 @@ export class RawSet {
                         __render: Object.freeze({
                             rawset: this,
                             scripts: this.setBindProperty(config?.scripts, obj)
+                            // eslint-disable-next-line no-use-before-define
                         } as Render)
                     }))
                 )
@@ -94,8 +109,12 @@ export class RawSet {
                     drInnerText: this.getAttributeAndDelete(element, RawSet.DR_INNERTEXT_NAME),
                     drItOption: this.getAttributeAndDelete(element, RawSet.DR_IT_OPTIONNAME),
                     drVarOption: this.getAttributeAndDelete(element, RawSet.DR_VAR_OPTIONNAME),
+                    drAfterOption: this.getAttributeAndDelete(element, RawSet.DR_AFTER_OPTIONNAME),
+                    drBeforeOption: this.getAttributeAndDelete(element, RawSet.DR_BEFORE_OPTIONNAME),
+                    drCompleteOption: this.getAttributeAndDelete(element, RawSet.DR_COMPLETE_OPTIONNAME),
                     drStripOption: this.getAttributeAndDelete(element, RawSet.DR_STRIP_OPTIONNAME) === 'true'
-                }
+                } as Attrs;
+                drAttrs.push(drAttr);
                 if (drAttr.dr !== null && drAttr.dr.length >= 0) {
                     const itRandom = RawSet.drItOtherEncoding(element);
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
@@ -106,6 +125,7 @@ export class RawSet {
                         const n = this.__render.element.cloneNode(true);
                         var destIt = ${drAttr.drItOption};
                         if (destIt !== undefined) {
+                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
                             n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
                         }
                         if (this.__render.drStripOption) {
@@ -119,6 +139,7 @@ export class RawSet {
                             element: element,
                             rawset: this,
                             scripts: this.setBindProperty(config?.scripts, obj)
+                            // eslint-disable-next-line no-use-before-define
                         } as Render)
                     }));
                     RawSet.drVarDecoding(newTemp, vars);
@@ -138,10 +159,12 @@ export class RawSet {
                     ScriptUtils.eval(`
                     const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
                     const ${RawSet.RAWSET_VARNAME} = this.__render.rawset;
+                    ${drAttr.drBeforeOption ?? ''}
                     if(${drAttr.drIf}) {
                         const n = this.__render.element.cloneNode(true);
                         var destIt = ${drAttr.drItOption};
                         if (destIt !== undefined) {
+                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
                             n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
                         }
                         if (this.__render.drStripOption) {
@@ -149,7 +172,9 @@ export class RawSet {
                         } else {
                             this.__render.fag.append(n);
                         }
-                    }`, Object.assign(obj,
+                    }
+                    ${drAttr.drAfterOption ?? ''}
+                    `, Object.assign(obj,
                         {
                             __render: Object.freeze({
                                 fag: newTemp,
@@ -157,6 +182,7 @@ export class RawSet {
                                 element: element,
                                 rawset: this,
                                 scripts: this.setBindProperty(config?.scripts, obj)
+                                // eslint-disable-next-line no-use-before-define
                             } as Render)
                         }
                     ));
@@ -166,10 +192,8 @@ export class RawSet {
                     tempalte.innerHTML = newTemp.innerHTML;
                     fag.append(tempalte.content)
                     const rr = RawSet.checkPointCreates(fag, config)
-                    // console.log('----->if', rr, Array.from(fag.childNodes))
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr)
-                    // console.log('----->if', raws, rr)
                 }
 
                 if (drAttr.drThis) {
@@ -189,12 +213,14 @@ export class RawSet {
                     const newTemp = document.createElement('temp');
                     ScriptUtils.eval(`
                         const n = this.__element.cloneNode(true);
+                        ${drAttr.drBeforeOption ?? ''}
                         n.innerText = this.__data;
                         if (this.__drStripOption) {
                             Array.from(n.childNodes).forEach(it => this.__fag.append(it));
                         } else {
                             this.__fag.append(n);
                         }
+                        ${drAttr.drAfterOption ?? ''}
                     `, Object.assign({
                         __fag: newTemp,
                         __drStripOption: drAttr.drStripOption,
@@ -214,12 +240,14 @@ export class RawSet {
                     const newTemp = document.createElement('temp');
                     ScriptUtils.eval(`
                         const n = this.__element.cloneNode(true);
+                        ${drAttr.drBeforeOption ?? ''}
                         n.innerHTML = this.__data;
                         if (this.__drStripOption) {
                             Array.from(n.childNodes).forEach(it => this.__fag.append(it));
                         } else {
                             this.__fag.append(n);
                         }
+                        ${drAttr.drAfterOption ?? ''}
                     `, Object.assign({
                         __fag: newTemp,
                         __drStripOption: drAttr.drStripOption,
@@ -239,11 +267,13 @@ export class RawSet {
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
                     const newTemp = document.createElement('temp');
                     ScriptUtils.eval(`
-                     const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
+                    const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
+                    ${drAttr.drBeforeOption ?? ''}
                     for(${drAttr.drFor}) {
                         const n = this.__render.element.cloneNode(true);
                         var destIt = ${drAttr.drItOption};
                         if (destIt !== undefined) {
+                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt))) 
                             n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
                         }
                         if (this.__render.drStripOption) {
@@ -251,7 +281,9 @@ export class RawSet {
                         } else {
                             this.__render.fag.append(n);
                         }
-                    }`, Object.assign(obj, {
+                    }
+                    ${drAttr.drAfterOption ?? ''}
+                    `, Object.assign(obj, {
                         __render: Object.freeze({
                             fag: newTemp,
                             drStripOption: drAttr.drStripOption,
@@ -273,9 +305,9 @@ export class RawSet {
                     const itRandom = RawSet.drItOtherEncoding(element);
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
                     const newTemp = document.createElement('temp');
-                    // console.log('vars-->', vars, element.innerHTML)
                     ScriptUtils.eval(`
                     const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
+                    ${drAttr.drBeforeOption ?? ''}
                     var i = 0; 
                     for(const it of ${drAttr.drForOf}) {
                         var destIt = it;
@@ -291,6 +323,7 @@ export class RawSet {
                         }
                         
                         const n = this.__render.element.cloneNode(true);
+                        n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
                         n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
                         
                         if (this.__render.drStripOption) {
@@ -299,13 +332,17 @@ export class RawSet {
                             this.__render.fag.append(n);
                         }
                         i++;
-                    }`, Object.assign(obj, {
+                    }
+                    ${drAttr.drAfterOption ?? ''}
+                    `, Object.assign(obj, {
                         __render: Object.freeze({
+                            rawset: this,
                             drStripOption: drAttr.drStripOption,
                             fag: newTemp,
                             element: element,
                             scripts: this.setBindProperty(config?.scripts, obj)
-                        })
+                            // eslint-disable-next-line no-use-before-define
+                        } as Render)
                     }));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
@@ -313,7 +350,6 @@ export class RawSet {
                     tempalte.innerHTML = newTemp.innerHTML;
                     fag.append(tempalte.content)
                     const rr = RawSet.checkPointCreates(fag, config)
-                    // console.log(Array.from(fag.childNodes))
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr)
                 }
@@ -364,6 +400,25 @@ export class RawSet {
 
         this.applyEvent(obj, genNode, config);
         this.replaceBody(genNode);
+        drAttrs.forEach(it => {
+            if (it.drCompleteOption) {
+                // genNode.childNodes
+                ScriptUtils.eval(`
+                const ${RawSet.FAG_VARNAME} = this.__render.fag;
+                const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
+                const ${RawSet.RAWSET_VARNAME} = this.__render.rawset;
+                ${it.drCompleteOption}
+                `, Object.assign(obj, {
+                    __render: Object.freeze({
+                        rawset: this,
+                        fag: genNode,
+                        scripts: this.setBindProperty(config?.scripts, obj)
+                        // eslint-disable-next-line no-use-before-define
+                    } as Render)
+                }
+                ));
+            }
+        })
         onElementInitCallBack.forEach(it => config?.onElementInit?.(it.name, obj, this))
         onAttrInitCallBack.forEach(it => config?.onAttrInit?.(it.attrName, it.attrValue, obj, this))
         return raws;
@@ -392,7 +447,6 @@ export class RawSet {
                 } else if (node.nodeType === Node.ELEMENT_NODE) {
                     const element = node as Element;
                     const isElement = (config?.targetElements?.map(it => it.name.toLowerCase()) ?? []).includes(element.tagName.toLowerCase());
-                    // console.log('element filter-->', isElement, element.tagName)
                     const targetAttrNames = (config?.targetAttrs?.map(it => it.name) ?? []).concat(RawSet.DR_ATTRIBUTES);
                     const isAttr = element.getAttributeNames().filter(it => targetAttrNames.includes(it.toLowerCase())).length > 0;
                     return (isAttr || isElement) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
@@ -400,7 +454,6 @@ export class RawSet {
                 return NodeFilter.FILTER_REJECT;
             }
         });
-
         const pars: RawSet[] = [];
         let currentNode;
         // eslint-disable-next-line no-cond-assign
@@ -517,7 +570,6 @@ export class RawSet {
         // const thisRegex = /[^(dr\-)]this(?=.?)/g;
         // const thisRegex = /[^(dr\-)]this\./g;
         // safari 때문에 전위 검색 regex가 안됨 아 짜증나서 이걸로함.
-        // console.log('--->', element.innerHTML, drThis)
         element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
             let message = it.innerHTML;
             StringUtils.regexExec(/([^(dr\-)])?this(?=.?)/g, message).reverse().forEach(it => {
@@ -591,12 +643,10 @@ export class RawSet {
             // const newScripts = Object.assign({}, scripts)
             const newScripts = Object.assign({}, scripts)
             for (const [key, value] of Object.entries(newScripts)) {
-                // console.log(typeof value, value, value.bind(obj))
                 if (typeof value === 'function') {
                     newScripts[key] = value.bind(obj);
                 }
             }
-            // console.log('setBind-->', newScripts, obj)
             return newScripts;
         }
     }
@@ -604,6 +654,6 @@ export class RawSet {
 
 export type Render = {
     rawset: RawSet;
-    scripts: {[n: string]: any};
+    scripts: { [n: string]: any };
     [n: string]: any
 }

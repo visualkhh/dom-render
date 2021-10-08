@@ -10,6 +10,7 @@
 </head>
 <body id="app">
 
+
     <h1>template</h1>
     <h2>print</h2>
     <div>${this.name}</div>
@@ -88,6 +89,15 @@
     <div>
         ${this.nullValue}
     </div>
+
+    <h1>select, selected</h1>
+    <select id="wow">
+        <option dr-for="var i = 1 ; i <= 9 ; i++" dr-it="i" dr-value="#it#" dr-before="console.log('before');"  dr-after="console.log('after');"
+                dr-complete="console.log('1'); document.querySelector('#wow').value='4'">
+            ${#it#}
+        </option>
+    </select>
+
 
     <h1>scripts</h1>
     ${$scripts.say('wow') + 'zzzzzzzz'}
