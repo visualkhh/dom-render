@@ -547,7 +547,7 @@ export class RawSet {
                 name: s[0],
                 value: s[1],
                 // regex: RegExp('(?<!(dr-|\\.))var\\.' + s[0] + '(?=.?)', 'g'),
-                regex: RegExp('var\\.' + s[0] + '(?=.?)', 'g'),
+                regex: RegExp('\\$var\\.' + s[0] + '(?=.?)', 'g'),
                 random: RandomUtils.uuid()
             }
         })

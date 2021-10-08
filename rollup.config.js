@@ -30,7 +30,7 @@ export default {
         babel({ exclude: 'node_modules/**' }),
         commonjs(),
         typescript({ tsconfig: './tsconfig.json', clean: true }),
-        sourcemaps(),
+        // sourcemaps(),
         replace({
             preventAssignment: true,
             "Object.defineProperty(exports, '__esModule', { value: true });": "try{if(!exports) {var exports = {}}}catch (e) {var exports = {}} Object.defineProperty(exports, '__esModule', { value: true });",
