@@ -78,7 +78,7 @@ export class RawSet {
                         __render: Object.freeze({
                             rawset: this,
                             scripts: this.setBindProperty(config?.scripts, obj)
-                        })
+                        } as Render)
                     }))
                 )
                 cNode.parentNode?.replaceChild(n, cNode)
@@ -119,7 +119,7 @@ export class RawSet {
                             element: element,
                             rawset: this,
                             scripts: this.setBindProperty(config?.scripts, obj)
-                        })
+                        } as Render)
                     }));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
@@ -157,7 +157,7 @@ export class RawSet {
                                 element: element,
                                 rawset: this,
                                 scripts: this.setBindProperty(config?.scripts, obj)
-                            })
+                            } as Render)
                         }
                     ));
                     RawSet.drVarDecoding(newTemp, vars);
