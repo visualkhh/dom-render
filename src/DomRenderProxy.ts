@@ -33,6 +33,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         const obj = (objProxy as any)._DomRender_origin;
         if (obj) {
             Object.keys(obj).forEach(it => {
+                // console.log('key-------->', it)
                 const target = (obj as any)[it]
                 if (target !== undefined && target !== null && typeof target === 'object' && !DomRenderProxy.isFinal(target) && !Object.isFrozen(target) && !(obj instanceof Shield)) {
                     const filter = this.config?.proxyExcludeTyps?.filter(it => target instanceof it) ?? []
@@ -103,6 +104,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public root(paths: string[], value: any) {
+        // console.log('root--->', paths, value, this._domRender_ref, this._domRender_origin)
         if (this._domRender_ref.size > 0) {
             this._domRender_ref.forEach((it, key) => {
                 if ('_DomRender_isProxy' in key) {
@@ -118,7 +120,8 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             // array check
             const front = strings.slice(0, strings.length - 1).join('.')
             const last = strings[strings.length - 1]
-            if (!isNaN(Number(last)) && Array.isArray(ScriptUtils.evalReturn('this.'+ front, this._domRender_proxy))) {
+            // console.log('root-else-->', fullPathStr, iterable, front, last)
+            if (!isNaN(Number(last)) && Array.isArray(ScriptUtils.evalReturn('this.' + front, this._domRender_proxy))) {
                 const aIterable = this._rawSets.get(front);
                 if (aIterable) {
                     this.render(Array.from(aIterable));
@@ -135,12 +138,21 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         }
     }
 
+    // public defineProperty(target: T, p: string | symbol, attributes: PropertyDescriptor) {
+    //     console.log('definProperty--->', target, p, attributes)
+    //     return true;
+    // }
+
     public set(target: T, p: string | symbol, value: any, receiver: T): boolean {
         // console.log('set--?', p, target, value);
         if (typeof p === 'string') {
-            value = this.proxy(target, value, p);
+            value = this.proxy(receiver, value, p);
         }
         (target as any)[p] = value;
+        // if (typeof p === 'string') {
+        //     (target as any)[p] = this.proxy(target, value, p);
+        // }
+
         if (typeof p === 'string') {
             this.root([p], value);
         }

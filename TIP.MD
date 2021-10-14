@@ -20,7 +20,19 @@ regex
     이를 해결하기 위해서 *?, +?, ??, {m, n}? 과 같이 ? 문자열을 사용하여 탐욕을 줄일 수 있다.
     ```
 
+tsconfig
+- https://www.typescriptlang.org/ko/docs/handbook/compiler-options.html
+- UtilsTypes
+  - https://www.typescriptlang.org/docs/handbook/utility-types.html
 
+custom-element
+- https://ko.javascript.info/custom-elements
+- https://developer.mozilla.org/en-US/docs/Web/API/CustomElementRegistry/whenDefined
+- https://developer.mozilla.org/en-US/docs/Web/API/CustomElementRegistry
+- https://developer.mozilla.org/ko/docs/Web/Web_Components/Using_custom_elements
+- https://developer.mozilla.org/ko/docs/Web/Web_Components/Using_shadow_DOM
+- https://ko.javascript.info/custom-elements#ref-562
+- 
 slot
   - https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_templates_and_slots
   - https://github.com/mdn/web-components-examples/tree/master/element-details

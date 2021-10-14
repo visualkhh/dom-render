@@ -1,17 +1,18 @@
 import {DomRender} from 'dom-render/DomRender';
 import {ScriptUtils} from 'dom-render/utils/script/ScriptUtils';
 import {Shield} from 'dom-render/Shield';
-import {Render} from 'dom-render/RawSet';
-import {DomRenderProxy} from 'dom-render/DomRenderProxy';
-
+import {RawSet, Render} from 'dom-render/RawSet';
+import {Profile} from './components/Profile';
 declare const naver: any;
 
 class User {
+    // public __domrender_components = {}
     name: string;
     age: number;
     gender: string;
     friends: User[];
     birth = new Date();
+    currentFriendName: string;
     office = {
         name: 'guro',
         addr: {
@@ -33,6 +34,12 @@ class User {
         this.age = age;
         this.gender = gender;
         this.friends = friends;
+        this.currentFriendName = this.friends[1]?.name ?? 'none';
+        console.log('fffff', this.friends, this.currentFriendName)
+    }
+
+    public cangeCurrentFriendName() {
+        this.currentFriendName = 'friend2';
     }
 
     async onInitRender() {
@@ -102,6 +109,24 @@ class User {
         context.fillRect(0, 0, 10, 10);
     }
 
+    public e?: Profile.Component;
+
+    onInitMyElement(e: Profile.Component) {
+        this.e = e;
+        console.log('onInitMyElement,  ', e, this.e)
+        // setTimeout(() => {
+        //     console.log('--->time', e);
+        //     e.name = 'wow';
+        // }, 5000)
+    }
+
+    changeIdMyElement() {
+        console.log('clicked-->', this, this.e)
+        if (this.e) {
+            this.e.name = 'zzzzzzzzzzzzz'
+        }
+    }
+
     getOfficeFullAddr() {
         return `${this.office.addr.first}, ${this.office.addr.last}, ${this.office.addr.street} (${this.office.name})`
     }
@@ -119,42 +144,80 @@ class User {
 const friends = [new User('friend1', 15, 'M'), new User('friend2', 16, 'F')]
 const target = document.querySelector('#app');
 if (target) {
+    // customElement
+
+    // setup
+    const scripts = {
+        say: function(m: string) {
+            return '-->' + m;
+            // const render = this.__render as Render;
+            // // console.log('--scriptsscriptsscripts----', m, this.i18n, render)
+            // if (!this.__i18n) {
+            //     this.__i18n = {};
+            // }
+            // if (!this.__i18n?.[m]) {
+            //     new Promise((resolve, reject) => {
+            //         // We call resolve(...) when what we were doing asynchronously was successful, and reject(...) when it failed.
+            //         // In this example, we use setTimeout(...) to simulate async code.
+            //         // In reality, you will probably be using something like XHR or an HTML5 API.
+            //         setTimeout(() => {
+            //             resolve(m);
+            //         }, 5000);
+            //     }).then(it => {
+            //         // t.childAllRemove();
+            //         this.__i18n[m] = 'nnnnnn';
+            //         // console.log('-??????-->', this, it, render);
+            //         (this._DomRender_proxy as DomRenderProxy<any>).render([render.rawset]);
+            //     });
+            // } else {
+            //     // console.log('---------sssau', this, this.__i18n);
+            //     return this.__i18n[m];
+            // }
+            // // console.log('---------sssau', m, t);
+            // return m;
+        }
+    };
     const user = DomRender.run(new User('parent', 10, 'M', friends), target,
         {
             proxyExcludeTyps: [HTMLCanvasElement],
-            scripts: {
-                say: function(m: string) {
-                    const render = this.__render as Render;
-                    // console.log('------', m, this.i18n, render)
-                    if (!this.__i18n) {
-                        this.__i18n = {};
-                    }
-                    if (!this.__i18n?.[m]) {
-                        new Promise((resolve, reject) => {
-                            // We call resolve(...) when what we were doing asynchronously was successful, and reject(...) when it failed.
-                            // In this example, we use setTimeout(...) to simulate async code.
-                            // In reality, you will probably be using something like XHR or an HTML5 API.
-                            setTimeout(() => {
-                                resolve(m);
-                            }, 5000);
-                        }).then(it => {
-                            // t.childAllRemove();
-                            this.__i18n[m] = 'nnnnnn';
-                            // console.log('-??????-->', this, it, render);
-                            (this._DomRender_proxy as DomRenderProxy<any>).render([render.rawset]);
-                        });
-                    } else {
-                        // console.log('---------sssau', this, this.__i18n);
-                        return this.__i18n[m];
-                    }
-                    // console.log('---------sssau', m, t);
-                    return m;
-                }
-            }
+            targetElements: [
+                RawSet.createComponentTargetElement('my-element', Profile.Component, Profile.templat, Profile.styles, scripts)
+            ],
+            scripts: scripts
         }
     );
     // setTimeout(() => {
     //     ((user as any)._DomRender_proxy as DomRenderProxy<any>).render();
     //     // console.log((user as any)._DomRender_proxy)
     // }, 10000)
+    console.log('created-->', user)
 }
+
+//
+//
+// import {WebComponentUtils} from 'dom-render/utils/dom/WebComponentUtils';
+// import {CustomElements} from 'dom-render/utils/dom/WebComponentUtils';
+// class WOW implements CustomElements {
+//     constructor() {
+//         console.log('cr222222222222eate')
+//     }
+//
+//     connectedCallback() {
+//         (this as any).innerHTML = '<div id="wow">asd</div>'
+//     }
+//
+//     get observedAttributes() {
+//         return ['z', 'b']
+//     }
+//
+//     attributeChangedCallback(name:string, oldValue: string, newValue: string) {
+//         console.log(name, oldValue, newValue)
+//     }
+// }
+// // const wow = new WOW();
+// const myElement = WebComponentUtils.defineCustomElements({name: 'my-element', customElementClass: WOW })
+
+// console.log('------->', myElement)
+// console.log('------->', (myElement as any).observedAttributes)
+// console.log('------->', myElement.prototype)
+// window.customElements.define('my-element', MyApplication);

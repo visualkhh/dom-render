@@ -22,6 +22,7 @@
     "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
     /* Advanced Options */
     "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
     "removeComments": true,
 //    "noImplicitAny": true,
 //    "plugins": [{ "name": "sample-ts-plugin" }],
@@ -38,6 +39,11 @@
       "es2015.collection"
     ]
   },
+  "include": [
+    "./src/**/*",
+    "src/utils/dom/webComponentUtils.json"
+  ],
+  "assets": ["src/utils/dom/webComponentUtils.js"],
   "exclude": [
     "example",
     "examples",
@@ -47,6 +53,7 @@
     "assets",
     "test-cli",
     "**/*.test.ts",
+    "src/utils/dom/webComponentUtils.js",
     "templates",
     "dist"
   ]

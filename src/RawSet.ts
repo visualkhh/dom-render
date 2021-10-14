@@ -2,7 +2,8 @@ import {RandomUtils} from './utils/random/RandomUtils';
 import {StringUtils} from './utils/string/StringUtils';
 import {ScriptUtils} from './utils/script/ScriptUtils';
 import {eventManager} from './events/EventManager';
-import {Config} from './Config';
+import {Config, TargetElement} from './Config';
+import {ConstructorType} from './types/Types';
 
 type Attrs = {
     dr: string | null
@@ -19,6 +20,7 @@ type Attrs = {
     drCompleteOption: string | null
     drStripOption: boolean
 }
+
 export class RawSet {
     public static readonly DR = 'dr';
     public static readonly DR_IF_NAME = 'dr-if';
@@ -91,7 +93,7 @@ export class RawSet {
                     Object.assign(obj, {
                         __render: Object.freeze({
                             rawset: this,
-                            scripts: this.setBindProperty(config?.scripts, obj)
+                            scripts: RawSet.setBindProperty(config?.scripts, obj)
                             // eslint-disable-next-line no-use-before-define
                         } as Render)
                     }))
@@ -138,7 +140,7 @@ export class RawSet {
                             drStripOption: drAttr.drStripOption,
                             element: element,
                             rawset: this,
-                            scripts: this.setBindProperty(config?.scripts, obj)
+                            scripts: RawSet.setBindProperty(config?.scripts, obj)
                             // eslint-disable-next-line no-use-before-define
                         } as Render)
                     }));
@@ -181,7 +183,7 @@ export class RawSet {
                                 drStripOption: drAttr.drStripOption,
                                 element: element,
                                 rawset: this,
-                                scripts: this.setBindProperty(config?.scripts, obj)
+                                scripts: RawSet.setBindProperty(config?.scripts, obj)
                                 // eslint-disable-next-line no-use-before-define
                             } as Render)
                         }
@@ -288,7 +290,7 @@ export class RawSet {
                             fag: newTemp,
                             drStripOption: drAttr.drStripOption,
                             element: element,
-                            scripts: this.setBindProperty(config?.scripts, obj)
+                            scripts: RawSet.setBindProperty(config?.scripts, obj)
                         })
                     }));
                     RawSet.drVarDecoding(newTemp, vars);
@@ -340,7 +342,7 @@ export class RawSet {
                             drStripOption: drAttr.drStripOption,
                             fag: newTemp,
                             element: element,
-                            scripts: this.setBindProperty(config?.scripts, obj)
+                            scripts: RawSet.setBindProperty(config?.scripts, obj)
                             // eslint-disable-next-line no-use-before-define
                         } as Render)
                     }));
@@ -412,7 +414,7 @@ export class RawSet {
                     __render: Object.freeze({
                         rawset: this,
                         fag: genNode,
-                        scripts: this.setBindProperty(config?.scripts, obj)
+                        scripts: RawSet.setBindProperty(config?.scripts, obj)
                         // eslint-disable-next-line no-use-before-define
                     } as Render)
                 }
@@ -506,6 +508,7 @@ export class RawSet {
                 }, fragment))
             }
         }
+        // console.log('check-->', pars)
         return pars;
     }
 
@@ -638,7 +641,7 @@ export class RawSet {
         return fag;
     }
 
-    private setBindProperty(scripts: { [p: string]: any } | undefined, obj: any): { [p: string]: any } | undefined {
+    public static setBindProperty(scripts: { [p: string]: any } | undefined, obj: any): { [p: string]: any } | undefined {
         if (scripts) {
             // const newScripts = Object.assign({}, scripts)
             const newScripts = Object.assign({}, scripts)
@@ -649,6 +652,53 @@ export class RawSet {
             }
             return newScripts;
         }
+    }
+
+    public static createComponentTargetElement(name: string, klass: ConstructorType<any>, template: string = '', styles: string[] = [], scripts?: { [n: string]: any }): TargetElement {
+        const targetElement: TargetElement = {
+            name,
+            styles,
+            template,
+            callBack(element: Element, obj: any, rawSet: RawSet): DocumentFragment {
+                // console.log('callback------->')
+                if (!obj.__domrender_components) {
+                    obj.__domrender_components = {};
+                };
+                const domrenderComponents = obj.__domrender_components;
+                const componentKey = '_' + RandomUtils.getRandomString(20)
+                // console.log('callback settttt---a-->')
+                domrenderComponents[componentKey] = new klass();
+                const instance = domrenderComponents[componentKey];
+                // console.log('callback settttt---b-->', obj.__domrender_components, instance)
+
+                const oninit = element.getAttribute('dr-on-init')
+                if (oninit) {
+                    // console.log('onInit------->')
+                    const attribute = {} as any;
+                    element.getAttributeNames().forEach(it => {
+                        attribute[it] = element.getAttribute(it);
+                    });
+                    const script = `var $component = this.__render.component; var $element = this.__render.$element; var $innerHTML = this.__render.$innerHTML; var $attribute = this.__render.$attribute;  ${oninit} `;
+                    ScriptUtils.eval(script, Object.assign(obj, {
+                        __render: Object.freeze({
+                            component: instance,
+                            element: element,
+                            innerHTML: element.innerHTML,
+                            attribute: attribute,
+                            rawset: rawSet,
+                            scripts: RawSet.setBindProperty(scripts, obj)
+                            // eslint-disable-next-line no-use-before-define
+                        } as Render
+                        )
+                    }))
+                }
+                const fag = document.createDocumentFragment();
+                element.innerHTML = template;
+                fag.append(RawSet.drThisCreate(element, `this.__domrender_components.${componentKey}`, '', true, obj))
+                return fag;
+            }
+        }
+        return targetElement;
     }
 }
 
