@@ -654,7 +654,7 @@ export class RawSet {
         }
     }
 
-    public static createComponentTargetElement(name: string, klass: ConstructorType<any>, template: string = '', styles: string[] = [], scripts?: { [n: string]: any }): TargetElement {
+    public static createComponentTargetElement(name: string, objFactory: () => any, template: string = '', styles: string[] = [], scripts?: { [n: string]: any }): TargetElement {
         const targetElement: TargetElement = {
             name,
             styles,
@@ -667,7 +667,7 @@ export class RawSet {
                 const domrenderComponents = obj.__domrender_components;
                 const componentKey = '_' + RandomUtils.getRandomString(20)
                 // console.log('callback settttt---a-->')
-                domrenderComponents[componentKey] = new klass();
+                domrenderComponents[componentKey] = objFactory();
                 const instance = domrenderComponents[componentKey];
                 // console.log('callback settttt---b-->', obj.__domrender_components, instance)
 
