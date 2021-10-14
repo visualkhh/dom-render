@@ -181,7 +181,7 @@ if (target) {
         {
             proxyExcludeTyps: [HTMLCanvasElement],
             targetElements: [
-                RawSet.createComponentTargetElement('my-element', () => new Profile.Component(), Profile.templat, Profile.styles, scripts)
+                RawSet.createComponentTargetElement('my-element', (e, o, r) => new Profile.Component(), Profile.templat, Profile.styles, scripts)
             ],
             scripts: scripts
         }
