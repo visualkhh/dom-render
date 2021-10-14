@@ -93,7 +93,7 @@ dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
 ## dr-strip
 as-is
 ```html
-<div dr-strip="false"><span>hello</span></div>
+<div dr-strip="true"><span>hello</span></div>
 ```
 to-be
 ```html
