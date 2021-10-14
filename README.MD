@@ -1,117 +1,169 @@
-dom-render
-===
-## view template engine
-### Dom control and reorder using web component
+![Single Page Application Framworks](assets/banner.png)
+[![npm version](https://img.shields.io/badge/npm-v1.0.44-blue)](https://www.npmjs.com/package/dom-render) [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE.md) [![Chat](https://img.shields.io/badge/discord-20%20online-brightgreen?logo=discord)](https://discord.gg/PW56dpns) [![Github](https://img.shields.io/badge/-github-black?logo=github)](https://github.com/visualkhh/dom-render)
+# Our primary goals are
+- view template engine
+- Dom control and reorder using web component
+---
+
+# 🚀 Quick start 
 ```shell
 npm install dom-render
 ````
+---
+# 😃 examples
+- [examples project](./example)
+--- 
+
+# 📄 Code description
+## initialized
 ```html
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <title>dom-render</title>
-</head>
-<body id="app">
-    <h1>template</h1>
-    <h2>print</h2>
-    <div>${this.name}</div>
-    <div>${this.office.addr.first}, ${this.office.addr.last}, ${this.office.addr.street} (${this.office.name})</div>
-    <div dr="this.office.addr.street">${this.getOfficeFullAddr()}</div>
-    
-    <h2>df-if</h2>
-    <div dr-if="true"> true</div>
-    <div dr-if="this.gender==='M'"> gender: M</div>
-    
-    <h2>df-for, of</h2>
-    <div dr-for="var i = 0; i < this.friends.length; i++"> friend</div>
-    <div dr-for-of="this.friends"> ${#it#.name}</div>
-    <div dr-for="var i = 1 ; i <= 9 ; i++" dr-it="i">
-        ${#it#} *
-        <scope dr-for="var y = 1 ; y <= 9 ; y++" dr-it="y" dr-var="superIt=#it#" dr-strip="true">
-            #it# = ${var.superIt * #it#}
-        </scope>
-    </div>
-
-    <h2>df-inner-text</h2>
-    <div dr-strip="true" dr-inner-text="'<b>aa</b> <button dr-event-click=\'alert(1)\'>aa</button>'" > friend</div>
-
-    <h2>df-inner-html</h2>
-    <div dr-strip="true" dr-inner-html="'<b>aa</b> <button dr-event-click=\'alert(1)\'>aa</button>'" > friend</div>
-
-    <h1>event</h1>
-    <h2>dr-event, click, change, input, keyup, keydown</h2>
-    <div>
-        click: <button dr-event-click="this.name = 'name' + new Date()">click</button> <br>
-        change: <input type="text" dr-event-change="this.name = $target.value"> <br>
-        input: <input type="text" dr-event-input="this.name = $target.value"> <br>
-        keyup: <input type="text" dr-event-keyup="this.name = $target.value"> <br>
-        keydown: <input type="text" dr-event-keydown="this.name = $target.value"><br>
-        submit: <form dr-event-submit="console.log($event); $event.preventDefault();"><input type="text"> <button type="submit">submit</button></form><br>
-        window-event-popstate: <input type="text" dr-window-event-popstate="alert(this.name)"><br>
-    </div>
-    
-    <h2>dr-value, value-link</h2>
-    <div>
-        dr-value: <input type="text" dr-value="this.office.name"> <br>
-        dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
-    </div>
-    
-    <h1>attribute</h1>
-    <h2>dr-attr</h2>
-    <textarea dr-attr="{rows: this.age/2, cols: this.age}"></textarea>
-    <h2>dr-style</h2>
-    <div dr-style="{fontSize: this.age+'px'}"> style </div>
-    <button dr-event-click="this.age = Math.floor(Math.random() * 20)"> change age</button>
-    
-    <h1>lifeCycle</h1>
-    <h2>dr-on-init</h2>
-    <div>
-        <input dr-on-init="this.onInitElement" value="init-test-value">
-    </div>
-    <script src="./src/index.ts"></script>
-</body>
-</html>
+<!doctype html><html lang="en"><body id="app"></body></html>
 ```
 ```typescript
-class User {
-    name: string;
-    age: number;
-    gender: string;
-    friends: User[];
-    office = {
-        name: 'guro',
-        addr: {
-            first: 'guro',
-            last: ' digital',
-            street: ' complex'
-        }
-    }
-
-    constructor(name: string, age: number, gender: string, friends: User[] = []) {
-        this.name = name;
-        this.age = age;
-        this.gender = gender;
-        this.friends = friends;
-    }
-
-    onInitElement(e: HTMLInputElement) {
-        console.log('inputElement onInit', e.value)
-    }
-
-    getOfficeFullAddr() {
-        return `${this.office.addr.first}, ${this.office.addr.last}, ${this.office.addr.street} (${this.office.name})`
-    }
-
-    sayName() {
-        console.log(this.name)
-    }
-}
-const friends = [new User('friend1', 15, 'M'), new User('friend2', 16, 'F')]
 const target = document.querySelector('#app');
-if (target) {
-    const user = DomRender.run(new User('parent', 10, 'M', friends), target);
-}
+const data = DomRender.run({name: 'my name is dom-render'}, target);
+data.name = 'modify name';
 ```
+## print and call
+```html
+<div>${this.name}</div>
+<div>${this.office.addr.first}, ${this.office.addr.last}, ${this.office.addr.street} (${this.office.name})</div>
+<div dr="this.office.addr.street">${this.getOfficeFullAddr()}</div>
+```
+## dr-if
+```html
+<div dr-if="true">true</div>
+<div dr-if="this.gender==='M'"> gender: M</div>
+```
+## dr-for, dr-for-of
+```html
+<div dr-for="var i = 0; i < this.friends.length; i++"> friend</div>
+<div dr-for-of="this.friends"> ${#it#.name}</div>
+<div dr-for="var i = 1 ; i <= 9 ; i++" dr-it="i">
+    ${#it#} *
+    <scope dr-for="var y = 1 ; y <= 9 ; y++" dr-it="y" dr-var="superIt=#it#" dr-strip="true">
+        #it# = ${var.superIt * #it#}
+    </scope>
+</div>
+```
+
+## dr-inner-text, dr-inner-html
+```html
+<div dr-inner-text="'<b>aa</b> <button dr-event-click=\'alert(1)\'>aa</button>'"> friend</div>
+<div dr-inner-html="'<b>aa</b> <button dr-event-click=\'alert(1)\'>aa</button>'"> friend</div>
+```
+
+## event
+- element
+  - dr-event
+    - click, mousedown, mouseup, dblclick, mouseover, mouseout, mousemove, mouseenter, mouseleave, contextmenu, keyup, keydown, keypress, change, input, submit, resize
+- window
+  - dr-window
+    - event-popstate
+```html
+<div>
+    click: <button dr-event-click="this.name = 'name' + new Date()">click</button> <br>
+    change: <input type="text" dr-event-change="this.name = $target.value"> <br>
+    input: <input type="text" dr-event-input="this.name = $target.value"> <br>
+    keyup: <input type="text" dr-event-keyup="this.name = $target.value"> <br>
+    ...
+    keydown: <input type="text" dr-event-keydown="this.name = $target.value"><br>
+    submit: <form dr-event-submit="console.log($event); $event.preventDefault();"><input type="text"> <button type="submit">submit</button></form><br>
+    window-event-popstate: <input type="text" dr-window-event-popstate="alert(this.name)"><br>
+</div>
+```
+
+## dr-value, value-link
+```html
+dr-value: <input type="text" dr-value="this.office.name"> <br>
+dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
+```
+
+## dr-attr
+```html
+<textarea dr-attr="{rows: this.age/2, cols: this.age}"></textarea>
+```
+
+## dr-style
+```html
+<div dr-style="{fontSize: this.age+'px'}"> style </div>
+```
+
+
+## dr-strip
+as-is
+```html
+<div dr-strip="false"><span>hello</span></div>
+```
+to-be
+```html
+<span>hello</span>
+```
+
+## dr-on-init
+```html
+<input dr-on-init="this.onInitElement">
+```
+---
+
+# script
+```typescript
+new DomRender.run(obj, target, {
+  scripts: {
+    concat: function (head: string, tail: string) {
+      return head + tail; 
+    }
+  }
+});
+```
+using script
+```typescript
+const data = config.scripts.concat('head', 'tail')
+```
+```html
+<div>${$scripts.concat('head', 'tail')}</div>
+<div dr-if="$scripts.concat('wow', 'good') === 'wowgood'"> is wowgood</div>
+```
+
+---
+# component
+```typescript
+export namespace Profile {
+  export const templat = '<div>aaaaa${this.name}aaaaa </div>';
+  export const styles = ['p {color: red}', 'div {margin: ${this.margin} + \'px\' }'];
+  export class Component {
+    public name = 'default name';
+    public margin = 5;
+    public say() {
+        console.log('say!~')
+    }
+  }
+}
+
+new DomRender.run(obj, target, {
+  targetElements: [
+    RawSet.createComponentTargetElement('my-element', (e, o, r) => new Profile.Component(), Profile.templat, Profile.styles, scripts)
+  ],
+});
+```
+using component
+```html
+<my-element dr-on-init="$component.say();"></my-element>
+```
+- attribute
+  - dr-on-init: component created init call script
+    - $component: component  instance
+    - $element: element instance
+    - $attribute: element attribute object
+    - $innerHTML: element innerHTML string
+---
+
+# LifeCycle
+```
+* OnInitRender
+  - onInitRender(): init render call
+```
+----
+# License
+* MIT
+* visualkhh@gmail.com

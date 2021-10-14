@@ -693,7 +693,8 @@ export class RawSet {
                     }))
                 }
                 const fag = document.createDocumentFragment();
-                element.innerHTML = template;
+                const innerHTML = (styles?.map(it => `<style>${it}</style>`) ?? []).join(' ') + (template ?? '');
+                element.innerHTML = innerHTML;
                 fag.append(RawSet.drThisCreate(element, `this.__domrender_components.${componentKey}`, '', true, obj))
                 return fag;
             }
