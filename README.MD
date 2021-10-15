@@ -55,8 +55,12 @@ data.name = 'modify name';
 
 ## event
 - element
-  - dr-event
-    - click, mousedown, mouseup, dblclick, mouseover, mouseout, mousemove, mouseenter, mouseleave, contextmenu, keyup, keydown, keypress, change, input, submit, resize
+  - dr-event ($event)
+    - click, mousedown, mouseup, dblclick, mouseover, mouseout, mousemove, mouseenter, mouseleave, contextmenu, keyup, keydown, keypress, change, input, submit, resize, focus, blur
+    - other event ($params, $event)
+      ```html
+      <input dr-event:bind='eventName1, eventName2' dr-event="console.log('event', $params, $event)"  type="text">
+      ```
 - window
   - dr-window
     - event-popstate
@@ -104,6 +108,18 @@ to-be
 ```html
 <input dr-on-init="this.onInitElement">
 ```
+
+## dr-before, dr-after
+```html
+<div dr-before="console.log('process before')" dr-after="console.log('process after')"></div>
+```
+## dr-complete
+```html
+<select dr-value-link="this.currentContry" dr-event-change="this.contryChange($event)">
+    <option dr-for-of="this.languages" dr-value="#it#.key" dr-complete="this.currentContry='defaultValue'">${#it#.title}</option>
+</select>
+```
+
 ---
 
 # script

@@ -8,27 +8,29 @@ export class DomUtils {
         return element.querySelectorAll(selector);
     }
 
-    static removeAttribute(result: HTMLElement, attrs: string[]) {
+    static removeAttribute(result: Element, attrs: string[]) {
         attrs.forEach(it => {
             result.removeAttribute(it)
         });
     }
 
-    static setAttribute(result: HTMLElement, attrs: string[]) {
+    static setAttribute(result: Element, attrs: string[]) {
         attrs.forEach(it => {
             result.setAttribute(it, '')
         });
     }
 
-    static setAttributeAttr(result: HTMLElement, attrs: Attr[]) {
+    static setAttributeAttr(result: Element, attrs: Attr[]) {
         attrs.forEach(it => {
             result.setAttribute(it.name, it.value)
         });
     }
 
-    static getAttributeToObject(input: HTMLElement): any {
+    static getAttributeToObject(input: Element): any {
         const attribute = {} as any;
-        input.getAttributeNames().forEach(ait => attribute[ait] = input.getAttribute(ait));
+        input.getAttributeNames().forEach(ait => {
+            attribute[ait] = input.getAttribute(ait);
+        });
         return attribute;
     }
 

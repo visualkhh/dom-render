@@ -1,12 +1,15 @@
 import {Config} from '../Config';
 import {ScriptUtils} from '../utils/script/ScriptUtils';
+import {DomUtils} from '../utils/dom/DomUtils';
 
 export const eventManager = new class {
     public readonly attrPrefix = 'dr-';
     public readonly eventNames = [
         'click', 'mousedown', 'mouseup', 'dblclick', 'mouseover', 'mouseout', 'mousemove', 'mouseenter', 'mouseleave', 'contextmenu',
         'keyup', 'keydown', 'keypress',
-        'change', 'input', 'submit', 'resize'];
+        'change', 'input', 'submit', 'resize', 'focus', 'blur'];
+
+    public readonly eventParam = this.attrPrefix + 'event';
 
     public readonly attrNames = [
         this.attrPrefix + 'value',
@@ -15,7 +18,8 @@ export const eventManager = new class {
         this.attrPrefix + 'style',
         this.attrPrefix + 'class',
         this.attrPrefix + 'window-event-popstate',
-        this.attrPrefix + 'on-init'
+        this.attrPrefix + 'on-init',
+        this.eventParam
     ];
 
     constructor() {
@@ -27,8 +31,11 @@ export const eventManager = new class {
             document.querySelectorAll('[dr-window-event-popstate]').forEach(it => {
                 const script = it.getAttribute('dr-window-event-popstate')
                 if (script) {
-                    // eslint-disable-next-line no-new-func,no-unused-expressions
-                    Function(`"use strict"; const $target = this.$target;  ${script} `).bind(Object.assign({$target: it}, (it as any).obj))() ?? {};
+                    ScriptUtils.eval(`"use strict"; const $target = this.__render.target;  ${script} `, Object.assign((it as any).obj, {
+                        __render: Object.freeze({
+                            target: it
+                        })
+                    }))
                 }
             })
         })
@@ -52,8 +59,9 @@ export const eventManager = new class {
         // Node.ELEMENT_NODE = 1
         // event
         this.eventNames.forEach(it => {
-            this.addDrEvent(obj, it, childNodes);
+            this.addDrEvents(obj, it, childNodes);
         });
+        this.addDrEventPram(obj, this.eventParam, childNodes);
 
         // value
         this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'value', (it, attribute) => {
@@ -135,8 +143,11 @@ export const eventManager = new class {
                 script = 'return ' + script;
             }
             if (this.isUsingThisVar(script, varName) || varName === undefined) {
-                // eslint-disable-next-line no-new-func
-                const data = Function(`"use strict"; const $target=this.$target; ${script} `).bind(Object.assign({$target: it}, obj))() ?? {};
+                const data = ScriptUtils.eval(`"use strict"; const $target=this.__render.target; ${script} `, Object.assign(obj, {
+                    __render: Object.freeze({
+                        target: it
+                    })
+                }))
                 for (const [key, value] of Object.entries(data)) {
                     it.setAttribute(key, String(value));
                 }
@@ -149,8 +160,11 @@ export const eventManager = new class {
                 script = 'return ' + script;
             }
             if (this.isUsingThisVar(script, varName) || varName === undefined) {
-                // eslint-disable-next-line no-new-func
-                const data = Function(`"use strict"; const $target = this.$target;  ${script} `).bind(Object.assign({$target: it}, obj))() ?? {};
+                const data = ScriptUtils.eval(`"use strict"; const $target = this.__render.target;  ${script} `, Object.assign(obj, {
+                    __render: Object.freeze({
+                        target: it
+                    })
+                }))
                 for (const [key, value] of Object.entries(data)) {
                     if (it instanceof HTMLElement) {
                         (it.style as any)[key] = String(value);
@@ -165,8 +179,11 @@ export const eventManager = new class {
                 script = 'return ' + script;
             }
             if (this.isUsingThisVar(script, varName) || varName === undefined) {
-                // eslint-disable-next-line no-new-func
-                const data = Function(`"use strict"; const $target = this.$target;  ${script} `).bind(Object.assign({$target: it}, obj))() ?? {};
+                const data = ScriptUtils.eval(`"use strict"; const $target = this.$target;  ${script} `, Object.assign(obj, {
+                    __render: Object.freeze({
+                        target: it
+                    })
+                }))
                 for (const [key, value] of Object.entries(data)) {
                     if (it instanceof HTMLElement) {
                         if (value) {
@@ -181,22 +198,46 @@ export const eventManager = new class {
     }
 
     // eslint-disable-next-line no-undef
-    public addDrEvent(obj: any, eventName: string, elements: Set<Element> | Set<ChildNode>) {
+    public addDrEvents(obj: any, eventName: string, elements: Set<Element> | Set<ChildNode>) {
         const attr = this.attrPrefix + 'event-' + eventName
         this.procAttr<HTMLInputElement>(elements, attr, (it, attribute) => {
-            // console.log('-------?', elements, it)
             const script = attribute;
             it.addEventListener(eventName, (event) => {
-                // eslint-disable-next-line no-new-func
-                const f = Function(`"use strict"; const $target=event.target; const $event=event; ${script} `);
-                // eslint-disable-next-line no-unused-vars
-                const data = f.bind(Object.assign(obj))() ?? {};
+                ScriptUtils.eval(`"use strict"; const $event=this.__render.event;  const $target=$event.target; ${script} `, Object.assign(obj, {
+                    __render: Object.freeze({
+                        event
+                    })
+                }))
             })
         })
     }
 
     // eslint-disable-next-line no-undef
-    public procAttr<T extends Element = Element>(elements: Set<Element> | Set<ChildNode> = new Set(), attrName: string, callBack: (h: T, value: string) => void) {
+    public addDrEventPram(obj: any, attr: string, elements: Set<ChildNode> | Set<Element>) {
+        this.procAttr<HTMLInputElement>(elements, attr, (it, attribute, attributes) => {
+            const bind: string | undefined = attributes[attr + ':bind'];
+            if (bind) {
+                const script = attribute;
+                const params = {} as any;
+                Object.entries(attributes).filter(([k, v]) => k.startsWith(attr + ':')).forEach(([k, v]) => {
+                    params[k] = v;
+                });
+                bind.split(',').forEach(eventName => {
+                    it.addEventListener(eventName.trim(), (event) => {
+                        ScriptUtils.eval(`"use strict"; const $params = this.__render.params; const $event=this.__render.event; const $target=$event.target;  ${script} `, Object.assign(obj, {
+                            __render: Object.freeze({
+                                event,
+                                params
+                            })
+                        }))
+                    })
+                });
+            }
+        })
+    }
+
+    // eslint-disable-next-line no-undef
+    public procAttr<T extends Element = Element>(elements: Set<Element> | Set<ChildNode> = new Set(), attrName: string, callBack: (h: T, value: string, attributes: any) => void) {
         const sets = new Set<Element>();
         elements.forEach(it => {
             // console.log('--->type', it, it.nodeType)
@@ -212,11 +253,11 @@ export const eventManager = new class {
                 })
             }
         });
-
         sets.forEach(it => {
             const attr = it.getAttribute(attrName);
+            const attrs = DomUtils.getAttributeToObject(it);
             if (attr) {
-                callBack(it as T, attr);
+                callBack(it as T, attr, attrs);
             }
         })
     }
@@ -271,4 +312,5 @@ export const eventManager = new class {
     //     const strings = Array.from(usingVars);
     //     return strings;
     // }
+
 }();

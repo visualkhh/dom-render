@@ -2,7 +2,7 @@ import { RawSet } from './RawSet';
 import { eventManager } from './events/EventManager';
 import { Config } from './Config';
 import { ScriptUtils } from './utils/script/ScriptUtils';
-import {Shield} from './Shield';
+import {Shield} from './types/Types';
 
 export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     public _domRender_ref = new Map<object, Set<string>>()
@@ -77,25 +77,9 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
 
     public render(raws?: RawSet[]) {
         (raws ?? this.getRawSets()).forEach(it => {
-            // console.log('render--->', raws, it.point.start.isConnected, it.point.start.isConnected)
-            // TODO: 여기 이걸 왜넣었는지... 확인필요함
-            // it.getUsingTriggerVariables(this.config); //.forEach(path => console.log('--->',path))
             it.getUsingTriggerVariables(this.config).forEach(path => this.addRawSet(path, it))
             if (it.point.start.isConnected && it.point.start.isConnected) {
-                // console.log('render-->');
-                // alert(1)
                 const rawSets = it.render(this._domRender_proxy, this.config);
-                // alert(1)
-                // const thisRawSet = rawSets.filter(it => !it.thisObjPath)
-                // rawSets.forEach(it => console.log('---->', it))
-                // rawSets.filter(it => it.thisObjPath).forEach(it => {
-                //     const childTarget = ScriptUtils.evalReturn(it.thisObjPath!, this._domRender_proxy);
-                //     it.thisObjPath = undefined;
-                //     console.log('objThisPath-->', it)
-                //     childTarget?._DomRender_proxy?.addRawSetAndRender('', it)
-                // })
-                // console.log('-----', thisRawSet, this._domRender_proxy)
-                // this.render(thisRawSet);
                 this.render(rawSets);
             } else {
                 this.removeRawSet(it)
@@ -138,21 +122,12 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         }
     }
 
-    // public defineProperty(target: T, p: string | symbol, attributes: PropertyDescriptor) {
-    //     console.log('definProperty--->', target, p, attributes)
-    //     return true;
-    // }
-
     public set(target: T, p: string | symbol, value: any, receiver: T): boolean {
         // console.log('set--?', p, target, value);
         if (typeof p === 'string') {
             value = this.proxy(receiver, value, p);
         }
         (target as any)[p] = value;
-        // if (typeof p === 'string') {
-        //     (target as any)[p] = this.proxy(target, value, p);
-        // }
-
         if (typeof p === 'string') {
             this.root([p], value);
         }
@@ -188,13 +163,6 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             } else {
                 return it;
             }
-            // return it;
-
-            // try {
-            //     return (p in target) ? (target as any)[p].bind(target) : undefined
-            // } catch (e) {
-            //     return (target as any)[p]
-            // }
         }
     }
 
@@ -205,7 +173,6 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     proxy(parentProxy: T, obj: T | any, p: string) {
         const proxyTarget = (this.config?.proxyExcludeTyps?.filter(it => obj instanceof it) ?? []).length <= 0;
         if (proxyTarget && obj !== undefined && obj !== null && typeof obj === 'object' && !('_DomRender_isProxy' in obj) && !DomRenderProxy.isFinal(obj) && !Object.isFrozen(obj) && !(obj instanceof Shield)) {
-            // console.log('proxyyyyyyyy->', obj)
             const domRender = new DomRenderProxy(obj, undefined, this.config);
             domRender.addRef(parentProxy, p);
             const proxy = new Proxy(obj, domRender);
@@ -234,12 +201,10 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public addRawSet(path: string, rawSet: RawSet) {
-        // console.log('???????????????????', path, rawSet)
         if (!this._rawSets.get(path)) {
             this._rawSets.set(path, new Set<RawSet>());
         }
         this._rawSets.get(path)?.add(rawSet);
-        // console.log('--->', this._rawSets)
     }
 
     public removeRawSet(raws: RawSet) {

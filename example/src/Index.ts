@@ -1,6 +1,6 @@
 import {DomRender} from 'dom-render/DomRender';
 import {ScriptUtils} from 'dom-render/utils/script/ScriptUtils';
-import {Shield} from 'dom-render/Shield';
+import {Shield} from 'dom-render/types/Types';
 import {RawSet, Render} from 'dom-render/RawSet';
 import {Profile} from './components/Profile';
 declare const naver: any;
