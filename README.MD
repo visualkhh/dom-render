@@ -54,27 +54,33 @@ data.name = 'modify name';
 ```
 
 ## event
-- element
-  - dr-event ($event)
-    - click, mousedown, mouseup, dblclick, mouseover, mouseout, mousemove, mouseenter, mouseleave, contextmenu, keyup, keydown, keypress, change, input, submit, resize, focus, blur
-    - other event ($params, $event)
-      ```html
-      <input dr-event:bind='eventName1, eventName2' dr-event="console.log('event', $params, $event)"  type="text">
-      ```
-- window
-  - dr-window
-    - event-popstate
+dr-event-(name) 
+- click, mousedown, mouseup, dblclick, mouseover, mouseout, mousemove, mouseenter, mouseleave, contextmenu, keyup, keydown, keypress, change, input, submit, resize, focus, blur
+- ref: element 
+- variable: $event, $target
 ```html
-<div>
-    click: <button dr-event-click="this.name = 'name' + new Date()">click</button> <br>
-    change: <input type="text" dr-event-change="this.name = $target.value"> <br>
-    input: <input type="text" dr-event-input="this.name = $target.value"> <br>
-    keyup: <input type="text" dr-event-keyup="this.name = $target.value"> <br>
-    ...
-    keydown: <input type="text" dr-event-keydown="this.name = $target.value"><br>
-    submit: <form dr-event-submit="console.log($event); $event.preventDefault();"><input type="text"> <button type="submit">submit</button></form><br>
-    window-event-popstate: <input type="text" dr-window-event-popstate="alert(this.name)"><br>
-</div>
+click: <button dr-event-click="this.name = 'name' + new Date()">click</button> <br>
+change: <input type="text" dr-event-change="this.name = $target.value"> <br>
+input: <input type="text" dr-event-input="this.name = $target.value"> <br>
+keyup: <input type="text" dr-event-keyup="this.name = $target.value"> <br>
+...
+keydown: <input type="text" dr-event-keydown="this.name = $target.value"><br>
+submit: <form dr-event-submit="console.log($event); $event.preventDefault();"><input type="text"> <button type="submit">submit</button></form><br>
+```
+
+dr-window-event-popstate
+- ref: window 
+- variable: $target
+```html
+window-event-popstate: <input type="text" dr-window-event-popstate="alert(this.name)"><br>
+```
+
+dr-event
+- other event
+- ref: element
+- variable: $params, $event
+```html
+<input dr-event:bind='eventName1, eventName2' dr-event="console.log('event', $params, $event)"  type="text">
 ```
 
 ## dr-value, value-link

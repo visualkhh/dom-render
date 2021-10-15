@@ -220,7 +220,7 @@ export const eventManager = new class {
                 const script = attribute;
                 const params = {} as any;
                 Object.entries(attributes).filter(([k, v]) => k.startsWith(attr + ':')).forEach(([k, v]) => {
-                    params[k] = v;
+                    params[k.slice(bind.length)] = v;
                 });
                 bind.split(',').forEach(eventName => {
                     it.addEventListener(eventName.trim(), (event) => {
