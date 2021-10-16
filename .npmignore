@@ -7,7 +7,7 @@ examples
 # TypeScript
 # *.js
 # *.map
-
+assets
 # JetBrains
 .idea
 .project

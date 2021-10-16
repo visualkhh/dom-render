@@ -26,7 +26,6 @@
     "serve": "sbf serve --port 3000 --path ./dist",
     "serve:watch": "sbf serve --port 3000 --path ./dist --watch",
     "serve:watch:all": "sbf serve --port 3000 --path ./dist --bundle rollup --watch",
-    "serve:watch:alls": "sbf exec --cmd 'npm run bundle:watch' --cmd 'npm run serve:watch'",
     "bundle": "rollup -c",
     "bundle:watch": "rollup -c -w"
   },

@@ -95,9 +95,19 @@ dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
 <textarea dr-attr="{rows: this.age/2, cols: this.age}"></textarea>
 ```
 
+## dr-class
+```html
+<div dr-class="{big: this.age > 50, red: this.age > 50}">
+<div dr-class="'big yellow ' + (this.age > 50 ? 'old' : 'young')">
+<div dr-class="['small', 'yellow']">
+```
+
 ## dr-style
 ```html
-<div dr-style="{fontSize: this.age+'px'}"> style </div>
+<div dr-style="{fontSize: this.age + 'px'}"> style </div>
+<div dr-style="{'font-size': '20px'}"> style</div>
+<div dr-style="'font-size: ' + this.age +'px; margin: ' + this.age + 'px'"> style </div>
+<div dr-style="['font-size: ' + this.age +'px', 'margin: ' + this.age + 'px']"> style </div>
 ```
 
 
@@ -188,6 +198,20 @@ using component
 ---
 
 # Detect Get, Set
+OnBeforeReturnSet
+```typescript
+export interface OnBeforeReturnSet {
+    onBeforeReturnSet(name: string, value: any, fullPath?: string[]): void;
+}
+```
+OnBeforeReturnGet
+```typescript
+export interface OnBeforeReturnGet {
+    onBeforeReturnGet(name: string, value: any, fullPath?: string[]): void;
+}
+```
+
+using detect
 ```typescript
 {
     name: 'dom-render'
@@ -199,7 +223,7 @@ using component
     }
 }
 ```
-Config (exclude)
+exclude detect property: Config
 - proxyExcludeOnBeforeReturnGets: ['propertyName']
 - proxyExcludeOnBeforeReturnSets: ['propertyName']
 ---
@@ -207,7 +231,7 @@ Config (exclude)
 # Proxy
 all internal variables are managed by proxy. (DomRenderProxy)
 ### exclude proxy (situation: Maximum call stack error)
-Config (exclude)
+exclude detect property: Config
 - proxyExcludeTyps: [Class...]
 
 Code base
@@ -248,7 +272,7 @@ export interface Config {
     proxyExcludeOnBeforeReturnGets?: string[];
     scripts?: { [n: string]: any };
     applyEvents?: { attrName: string, callBack: (elements: Element, attrValue: string, obj: any) => void }[];
-}_
+}
 ```
 ----
 # License

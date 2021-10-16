@@ -165,9 +165,21 @@ export const eventManager = new class {
                         target: it
                     })
                 }))
-                for (const [key, value] of Object.entries(data)) {
+                if (typeof data === 'string') {
                     if (it instanceof HTMLElement) {
-                        (it.style as any)[key] = String(value);
+                        it.removeAttribute('style');
+                        it.setAttribute('style', data);
+                    }
+                } else if (Array.isArray(data)) {
+                    if (it instanceof HTMLElement) {
+                        it.removeAttribute('style');
+                        it.setAttribute('style', data.join(';'));
+                    }
+                } else {
+                    for (const [key, value] of Object.entries(data)) {
+                        if (it instanceof HTMLElement) {
+                            (it.style as any)[key] = String(value);
+                        }
                     }
                 }
             }
@@ -184,12 +196,25 @@ export const eventManager = new class {
                         target: it
                     })
                 }))
-                for (const [key, value] of Object.entries(data)) {
+
+                if (typeof data === 'string') {
                     if (it instanceof HTMLElement) {
-                        if (value) {
-                            it.classList.add(key);
-                        } else {
-                            it.classList.remove(key);
+                        it.removeAttribute('class');
+                        it.setAttribute('class', data);
+                    }
+                } else if (Array.isArray(data)) {
+                    if (it instanceof HTMLElement) {
+                        it.removeAttribute('class');
+                        it.setAttribute('class', data.join(' '));
+                    }
+                } else {
+                    for (const [key, value] of Object.entries(data)) {
+                        if (it instanceof HTMLElement) {
+                            if (value) {
+                                it.classList.add(key);
+                            } else {
+                                it.classList.remove(key);
+                            }
                         }
                     }
                 }
