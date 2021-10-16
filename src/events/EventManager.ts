@@ -31,7 +31,7 @@ export const eventManager = new class {
             document.querySelectorAll('[dr-window-event-popstate]').forEach(it => {
                 const script = it.getAttribute('dr-window-event-popstate')
                 if (script) {
-                    ScriptUtils.eval(`"use strict"; const $target = this.__render.target;  ${script} `, Object.assign((it as any).obj, {
+                    ScriptUtils.eval(`const $target = this.__render.target;  ${script} `, Object.assign((it as any).obj, {
                         __render: Object.freeze({
                             target: it
                         })
@@ -143,7 +143,7 @@ export const eventManager = new class {
                 script = 'return ' + script;
             }
             if (this.isUsingThisVar(script, varName) || varName === undefined) {
-                const data = ScriptUtils.eval(`"use strict"; const $target=this.__render.target; ${script} `, Object.assign(obj, {
+                const data = ScriptUtils.eval(`const $target=this.__render.target; ${script} `, Object.assign(obj, {
                     __render: Object.freeze({
                         target: it
                     })
@@ -160,7 +160,7 @@ export const eventManager = new class {
                 script = 'return ' + script;
             }
             if (this.isUsingThisVar(script, varName) || varName === undefined) {
-                const data = ScriptUtils.eval(`"use strict"; const $target = this.__render.target;  ${script} `, Object.assign(obj, {
+                const data = ScriptUtils.eval(`const $target = this.__render.target;  ${script} `, Object.assign(obj, {
                     __render: Object.freeze({
                         target: it
                     })
@@ -179,7 +179,7 @@ export const eventManager = new class {
                 script = 'return ' + script;
             }
             if (this.isUsingThisVar(script, varName) || varName === undefined) {
-                const data = ScriptUtils.eval(`"use strict"; const $target = this.$target;  ${script} `, Object.assign(obj, {
+                const data = ScriptUtils.eval(`const $target = this.$target;  ${script} `, Object.assign(obj, {
                     __render: Object.freeze({
                         target: it
                     })
@@ -203,7 +203,7 @@ export const eventManager = new class {
         this.procAttr<HTMLInputElement>(elements, attr, (it, attribute) => {
             const script = attribute;
             it.addEventListener(eventName, (event) => {
-                ScriptUtils.eval(`"use strict"; const $event=this.__render.event;  const $target=$event.target; ${script} `, Object.assign(obj, {
+                ScriptUtils.eval(`const $event=this.__render.event;  const $target=$event.target; ${script} `, Object.assign(obj, {
                     __render: Object.freeze({
                         event
                     })
@@ -219,12 +219,13 @@ export const eventManager = new class {
             if (bind) {
                 const script = attribute;
                 const params = {} as any;
-                Object.entries(attributes).filter(([k, v]) => k.startsWith(attr + ':')).forEach(([k, v]) => {
-                    params[k.slice(bind.length)] = v;
+                const prefix = attr + ':';
+                Object.entries(attributes).filter(([k, v]) => k.startsWith(prefix)).forEach(([k, v]) => {
+                    params[k.slice(prefix.length)] = v;
                 });
                 bind.split(',').forEach(eventName => {
                     it.addEventListener(eventName.trim(), (event) => {
-                        ScriptUtils.eval(`"use strict"; const $params = this.__render.params; const $event=this.__render.event; const $target=$event.target;  ${script} `, Object.assign(obj, {
+                        ScriptUtils.eval(`const $params = this.__render.params; const $event=this.__render.event; const $target=$event.target;  ${script} `, Object.assign(obj, {
                             __render: Object.freeze({
                                 event,
                                 params

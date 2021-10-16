@@ -3,7 +3,7 @@ import { eventManager } from './events/EventManager';
 import { Config } from './Config';
 import { ScriptUtils } from './utils/script/ScriptUtils';
 import {Shield} from './types/Types';
-
+const excludeGetSetPropertys = ['onBeforeReturnGet', 'onBeforeReturnSet', '__domrender_components', '__render', '_DomRender_isFinal', '_domRender_ref', '_rawSets', '_domRender_proxy', '_targets', '_DomRender_origin', '_DomRender_ref', '_DomRender_proxy'];
 export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     public _domRender_ref = new Map<object, Set<string>>()
     public _rawSets = new Map<string, Set<RawSet>>()
@@ -87,39 +87,45 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         })
     }
 
-    public root(paths: string[], value: any) {
+    public root(paths: string[], value?: any, lastDoneExecute = true) {
         // console.log('root--->', paths, value, this._domRender_ref, this._domRender_origin)
+        const fullPaths: string[] = []
         if (this._domRender_ref.size > 0) {
             this._domRender_ref.forEach((it, key) => {
                 if ('_DomRender_isProxy' in key) {
                     it.forEach(sit => {
-                        (key as any)._DomRender_proxy?.root(paths.concat(sit), value)
+                        const items = (key as any)._DomRender_proxy?.root(paths.concat(sit), value, lastDoneExecute);
+                        fullPaths.push(items.join(','));
                     })
                 }
             })
         } else {
             const strings = paths.reverse();
             const fullPathStr = strings.join('.');
-            const iterable = this._rawSets.get(fullPathStr);
-            // array check
-            const front = strings.slice(0, strings.length - 1).join('.')
-            const last = strings[strings.length - 1]
-            // console.log('root-else-->', fullPathStr, iterable, front, last)
-            if (!isNaN(Number(last)) && Array.isArray(ScriptUtils.evalReturn('this.' + front, this._domRender_proxy))) {
-                const aIterable = this._rawSets.get(front);
-                if (aIterable) {
-                    this.render(Array.from(aIterable));
+            if (lastDoneExecute) {
+                const iterable = this._rawSets.get(fullPathStr);
+                // array check
+                const front = strings.slice(0, strings.length - 1).join('.')
+                const last = strings[strings.length - 1]
+                // console.log('root-else-->', fullPathStr, iterable, front, last)
+                if (!isNaN(Number(last)) && Array.isArray(ScriptUtils.evalReturn('this.' + front, this._domRender_proxy))) {
+                    const aIterable = this._rawSets.get(front);
+                    if (aIterable) {
+                        this.render(Array.from(aIterable));
+                    }
+                } else if (iterable) {
+                    this.render(Array.from(iterable));
                 }
-            } else if (iterable) {
-                this.render(Array.from(iterable));
+                this._targets.forEach(it => {
+                    if (it.nodeType === Node.DOCUMENT_FRAGMENT_NODE || it.nodeType === Node.ELEMENT_NODE) {
+                        const targets = eventManager.findAttrElements((it as DocumentFragment | Element), this.config);
+                        eventManager.changeVar(this._domRender_proxy, targets, `this.${fullPathStr}`)
+                    }
+                })
             }
-            this._targets.forEach(it => {
-                if (it.nodeType === Node.DOCUMENT_FRAGMENT_NODE || it.nodeType === Node.ELEMENT_NODE) {
-                    const targets = eventManager.findAttrElements((it as DocumentFragment | Element), this.config);
-                    eventManager.changeVar(this._domRender_proxy, targets, `this.${fullPathStr}`)
-                }
-            })
+            fullPaths.push(fullPathStr);
         }
+        return fullPaths;
     }
 
     public set(target: T, p: string | symbol, value: any, receiver: T): boolean {
@@ -128,8 +134,13 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             value = this.proxy(receiver, value, p);
         }
         (target as any)[p] = value;
+        let fullPath: undefined | string[];
         if (typeof p === 'string') {
-            this.root([p], value);
+            fullPath = this.root([p], value);
+        }
+
+        if (('onBeforeReturnSet' in receiver) && typeof p === 'string' && !(this.config?.proxyExcludeOnBeforeReturnSets ?? []).concat(excludeGetSetPropertys).includes(p)) {
+            (receiver as any)?.onBeforeReturnSet?.(p, value, fullPath);
         }
         return true;
     }
@@ -157,12 +168,15 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             // return (p in target) ? (target as any)[p].bind(target) : (target as any)[p]
             // console.log('-->', p, Object.prototype.toString.call((target as any)[p]), (target as any)[p])
             // return (target as any)[p]
-            const it = (target as any)[p];
+            let it = (target as any)[p];
             if (it && typeof it === 'object' && ('_DomRender_isProxy' in it) && Object.prototype.toString.call(it._DomRender_origin) === '[object Date]') {
-                return it._DomRender_origin;
-            } else {
-                return it;
+                it = it._DomRender_origin;
             }
+
+            if (('onBeforeReturnGet' in receiver) && typeof p === 'string' && !(this.config?.proxyExcludeOnBeforeReturnGets ?? []).concat(excludeGetSetPropertys).includes(p)) {
+                (receiver as any)?.onBeforeReturnGet?.(p, it, this.root([p], it, false));
+            }
+            return it;
         }
     }
 

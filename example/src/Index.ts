@@ -19,9 +19,23 @@ class User {
             first: 'guro',
             last: ' digital',
             street: ' complex'
+            ,
+            onBeforeReturnSet: (name: string, value: any, fullpath: string[]) => {
+                console.log('set office addr name-->', name, value, fullpath);
+            },
+            onBeforeReturnGet: (name: string, value: any, fullpath: string[]) => {
+                console.log('get office addr name-->', name, value, fullpath);
+            }
+        },
+        onBeforeReturnSet: (name: string, value: any, fullpath: string[]) => {
+            console.log('set office name-->', name, value, fullpath);
+        },
+        onBeforeReturnGet: (name: string, value: any, fullpath: string[]) => {
+            console.log('get office name-->', name, value, fullpath);
         }
     };
 
+    office2 = this.office;
     shield: any = new Shield();
 
     nullValue = null;
@@ -139,6 +153,14 @@ class User {
         console.log('getNamegetNamegetNamegetName', 'getName');
         return (this.name)
     }
+
+    onBeforeReturnSet(name: string, value: any, fullpath: string[]) {
+        console.log('set root name-->', name, value, fullpath);
+    }
+
+    onBeforeReturnGet(name: string, value: any, fullpath: string[]) {
+        console.log('get root name-->', name, value, fullpath);
+    }
 }
 
 const friends = [new User('friend1', 15, 'M'), new User('friend2', 16, 'F')]
@@ -179,6 +201,8 @@ if (target) {
     };
     const user = DomRender.run(new User('parent', 10, 'M', friends), target,
         {
+            proxyExcludeOnBeforeReturnGets: [],
+            proxyExcludeOnBeforeReturnSets: [],
             proxyExcludeTyps: [HTMLCanvasElement],
             targetElements: [
                 RawSet.createComponentTargetElement('my-element', (e, o, r) => new Profile.Component(), Profile.templat, Profile.styles, scripts)

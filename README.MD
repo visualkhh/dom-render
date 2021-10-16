@@ -2,7 +2,8 @@
 [![npm version](https://img.shields.io/badge/npm-v1.0.44-blue)](https://www.npmjs.com/package/dom-render) [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE.md) [![Chat](https://img.shields.io/badge/discord-20%20online-brightgreen?logo=discord)](https://discord.gg/PW56dpns) [![Github](https://img.shields.io/badge/-github-black?logo=github)](https://github.com/visualkhh/dom-render)
 # Our primary goals are
 - view template engine
-- Dom control and reorder using web component
+- Dom control and reorder
+- all internal variables are managed by proxy. (DomRenderProxy)
 ---
 
 # 🚀 Quick start 
@@ -127,8 +128,14 @@ to-be
 ```
 
 ---
+# LifeCycle
+```
+* OnInitRender
+  - onInitRender(): init render call
+```
+---
 
-# script
+# Script
 ```typescript
 new DomRender.run(obj, target, {
   scripts: {
@@ -148,7 +155,7 @@ const data = config.scripts.concat('head', 'tail')
 ```
 
 ---
-# component
+# Component
 ```typescript
 export namespace Profile {
   export const templat = '<div>aaaaa${this.name}aaaaa </div>';
@@ -180,10 +187,68 @@ using component
     - $innerHTML: element innerHTML string
 ---
 
-# LifeCycle
+# Detect Get, Set
+```typescript
+{
+    name: 'dom-render'
+    onBeforeReturnSet: (name: string, value: any, fullpath: string[]) => {
+        console.log('set name-->', name, value, fullpath);
+    }
+    onBeforeReturnGet: (name: string, value: any, fullpath: string[]) => {
+        console.log('get name-->', name, value, fullpath);
+    }
+}
 ```
-* OnInitRender
-  - onInitRender(): init render call
+Config (exclude)
+- proxyExcludeOnBeforeReturnGets: ['propertyName']
+- proxyExcludeOnBeforeReturnSets: ['propertyName']
+---
+
+# Proxy
+all internal variables are managed by proxy. (DomRenderProxy)
+### exclude proxy (situation: Maximum call stack error)
+Config (exclude)
+- proxyExcludeTyps: [Class...]
+
+Code base
+```typescript
+// frezz
+{name : Object.freeze({...})}
+
+// Shield Object type: {[k: string]: any}
+{name : new Shield()}
+
+// DomRenderProxy Final
+{name : DomRenderProxy.final({...})}
+```
+--- 
+# Config
+```typescript
+export type TargetElement = {
+    _name: string,
+    template?: string,
+    styles?: string[],
+    callBack: (target: Element, obj: any, rawSet: RawSet) => DocumentFragment,
+    complete?: (target: Element, obj: any, rawSet: RawSet) => void
+};
+
+export type TargetAttr = {
+    name: string,
+    callBack: (target: Element, attrValue: string, obj: any, rawSet: RawSet) => DocumentFragment,
+    complete?: (target: Element, attrValue: string, obj: any, rawSet: RawSet) => void
+};
+
+export interface Config {
+    targetElements?: TargetElement[];
+    targetAttrs?: TargetAttr[];
+    onElementInit?: (name: string, obj: any, rawSet: RawSet) => void;
+    onAttrInit?: (name: string, attrValue: string, obj: any, rawSet: RawSet) => void;
+    proxyExcludeTyps?: ConstructorType<any>[];
+    proxyExcludeOnBeforeReturnSets?: string[];
+    proxyExcludeOnBeforeReturnGets?: string[];
+    scripts?: { [n: string]: any };
+    applyEvents?: { attrName: string, callBack: (elements: Element, attrValue: string, obj: any) => void }[];
+}_
 ```
 ----
 # License

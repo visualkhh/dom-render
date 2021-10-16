@@ -12,7 +12,8 @@
 </head>
 <body id="app">
     <div>
-    <input dr-event-click="console.log('---', $event); this.e.name='zzz'"  type="text">
+        ${this.office.name}
+    <input dr-event-click="this.name='vvv'; this.office.name='z'; this.office.addr.street = 'zzz'" dr-value-link="this.office.name" type="text">
 <!--    <input dr-event:bind='click, keyup' dr-event="console.log('-&#45;&#45;',$params, $event); this.e.name='zzz'"  type="text">-->
     </div>
       --  ${this.e?.name}  --
