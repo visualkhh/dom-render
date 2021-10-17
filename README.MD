@@ -34,7 +34,7 @@ data.name = 'modify name';
 ## dr-if
 ```html
 <div dr-if="true">true</div>
-<div dr-if="this.gender==='M'"> gender: M</div>
+<div dr-if="this.gender==='M'">gender: M</div>
 ```
 ## dr-for, dr-for-of
 ```html
@@ -85,6 +85,11 @@ dr-event
 ```
 
 ## dr-value, value-link
+dr-value
+- The value is assigned the first time.
+
+dr-value-link
+- Value and variable values are referencing each other. It affects each other when changing. (Immediate reflection event: input)
 ```html
 dr-value: <input type="text" dr-value="this.office.name"> <br>
 dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
@@ -93,6 +98,9 @@ dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
 ## dr-attr
 ```html
 <textarea dr-attr="{rows: this.age/2, cols: this.age}"></textarea>
+<div dr-attr="{wow: '123', good: 123444}"></div>
+<div dr-attr="['wow=123', 'good=123444']"></div>
+<div dr-attr="'wow=123, good=123444'"></div>
 ```
 
 ## dr-class

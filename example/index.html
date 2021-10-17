@@ -32,7 +32,10 @@
 <!--    <div dr-style="['font-size: ' + this.age +'px', 'margin: ' + this.age + 'px']">-->
 <!--    <div dr-class="{big: this.age > 50, red: this.age > 50}">-->
 <!--    <div dr-class="'big yellow'">-->
-    <div dr-class="['small', 'yellow']">
+<!--    <div dr-class="['small', 'yellow']">-->
+<!--    <div dr-attr="{wow: '123', good: 123444}">-->
+<!--    <div dr-attr="['wow=123', 'good=123444']">-->
+    <div dr-attr="'wow=123, good=123444'">
         ${this.office.name}
         <button dr-event-click="this.age = Math.floor(Math.random() * 100)"> change </button>
     <input dr-event-click="this.name='vvv'; this.office.name='z'; this.office.addr.street = 'zzz'" dr-value-link="this.office.name" type="text">

@@ -22,8 +22,7 @@ export default {
         html({include: '**/*.html'}),
         copy({
             targets: [
-                { src: 'index.html', dest: 'dist' },
-                { src: 'assets', dest: 'dist' }
+                { src: 'index.html', dest: 'dist' }
             ]
         }),
         resolve(),

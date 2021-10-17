@@ -148,8 +148,20 @@ export const eventManager = new class {
                         target: it
                     })
                 }))
-                for (const [key, value] of Object.entries(data)) {
-                    it.setAttribute(key, String(value));
+                if (typeof data === 'string') {
+                    data.split(',').forEach(sit => {
+                        const [key, value] = sit.split('=');
+                        it.setAttribute(key.trim(), value.trim());
+                    })
+                } else if (Array.isArray(data)) {
+                    data.forEach(sit => {
+                        const [key, value] = sit.split('=');
+                        it.setAttribute(key.trim(), value.trim());
+                    })
+                } else {
+                    for (const [key, value] of Object.entries(data)) {
+                        it.setAttribute(key, String(value));
+                    }
                 }
             }
         })
@@ -166,15 +178,9 @@ export const eventManager = new class {
                     })
                 }))
                 if (typeof data === 'string') {
-                    if (it instanceof HTMLElement) {
-                        it.removeAttribute('style');
-                        it.setAttribute('style', data);
-                    }
+                    it.setAttribute('style', data);
                 } else if (Array.isArray(data)) {
-                    if (it instanceof HTMLElement) {
-                        it.removeAttribute('style');
-                        it.setAttribute('style', data.join(';'));
-                    }
+                    it.setAttribute('style', data.join(';'));
                 } else {
                     for (const [key, value] of Object.entries(data)) {
                         if (it instanceof HTMLElement) {
@@ -198,15 +204,9 @@ export const eventManager = new class {
                 }))
 
                 if (typeof data === 'string') {
-                    if (it instanceof HTMLElement) {
-                        it.removeAttribute('class');
-                        it.setAttribute('class', data);
-                    }
+                    it.setAttribute('class', data);
                 } else if (Array.isArray(data)) {
-                    if (it instanceof HTMLElement) {
-                        it.removeAttribute('class');
-                        it.setAttribute('class', data.join(' '));
-                    }
+                    it.setAttribute('class', data.join(' '));
                 } else {
                     for (const [key, value] of Object.entries(data)) {
                         if (it instanceof HTMLElement) {

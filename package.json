@@ -1,6 +1,6 @@
 {
   "name": "dom-render",
-  "version": "1.0.48",
+  "version": "1.0.49",
   "main": "DomRender.js",
   "license": "MIT",
   "description": "dom-render",
@@ -55,7 +55,7 @@
     "bundle:watch": "rollup -c -w",
     "dev:start": "npm run start --workspace=dev",
     "dev:serve": "npm run serve --workspace=dev",
-    "npm-build": "npm run build && cp package.json dist && cp README.MD dist",
+    "npm-build": "npm run build && cp package.json dist && cp .npmignore dist && cp README.MD dist",
     "npm-publish": "npm run npm-build && npm publish ./dist",
     "tsc": "tsc",
     "tsc:watch": "rm -rf ./dist && mkdir dist && cp package.json dist && tsc --watch --sourceMap true",
