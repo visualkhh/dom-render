@@ -49,7 +49,7 @@ class User {
         this.gender = gender;
         this.friends = friends;
         this.currentFriendName = this.friends[1]?.name ?? 'none';
-        console.log('fffff', this.friends, this.currentFriendName)
+        console.log('fccfff', this.friends, this.currentFriendName)
     }
 
     public cangeCurrentFriendName() {

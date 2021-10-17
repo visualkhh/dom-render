@@ -11,7 +11,6 @@ export class DomRender {
             robj = obj;
             return robj;
         }
-
         const domRender = new DomRenderProxy(obj, target, config);
         const dest = new Proxy(obj, domRender)
         robj = dest;

@@ -1,6 +1,5 @@
 import {ConstructorType} from './types/Types';
 import {RawSet} from './RawSet';
-// import {CustomElementDefinitionOptions} from './utils/dom/WebComponentUtils';
 
 export type TargetElement = {
     name: string,
