@@ -3,13 +3,13 @@ import {StringUtils} from './utils/string/StringUtils';
 import {ScriptUtils} from './utils/script/ScriptUtils';
 import {eventManager} from './events/EventManager';
 import {Config, TargetElement} from './Config';
-import {ConstructorType} from './types/Types';
 
 type Attrs = {
     dr: string | null
     drIf: string | null
     drFor: string | null
     drForOf: string | null
+    drRepeat: string | null
     drThis: string | null
     drInnerHTML: string | null
     drInnerText: string | null
@@ -26,6 +26,7 @@ export class RawSet {
     public static readonly DR_IF_NAME = 'dr-if';
     public static readonly DR_FOR_OF_NAME = 'dr-for-of';
     public static readonly DR_FOR_NAME = 'dr-for';
+    public static readonly DR_REPEAT_NAME = 'dr-repeat';
     public static readonly DR_THIS_NAME = 'dr-this';
     public static readonly DR_INNERHTML_NAME = 'dr-inner-html';
     public static readonly DR_INNERTEXT_NAME = 'dr-inner-text';
@@ -41,7 +42,7 @@ export class RawSet {
     // public static readonly DR_PARAMETER_OPTIONNAME = 'dr-parameter';
     // public static readonly DR_THIS_OPTIONNAME = 'dr-this';
     // public static readonly DR_CONTENT_OPTIONNAME = 'dr-content';
-    public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME];
+    public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME];
 
     public static readonly SCRIPTS_VARNAME = '$scripts';
     public static readonly FAG_VARNAME = '$fag';
@@ -106,6 +107,7 @@ export class RawSet {
                     drIf: this.getAttributeAndDelete(element, RawSet.DR_IF_NAME),
                     drFor: this.getAttributeAndDelete(element, RawSet.DR_FOR_NAME),
                     drForOf: this.getAttributeAndDelete(element, RawSet.DR_FOR_OF_NAME),
+                    drRepeat: this.getAttributeAndDelete(element, RawSet.DR_REPEAT_NAME),
                     drThis: this.getAttributeAndDelete(element, RawSet.DR_THIS_NAME),
                     drInnerHTML: this.getAttributeAndDelete(element, RawSet.DR_INNERHTML_NAME),
                     drInnerText: this.getAttributeAndDelete(element, RawSet.DR_INNERTEXT_NAME),
@@ -345,6 +347,45 @@ export class RawSet {
                             scripts: RawSet.setBindProperty(config?.scripts, obj)
                             // eslint-disable-next-line no-use-before-define
                         } as Render)
+                    }));
+                    RawSet.drVarDecoding(newTemp, vars);
+                    RawSet.drItOtherDecoding(newTemp, itRandom);
+                    const tempalte = document.createElement('template');
+                    tempalte.innerHTML = newTemp.innerHTML;
+                    fag.append(tempalte.content)
+                    const rr = RawSet.checkPointCreates(fag, config)
+                    element.parentNode?.replaceChild(fag, element);
+                    raws.push(...rr)
+                }
+ 
+                if (drAttr.drRepeat) {
+                    const itRandom = RawSet.drItOtherEncoding(element);
+                    const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
+                    const newTemp = document.createElement('temp');
+                    ScriptUtils.eval(`
+                    const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
+                    ${drAttr.drBeforeOption ?? ''}
+                    for(var $repeat = 0 ; $repeat < ${drAttr.drRepeat} ; $repeat++) {
+                        const n = this.__render.element.cloneNode(true);
+                        var destIt = ${drAttr.drItOption};
+                        if (destIt !== undefined) {
+                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
+                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
+                        }
+                        if (this.__render.drStripOption) {
+                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
+                        } else {
+                            this.__render.fag.append(n);
+                        }
+                    }
+                    ${drAttr.drAfterOption ?? ''}
+                    `, Object.assign(obj, {
+                        __render: Object.freeze({
+                            fag: newTemp,
+                            drStripOption: drAttr.drStripOption,
+                            element: element,
+                            scripts: RawSet.setBindProperty(config?.scripts, obj)
+                        })
                     }));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);

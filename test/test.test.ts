@@ -1,5 +1,6 @@
 import {ScriptUtils} from '../src/utils/script/ScriptUtils';
 import {StringUtils} from '../src/utils/string/StringUtils';
+import {Range} from '../src/iterators/Range';
 
 describe('Test', () => {
     test('test', async (done) => {
@@ -122,4 +123,13 @@ describe('Test', () => {
         expect(200).toBe(200)
         done()
     })
+
+    // test('iterator test', async (done) => {
+    //     const range = new Range()
+    //     for (let v of range) {
+    //         console.log(v)
+    //     }
+    //     expect(200).toBe(200)
+    //     done()
+    // })
 })

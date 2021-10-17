@@ -48,6 +48,16 @@ data.name = 'modify name';
 </div>
 ```
 
+## dr-repeat
+- start: 0
+- end: dr-repeat value (number)
+- variable: $repeat 
+```html
+<div dr-repeat="10" dr-it="$repeat">
+    <div>#it# <--</div>
+</div>
+```
+
 ## dr-inner-text, dr-inner-html
 ```html
 <div dr-inner-text="'<b>aa</b> <button dr-event-click=\'alert(1)\'>aa</button>'"> friend</div>

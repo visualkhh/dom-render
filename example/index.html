@@ -7,43 +7,35 @@
     <title>dom-render</title>
     <script src="./bundle.js" defer></script>
 
-    <style>
-        .big {
-            font-size: 40px;
-            margin: 40px;
-        }
-        .red {
-            color: red;
-        }
-        .yellow {
-            color: yellow;
-        }
-        .small {
-            font-size: 20px;
-            margin: 20px;
-        }
-    </style>
 <!--    <script src="./bundle.js" defer></script>-->
     <!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">-->
 </head>
 <body id="app">
-<!--    <div dr-style="{'font-size': '20px'}">-->
-<!--    <div dr-style="'font-size: ' + this.age +'px; margin: ' + this.age + 'px'">-->
-<!--    <div dr-style="['font-size: ' + this.age +'px', 'margin: ' + this.age + 'px']">-->
-<!--    <div dr-class="{big: this.age > 50, red: this.age > 50}">-->
-<!--    <div dr-class="'big yellow'">-->
-<!--    <div dr-class="['small', 'yellow']">-->
-<!--    <div dr-attr="{wow: '123', good: 123444}">-->
-<!--    <div dr-attr="['wow=123', 'good=123444']">-->
-    <div dr-attr="'wow=123, good=123444'">
-        ${this.office.name}
-        <button dr-event-click="this.age = Math.floor(Math.random() * 100)"> change </button>
-    <input dr-event-click="this.name='vvv'; this.office.name='z'; this.office.addr.street = 'zzz'" dr-value-link="this.office.name" type="text">
-<!--    <input dr-event:bind='click, keyup' dr-event="console.log('-&#45;&#45;',$params, $event); this.e.name='zzz'"  type="text">-->
+<!--    <div dr-for="var i = 0 ; i < 10; i++">-->
+<!--        <div>11</div>-->
+<!--    </div>-->
+
+<!--    <div dr-for-of="range(10)">-->
+<!--        <div>11</div>-->
+<!--    </div>-->
+
+<!--    <div dr-for-of="10">-->
+<!--        <div>11</div>-->
+<!--    </div>-->
+
+<!--    <div dr-repeat="10">-->
+<!--        <div>11</div>-->
+<!--    </div>-->
+    <div dr-repeat="10" dr-it="$repeat">
+        <div>#it# 11</div>
     </div>
-      --  ${this.e?.name}  --
-    <my-element dr-on-init="this.onInitMyElement($component)">z</my-element>
-    <button dr-event-click="console.log('click-->', this); this.changeIdMyElement()">changeIdMyElement</button>
+<!--    <div dr-for-of="this.friends"> friend name: ${#it#.name}</div>-->
+<!--    <div dr-for="var i = 1 ; i <= 9 ; i++" dr-it="i">-->
+<!--        ${#it#} *-->
+<!--        <scope dr-for="var y = 1 ; y <= 9 ; y++" dr-it="y" dr-var="superIt=#it#" dr-strip="true">-->
+<!--            #it# = ${$var.superIt * #it#}-->
+<!--        </scope>-->
+<!--    </div>-->
 <!--    <h2 dr-if="false" >aaa</h2>-->
 <!--    <my-element dr-if="false" id="my">vvvvvvv</my-element>-->
 <!--    <my-element dr-if="false" >zaa</my-element>-->
