@@ -31,7 +31,7 @@ class User {
 
         gender = new class extends Validations<string, HTMLInputElement> {
             valid(): boolean {
-                const inChecked = this.values?.filter(it => it.target && !it.target.checked) ?? [];
+                const inChecked = this.values?.filter(it => it.target && it.target.checked) ?? [];
                 return inChecked.length > 0
             }
         }()

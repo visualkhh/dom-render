@@ -1,13 +1,12 @@
 export abstract class Validation<T = any, E = Element> {
-    constructor(protected _value?: T, public target?: E, public event?: Event) {
+    constructor(private _value?: T, public target?: E, public event?: Event) {
     }
 
-    // @ts-ignore
     get value(): T | undefined {
         return this._value;
     }
 
-    set value(value: T) {
+    set value(value: T | undefined) {
         this._value = value;
     }
 
