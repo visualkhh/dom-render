@@ -3,6 +3,7 @@ import {StringUtils} from './utils/string/StringUtils';
 import {ScriptUtils} from './utils/script/ScriptUtils';
 import {eventManager} from './events/EventManager';
 import {Config, TargetElement} from './Config';
+import {Range} from './iterators/Range';
 
 type Attrs = {
     dr: string | null
@@ -11,6 +12,7 @@ type Attrs = {
     drForOf: string | null
     drRepeat: string | null
     drThis: string | null
+    drForm: string | null
     drInnerHTML: string | null
     drInnerText: string | null
     drItOption: string | null
@@ -28,6 +30,7 @@ export class RawSet {
     public static readonly DR_FOR_NAME = 'dr-for';
     public static readonly DR_REPEAT_NAME = 'dr-repeat';
     public static readonly DR_THIS_NAME = 'dr-this';
+    public static readonly DR_FORM_NAME = 'dr-form';
     public static readonly DR_INNERHTML_NAME = 'dr-inner-html';
     public static readonly DR_INNERTEXT_NAME = 'dr-inner-text';
 
@@ -42,11 +45,15 @@ export class RawSet {
     // public static readonly DR_PARAMETER_OPTIONNAME = 'dr-parameter';
     // public static readonly DR_THIS_OPTIONNAME = 'dr-this';
     // public static readonly DR_CONTENT_OPTIONNAME = 'dr-content';
-    public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME];
+    public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_FORM_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME];
 
     public static readonly SCRIPTS_VARNAME = '$scripts';
     public static readonly FAG_VARNAME = '$fag';
     public static readonly RAWSET_VARNAME = '$rawset';
+    public static readonly RANGE_VARNAME = '$range';
+    public static readonly ELEMENT_VARNAME = '$element';
+    public static readonly TARGET_VARNAME = '$target';
+    public static readonly VARNAMES = [RawSet.SCRIPTS_VARNAME, RawSet.FAG_VARNAME, RawSet.RAWSET_VARNAME, RawSet.RANGE_VARNAME, RawSet.ELEMENT_VARNAME, RawSet.TARGET_VARNAME];
 
     constructor(public uuid: string, public point: { start: Comment, end: Comment }, public fragment: DocumentFragment, public data: any = {}) { // , public thisObjPath?: string
     }
@@ -67,8 +74,9 @@ export class RawSet {
                 script = targetAttrNames.map(it => (element.getAttribute(it))).filter(it => it).join(';');
             }
             if (script) {
-                script = script.replace(RegExp(RawSet.SCRIPTS_VARNAME.replace('$', '\\$'), 'g'), `this?.___${RawSet.SCRIPTS_VARNAME}`); // .replace(/(\$scripts)/g, 'this?.___$1');
-                script = script.replace(RegExp(RawSet.RAWSET_VARNAME.replace('$', '\\$'), 'g'), `this?.___${RawSet.RAWSET_VARNAME}`); // .replace(/(\$scripts)/g, 'this?.___$1');
+                RawSet.VARNAMES.forEach(it => {
+                    script = script.replace(RegExp(it.replace('$', '\\$'), 'g'), `this?.___${it}`);
+                })
                 Array.from(ScriptUtils.getVariablePaths(script)).filter(it => !it.startsWith(`___${RawSet.SCRIPTS_VARNAME}`) && !it.startsWith(`___${RawSet.SCRIPTS_VARNAME}`)).forEach(it => usingTriggerVariables.add(it));
             }
         })
@@ -109,6 +117,7 @@ export class RawSet {
                     drForOf: this.getAttributeAndDelete(element, RawSet.DR_FOR_OF_NAME),
                     drRepeat: this.getAttributeAndDelete(element, RawSet.DR_REPEAT_NAME),
                     drThis: this.getAttributeAndDelete(element, RawSet.DR_THIS_NAME),
+                    drForm: this.getAttributeAndDelete(element, RawSet.DR_FORM_NAME),
                     drInnerHTML: this.getAttributeAndDelete(element, RawSet.DR_INNERHTML_NAME),
                     drInnerText: this.getAttributeAndDelete(element, RawSet.DR_INNERTEXT_NAME),
                     drItOption: this.getAttributeAndDelete(element, RawSet.DR_IT_OPTIONNAME),
@@ -212,11 +221,21 @@ export class RawSet {
                     }
                 }
 
+                if (drAttr.drForm) {
+                    RawSet.drFormOtherMoveAttr(element, 'name', 'temp-name');
+                    element.querySelectorAll('[name]').forEach(it => {
+                        const eventName = it.getAttribute('dr-form:event') ?? 'change'
+                        it.setAttribute(eventManager.attrPrefix + 'event-' + eventName, drAttr.drForm + '.' + it.getAttribute('name') + ' = $target.value');
+                    })
+                    RawSet.drFormOtherMoveAttr(element, 'temp-name', 'name');
+                    raws.push(...RawSet.checkPointCreates(element, config));
+                }
+
                 if (drAttr.drInnerText) {
                     const data = ScriptUtils.evalReturn(drAttr.drInnerText, obj);
                     const newTemp = document.createElement('temp');
-                    ScriptUtils.eval(`
-                        const n = this.__element.cloneNode(true);
+                    ScriptUtils.eval(` 
+                        const n = this.__element.cloneNode(true);  
                         ${drAttr.drBeforeOption ?? ''}
                         n.innerText = this.__data;
                         if (this.__drStripOption) {
@@ -272,6 +291,8 @@ export class RawSet {
                     const newTemp = document.createElement('temp');
                     ScriptUtils.eval(`
                     const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
+                    const ${RawSet.RANGE_VARNAME} = this.__render.range;
+                    const ${RawSet.ELEMENT_VARNAME} = this.__render.element;
                     ${drAttr.drBeforeOption ?? ''}
                     for(${drAttr.drFor}) {
                         const n = this.__render.element.cloneNode(true);
@@ -289,6 +310,7 @@ export class RawSet {
                     ${drAttr.drAfterOption ?? ''}
                     `, Object.assign(obj, {
                         __render: Object.freeze({
+                            range: Range.range,
                             fag: newTemp,
                             drStripOption: drAttr.drStripOption,
                             element: element,
@@ -311,25 +333,28 @@ export class RawSet {
                     const newTemp = document.createElement('temp');
                     ScriptUtils.eval(`
                     const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
+                    const ${RawSet.RANGE_VARNAME} = this.__render.range;
+                    const ${RawSet.ELEMENT_VARNAME} = this.__render.element;
                     ${drAttr.drBeforeOption ?? ''}
                     var i = 0; 
-                    for(const it of ${drAttr.drForOf}) {
+                    const forOf = ${drAttr.drForOf};
+                    const forOfStr = \`${drAttr.drForOf}\`.trim();
+                    for(const it of forOf) {
                         var destIt = it;
-                        var forOfStr = \`${drAttr.drForOf}\`;
-                        if (/,/g.test(forOfStr)) {
+                        if (/\\[(.*,?)\\],/g.test(forOfStr)) {
                             if (typeof it === 'string') {
                                 destIt = it;
                             } else {
                                 destIt = forOfStr.substring(1, forOfStr.length-1).split(',')[i];
                             }
-                        } else {
+                        } else if (forOf.isRange) {
+                                destIt = it;
+                        }  else {
                             destIt = forOfStr + '[' + i +']'
                         }
-                        
                         const n = this.__render.element.cloneNode(true);
                         n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
                         n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
-                        
                         if (this.__render.drStripOption) {
                             Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
                         } else {
@@ -341,6 +366,7 @@ export class RawSet {
                     `, Object.assign(obj, {
                         __render: Object.freeze({
                             rawset: this,
+                            range: Range.range,
                             drStripOption: drAttr.drStripOption,
                             fag: newTemp,
                             element: element,
@@ -357,30 +383,45 @@ export class RawSet {
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr)
                 }
- 
+
                 if (drAttr.drRepeat) {
                     const itRandom = RawSet.drItOtherEncoding(element);
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
                     const newTemp = document.createElement('temp');
                     ScriptUtils.eval(`
                     const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
+                    const ${RawSet.RANGE_VARNAME} = this.__render.range;
+                    const ${RawSet.ELEMENT_VARNAME} = this.__render.element;
                     ${drAttr.drBeforeOption ?? ''}
-                    for(var $repeat = 0 ; $repeat < ${drAttr.drRepeat} ; $repeat++) {
-                        const n = this.__render.element.cloneNode(true);
-                        var destIt = ${drAttr.drItOption};
-                        if (destIt !== undefined) {
-                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
-                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
+                    var i = 0; 
+                    const repeat = ${drAttr.drRepeat};
+                    const repeatStr = \`${drAttr.drRepeat}\`;
+                    let range = repeat;
+                    if (typeof repeat === 'number') {
+                        range = ${RawSet.RANGE_VARNAME}(repeat);
+                    } 
+                    for(const it of range) {
+                        var destIt = it;
+                        if (range.isRange) {
+                            destIt = it;
+                        }  else {
+                            destIt = repeatStr + '[' + i +']'
                         }
+                        const n = this.__render.element.cloneNode(true);
+                        n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
+                        n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
+                        
                         if (this.__render.drStripOption) {
                             Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
                         } else {
                             this.__render.fag.append(n);
                         }
+                        i++;
                     }
                     ${drAttr.drAfterOption ?? ''}
                     `, Object.assign(obj, {
                         __render: Object.freeze({
+                            range: Range.range,
                             fag: newTemp,
                             drStripOption: drAttr.drStripOption,
                             element: element,
@@ -567,14 +608,14 @@ export class RawSet {
     public static drItOtherEncoding(element: Element | DocumentFragment) {
         const random = RandomUtils.uuid();
         const regex = /#it#/g;
-        element.querySelectorAll(`[${RawSet.DR_IT_OPTIONNAME}], [${RawSet.DR_FOR_OF_NAME}]`).forEach(it => {
+        element.querySelectorAll(`[${RawSet.DR_IT_OPTIONNAME}], [${RawSet.DR_FOR_OF_NAME}], [${RawSet.DR_REPEAT_NAME}]`).forEach(it => {
             it.innerHTML = it.innerHTML.replace(regex, random);
         });
         return random;
     }
 
     public static drItOtherDecoding(element: Element | DocumentFragment, random: string) {
-        element.querySelectorAll(`[${RawSet.DR_IT_OPTIONNAME}], [${RawSet.DR_FOR_OF_NAME}]`).forEach(it => {
+        element.querySelectorAll(`[${RawSet.DR_IT_OPTIONNAME}], [${RawSet.DR_FOR_OF_NAME}], [${RawSet.DR_REPEAT_NAME}]`).forEach(it => {
             it.innerHTML = it.innerHTML.replace(RegExp(random, 'g'), '#it#');
         });
     }
@@ -634,6 +675,29 @@ export class RawSet {
         element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
             it.innerHTML = it.innerHTML.replace(RegExp(thisRandom, 'g'), 'this');
         });
+    }
+
+    public static drFormOtherMoveAttr(element: Element, as: string, to: string) {
+        element.querySelectorAll(`[${RawSet.DR_FORM_NAME}]`).forEach(subElement => {
+            const nodeIterator = document.createNodeIterator(subElement, NodeFilter.SHOW_ELEMENT, {
+                acceptNode(node) {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        const element = node as Element;
+                        return element.hasAttribute(as) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT
+                    } else {
+                        return NodeFilter.FILTER_REJECT;
+                    }
+                }
+            })
+
+            let node;
+            // eslint-disable-next-line no-cond-assign
+            while (node = nodeIterator.nextNode()) {
+                const element = node as Element;
+                element.setAttribute(to, element.getAttribute(as) ?? '')
+                element.removeAttribute(as)
+            }
+        })
     }
 
     public static drVarEncoding(element: Element, drVarOption: string) {

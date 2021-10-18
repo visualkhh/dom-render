@@ -124,12 +124,20 @@ describe('Test', () => {
         done()
     })
 
-    // test('iterator test', async (done) => {
-    //     const range = new Range()
-    //     for (let v of range) {
-    //         console.log(v)
-    //     }
-    //     expect(200).toBe(200)
-    //     done()
-    // })
+    test('iterator test', async (done) => {
+        // const range = new Range(1, 60, 10)
+        // const range = new Range(60, -1, 10)
+        // const range = Range.range('60..1, 10')
+        // const range = Range.range(10)
+        const range = Range.range('10..555')
+        // const range = new Range(60, 1)
+        // for (let v of range) {
+        //     console.log(v)
+        // }
+        // for (let v of range) {
+        //     console.log('-->', v)
+        // }
+        expect(200).toBe(200)
+        done()
+    })
 })

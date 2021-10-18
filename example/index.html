@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" xmlns:dr-event="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:dr-event="http://www.w3.org/1999/xhtml" xmlns:dr-form="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,16 +19,26 @@
 <!--        <div>11</div>-->
 <!--    </div>-->
 
-<!--    <div dr-for-of="10">-->
-<!--        <div>11</div>-->
+<!--    <div dr-for-of="$range(10, 20)">-->
+<!--        <div>${#it#} 11</div>-->
+<!--    </div>-->
+<!--    <input dr-value-link='this.name2'>-->
+<!--        <form dr-form="this.form" dr-event-submit="this.submit(); $event.preventDefault();">-->
+<!--            <input name="wow">-->
+<!--            <input name="zz">-->
+<!--            <input name="zdd">-->
+<!--            <button type="submit"> aa</button>-->
+<!--        </form>-->
+<!--    <div dr-repeat="10">-->
+<!--    <div dr-repeat="$range(10, 20)">-->
+<!--    <div dr-repeat="$range(10, 20, 5)">-->
+<!--    <div dr-repeat="$range('10..5, 2')">-->
+<!--        <div>#it# 11</div>-->
 <!--    </div>-->
 
-<!--    <div dr-repeat="10">-->
-<!--        <div>11</div>-->
+<!--    <div dr-repeat="10" dr-it="$repeat">-->
+<!--        <div>#it# 11</div>-->
 <!--    </div>-->
-    <div dr-repeat="10" dr-it="$repeat">
-        <div>#it# 11</div>
-    </div>
 <!--    <div dr-for-of="this.friends"> friend name: ${#it#.name}</div>-->
 <!--    <div dr-for="var i = 1 ; i <= 9 ; i++" dr-it="i">-->
 <!--        ${#it#} *-->

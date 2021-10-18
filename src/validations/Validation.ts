@@ -1,13 +1,17 @@
 export abstract class Validation {
-    value = '';
+    value?: string;
+
+    constructor(value?: string) {
+        this.value = value;
+    }
 
     abstract valid(): boolean;
 
-    public childValid(): boolean {
-        return !this.childInValid();
+    public valids(): boolean {
+        return !this.inValids();
     }
 
-    public childInValid(): boolean {
+    public inValids(): boolean {
         const inValid = Object.entries(this).filter(([k, v]) => (v instanceof Validation) && !v.valid());
         return inValid.length > 0;
     }
@@ -16,5 +20,13 @@ export abstract class Validation {
         return this.value?.length ?? 0;
     }
 
-    [name: string]: Validation | string | undefined | Element | any;
+    [name: string]: Validation | string | undefined | Element | any ;
 }
+
+const a = new class extends Validation {
+    valid(): boolean {
+        return false;
+    }
+}('a')
+
+console.log('--', a)

@@ -92,15 +92,20 @@ export const eventManager = new class {
         // value-link event
         this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'value-link', (it, varName) => {
             if (varName) {
-                // console.log('-->', this.getValue(obj, varName))
+                console.log('--value-link-->', this.getValue(obj, varName), 'value->', it.value)
+
                 const value = this.getValue(obj, varName);
                 if (typeof value === 'function' && value) {
                     value(it.value)
                 } else {
-                    this.setValue(obj, varName, it.value)
+                    if (value) {
+                        this.setValue(obj, varName, value)
+                    } else {
+                        this.setValue(obj, varName, it.value)
+                    }
                 }
                 it.addEventListener('input', (eit) => {
-                    // console.log('input change--->link')
+                    console.log('input change--->link', (eit.target as any).value)
                     if (typeof this.getValue(obj, varName) === 'function') {
                         this.getValue(obj, varName)(it.value, eit)
                     } else {

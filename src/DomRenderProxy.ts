@@ -129,7 +129,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public set(target: T, p: string | symbol, value: any, receiver: T): boolean {
-        // console.log('set--?', p, target, value);
+        console.log('set--?', p, target, value);
         if (typeof p === 'string') {
             value = this.proxy(receiver, value, p);
         }

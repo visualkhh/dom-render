@@ -40,6 +40,7 @@ data.name = 'modify name';
 ```html
 <div dr-for="var i = 0; i < this.friends.length; i++"> friend</div>
 <div dr-for-of="this.friends"> ${#it#.name}</div>
+<div dr-for-of="$range(10, 20)"><div>${#it#}</div><div>
 <div dr-for="var i = 1 ; i <= 9 ; i++" dr-it="i">
     ${#it#} *
     <scope dr-for="var y = 1 ; y <= 9 ; y++" dr-it="y" dr-var="superIt=#it#" dr-strip="true">
@@ -49,13 +50,11 @@ data.name = 'modify name';
 ```
 
 ## dr-repeat
-- start: 0
-- end: dr-repeat value (number)
-- variable: $repeat 
 ```html
-<div dr-repeat="10" dr-it="$repeat">
-    <div>#it# <--</div>
-</div>
+<div dr-repeat="10"><div>#it#</div></div>
+<div dr-repeat="$range(10, 20)"><div>#it#</div></div>
+<div dr-repeat="$range(10, 20, 5)"><div>#it#</div></div>
+<div dr-repeat="$range('10..5, 2')"><div>#it#</div></div>
 ```
 
 ## dr-inner-text, dr-inner-html
@@ -214,6 +213,27 @@ using component
     - $attribute: element attribute object
     - $innerHTML: element innerHTML string
 ---
+
+# dr-form
+- event: change
+- modify change: dr-form:event="input"
+```typescript
+class User {
+  form = {};
+  submit() {
+    const form = (this.form as any)
+    console.log('submit->', form, form.name, form.age, form.addr);
+  }
+}
+```
+```html
+<form dr-form="this.form" dr-event-submit="this.submit(); $event.preventDefault();">
+  name: <input name="name">
+  age: <input name="age">
+  addr: <input dr-form:event="input" name="addr">
+  <button type="submit"> aa</button>
+</form>
+```
 
 # validation
 ```html

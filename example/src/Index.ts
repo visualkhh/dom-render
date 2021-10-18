@@ -1,8 +1,9 @@
 import {DomRender} from 'dom-render/DomRender';
 import {ScriptUtils} from 'dom-render/utils/script/ScriptUtils';
 import {Shield} from 'dom-render/types/Types';
-import {RawSet, Render} from 'dom-render/RawSet';
+import {RawSet} from 'dom-render/RawSet';
 import {Profile} from './components/Profile';
+
 declare const naver: any;
 
 class User {
@@ -12,14 +13,14 @@ class User {
     gender: string;
     friends: User[];
     birth = new Date();
+    form = {};
     currentFriendName: string;
     office = {
         name: 'guro',
         addr: {
             first: 'guro',
             last: ' digital',
-            street: ' complex'
-            ,
+            street: ' complex',
             onBeforeReturnSet: (name: string, value: any, fullpath: string[]) => {
                 console.log('set office addr name-->', name, value, fullpath);
             },
@@ -41,6 +42,7 @@ class User {
     nullValue = null;
     inputElement?: HTMLInputElement;
     canvasElement?: HTMLCanvasElement;
+
     // map?: any = {};
 
     constructor(name: string, age: number, gender: string, friends: User[] = []) {
@@ -161,6 +163,11 @@ class User {
     onBeforeReturnGet(name: string, value: any, fullpath: string[]) {
         console.log('get root name-->', name, value, fullpath);
     }
+
+    submit() {
+        const form = (this.form as any)
+        console.log('submit->', form, form.wow, form.zz, form.zdd);
+    }
 }
 
 const friends = [new User('friend1', 15, 'M'), new User('friend2', 16, 'F')]
@@ -170,7 +177,7 @@ if (target) {
 
     // setup
     const scripts = {
-        say: function(m: string) {
+        say: function (m: string) {
             return '-->' + m;
             // const render = this.__render as Render;
             // // console.log('--scriptsscriptsscripts----', m, this.i18n, render)
