@@ -22,11 +22,3 @@ export abstract class Validation {
 
     [name: string]: Validation | string | undefined | Element | any ;
 }
-
-const a = new class extends Validation {
-    valid(): boolean {
-        return false;
-    }
-}('a')
-
-console.log('--', a)

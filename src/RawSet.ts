@@ -4,6 +4,7 @@ import {ScriptUtils} from './utils/script/ScriptUtils';
 import {eventManager} from './events/EventManager';
 import {Config, TargetElement} from './Config';
 import {Range} from './iterators/Range';
+import {Validation} from './validations/Validation';
 
 type Attrs = {
     dr: string | null
@@ -225,7 +226,16 @@ export class RawSet {
                     RawSet.drFormOtherMoveAttr(element, 'name', 'temp-name');
                     element.querySelectorAll('[name]').forEach(it => {
                         const eventName = it.getAttribute('dr-form:event') ?? 'change'
-                        it.setAttribute(eventManager.attrPrefix + 'event-' + eventName, drAttr.drForm + '.' + it.getAttribute('name') + ' = $target.value');
+                        let varpath = it.getAttribute('name');
+                        // console.log('--varpath-->', varpath)
+                        if (varpath != null) {
+                            const data = ScriptUtils.evalReturn(`${drAttr.drForm}${varpath ? '.' + varpath : ''}`, obj);
+                            if (data instanceof Validation) {
+                                varpath += (varpath ? '.value' : 'value');
+                            }
+                            // console.log('--varpath-dat->', varpath, data)
+                            it.setAttribute(eventManager.attrPrefix + 'event-' + eventName, drAttr.drForm + '.' + varpath + ' = $target.value');
+                        }
                     })
                     RawSet.drFormOtherMoveAttr(element, 'temp-name', 'name');
                     raws.push(...RawSet.checkPointCreates(element, config));

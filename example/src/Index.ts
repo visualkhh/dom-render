@@ -3,6 +3,7 @@ import {ScriptUtils} from 'dom-render/utils/script/ScriptUtils';
 import {Shield} from 'dom-render/types/Types';
 import {RawSet} from 'dom-render/RawSet';
 import {Profile} from './components/Profile';
+import {Validation} from 'dom-render/validations/Validation';
 
 declare const naver: any;
 
@@ -13,7 +14,18 @@ class User {
     gender: string;
     friends: User[];
     birth = new Date();
-    form = {};
+    form = new class extends Validation {
+        id = new class extends Validation {
+            valid(): boolean {
+                return false;
+            }
+        }()
+
+        valid(): boolean {
+            return false;
+        }
+    }();
+
     currentFriendName: string;
     office = {
         name: 'guro',

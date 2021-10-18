@@ -335,7 +335,29 @@ class SignUp {
     }();
 }
 ```
+## dr-form (validation)
+```typescript
+form = new class extends Validation {
+    id = new class extends Validation {
+        valid(): boolean {
+            return false;
+        }
+    }()
 
+    valid(): boolean {
+        return false;
+    }
+}();
+
+console.log(form.id.value)
+```
+```html
+<form dr-form="this.form" dr-event-submit="this.submit(); $event.preventDefault();">
+    <input name="id"> <!-- id value -->
+    <input name=""> <!-- root value -->
+    <button type="submit"> submit</button>
+</form>
+```
 # Detect Get, Set
 OnBeforeReturnSet
 ```typescript
