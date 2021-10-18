@@ -20,7 +20,6 @@ export abstract class Validations <T = any, E = Element> extends Validation<Vali
     }
 
     addValue(value: T, target: E, event?: Event) {
-        console.log('validations --> ', value, target, event)
         if (!this.value) {
             this.value = [];
         }
