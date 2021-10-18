@@ -4,6 +4,7 @@ import {Shield} from 'dom-render/types/Types';
 import {RawSet} from 'dom-render/RawSet';
 import {Profile} from './components/Profile';
 import {Validation} from 'dom-render/validations/Validation';
+import {Validations} from 'dom-render/validations/Validations';
 
 declare const naver: any;
 
@@ -17,12 +18,26 @@ class User {
     form = new class extends Validation {
         id = new class extends Validation {
             valid(): boolean {
-                return false;
+                return this.length > 0;
+            }
+        }();
+
+        all = new class extends Validations<string, HTMLInputElement> {
+            valid(): boolean {
+                const inChecked = this.values?.filter(it => it.target && !it.target.checked) ?? [];
+                return !(inChecked.length > 0)
+            }
+        }()
+
+        gender = new class extends Validations<string, HTMLInputElement> {
+            valid(): boolean {
+                const inChecked = this.values?.filter(it => it.target && !it.target.checked) ?? [];
+                return inChecked.length > 0
             }
         }()
 
         valid(): boolean {
-            return false;
+            return this.valids();
         }
     }();
 
@@ -178,7 +193,7 @@ class User {
 
     submit() {
         const form = (this.form as any)
-        console.log('submit->', form, form.wow, form.zz, form.zdd);
+        console.log('submit222->', form.valid());
     }
 }
 

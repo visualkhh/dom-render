@@ -5,6 +5,7 @@ import {eventManager} from './events/EventManager';
 import {Config, TargetElement} from './Config';
 import {Range} from './iterators/Range';
 import {Validation} from './validations/Validation';
+import {Validations} from './validations/Validations';
 
 type Attrs = {
     dr: string | null
@@ -226,15 +227,27 @@ export class RawSet {
                     RawSet.drFormOtherMoveAttr(element, 'name', 'temp-name');
                     element.querySelectorAll('[name]').forEach(it => {
                         const eventName = it.getAttribute('dr-form:event') ?? 'change'
+                        const attrEventName = eventManager.attrPrefix + 'event-' + eventName;
                         let varpath = it.getAttribute('name');
                         // console.log('--varpath-->', varpath)
                         if (varpath != null) {
                             const data = ScriptUtils.evalReturn(`${drAttr.drForm}${varpath ? '.' + varpath : ''}`, obj);
-                            if (data instanceof Validation) {
+                            if (data instanceof Validations) {
+                                varpath = drAttr.drForm + '.' + varpath;
+                                it.setAttribute(attrEventName, `${varpath}.setValue($target, $target.value, $event);`);
+                                data.addValue((it as any).value, it);
+                            } else if (data instanceof Validation) {
+                                const target = drAttr.drForm + '.' + varpath + '.target'
+                                const event = drAttr.drForm + '.' + varpath + '.event'
                                 varpath += (varpath ? '.value' : 'value');
+                                varpath = drAttr.drForm + '.' + varpath;
+                                it.setAttribute(attrEventName, `${varpath} = $target.value; ${target}=$target; ${event}=$event;`);
+                                data.target = it;
+                                data.value = (it as any).value;
+                            } else {
+                                varpath = drAttr.drForm + '.' + varpath;
+                                it.setAttribute(attrEventName, `${varpath} = $target.value;`);
                             }
-                            // console.log('--varpath-dat->', varpath, data)
-                            it.setAttribute(eventManager.attrPrefix + 'event-' + eventName, drAttr.drForm + '.' + varpath + ' = $target.value');
                         }
                     })
                     RawSet.drFormOtherMoveAttr(element, 'temp-name', 'name');
@@ -778,7 +791,8 @@ export class RawSet {
                 // console.log('callback------->')
                 if (!obj.__domrender_components) {
                     obj.__domrender_components = {};
-                };
+                }
+                ;
                 const domrenderComponents = obj.__domrender_components;
                 const componentKey = '_' + RandomUtils.getRandomString(20)
                 // console.log('callback settttt---a-->')

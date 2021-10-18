@@ -335,7 +335,7 @@ class SignUp {
     }();
 }
 ```
-## dr-form (validation)
+### dr-form (normal)
 ```typescript
 form = new class extends Validation {
     id = new class extends Validation {
@@ -348,7 +348,6 @@ form = new class extends Validation {
         return false;
     }
 }();
-
 console.log(form.id.value)
 ```
 ```html
@@ -356,6 +355,54 @@ console.log(form.id.value)
     <input name="id"> <!-- id value -->
     <input name=""> <!-- root value -->
     <button type="submit"> submit</button>
+</form>
+```
+### dr-form (multiple validation)
+```typescript
+form = new class extends Validation {
+    id = new class extends Validation {
+        valid(): boolean {
+            return this.length > 0;
+        }
+    }();
+
+    all = new class extends Validations<string, HTMLInputElement> {
+        valid(): boolean {
+            const inChecked = this.values?.filter(it => it.target && !it.target.checked) ?? [];
+            return !(inChecked.length > 0)
+        }
+    }()
+
+    gender = new class extends Validations<string, HTMLInputElement> {
+        valid(): boolean {
+            const inChecked = this.values?.filter(it => it.target && !it.target.checked) ?? [];
+            return inChecked.length > 0
+        }
+    }()
+
+    valid(): boolean {
+        return this.valids();
+    }
+}();
+
+submit() {
+  const form = (this.form as any)
+  console.log('submit222->', form.valid());
+}
+```
+```html
+<form dr-form="this.form" dr-event-submit="this.submit(); $event.preventDefault();">
+    <h2>name</h2>
+    name: <input name="id">
+    <h2>all check required</h2>
+    <input name="all" type="checkbox" value="a">a
+    <input name="all" type="checkbox" value="b">b
+
+    <h2>gender chose one</h2>
+    <input name="gender" type="radio" value="male"> male
+    <input name="gender" type="radio" value="female"> Female
+    <br>
+    <button type="submit">check valid</button>
 </form>
 ```
 # Detect Get, Set

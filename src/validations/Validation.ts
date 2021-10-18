@@ -1,8 +1,14 @@
-export abstract class Validation {
-    value?: string;
+export abstract class Validation<T = any, E = Element> {
+    constructor(protected _value?: T, public target?: E, public event?: Event) {
+    }
 
-    constructor(value?: string) {
-        this.value = value;
+    // @ts-ignore
+    get value(): T | undefined {
+        return this._value;
+    }
+
+    set value(value: T) {
+        this._value = value;
     }
 
     abstract valid(): boolean;
@@ -17,7 +23,7 @@ export abstract class Validation {
     }
 
     public get length() {
-        return this.value?.length ?? 0;
+        return (this.value as any)?.length ?? 0;
     }
 
     [name: string]: Validation | string | undefined | Element | any ;

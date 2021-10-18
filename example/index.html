@@ -24,11 +24,17 @@
 <!--    </div>-->
 <!--    <input dr-value-link='this.name2'>-->
         <form dr-form="this.form" dr-event-submit="this.submit(); $event.preventDefault();">
-            <input name="id">
-            <input name="zz">
-            <input name="zdd">
-            <input name="">
-            <button type="submit"> aa</button>
+            <h2>name</h2>
+            name: <input name="id">
+            <h2>all check required</h2>
+            <input name="all" type="checkbox" value="a">a
+            <input name="all" type="checkbox" value="b">b
+
+            <h2>gender chose one</h2>
+            <input name="gender" type="radio" value="male"> male
+            <input name="gender" type="radio" value="female"> Female
+            <br>
+            <button type="submit">check valid</button>
         </form>
 <!--    <div dr-repeat="10">-->
 <!--    <div dr-repeat="$range(10, 20)">-->
