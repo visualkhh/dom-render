@@ -10,27 +10,29 @@ import {EmptyValidator} from 'dom-render/validators/EmptyValidator';
 import {RegExpTestValidator} from 'dom-render/validators/RegExpTestValidator';
 import {MultipleValidator} from 'dom-render/validators/MultipleValidator';
 import {ValidValidatorArray} from 'dom-render/validators/ValidValidatorArray';
+import {FormValidator} from 'dom-render/validators/FormValidator';
+import {AllCheckedValidatorArray} from 'dom-render/validators/AllCheckedValidatorArray';
+import {AllUnCheckedValidatorArray} from 'dom-render/validators/AllUnCheckedValidatorArray';
+import {CountCheckedValidatorArray} from 'dom-render/validators/CountCheckedValidatorArray';
+import {IncludeCheckedValidatorArray} from 'dom-render/validators/IncludeCheckedValidatorArray';
+import {ExcludeCheckedValidatorArray} from 'dom-render/validators/ExcludeCheckedValidatorArray';
+import {ValueEqualsValidator} from 'dom-render/validators/ValueEqualsValidator';
 
 declare const naver: any;
 
-class PageValidator extends Validator {
-    required = new RequiredValidator();
-    notEmpty = new NotEmptyValidator();
-    empty = new EmptyValidator();
-    regexp = new RegExpTestValidator(/[0-9]/);
-    mix = new MultipleValidator([new RequiredValidator(), new NotEmptyValidator()]);
+class PageValidator extends FormValidator {
+    // required = new RequiredValidator();
+    // notEmpty = new NotEmptyValidator();
+    // empty = new EmptyValidator();
+    // regexp = new RegExpTestValidator(/[0-9]/);
+    // mix = new MultipleValidator([new RequiredValidator(), new NotEmptyValidator()]);
 
-    all = new ValidValidatorArray((v, t, e) => {
-        return !((v ?? []).filter(it => !it.checked).length > 0);
-    });
+    all = new ExcludeCheckedValidatorArray(['a', 'c']);
 
-    gender = new ValidValidatorArray((v, t, e) => {
-        return ((v ?? []).filter(it => it.checked).length > 0);
-    });
-
-    valid(): boolean {
-        return super.childValids();
-    }
+    // gender = new ValidValidatorArray((v, t, e) => {
+    //     return ((v ?? []).filter(it => it.checked).length > 0);
+    // });
+    equals = new ValueEqualsValidator('c');
 }
 
 class User {
@@ -191,7 +193,7 @@ class User {
     // }
 
     submit() {
-        console.log('submit valid->', this.form.getOriginTarget(), this.form.valid());
+        console.log('submit valid->', this.form.valid());
     }
 }
 

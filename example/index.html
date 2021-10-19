@@ -34,11 +34,22 @@
             <h2>all check required</h2>
             <input name="all" type="checkbox" value="a">a <br>
             <input name="all" type="checkbox" value="b">b <br>
+            <input name="all" type="checkbox" value="c">c <br>
+            <input name="all" type="checkbox" value="d">d <br>
 
             <h2>gender chose one</h2>
             <input name="gender" type="radio" value="male"> Male <br>
             <input name="gender" type="radio" value="female"> Female<br>
+            <input name="gender" type="radio" value="normal"> Normal<br>
 
+            <h2>select</h2>
+            <select name="equals">
+                <option value="a">a</option>
+                <option value="b">b</option>
+                <option value="c">c</option>
+            </select> <br>
+
+            <br><br>
             <button type="submit">check valid</button>
         </form>
     <button dr-event-click="alert(1); this.form.required.value='zzzzzz'">aaaa</button>

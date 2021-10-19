@@ -1,13 +1,49 @@
+import {DomRenderProxy} from '../DomRenderProxy';
+
 export type Valid<T = any, E = Element> = (value?: T, target?: E, event?: Event) => boolean;
 // export interface Valid<T = any, E = Element> {
 //     valid(value?: T, target?: E, event?: Event): boolean;
 // }
 export abstract class Validator<T = any, E = Element> {
-    constructor(protected _value?: T, public target?: E, public event?: Event, public autoValid = true) {
+    private _target?: E;
+    private _event?: Event;
+
+    constructor(protected _value?: T, target?: E, event?: Event, public autoValid = true) {
+        this.target = target;
+        this.event = event;
+    }
+
+    get event() {
+        return ((this._event as any)?._DomRender_origin ?? this._event);
+    }
+
+    set event(event: Event | undefined) {
+        this.setEvent(event)
+    }
+
+    setEvent(event: Event | undefined) {
+        if (event) {
+            this._event = DomRenderProxy.final(event);
+        }
+    }
+
+    get target() {
+        return ((this._target as any)?._DomRender_origin ?? this._target);
+    }
+
+    set target(target: E | undefined) {
+        this.setTarget(target)
+    }
+
+    setTarget(target: E | undefined) {
+        if (target) {
+            this._target = DomRenderProxy.final(target);
+        }
     }
 
     get value(): T | undefined {
-        if (this._value !== undefined && this?._value !== null) {
+        console.log('value-->', this._value)
+        if (this._value === undefined || this._value === null) {
             this._value = (this.target as any)?.value;
         }
         return this._value;
@@ -28,9 +64,9 @@ export abstract class Validator<T = any, E = Element> {
     changeValue(value: T | undefined) {
     }
 
-    getOriginTarget() {
-        return ((this.target as any)?._DomRender_origin ?? this.target);
-    }
+    // getOriginTarget() {
+    //     return ((this.target as any)?._DomRender_origin ?? this.target);
+    // }
 
     get checked(): boolean {
         return (this.target as any)?.checked ?? false;
@@ -68,6 +104,7 @@ export abstract class Validator<T = any, E = Element> {
 
     public childInValids(): boolean {
         const inValid = Object.entries(this).filter(([k, v]) => (v instanceof Validator) && !v.valid());
+        // console.log('child InValid->', Object.entries(this).filter(([k, v]) => (v instanceof Validator)));
         // console.log('child InValid->', inValid)
         return inValid.length > 0;
     }

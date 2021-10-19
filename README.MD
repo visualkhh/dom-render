@@ -287,17 +287,25 @@ class User {
 validator
 - Validator (abstract)
 - ValidatorArray (abstract)
-- ValidValidator
-- ValidMultipleValidator
-- ValidValidatorArray
-- BlockValidator
+- AllCheckedValidatorArray
+- AllUnCheckedValidatorArray
 - CheckedValidator
+- CountCheckedValidatorArray
+- CountUnCheckedValidatorArray
 - EmptyValidator
+- ExcludeCheckedValidatorArray
+- FormValidator
+- IncludeCheckedValidatorArray
 - MultipleValidator
+- NonPassValidator
 - NotEmptyValidator
+- PassValidator
 - RegExpTestValidator
 - RequiredValidator
-- SkipValidator
+- ValidMultipleValidator
+- ValidValidator
+- ValidValidatorArray
+- ValueEqualsValidator
 # Detect Get, Set
 OnBeforeReturnSet
 ```typescript

@@ -1,5 +1,5 @@
 import {Validator} from './Validator';
-import {BlockValidator} from './BlockValidator';
+import {NonPassValidator} from './NonPassValidator';
 
 // export type MakeValidator<T = any, E = Element> = (value: T, target: E, event?: Event) => Validator<T, E>;
 
@@ -48,6 +48,6 @@ export abstract class ValidatorArray<T = any, E = Element> extends Validator<Val
     }
 
     makeValidator(value: T, target: E, event?: Event): Validator<T, E> {
-        return new BlockValidator(value, target, event);
+        return new NonPassValidator(value, target, event);
     };
 }

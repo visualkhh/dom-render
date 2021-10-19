@@ -239,14 +239,14 @@ export class RawSet {
                             if (data instanceof ValidatorArray) {
                                 varpath = drAttr.drForm + '.' + varpath;
                                 it.setAttribute(attrEventName, `${varpath}.setValue($target, $target.value, $event);`);
-                                data.addValidator((it as any).value, it);
+                                data.addValidator((it as any).value, DomRenderProxy.final(it));
                             } else if (data instanceof Validator) {
-                                const target = drAttr.drForm + '.' + varpath + '.target'
-                                const event = drAttr.drForm + '.' + varpath + '.event'
+                                const fieldPath = drAttr.drForm + '.' + varpath;
                                 varpath += (varpath ? '.value' : 'value');
                                 varpath = drAttr.drForm + '.' + varpath;
-                                it.setAttribute(attrEventName, `${varpath} = $target.value; ${target}=$target; ${event}=$event;`);
-                                data.target = it;
+                                // it.setAttribute(attrEventName, `${varpath} = $target.value; ${target}=$target; ${event}=$event;`);
+                                it.setAttribute(attrEventName, `${varpath} = $target.value; ${fieldPath}.setTarget($target); ${fieldPath}.setEvent($event);`);
+                                data.target = DomRenderProxy.final(it);
                                 data.value = (it as any).value;
                             } else {
                                 varpath = drAttr.drForm + '.' + varpath;

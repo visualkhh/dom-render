@@ -7,6 +7,7 @@ export class ValidValidatorArray<T = any, E = Element> extends ValidatorArray<T,
     }
 
     valid(): boolean {
+        console.log('-------vvv', this.value, this.validCallBack(this.value, this.target, this.event))
         return this.validCallBack(this.value, this.target, this.event);
     }
 }
