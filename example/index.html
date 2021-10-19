@@ -24,16 +24,21 @@
 <!--    </div>-->
 <!--    <input dr-value-link='this.name2'>-->
         <form dr-form="this.form" dr-event-submit="this.submit(); $event.preventDefault();">
-            <h2>name</h2>
-            name: <input name="id">
+            <h2>validator</h2>
+            required: <input name="required"> <br>
+            notEmpty: <input name="notEmpty"> <br>
+            empty: <input name="empty"> <br>
+            regexp: /[0-9]/ <input name="regexp"> <br>
+            <h2>mix validator</h2>
+            required, notEmpty: <input name="mix"> <br>
             <h2>all check required</h2>
-            <input name="all" type="checkbox" value="a">a
-            <input name="all" type="checkbox" value="b">b
+            <input name="all" type="checkbox" value="a">a <br>
+            <input name="all" type="checkbox" value="b">b <br>
 
             <h2>gender chose one</h2>
-            <input name="gender" type="radio" value="male"> male
-            <input name="gender" type="radio" value="female"> Female
-            <br>
+            <input name="gender" type="radio" value="male"> Male <br>
+            <input name="gender" type="radio" value="female"> Female<br>
+
             <button type="submit">check valid</button>
         </form>
 <!--    <div dr-repeat="10">-->

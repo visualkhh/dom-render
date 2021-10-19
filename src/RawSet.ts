@@ -4,8 +4,8 @@ import {ScriptUtils} from './utils/script/ScriptUtils';
 import {eventManager} from './events/EventManager';
 import {Config, TargetElement} from './Config';
 import {Range} from './iterators/Range';
-import {Validation} from './validations/Validation';
-import {Validations} from './validations/Validations';
+import {Validator} from './validators/Validator';
+import {ValidatorArray} from './validators/ValidatorArray';
 
 type Attrs = {
     dr: string | null
@@ -232,11 +232,11 @@ export class RawSet {
                         // console.log('--varpath-->', varpath)
                         if (varpath != null) {
                             const data = ScriptUtils.evalReturn(`${drAttr.drForm}${varpath ? '.' + varpath : ''}`, obj);
-                            if (data instanceof Validations) {
+                            if (data instanceof ValidatorArray) {
                                 varpath = drAttr.drForm + '.' + varpath;
                                 it.setAttribute(attrEventName, `${varpath}.setValue($target, $target.value, $event);`);
-                                data.addValue((it as any).value, it);
-                            } else if (data instanceof Validation) {
+                                data.addValidator((it as any).value, it);
+                            } else if (data instanceof Validator) {
                                 const target = drAttr.drForm + '.' + varpath + '.target'
                                 const event = drAttr.drForm + '.' + varpath + '.event'
                                 varpath += (varpath ? '.value' : 'value');
