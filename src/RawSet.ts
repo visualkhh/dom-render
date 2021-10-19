@@ -6,6 +6,7 @@ import {Config, TargetElement} from './Config';
 import {Range} from './iterators/Range';
 import {Validator} from './validators/Validator';
 import {ValidatorArray} from './validators/ValidatorArray';
+import {DomRenderProxy} from './DomRenderProxy';
 
 type Attrs = {
     dr: string | null
@@ -225,11 +226,14 @@ export class RawSet {
 
                 if (drAttr.drForm) {
                     RawSet.drFormOtherMoveAttr(element, 'name', 'temp-name');
+                    const data = ScriptUtils.evalReturn(`${drAttr.drForm}`, obj);
+                    if (data instanceof Validator) {
+                        data.target = DomRenderProxy.final(element);
+                    }
                     element.querySelectorAll('[name]').forEach(it => {
                         const eventName = it.getAttribute('dr-form:event') ?? 'change'
                         const attrEventName = eventManager.attrPrefix + 'event-' + eventName;
                         let varpath = it.getAttribute('name');
-                        // console.log('--varpath-->', varpath)
                         if (varpath != null) {
                             const data = ScriptUtils.evalReturn(`${drAttr.drForm}${varpath ? '.' + varpath : ''}`, obj);
                             if (data instanceof ValidatorArray) {

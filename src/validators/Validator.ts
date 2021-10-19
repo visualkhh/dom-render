@@ -7,14 +7,18 @@ export abstract class Validator<T = any, E = Element> {
     }
 
     get value(): T | undefined {
+        if (this._value !== undefined && this?._value !== null) {
+            this._value = (this.target as any)?.value;
+        }
         return this._value;
     }
 
     set value(value: T | undefined) {
         this._value = value;
         this.changeValue(value);
-        if ((this.target as any)?.value) {
-            (this.target as any).value = this._value;
+        const target = this.target as any;
+        if (target?.value !== undefined && target?.value !== null) {
+            target.value = this._value;
         }
         if (this.autoValid) {
             this.valid();
