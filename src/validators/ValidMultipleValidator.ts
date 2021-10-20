@@ -9,6 +9,6 @@ export class ValidMultipleValidator<T = any, E = Element> extends MultipleValida
     }
 
     valid(): boolean {
-        return this.validMultipleCallback(this.validators, this.value, this.target, this.event);
+        return this.validMultipleCallback(this.validators, this.value, this.getTarget(), this.getEvent());
     }
 }

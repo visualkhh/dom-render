@@ -237,7 +237,7 @@ class User {
 
 # validator
 ```typescript
-class PageValidator extends Validator { 
+class PageValidator extends FormValidator { 
     required = new RequiredValidator();
     notEmpty = new NotEmptyValidator();
     empty = new EmptyValidator();
@@ -251,15 +251,15 @@ class PageValidator extends Validator {
     gender = new ValidValidatorArray((v, t, e) => {
         return ((v ?? []).filter(it => it.checked).length > 0);
     });
-
-    valid(): boolean {
-        return super.childValids();
-    }
 }
 class User {
   form = new PageValidator();
   submit() {
     console.log('submit valid->', this.form.valid());
+  }
+  
+  changeData() {
+    this.form.required.value = 'new value';    
   }
 }
 ```
@@ -290,7 +290,16 @@ validator
 - AllCheckedValidatorArray
 - AllUnCheckedValidatorArray
 - CheckedValidator
-- CountCheckedValidatorArray
+- CountEqualsCheckedValidatorArray
+- CountEqualsUnCheckedValidatorArray
+- CountGreaterThanCheckedValidatorArray
+- CountGreaterThanEqualsCheckedValidatorArray
+- CountGreaterThanEqualsUnCheckedValidatorArray
+- CountGreaterThanUnCheckedValidatorArray
+- CountLessThanCheckedValidatorArray
+- CountLessThanEqualsCheckedValidatorArray
+- CountLessThanEqualsUnCheckedValidatorArray
+- CountLessThanUnCheckedValidatorArray
 - CountUnCheckedValidatorArray
 - EmptyValidator
 - ExcludeCheckedValidatorArray
@@ -299,13 +308,17 @@ validator
 - MultipleValidator
 - NonPassValidator
 - NotEmptyValidator
+- NotRegExpTestValidator
 - PassValidator
 - RegExpTestValidator
 - RequiredValidator
+- UnCheckedValidator
 - ValidMultipleValidator
 - ValidValidator
 - ValidValidatorArray
 - ValueEqualsValidator
+- ValueNotEqualsValidator
+
 # Detect Get, Set
 OnBeforeReturnSet
 ```typescript

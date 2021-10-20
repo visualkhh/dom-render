@@ -16,22 +16,29 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         }
     }
 
+    public static unFinal<T = any> (obj: T): T {
+        delete (obj as any)._DomRender_isFinal;
+        return obj;
+    }
+
     public static final<T = any> (obj: T): T {
-        if (!('_DomRender_isFinal' in obj)) {
-            return new Proxy(obj as any, {
-                get(target: T, p: string | symbol, receiver: any): any {
-                    if (p === '_DomRender_origin') {
-                        return obj;
-                    }
-                    return (target as any)[p];
-                },
-                has(target: any, p: string | symbol): boolean {
-                    return p === '_DomRender_isFinal' || p in target;
-                }
-            })
-        } else {
-            return obj;
-        }
+        (obj as any)._DomRender_isFinal = true;
+        return obj;
+        // if (!('_DomRender_isFinal' in obj)) {
+        //     return new Proxy(obj as any, {
+        //         get(target: T, p: string | symbol, receiver: any): any {
+        //             if (p === '_DomRender_origin') {
+        //                 return obj;
+        //             }
+        //             return (target as any)[p];
+        //         },
+        //         has(target: any, p: string | symbol): boolean {
+        //             return p === '_DomRender_isFinal' || p in target;
+        //         }
+        //     })
+        // } else {
+        //     return obj;
+        // }
     }
 
     public static isFinal<T = any> (obj: T) {

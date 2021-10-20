@@ -9,16 +9,12 @@ export abstract class Validator<T = any, E = Element> {
     private _event?: Event;
 
     constructor(protected _value?: T, target?: E, event?: Event, public autoValid = true) {
-        this.target = target;
-        this.event = event;
+        this.setTarget(target);
+        this.setEvent(event);
     }
 
-    get event() {
-        return ((this._event as any)?._DomRender_origin ?? this._event);
-    }
-
-    set event(event: Event | undefined) {
-        this.setEvent(event)
+    getEvent() {
+        return this._event;
     }
 
     setEvent(event: Event | undefined) {
@@ -27,12 +23,8 @@ export abstract class Validator<T = any, E = Element> {
         }
     }
 
-    get target() {
-        return ((this._target as any)?._DomRender_origin ?? this._target);
-    }
-
-    set target(target: E | undefined) {
-        this.setTarget(target)
+    getTarget() {
+        return this._target;
     }
 
     setTarget(target: E | undefined) {
@@ -44,7 +36,7 @@ export abstract class Validator<T = any, E = Element> {
     get value(): T | undefined {
         console.log('value-->', this._value)
         if (this._value === undefined || this._value === null) {
-            this._value = (this.target as any)?.value;
+            this._value = (this.getTarget() as any)?.value;
         }
         return this._value;
     }
@@ -52,7 +44,7 @@ export abstract class Validator<T = any, E = Element> {
     set value(value: T | undefined) {
         this._value = value;
         this.changeValue(value);
-        const target = this.target as any;
+        const target = this.getTarget() as any;
         if (target?.value !== undefined && target?.value !== null) {
             target.value = this._value;
         }
@@ -61,35 +53,37 @@ export abstract class Validator<T = any, E = Element> {
         }
     }
 
+    set(value?:T, target?: E, event?: Event) {
+        this.value = value;
+        this.setTarget(target);
+        this.setEvent(event)
+    }
+
     changeValue(value: T | undefined) {
     }
 
-    // getOriginTarget() {
-    //     return ((this.target as any)?._DomRender_origin ?? this.target);
-    // }
-
     get checked(): boolean {
-        return (this.target as any)?.checked ?? false;
+        return (this.getTarget() as any)?.checked ?? false;
     }
 
     set checked(checked: boolean) {
-        (this.target as any).checked = checked;
+        (this.getTarget() as any).checked = checked;
     }
 
     get selectedIndex(): number {
-        return (this.target as any)?.selectedIndex ?? -1;
+        return (this.getTarget() as any)?.selectedIndex ?? -1;
     }
 
     set selectedIndex(selectedIndex: number) {
-        (this.target as any).selectedIndex = selectedIndex;
+        (this.getTarget() as any).selectedIndex = selectedIndex;
     }
 
     public querySelector(selector: string) {
-        return (this.target as unknown as Element)?.querySelector(selector);
+        return (this.getTarget() as unknown as Element)?.querySelector(selector);
     }
 
     public querySelectorALL(selector: string) {
-        return (this.target as unknown as Element)?.querySelectorAll(selector);
+        return (this.getTarget() as unknown as Element)?.querySelectorAll(selector);
     }
 
     abstract valid(): boolean;

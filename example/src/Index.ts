@@ -27,7 +27,7 @@ class PageValidator extends FormValidator {
     // regexp = new RegExpTestValidator(/[0-9]/);
     // mix = new MultipleValidator([new RequiredValidator(), new NotEmptyValidator()]);
 
-    all = new ExcludeCheckedValidatorArray(['a', 'c']);
+    all = new AllCheckedValidatorArray();
 
     // gender = new ValidValidatorArray((v, t, e) => {
     //     return ((v ?? []).filter(it => it.checked).length > 0);
@@ -193,7 +193,7 @@ class User {
     // }
 
     submit() {
-        console.log('submit valid->', this.form.valid());
+        console.log('submit valid->', this.form, this.form.valid());
     }
 }
 

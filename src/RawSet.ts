@@ -6,7 +6,6 @@ import {Config, TargetElement} from './Config';
 import {Range} from './iterators/Range';
 import {Validator} from './validators/Validator';
 import {ValidatorArray} from './validators/ValidatorArray';
-import {DomRenderProxy} from './DomRenderProxy';
 
 type Attrs = {
     dr: string | null
@@ -228,7 +227,7 @@ export class RawSet {
                     RawSet.drFormOtherMoveAttr(element, 'name', 'temp-name');
                     const data = ScriptUtils.evalReturn(`${drAttr.drForm}`, obj);
                     if (data instanceof Validator) {
-                        data.target = DomRenderProxy.final(element);
+                        data.setTarget(element);
                     }
                     element.querySelectorAll('[name]').forEach(it => {
                         const eventName = it.getAttribute('dr-form:event') ?? 'change'
@@ -239,14 +238,14 @@ export class RawSet {
                             if (data instanceof ValidatorArray) {
                                 varpath = drAttr.drForm + '.' + varpath;
                                 it.setAttribute(attrEventName, `${varpath}.setValue($target, $target.value, $event);`);
-                                data.addValidator((it as any).value, DomRenderProxy.final(it));
+                                data.addValidator((it as any).value, it);
                             } else if (data instanceof Validator) {
                                 const fieldPath = drAttr.drForm + '.' + varpath;
                                 varpath += (varpath ? '.value' : 'value');
                                 varpath = drAttr.drForm + '.' + varpath;
                                 // it.setAttribute(attrEventName, `${varpath} = $target.value; ${target}=$target; ${event}=$event;`);
                                 it.setAttribute(attrEventName, `${varpath} = $target.value; ${fieldPath}.setTarget($target); ${fieldPath}.setEvent($event);`);
-                                data.target = DomRenderProxy.final(it);
+                                data.setTarget(it);
                                 data.value = (it as any).value;
                             } else {
                                 varpath = drAttr.drForm + '.' + varpath;

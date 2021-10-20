@@ -4,7 +4,7 @@ import {NonPassValidator} from './NonPassValidator';
 // export type MakeValidator<T = any, E = Element> = (value: T, target: E, event?: Event) => Validator<T, E>;
 
 export abstract class ValidatorArray<T = any, E = Element> extends Validator<Validator<T, E>[], E> {
-    constructor(value?: Validator<T, E>[], target?: E, public event?: Event, public autoValid = true) {
+    constructor(value?: Validator<T, E>[], target?: E, event?: Event, autoValid = true) {
         super(value, target, event, autoValid);
     }
 
@@ -14,14 +14,14 @@ export abstract class ValidatorArray<T = any, E = Element> extends Validator<Val
 
     setValue(target: E, value: T, event?: Event) {
         this.value?.filter(it => {
-            if (it.target) {
-                return it.target === target || (it.target as any)._DomRender_origin === target
+            if (it.getTarget()) {
+                return it.getTarget() === target;
             } else {
                 return false;
             }
         }).forEach(it => {
             it.value = value;
-            it.event = event;
+            it.setEvent(event);
         })
     }
 
@@ -37,13 +37,13 @@ export abstract class ValidatorArray<T = any, E = Element> extends Validator<Val
     }
 
     getValidator(e: E) {
-        return this.value?.filter(it => ((it.target as any)?._DomRender_origin ?? it.target) === e)[0]
+        return this.value?.filter(it => it.getTarget() === e)[0]
     }
 
     removeElement(e: E) {
         const value = this.value;
         if (value) {
-            this.value = value.filter(it => ((it.target as any)?._DomRender_origin ?? it.target) !== e);
+            this.value = value.filter(it => it.getTarget() !== e);
         }
     }
 
