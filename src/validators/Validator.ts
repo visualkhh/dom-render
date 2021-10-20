@@ -1,6 +1,7 @@
 import {DomRenderProxy} from '../DomRenderProxy';
 
 export type Valid<T = any, E = Element> = (value?: T, target?: E, event?: Event) => boolean;
+export type ValidAction<T = any, E = Element> = (valid: boolean, value?: T, target?: E, event?: Event) => void;
 // export interface Valid<T = any, E = Element> {
 //     valid(value?: T, target?: E, event?: Event): boolean;
 // }
@@ -8,11 +9,20 @@ export abstract class Validator<T = any, E = Element> {
     private _target?: E;
     private _event?: Event;
     private _autoValid!: boolean;
-
+    private _validAction?: ValidAction<T, E>;
     constructor(protected _value?: T, target?: E, event?: Event, autoValid = true) {
         this.setTarget(target);
         this.setEvent(event);
         this.setAutoValid(autoValid)
+    }
+
+    getValidAction(): ValidAction<T, E> | undefined {
+        return this._validAction;
+    }
+
+    setValidAction(value: ValidAction<T, E>) {
+        this._validAction = value;
+        return this;
     }
 
     getAutoValid() {
@@ -104,6 +114,18 @@ export abstract class Validator<T = any, E = Element> {
         return (this.getTarget() as unknown as Element)?.querySelectorAll(selector);
     }
 
+    public validAction() {
+        const valid = this.valid();
+        this.getValidAction()?.(valid, this.value, this.getTarget(), this.getEvent());
+        return valid;
+    }
+
+    // public childValidAction() {
+    //     const valid = this.childValids();
+    //     this.getValidAction()?.(valid, this.value, this.getTarget(), this.getEvent());
+    //     return valid;
+    // }
+
     public abstract valid(): boolean;
 
     public inValid(): boolean {
@@ -111,22 +133,41 @@ export abstract class Validator<T = any, E = Element> {
     };
 
     public allValid() {
-        return this.valid() && this.childInValids();
+        return this.valid() && this.childInValid();
+    }
+
+    public allValidAction() {
+        return this.validAction() && this.childInValidAction();
     }
 
     public allInValid() {
         return !this.allValid();
     }
 
-    public childValids(): boolean {
-        return !this.childInValids();
+    public allInValidAction() {
+        return !this.allValidAction();
     }
 
-    public childInValids(): boolean {
-        const inValid = Object.entries(this).filter(([k, v]) => (v instanceof Validator) && !v.valid());
-        // console.log('child InValid->', Object.entries(this).filter(([k, v]) => (v instanceof Validator)));
-        // console.log('child InValid->', inValid)
+    public childValid(): boolean {
+        return !this.childInValid();
+    }
+
+    public childValidAction(): boolean {
+        return !this.childInValidAction();
+    }
+
+    public childInValid(): boolean {
+        const inValid = this.childValidator().filter(([k, v]) => !v.valid());
         return inValid.length > 0;
+    }
+
+    public childInValidAction(): boolean {
+        const inValid = this.childValidator().filter(([k, v]) => !v.validAction());
+        return inValid.length > 0;
+    }
+
+    public childValidator(): [string, Validator][] {
+        return Object.entries(this).filter(([k, v]) => (v instanceof Validator));
     }
 
     public get length() {

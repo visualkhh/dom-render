@@ -5,7 +5,11 @@ export class FormValidator<E = HTMLFormElement> extends Validator<void, E> {
         super(undefined, target, event, autoValid)
     }
 
-    public valid(): boolean {
-        return this.childValids()
+    validAction(): boolean {
+        return super.childValidAction();
+    }
+
+    valid(): boolean {
+        return this.childValid()
     }
 }

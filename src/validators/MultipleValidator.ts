@@ -10,6 +10,10 @@ export class MultipleValidator<T = any, E = Element> extends Validator<T, E> {
         this.validators.forEach(it => it.set(this.value, this.getTarget(), this.getEvent()));
     }
 
+    validAction(): boolean {
+        return !(this.validators.filter(it => !it.validAction()).length > 0);
+    }
+
     valid(): boolean {
         return !(this.validators.filter(it => !it.valid()).length > 0);
     }

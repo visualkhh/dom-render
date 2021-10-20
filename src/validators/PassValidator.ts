@@ -9,4 +9,3 @@ export class PassValidator<T = any, E = Element> extends Validator<T, E> {
         return true;
     }
 }
-

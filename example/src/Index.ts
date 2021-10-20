@@ -6,21 +6,39 @@ import {Profile} from './components/Profile';
 import {FormValidator} from 'dom-render/validators/FormValidator';
 import {AllCheckedValidatorArray} from 'dom-render/validators/AllCheckedValidatorArray';
 import {ValueEqualsValidator} from 'dom-render/validators/ValueEqualsValidator';
+import {MultipleValidator} from 'dom-render/validators/MultipleValidator';
+import {RequiredValidator} from 'dom-render/validators/RequiredValidator';
+import {NotEmptyValidator} from 'dom-render/validators/NotEmptyValidator';
 
 declare const naver: any;
 
 class PageValidator extends FormValidator {
     // required = new RequiredValidator();
-    // notEmpty = new NotEmptyValidator();
+    // notEmpty = new NotEmptyValidator().setValidAction((s, v, t, e) => {
+    //     console.log('--NotEmptyValidator', s, v, e)
+    // });
+
     // empty = new EmptyValidator();
     // regexp = new RegExpTestValidator(/[0-9]/);
-    // mix = new MultipleValidator([new RequiredValidator(), new NotEmptyValidator()]);
+    mix = new MultipleValidator([
+        new RequiredValidator().setValidAction((s, v, t, e) => {
+            console.log('--RequiredValidator', s, v, e)
+        }),
+        new NotEmptyValidator().setValidAction((s, v, t, e) => {
+            console.log('--NotEmptyValidator', s, v, e)
+        }),
+    ]);
 
-    all = new AllCheckedValidatorArray();
+    all = new AllCheckedValidatorArray().setValidAction((s, v, t, e) => {
+        console.log('--AllCheckedValidatorArray', s)
+    });
+
     // gender = new ValidValidatorArray((v, t, e) => {
     //     return ((v ?? []).filter(it => it.checked).length > 0);
     // });
-    equals = new ValueEqualsValidator('c');
+    equals = new ValueEqualsValidator('c').setValidAction((s, v, t, e) => {
+        console.log(s, '----**----')
+    });
 }
 
 class User {
@@ -181,7 +199,7 @@ class User {
     // }
 
     submit() {
-        console.log('submit valid->', this.form, this.form.valid());
+        console.log('submit valid->', this.form, this.form.validAction());
     }
 }
 
