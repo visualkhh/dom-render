@@ -237,7 +237,7 @@ export class RawSet {
                             const data = ScriptUtils.evalReturn(`${drAttr.drForm}${varpath ? '.' + varpath : ''}`, obj);
                             if (data instanceof ValidatorArray) {
                                 varpath = drAttr.drForm + '.' + varpath;
-                                it.setAttribute(attrEventName, `${varpath}.setValue($target, $target.value, $event);`);
+                                it.setAttribute(attrEventName, `${varpath}.setArrayValue($target, $target.value, $event);`);
                                 data.addValidator((it as any).value, it);
                             } else if (data instanceof Validator) {
                                 const fieldPath = drAttr.drForm + '.' + varpath;

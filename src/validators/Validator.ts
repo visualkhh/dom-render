@@ -7,10 +7,21 @@ export type Valid<T = any, E = Element> = (value?: T, target?: E, event?: Event)
 export abstract class Validator<T = any, E = Element> {
     private _target?: E;
     private _event?: Event;
+    private _autoValid!: boolean;
 
-    constructor(protected _value?: T, target?: E, event?: Event, public autoValid = true) {
+    constructor(protected _value?: T, target?: E, event?: Event, autoValid = true) {
         this.setTarget(target);
         this.setEvent(event);
+        this.setAutoValid(autoValid)
+    }
+
+    getAutoValid() {
+        return this._autoValid;
+    }
+
+    setAutoValid(autoValid: boolean) {
+        this._autoValid = autoValid;
+        return this;
     }
 
     getEvent() {
@@ -21,6 +32,7 @@ export abstract class Validator<T = any, E = Element> {
         if (event) {
             this._event = DomRenderProxy.final(event);
         }
+        return this;
     }
 
     getTarget() {
@@ -31,10 +43,10 @@ export abstract class Validator<T = any, E = Element> {
         if (target) {
             this._target = DomRenderProxy.final(target);
         }
+        return this;
     }
 
     get value(): T | undefined {
-        console.log('value-->', this._value)
         if (this._value === undefined || this._value === null) {
             this._value = (this.getTarget() as any)?.value;
         }
@@ -45,10 +57,10 @@ export abstract class Validator<T = any, E = Element> {
         this._value = value;
         this.changeValue(value);
         const target = this.getTarget() as any;
-        if (target?.value !== undefined && target?.value !== null) {
+        if (target && target?.value !== undefined && target?.value !== null) {
             target.value = this._value;
         }
-        if (this.autoValid) {
+        if (this.getAutoValid()) {
             this.valid();
         }
     }
@@ -67,7 +79,10 @@ export abstract class Validator<T = any, E = Element> {
     }
 
     set checked(checked: boolean) {
-        (this.getTarget() as any).checked = checked;
+        const target = this.getTarget() as any;
+        if (target) {
+            target.checked = checked;
+        }
     }
 
     get selectedIndex(): number {
@@ -75,7 +90,10 @@ export abstract class Validator<T = any, E = Element> {
     }
 
     set selectedIndex(selectedIndex: number) {
-        (this.getTarget() as any).selectedIndex = selectedIndex;
+        const target = this.getTarget() as any;
+        if (target) {
+            target.selectedIndex = selectedIndex;
+        }
     }
 
     public querySelector(selector: string) {
@@ -86,11 +104,19 @@ export abstract class Validator<T = any, E = Element> {
         return (this.getTarget() as unknown as Element)?.querySelectorAll(selector);
     }
 
-    abstract valid(): boolean;
+    public abstract valid(): boolean;
 
     public inValid(): boolean {
         return !this.valid();
     };
+
+    public allValid() {
+        return this.valid() && this.childInValids();
+    }
+
+    public allInValid() {
+        return !this.allValid();
+    }
 
     public childValids(): boolean {
         return !this.childInValids();

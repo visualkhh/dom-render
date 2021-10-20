@@ -52,7 +52,9 @@
             <br><br>
             <button type="submit">check valid</button>
         </form>
-    <button dr-event-click="alert(1); this.form.required.value='zzzzzz'">aaaa</button>
+    <button dr-event-click="console.log(this.form.all); this.form.all.getValidatorByValue('c').checked = true">checked</button>
+    <button dr-event-click="this.form.all.allChecked(false)">checked</button>
+    <button dr-event-click="alert(1); this.form.equals.value = 'c'">aaaa</button>
 <!--    <div dr-repeat="10">-->
 <!--    <div dr-repeat="$range(10, 20)">-->
 <!--    <div dr-repeat="$range(10, 20, 5)">-->

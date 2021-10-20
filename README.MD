@@ -319,6 +319,17 @@ validator
 - ValueEqualsValidator
 - ValueNotEqualsValidator
 
+
+# Class
+## Range
+```typescript
+const range = new Range(100,55, 10);
+for (let data of new Range(100,55, 10)) {
+  console.log(data);
+}
+const rangeArray = new Range(100,55, 10).toArray();
+```
+
 # Detect Get, Set
 OnBeforeReturnSet
 ```typescript

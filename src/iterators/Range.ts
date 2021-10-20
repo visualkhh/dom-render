@@ -3,16 +3,19 @@
 export class RangeResult implements IteratorResult<number> {
     done: boolean;
     value: number;
+
     constructor(value: number | undefined, done: boolean) {
         this.done = done;
         this.value = value ?? 0;
     }
 }
+
 export class RangeIterator implements Iterator<number> {
     private _first: number;
     private _current: number;
     private _last: number
     private _step: number
+
     constructor(first: number, last: number, step: number) {
         this._current = this._first = first;
         this._last = last;
@@ -36,6 +39,7 @@ export class RangeIterator implements Iterator<number> {
 
 export class Range implements Iterable<number> {
     public readonly isRange = true;
+
     constructor(public first: number, public last: number, public step: number = 1) {
     }
 
@@ -43,7 +47,7 @@ export class Range implements Iterable<number> {
         return new RangeIterator(this.first, this.last, this.step);
     }
 
-    public static range(first: number | string, last?: number, step: number = 1):Range {
+    public static range(first: number | string, last?: number, step: number = 1): Range {
         if (typeof first === 'number' && last === undefined) {
             return new Range(0, first, step);
         } else if (typeof first === 'string') {
@@ -53,5 +57,9 @@ export class Range implements Iterable<number> {
         } else {
             return new Range(first, last ?? 0, step);
         }
+    }
+
+    toArray() {
+        return [...this];
     }
 }

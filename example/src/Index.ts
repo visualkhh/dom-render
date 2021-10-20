@@ -3,19 +3,8 @@ import {ScriptUtils} from 'dom-render/utils/script/ScriptUtils';
 import {Shield} from 'dom-render/types/Types';
 import {RawSet} from 'dom-render/RawSet';
 import {Profile} from './components/Profile';
-import {Validator} from 'dom-render/validators/Validator';
-import {NotEmptyValidator} from 'dom-render/validators/NotEmptyValidator';
-import {RequiredValidator} from 'dom-render/validators/RequiredValidator';
-import {EmptyValidator} from 'dom-render/validators/EmptyValidator';
-import {RegExpTestValidator} from 'dom-render/validators/RegExpTestValidator';
-import {MultipleValidator} from 'dom-render/validators/MultipleValidator';
-import {ValidValidatorArray} from 'dom-render/validators/ValidValidatorArray';
 import {FormValidator} from 'dom-render/validators/FormValidator';
 import {AllCheckedValidatorArray} from 'dom-render/validators/AllCheckedValidatorArray';
-import {AllUnCheckedValidatorArray} from 'dom-render/validators/AllUnCheckedValidatorArray';
-import {CountCheckedValidatorArray} from 'dom-render/validators/CountCheckedValidatorArray';
-import {IncludeCheckedValidatorArray} from 'dom-render/validators/IncludeCheckedValidatorArray';
-import {ExcludeCheckedValidatorArray} from 'dom-render/validators/ExcludeCheckedValidatorArray';
 import {ValueEqualsValidator} from 'dom-render/validators/ValueEqualsValidator';
 
 declare const naver: any;
@@ -28,7 +17,6 @@ class PageValidator extends FormValidator {
     // mix = new MultipleValidator([new RequiredValidator(), new NotEmptyValidator()]);
 
     all = new AllCheckedValidatorArray();
-
     // gender = new ValidValidatorArray((v, t, e) => {
     //     return ((v ?? []).filter(it => it.checked).length > 0);
     // });
