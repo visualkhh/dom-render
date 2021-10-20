@@ -30,7 +30,8 @@ export abstract class ValidatorArray<T = any, E = Element> extends Validator<Val
             }
         }).forEach(it => {
             it.set(value, target, event);
-        })
+        });
+        this.tickValue(this.value)
     }
 
     addValidator(value: T, target: E, event?: Event) {
@@ -42,6 +43,7 @@ export abstract class ValidatorArray<T = any, E = Element> extends Validator<Val
         } else {
             this.value?.push(this.makeValidator(value, target, event))
         }
+        this.tickValue(this.value)
     }
 
     allChecked(checked: boolean) {

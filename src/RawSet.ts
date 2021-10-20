@@ -244,7 +244,7 @@ export class RawSet {
                                 varpath += (varpath ? '.value' : 'value');
                                 varpath = drAttr.drForm + '.' + varpath;
                                 // it.setAttribute(attrEventName, `${varpath} = $target.value; ${target}=$target; ${event}=$event;`);
-                                it.setAttribute(attrEventName, `${varpath} = $target.value; ${fieldPath}.setTarget($target); ${fieldPath}.setEvent($event);`);
+                                it.setAttribute(attrEventName, `${fieldPath}.set($target.value, $target, $event);`);
                                 data.setTarget(it);
                                 data.value = (it as any).value;
                             } else {

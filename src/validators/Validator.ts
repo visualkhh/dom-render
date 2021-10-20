@@ -9,11 +9,13 @@ export abstract class Validator<T = any, E = Element> {
     private _target?: E;
     private _event?: Event;
     private _autoValid!: boolean;
+    private _autoValidAction!: boolean;
     private _validAction?: ValidAction<T, E>;
-    constructor(protected _value?: T, target?: E, event?: Event, autoValid = true) {
+    constructor(protected _value?: T, target?: E, event?: Event, autoValid = true, autoValidAction = true) {
         this.setTarget(target);
         this.setEvent(event);
         this.setAutoValid(autoValid)
+        this.setAutoValidAction(autoValidAction)
     }
 
     getValidAction(): ValidAction<T, E> | undefined {
@@ -31,6 +33,15 @@ export abstract class Validator<T = any, E = Element> {
 
     setAutoValid(autoValid: boolean) {
         this._autoValid = autoValid;
+        return this;
+    }
+
+    getAutoValidAction() {
+        return this._autoValidAction;
+    }
+
+    setAutoValidAction(autoValid: boolean) {
+        this._autoValidAction = autoValid;
         return this;
     }
 
@@ -64,21 +75,28 @@ export abstract class Validator<T = any, E = Element> {
     }
 
     set value(value: T | undefined) {
+        // console.log('---?set?', value, this)
         this._value = value;
+        this.tickValue(value);
+    }
+
+    protected tickValue(value: T | undefined) {
         this.changeValue(value);
         const target = this.getTarget() as any;
         if (target && target?.value !== undefined && target?.value !== null) {
             target.value = this._value;
         }
-        if (this.getAutoValid()) {
+        if (this.getAutoValidAction()) {
+            this.validAction();
+        } else if (this.getAutoValid()) {
             this.valid();
         }
     }
 
     set(value?:T, target?: E, event?: Event) {
-        this.value = value;
         this.setTarget(target);
         this.setEvent(event)
+        this.value = value;
     }
 
     changeValue(value: T | undefined) {

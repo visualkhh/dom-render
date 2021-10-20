@@ -8,36 +8,42 @@ import {AllCheckedValidatorArray} from 'dom-render/validators/AllCheckedValidato
 import {ValueEqualsValidator} from 'dom-render/validators/ValueEqualsValidator';
 import {MultipleValidator} from 'dom-render/validators/MultipleValidator';
 import {RequiredValidator} from 'dom-render/validators/RequiredValidator';
+import {RegExpTestValidator} from 'dom-render/validators/RegExpTestValidator';
 import {NotEmptyValidator} from 'dom-render/validators/NotEmptyValidator';
+import {ValidValidatorArray} from 'dom-render/validators/ValidValidatorArray';
+import {EmptyValidator} from 'dom-render/validators/EmptyValidator';
 
 declare const naver: any;
 
 class PageValidator extends FormValidator {
-    // required = new RequiredValidator();
-    // notEmpty = new NotEmptyValidator().setValidAction((s, v, t, e) => {
-    //     console.log('--NotEmptyValidator', s, v, e)
-    // });
+    required = new RequiredValidator();
+    notEmpty = new NotEmptyValidator().setValidAction((s, v, t, e) => {
+        console.log('--NotEmptyValidator', s, v, e)
+    });
 
-    // empty = new EmptyValidator();
-    // regexp = new RegExpTestValidator(/[0-9]/);
+    empty = new EmptyValidator();
+    regexp = new RegExpTestValidator(/[0-9]/);
     mix = new MultipleValidator([
         new RequiredValidator().setValidAction((s, v, t, e) => {
-            console.log('--RequiredValidator', s, v, e)
+            console.log('ValidAction--RequiredValidator', s, v, e)
         }),
         new NotEmptyValidator().setValidAction((s, v, t, e) => {
-            console.log('--NotEmptyValidator', s, v, e)
-        }),
+            console.log('ValidAction--NotEmptyValidator', s, v, e)
+        })
     ]);
 
     all = new AllCheckedValidatorArray().setValidAction((s, v, t, e) => {
         console.log('--AllCheckedValidatorArray', s)
     });
 
-    // gender = new ValidValidatorArray((v, t, e) => {
-    //     return ((v ?? []).filter(it => it.checked).length > 0);
-    // });
+    gender = new ValidValidatorArray((v, t, e) => {
+        return ((v ?? []).filter(it => it.checked).length > 0);
+    }).setValidAction((s, v, t, e) => {
+        console.log('ValidAction----gg**----', s)
+    });
+
     equals = new ValueEqualsValidator('c').setValidAction((s, v, t, e) => {
-        console.log(s, '----**----')
+        console.log('ValidAction----**----', s)
     });
 }
 
