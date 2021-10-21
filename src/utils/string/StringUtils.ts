@@ -13,6 +13,22 @@ export class StringUtils {
         return usingVars;
     }
 
+    public static betweenRegexpStr(start: string, end: string, data: string, flag = 'gm') {
+        const startEspace = StringUtils.escapeSpecialCharacterRegExp(start);
+        const reg = RegExp(`(${start}(?:(${start})??[^${startEspace}]*?${end}))`,flag);
+        return StringUtils.regexExec(reg, data);
+    }
+    public static between(start: string, end: string, data: string, flag = 'gm') {
+        // (\$\{(?:\[??[^\[]*?\})), (\$\{(?:(\$\{)??[^\$\{]*?\}))
+        start = StringUtils.escapeSpecialCharacterRegExp(start);
+        end = StringUtils.escapeSpecialCharacterRegExp(end);
+        const reg = RegExp(`(${start}(?:(${start})??[^${start}]*?${end}))`,flag);
+        return StringUtils.regexExec(reg, data);
+    }
+
+    public static escapeSpecialCharacterRegExp(data: string) {
+        return data.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    }
     // public static betweenReplace(start: string, end: string, message: string, replace: string) {
     //     const regex = RegExp('([^(dr\\-)])?this(?=.?)', 'gm');
     //     StringUtils.regexExec(regex, message).reverse().forEach(it => {
