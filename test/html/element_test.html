@@ -4,36 +4,36 @@
 
 <script>
     window.addEventListener('DOMContentLoaded', () => {
-        const fag = document.createDocumentFragment();
-        const wow = document.querySelector('#wow');
-        fag.append(wow)
-        // const c = Array.from(a.childNodes)
-        // c.forEach(it => {
-        //     // console.log(it, it.parentNode)
-        //     console.log(it, it.parentElement)
-        // })
-        console.log(NodeFilter.SHOW_ALL)
-        console.log(Node.ELEMENT_NODE)
-
-       // const nodes = document.createNodeIterator(wow, NodeFilter.SHOW_ALL, {
-       const nodes = document.createTreeWalker(fag, NodeFilter.SHOW_ALL, {
-            acceptNode(node) {
-                console.log(node)
-                // if (node.nodeType === Node.ELEMENT_NODE) {
-                //     return NodeFilter.FILTER_REJECT
-                // }
-                return NodeFilter.FILTER_ACCEPT;
-                //     const element = node as Element;
-                //     return element.hasAttribute(as) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT
-                // } else {
-                //     return NodeFilter.FILTER_REJECT;
-                // }
-            }
-        })
-        let node;
-        while (node = nodes.nextNode()) {
-            console.log('------', node)
-        }
+       //  const fag = document.createDocumentFragment();
+       //  const wow = document.querySelector('#wow');
+       //  fag.append(wow)
+       //  // const c = Array.from(a.childNodes)
+       //  // c.forEach(it => {
+       //  //     // console.log(it, it.parentNode)
+       //  //     console.log(it, it.parentElement)
+       //  // })
+       //  console.log(NodeFilter.SHOW_ALL)
+       //  console.log(Node.ELEMENT_NODE)
+       //
+       // // const nodes = document.createNodeIterator(wow, NodeFilter.SHOW_ALL, {
+       // const nodes = document.createTreeWalker(fag, NodeFilter.SHOW_ALL, {
+       //      acceptNode(node) {
+       //          console.log(node)
+       //          // if (node.nodeType === Node.ELEMENT_NODE) {
+       //          //     return NodeFilter.FILTER_REJECT
+       //          // }
+       //          return NodeFilter.FILTER_ACCEPT;
+       //          //     const element = node as Element;
+       //          //     return element.hasAttribute(as) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT
+       //          // } else {
+       //          //     return NodeFilter.FILTER_REJECT;
+       //          // }
+       //      }
+       //  })
+       //  let node;
+       //  while (node = nodes.nextNode()) {
+       //      console.log('------', node)
+       //  }
 
     })
 </script>
@@ -41,6 +41,8 @@
     <div id = "wow">
         zzz
         <span>asd</span>
+        <div wow="true">asd</div>
+        <span exclude="true">asd</span>
         ggg
     </div>
 </body>

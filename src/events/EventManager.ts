@@ -153,16 +153,32 @@ export const eventManager = new class {
                 if (typeof data === 'string') {
                     data.split(',').forEach(sit => {
                         const [key, value] = sit.split('=');
-                        it.setAttribute(key.trim(), value.trim());
+                        const s = value.trim();
+                        const k = key.trim();
+                        if (s === 'null') {
+                            it.removeAttribute(k);
+                        }  else {
+                            it.setAttribute(k, s);
+                        }
                     })
                 } else if (Array.isArray(data)) {
                     data.forEach(sit => {
                         const [key, value] = sit.split('=');
-                        it.setAttribute(key.trim(), value.trim());
+                        const s = value.trim();
+                        const k = key.trim();
+                        if (s === 'null') {
+                            it.removeAttribute(k);
+                        }  else {
+                            it.setAttribute(k, s);
+                        }
                     })
                 } else {
                     for (const [key, value] of Object.entries(data)) {
-                        it.setAttribute(key, String(value));
+                        if (value === null) {
+                            it.removeAttribute(key);
+                        } else {
+                            it.setAttribute(key, String(value));
+                        }
                     }
                 }
             }

@@ -115,16 +115,18 @@ export class RawSet {
             }) as unknown as Render;
 
             const fag = document.createDocumentFragment()
-            if (cNode.nodeType === Node.TEXT_NODE) {
+            if (cNode.nodeType === Node.TEXT_NODE && cNode.textContent) {
                 const textContent = cNode.textContent;
+                const runText = RawSet.exporesionGrouops(textContent)[0][1];
+                // console.log('--->', textContent,runText, runText[0][1])
                 let n: Node;
                 if (textContent?.startsWith('#')) {
-                    const r = ScriptUtils.eval(`${__render.bindScript} return \`${'$' + textContent?.slice(1)}\``,Object.assign(obj, {__render}));
+                    const r = ScriptUtils.eval(`${__render.bindScript} return ${runText}`,Object.assign(obj, {__render}));
                     const template = document.createElement('template') as HTMLTemplateElement;
                     template.innerHTML = r;
                     n = template.content;
                 } else {
-                    const r = ScriptUtils.eval(`${__render.bindScript}  return \`${textContent}\``,Object.assign(obj, {__render}));
+                    const r = ScriptUtils.eval(`${__render.bindScript}  return ${runText}`,Object.assign(obj, {__render}));
                     n = document.createTextNode(r);
                 }
                 cNode.parentNode?.replaceChild(n, cNode)
@@ -138,7 +140,7 @@ export class RawSet {
                     drRepeat: this.getAttributeAndDelete(element, RawSet.DR_REPEAT_NAME),
                     drThis: this.getAttributeAndDelete(element, RawSet.DR_THIS_NAME),
                     drForm: this.getAttributeAndDelete(element, RawSet.DR_FORM_NAME),
-                    drPre: this.getAttribute(element, RawSet.DR_PRE_NAME),
+                    drPre: this.getAttributeAndDelete(element, RawSet.DR_PRE_NAME),
                     drInnerHTML: this.getAttributeAndDelete(element, RawSet.DR_INNERHTML_NAME),
                     drInnerText: this.getAttributeAndDelete(element, RawSet.DR_INNERTEXT_NAME),
                     drItOption: this.getAttributeAndDelete(element, RawSet.DR_IT_OPTIONNAME),
@@ -149,6 +151,10 @@ export class RawSet {
                     drStripOption: this.getAttributeAndDelete(element, RawSet.DR_STRIP_OPTIONNAME) === 'true'
                 } as Attrs;
                 drAttrs.push(drAttr);
+
+                if (drAttr.drPre != null) {
+                    return;
+                }
                 if (drAttr.dr !== null && drAttr.dr.length >= 0) {
                     const itRandom = RawSet.drItOtherEncoding(element);
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
@@ -183,46 +189,6 @@ export class RawSet {
                     raws.push(...rr)
                 }
 
-                if (drAttr.drPre) {
-                    // const itRandom = RawSet.drItOtherEncoding(element);
-                    // const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
-                    // const newTemp = document.createElement('temp');
-                    // ScriptUtils.eval(`
-                    // ${__render.bindScript}
-                    // ${drAttr.drBeforeOption ?? ''}
-                    // if(${drAttr.drIf}) {
-                    //     const n = $element.cloneNode(true);
-                    //     var destIt = ${drAttr.drItOption};
-                    //     if (destIt !== undefined) {
-                    //         n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
-                    //         n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
-                    //     }
-                    //     if (this.__render.drStripOption) {
-                    //         Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
-                    //     } else {
-                    //         this.__render.fag.append(n);
-                    //     }
-                    // }
-                    // ${drAttr.drAfterOption ?? ''}
-                    // `, Object.assign(obj,
-                    //     {
-                    //         __render: Object.freeze({
-                    //             fag: newTemp,
-                    //             drStripOption: drAttr.drStripOption,
-                    //             ...__render
-                    //             // eslint-disable-next-line no-use-before-define
-                    //         } as Render)
-                    //     }
-                    // ));
-                    // RawSet.drVarDecoding(newTemp, vars);
-                    // RawSet.drItOtherDecoding(newTemp, itRandom);
-                    // const tempalte = document.createElement('template');
-                    // tempalte.innerHTML = newTemp.innerHTML;
-                    // fag.append(tempalte.content)
-                    // const rr = RawSet.checkPointCreates(fag, config)
-                    // element.parentNode?.replaceChild(fag, element);
-                    // raws.push(...rr)
-                }
                 if (drAttr.drIf) {
                     const itRandom = RawSet.drItOtherEncoding(element);
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
@@ -609,9 +575,11 @@ export class RawSet {
                     // console.log('???????/',node.textContent, node.parentElement?.getAttribute('dr-pre'))
                     //나중에
                     // const between = StringUtils.betweenRegexpStr('[$#]\\{', '\\}', StringUtils.deleteEnter((node as Text).data ?? ''))
-                    // return between?.length > 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                    const between = RawSet.exporesionGrouops(StringUtils.deleteEnter((node as Text).data ?? ''))
+                    // console.log('bbbb', between)
+                    return between?.length > 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                     // return /\$\{.*?\}/g.test(StringUtils.deleteEnter((node as Text).data ?? '')) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
-                    return /[$#]\{.*?\}/g.test(StringUtils.deleteEnter((node as Text).data ?? '')) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                    // return /[$#]\{.*?\}/g.test(StringUtils.deleteEnter((node as Text).data ?? '')) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                 } else if (node.nodeType === Node.ELEMENT_NODE) {
                     const element = node as Element;
                     const isElement = (config?.targetElements?.map(it => it.name.toLowerCase()) ?? []).includes(element.tagName.toLowerCase());
@@ -627,12 +595,12 @@ export class RawSet {
         // eslint-disable-next-line no-cond-assign
         while (currentNode = nodeIterator.nextNode()) {
             if (currentNode.nodeType === Node.TEXT_NODE) {
-                console.log('parentElement-->', currentNode.parentElement)
                 const text = (currentNode as Text).textContent ?? '';
                 const template = document.createElement('template');
                 // const a = StringUtils.regexExec(/\$\{.*?\}/g, text);
-                const a = StringUtils.regexExec(/[$#]\{.*?\}/g, text);
-                // const a = StringUtils.betweenRegexpStr('[$#]\\{', '\\}', text); <--나중에..
+                // const a = StringUtils.regexExec(/[$#]\{.*?\}/g, text);
+                // const a = StringUtils.betweenRegexpStr('[$#]\\{', '\\}', text); // <--나중에..
+                const a = RawSet.exporesionGrouops(text); // <--나중에..
                 const map = a.map(it => {
                     return {
                         uuid: RandomUtils.uuid(),
@@ -660,6 +628,7 @@ export class RawSet {
                     }, fragment));
                     lasterIndex = regexArr.index + it.content.length;
                 })
+                console.log('---------->', text.substring(lasterIndex, text.length))
                 template.content.append(document.createTextNode(text.substring(lasterIndex, text.length)));
                 currentNode?.parentNode?.replaceChild(template.content, currentNode);
             } else {
@@ -742,10 +711,14 @@ export class RawSet {
         // const thisRegex = /[^(dr\-)]this\./g;
         // safari 때문에 전위 검색 regex가 안됨 아 짜증나서 이걸로함.
 
+        // element.querySelectorAll(`[${RawSet.DR_PRE_NAME}]`).forEach(it => {
+        //     let message = it.innerHTML;
+        // })
+
+        // console.log('-----?', `[${RawSet.DR_THIS_NAME}], :not([${RawSet.DR_PRE_NAME}])`)
         element.querySelectorAll(`[${RawSet.DR_PRE_NAME}]`).forEach(it => {
-
+            it.innerHTML = it.innerHTML.replace(/this/g, thisRandom);
         })
-
         element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
             let message = it.innerHTML;
             StringUtils.regexExec(/([^(dr\-)])?this(?=.?)/g, message).reverse().forEach(it => {
@@ -763,6 +736,9 @@ export class RawSet {
     }
 
     public static drThisDecoding(element: Element, thisRandom: string) {
+        element.querySelectorAll(`[${RawSet.DR_PRE_NAME}]`).forEach(it => {
+            it.innerHTML = it.innerHTML.replace(RegExp(thisRandom, 'g'), 'this');
+        })
         element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
             it.innerHTML = it.innerHTML.replace(RegExp(thisRandom, 'g'), 'this');
         });
@@ -794,11 +770,13 @@ export class RawSet {
     public static drVarEncoding(element: Element, drVarOption: string) {
         const vars = (drVarOption?.split(',') ?? []).map(it => {
             const s = it.trim().split('=');
+            const name = s[0]?.trim();
+            const value = s[1]?.trim();
             return {
-                name: s[0].trim(),
-                value: s[1].trim(),
+                name,
+                value,
                 // regex: RegExp('(?<!(dr-|\\.))var\\.' + s[0] + '(?=.?)', 'g'),
-                regex: RegExp('\\$var\\.' + s[0] + '(?=.?)', 'g'),
+                regex: RegExp('\\$var\\.' + name + '(?=.?)', 'g'),
                 random: RandomUtils.uuid()
             }
         })
@@ -897,6 +875,11 @@ export class RawSet {
             }
         }
         return targetElement;
+    }
+
+    public static exporesionGrouops(data: string) {
+        const reg = /(?:[$#]\{(?:(([$#]\{)??[^$#]*?)\}[$#]))/g;
+        return StringUtils.regexExec(reg, data);
     }
 }
 
