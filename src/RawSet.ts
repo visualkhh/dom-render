@@ -730,8 +730,8 @@ export class RawSet {
         const vars = (drVarOption?.split(',') ?? []).map(it => {
             const s = it.trim().split('=');
             return {
-                name: s[0],
-                value: s[1],
+                name: s[0].trim(),
+                value: s[1].trim(),
                 // regex: RegExp('(?<!(dr-|\\.))var\\.' + s[0] + '(?=.?)', 'g'),
                 regex: RegExp('\\$var\\.' + s[0] + '(?=.?)', 'g'),
                 random: RandomUtils.uuid()
