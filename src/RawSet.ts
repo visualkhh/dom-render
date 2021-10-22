@@ -25,6 +25,9 @@ type Attrs = {
     drStripOption: boolean
 }
 
+// export enum RawSetViewType {
+//     HTML
+// }
 export class RawSet {
     public static readonly DR = 'dr';
     public static readonly DR_IF_NAME = 'dr-if';
@@ -57,6 +60,7 @@ export class RawSet {
     public static readonly TARGET_VARNAME = '$target';
     public static readonly VARNAMES = [RawSet.SCRIPTS_VARNAME, RawSet.FAG_VARNAME, RawSet.RAWSET_VARNAME, RawSet.RANGE_VARNAME, RawSet.ELEMENT_VARNAME, RawSet.TARGET_VARNAME];
 
+    // public viewType?: RawSetViewType;
     constructor(public uuid: string, public point: { start: Comment, end: Comment }, public fragment: DocumentFragment, public data: any = {}) { // , public thisObjPath?: string
     }
 
@@ -91,24 +95,36 @@ export class RawSet {
         const onAttrInitCallBack: { attrName: string, attrValue: string, obj: any }[] = [];
         const onElementInitCallBack: { name: string, obj: any }[] = [];
         const drAttrs: Attrs[] = [];
+
+
+
         genNode.childNodes.forEach((cNode, key) => {
+            const __render =  Object.freeze({
+                rawset: this,
+                scripts: RawSet.setBindProperty(config?.scripts, obj),
+                range: Range.range,
+                element: cNode,
+                bindScript: `
+                    const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
+                    const ${RawSet.RAWSET_VARNAME} = this.__render.rawset;
+                    const ${RawSet.ELEMENT_VARNAME} = this.__render.element;
+                    const ${RawSet.RANGE_VARNAME} = this.__render.range;
+            `
+            }) as unknown as Render;
+
             const fag = document.createDocumentFragment()
             if (cNode.nodeType === Node.TEXT_NODE) {
                 const textContent = cNode.textContent;
-                const n = document.createTextNode(ScriptUtils.eval(
-                    `
-                    const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
-                    const ${RawSet.RAWSET_VARNAME} = this.__render.rawset;
-                    return \`${textContent}\`
-                    `,
-                    Object.assign(obj, {
-                        __render: Object.freeze({
-                            rawset: this,
-                            scripts: RawSet.setBindProperty(config?.scripts, obj)
-                            // eslint-disable-next-line no-use-before-define
-                        } as Render)
-                    }))
-                )
+                let n: Node;
+                if (textContent?.startsWith('#')) {
+                    const r = ScriptUtils.eval(`${__render.bindScript} return \`${'$' + textContent?.slice(1)}\``,Object.assign(obj, {__render}));
+                    const template = document.createElement('template') as HTMLTemplateElement;
+                    template.innerHTML = r;
+                    n = template.content;
+                } else {
+                    const r = ScriptUtils.eval(`${__render.bindScript}  return \`${textContent}\``,Object.assign(obj, {__render}));
+                    n = document.createTextNode(r);
+                }
                 cNode.parentNode?.replaceChild(n, cNode)
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
@@ -135,9 +151,8 @@ export class RawSet {
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
                     const newTemp = document.createElement('temp');
                     ScriptUtils.eval(`
-                        const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
-                        const ${RawSet.RAWSET_VARNAME} = this.__render.rawset;
-                        const n = this.__render.element.cloneNode(true);
+                        ${__render.bindScript}
+                        const n = $element.cloneNode(true);
                         var destIt = ${drAttr.drItOption};
                         if (destIt !== undefined) {
                             n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
@@ -151,9 +166,7 @@ export class RawSet {
                         __render: Object.freeze({
                             fag: newTemp,
                             drStripOption: drAttr.drStripOption,
-                            element: element,
-                            rawset: this,
-                            scripts: RawSet.setBindProperty(config?.scripts, obj)
+                            ...__render
                             // eslint-disable-next-line no-use-before-define
                         } as Render)
                     }));
@@ -172,8 +185,7 @@ export class RawSet {
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
                     const newTemp = document.createElement('temp');
                     ScriptUtils.eval(`
-                    const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
-                    const ${RawSet.RAWSET_VARNAME} = this.__render.rawset;
+                    ${__render.bindScript}
                     ${drAttr.drBeforeOption ?? ''}
                     if(${drAttr.drIf}) {
                         const n = this.__render.element.cloneNode(true);
@@ -194,9 +206,7 @@ export class RawSet {
                             __render: Object.freeze({
                                 fag: newTemp,
                                 drStripOption: drAttr.drStripOption,
-                                element: element,
-                                rawset: this,
-                                scripts: RawSet.setBindProperty(config?.scripts, obj)
+                                ...__render
                                 // eslint-disable-next-line no-use-before-define
                             } as Render)
                         }
@@ -258,24 +268,26 @@ export class RawSet {
                 }
 
                 if (drAttr.drInnerText) {
-                    const data = ScriptUtils.evalReturn(drAttr.drInnerText, obj);
                     const newTemp = document.createElement('temp');
                     ScriptUtils.eval(` 
-                        const n = this.__element.cloneNode(true);  
+                        ${__render.bindScript}
+                        const n = $element.cloneNode(true);  
                         ${drAttr.drBeforeOption ?? ''}
-                        n.innerText = this.__data;
-                        if (this.__drStripOption) {
-                            Array.from(n.childNodes).forEach(it => this.__fag.append(it));
+                        n.innerText = ${drAttr.drInnerText};
+                        if (this.__render.drStripOption) {
+                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
                         } else {
-                            this.__fag.append(n);
+                            this.__render.fag.append(n);
                         }
                         ${drAttr.drAfterOption ?? ''}
-                    `, Object.assign({
-                        __fag: newTemp,
-                        __drStripOption: drAttr.drStripOption,
-                        __data: data,
-                        __element: element
-                    }, obj));
+                    `, Object.assign(obj, {
+                        __render: Object.freeze({
+                            drStripOption: drAttr.drStripOption,
+                            fag: newTemp,
+                            ...__render
+                            // eslint-disable-next-line no-use-before-define
+                        } as Render)
+                    }));
                     const tempalte = document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
                     fag.append(tempalte.content);
@@ -285,24 +297,26 @@ export class RawSet {
                 }
 
                 if (drAttr.drInnerHTML) {
-                    const data = ScriptUtils.evalReturn(drAttr.drInnerHTML, obj);
                     const newTemp = document.createElement('temp');
                     ScriptUtils.eval(`
-                        const n = this.__element.cloneNode(true);
+                        ${__render.bindScript}
+                        const n = $element.cloneNode(true);
                         ${drAttr.drBeforeOption ?? ''}
-                        n.innerHTML = this.__data;
-                        if (this.__drStripOption) {
-                            Array.from(n.childNodes).forEach(it => this.__fag.append(it));
+                        n.innerHTML = ${drAttr.drInnerHTML};
+                        if (this.__render.drStripOption) {
+                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
                         } else {
-                            this.__fag.append(n);
+                            this.__render.fag.append(n);
                         }
                         ${drAttr.drAfterOption ?? ''}
-                    `, Object.assign({
-                        __fag: newTemp,
-                        __drStripOption: drAttr.drStripOption,
-                        __data: data,
-                        __element: element
-                    }, obj));
+                    `, Object.assign(obj, {
+                        __render: Object.freeze({
+                            drStripOption: drAttr.drStripOption,
+                            fag: newTemp,
+                            ...__render
+                            // eslint-disable-next-line no-use-before-define
+                        } as Render)
+                    }));
                     const tempalte = document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
                     fag.append(tempalte.content);
@@ -316,9 +330,7 @@ export class RawSet {
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
                     const newTemp = document.createElement('temp');
                     ScriptUtils.eval(`
-                    const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
-                    const ${RawSet.RANGE_VARNAME} = this.__render.range;
-                    const ${RawSet.ELEMENT_VARNAME} = this.__render.element;
+                    ${__render.bindScript}
                     ${drAttr.drBeforeOption ?? ''}
                     for(${drAttr.drFor}) {
                         const n = this.__render.element.cloneNode(true);
@@ -336,11 +348,9 @@ export class RawSet {
                     ${drAttr.drAfterOption ?? ''}
                     `, Object.assign(obj, {
                         __render: Object.freeze({
-                            range: Range.range,
                             fag: newTemp,
                             drStripOption: drAttr.drStripOption,
-                            element: element,
-                            scripts: RawSet.setBindProperty(config?.scripts, obj)
+                            ...__render
                         })
                     }));
                     RawSet.drVarDecoding(newTemp, vars);
@@ -358,9 +368,7 @@ export class RawSet {
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
                     const newTemp = document.createElement('temp');
                     ScriptUtils.eval(`
-                    const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
-                    const ${RawSet.RANGE_VARNAME} = this.__render.range;
-                    const ${RawSet.ELEMENT_VARNAME} = this.__render.element;
+                    ${__render.bindScript}
                     ${drAttr.drBeforeOption ?? ''}
                     var i = 0; 
                     const forOf = ${drAttr.drForOf};
@@ -391,12 +399,9 @@ export class RawSet {
                     ${drAttr.drAfterOption ?? ''}
                     `, Object.assign(obj, {
                         __render: Object.freeze({
-                            rawset: this,
-                            range: Range.range,
                             drStripOption: drAttr.drStripOption,
                             fag: newTemp,
-                            element: element,
-                            scripts: RawSet.setBindProperty(config?.scripts, obj)
+                            ...__render
                             // eslint-disable-next-line no-use-before-define
                         } as Render)
                     }));
@@ -415,9 +420,7 @@ export class RawSet {
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
                     const newTemp = document.createElement('temp');
                     ScriptUtils.eval(`
-                    const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
-                    const ${RawSet.RANGE_VARNAME} = this.__render.range;
-                    const ${RawSet.ELEMENT_VARNAME} = this.__render.element;
+                    ${__render.bindScript}
                     ${drAttr.drBeforeOption ?? ''}
                     var i = 0; 
                     const repeat = ${drAttr.drRepeat};
@@ -447,11 +450,9 @@ export class RawSet {
                     ${drAttr.drAfterOption ?? ''}
                     `, Object.assign(obj, {
                         __render: Object.freeze({
-                            range: Range.range,
                             fag: newTemp,
                             drStripOption: drAttr.drStripOption,
-                            element: element,
-                            scripts: RawSet.setBindProperty(config?.scripts, obj)
+                            ...__render
                         })
                     }));
                     RawSet.drVarDecoding(newTemp, vars);
@@ -553,7 +554,11 @@ export class RawSet {
         const nodeIterator = document.createNodeIterator(element, NodeFilter.SHOW_ALL, {
             acceptNode(node) {
                 if (node.nodeType === Node.TEXT_NODE) {
-                    return /\$\{.*?\}/g.test(StringUtils.deleteEnter((node as Text).data ?? '')) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                    //나중에
+                    // const between = StringUtils.betweenRegexpStr('[$#]\\{', '\\}', StringUtils.deleteEnter((node as Text).data ?? ''))
+                    // return between?.length > 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                    // return /\$\{.*?\}/g.test(StringUtils.deleteEnter((node as Text).data ?? '')) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                    return /[$#]\{.*?\}/g.test(StringUtils.deleteEnter((node as Text).data ?? '')) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                 } else if (node.nodeType === Node.ELEMENT_NODE) {
                     const element = node as Element;
                     const isElement = (config?.targetElements?.map(it => it.name.toLowerCase()) ?? []).includes(element.tagName.toLowerCase());
@@ -571,7 +576,9 @@ export class RawSet {
             if (currentNode.nodeType === Node.TEXT_NODE) {
                 const text = (currentNode as Text).textContent ?? '';
                 const template = document.createElement('template');
-                const a = StringUtils.regexExec(/\$\{.*?\}/g, text);
+                // const a = StringUtils.regexExec(/\$\{.*?\}/g, text);
+                const a = StringUtils.regexExec(/[$#]\{.*?\}/g, text);
+                // const a = StringUtils.betweenRegexpStr('[$#]\\{', '\\}', text); <--나중에..
                 const map = a.map(it => {
                     return {
                         uuid: RandomUtils.uuid(),
@@ -586,7 +593,7 @@ export class RawSet {
                     const start = document.createComment(`start text ${it.uuid}`);
                     const end = document.createComment(`end text ${it.uuid}`);
                     // layout setting
-                    template.content.append(document.createTextNode(preparedText));
+                    template.content.append(document.createTextNode(preparedText)); // 사이사이값.
                     template.content.append(start);
                     template.content.append(end);
 
@@ -838,5 +845,8 @@ export class RawSet {
 export type Render = {
     rawset: RawSet;
     scripts: { [n: string]: any };
+    bindScript?: string;
+    element?: any;
+    range?: any;
     [n: string]: any
 }
