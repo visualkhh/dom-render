@@ -1,6 +1,7 @@
 import {Config} from '../Config';
 import {ScriptUtils} from '../utils/script/ScriptUtils';
 import {DomUtils} from '../utils/dom/DomUtils';
+import { RawSet } from '../RawSet';
 
 export const eventManager = new class {
     public readonly attrPrefix = 'dr-';
@@ -145,24 +146,40 @@ export const eventManager = new class {
                 script = 'return ' + script;
             }
             if (this.isUsingThisVar(script, varName) || varName === undefined) {
-                const data = ScriptUtils.eval(`const $target=this.__render.target; ${script} `, Object.assign(obj, {
+                const data = ScriptUtils.eval(`const $element = this.__render.element; ${script} `, Object.assign(obj, {
                     __render: Object.freeze({
-                        target: it
+                        element: it
                     })
                 }))
                 if (typeof data === 'string') {
                     data.split(',').forEach(sit => {
                         const [key, value] = sit.split('=');
-                        it.setAttribute(key.trim(), value.trim());
+                        const s = value.trim();
+                        const k = key.trim();
+                        if (s === 'null') {
+                            it.removeAttribute(k);
+                        }  else {
+                            it.setAttribute(k, s);
+                        }
                     })
                 } else if (Array.isArray(data)) {
                     data.forEach(sit => {
                         const [key, value] = sit.split('=');
-                        it.setAttribute(key.trim(), value.trim());
+                        const s = value.trim();
+                        const k = key.trim();
+                        if (s === 'null') {
+                            it.removeAttribute(k);
+                        }  else {
+                            it.setAttribute(k, s);
+                        }
                     })
                 } else {
                     for (const [key, value] of Object.entries(data)) {
-                        it.setAttribute(key, String(value));
+                        if (value === null) {
+                            it.removeAttribute(key);
+                        } else {
+                            it.setAttribute(key, String(value));
+                        }
                     }
                 }
             }
@@ -174,9 +191,9 @@ export const eventManager = new class {
                 script = 'return ' + script;
             }
             if (this.isUsingThisVar(script, varName) || varName === undefined) {
-                const data = ScriptUtils.eval(`const $target = this.__render.target;  ${script} `, Object.assign(obj, {
+                const data = ScriptUtils.eval(`const $element = this.__render.element;  ${script} `, Object.assign(obj, {
                     __render: Object.freeze({
-                        target: it
+                        element: it
                     })
                 }))
                 if (typeof data === 'string') {
@@ -199,9 +216,9 @@ export const eventManager = new class {
                 script = 'return ' + script;
             }
             if (this.isUsingThisVar(script, varName) || varName === undefined) {
-                const data = ScriptUtils.eval(`const $target = this.$target;  ${script} `, Object.assign(obj, {
+                const data = ScriptUtils.eval(`const $element = this.element;  ${script} `, Object.assign(obj, {
                     __render: Object.freeze({
-                        target: it
+                        element: it
                     })
                 }))
 
@@ -313,6 +330,9 @@ export const eventManager = new class {
             if (varName.startsWith('this.')) {
                 varName = varName.replace(/this\./, '')
             }
+            RawSet.VARNAMES.forEach(it => {
+                raws = raws!.replace(RegExp(it.replace('$', '\\$'), 'g'), `this?.___${it}`);
+            })
             const variablePaths = ScriptUtils.getVariablePaths(raws ?? '');
             return variablePaths.has(varName)
         }
