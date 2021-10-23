@@ -27,9 +27,9 @@ data.name = 'modify name';
 ```
 ## print and call
 ```html
-<div>${this.name}</div>
-<div>${this.office.addr.first}, ${this.office.addr.last}, ${this.office.addr.street} (${this.office.name})</div>
-<div dr="this.office.addr.street">${this.getOfficeFullAddr()}</div>
+<div>${this.name}$</div>
+<div>${this.office.addr.first}$, ${this.office.addr.last}$, ${this.office.addr.street}$ (${this.office.name}$)</div>
+<div dr="this.office.addr.street">${this.getOfficeFullAddr()}$</div>
 ```
 ## dr-if
 ```html
@@ -39,12 +39,12 @@ data.name = 'modify name';
 ## dr-for, dr-for-of
 ```html
 <div dr-for="var i = 0; i < this.friends.length; i++"> friend</div>
-<div dr-for-of="this.friends"> ${#it#.name}</div>
-<div dr-for-of="$range(10, 20)"><div>${#it#}</div><div>
+<div dr-for-of="this.friends"> ${#it#.name}$</div>
+<div dr-for-of="$range(10, 20)"><div>${#it#}$</div><div>
 <div dr-for="var i = 1 ; i <= 9 ; i++" dr-it="i">
-    ${#it#} *
+    ${#it#}$ *
     <scope dr-for="var y = 1 ; y <= 9 ; y++" dr-it="y" dr-var="superIt=#it#" dr-strip="true">
-        #it# = ${var.superIt * #it#}
+        #it# = ${var.superIt * #it#}$
     </scope>
 </div>
 ```
@@ -150,7 +150,7 @@ to-be
 ## dr-complete
 ```html
 <select dr-value-link="this.currentContry" dr-event-change="this.contryChange($event)">
-    <option dr-for-of="this.languages" dr-value="#it#.key" dr-complete="this.currentContry='defaultValue'">${#it#.title}</option>
+    <option dr-for-of="this.languages" dr-value="#it#.key" dr-complete="this.currentContry='defaultValue'">${#it#.title}$</option>
 </select>
 ```
 
