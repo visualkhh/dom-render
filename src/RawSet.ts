@@ -628,7 +628,6 @@ export class RawSet {
                     }, fragment));
                     lasterIndex = regexArr.index + it.content.length;
                 })
-                console.log('---------->', text.substring(lasterIndex, text.length))
                 template.content.append(document.createTextNode(text.substring(lasterIndex, text.length)));
                 currentNode?.parentNode?.replaceChild(template.content, currentNode);
             } else {
