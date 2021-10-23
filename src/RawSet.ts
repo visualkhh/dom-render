@@ -99,7 +99,7 @@ export class RawSet {
 
 
         genNode.childNodes.forEach((cNode, key) => {
-            const __render =  Object.freeze({
+            const __render = Object.freeze({
                 rawset: this,
                 scripts: RawSet.setBindProperty(config?.scripts, obj),
                 range: Range.range,
