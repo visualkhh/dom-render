@@ -1,7 +1,7 @@
 import {RandomUtils} from './utils/random/RandomUtils';
 import {StringUtils} from './utils/string/StringUtils';
 import {ScriptUtils} from './utils/script/ScriptUtils';
-import {eventManager} from './events/EventManager';
+import { EventManager, eventManager } from './events/EventManager';
 import {Config, TargetElement} from './Config';
 import {Range} from './iterators/Range';
 import {Validator} from './validators/Validator';
@@ -25,10 +25,6 @@ type Attrs = {
     drCompleteOption: string | null
     drStripOption: boolean
 }
-
-// export enum RawSetViewType {
-//     HTML
-// }
 export class RawSet {
     public static readonly DR = 'dr';
     public static readonly DR_IF_NAME = 'dr-if';
@@ -49,18 +45,15 @@ export class RawSet {
     public static readonly DR_COMPLETE_OPTIONNAME = 'dr-complete';
     public static readonly DR_VAR_OPTIONNAME = 'dr-var';
     public static readonly DR_STRIP_OPTIONNAME = 'dr-strip';
-    // public static readonly DR_PARAMETER_OPTIONNAME = 'dr-parameter';
-    // public static readonly DR_THIS_OPTIONNAME = 'dr-this';
-    // public static readonly DR_CONTENT_OPTIONNAME = 'dr-content';
     public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_FORM_NAME, RawSet.DR_PRE_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME];
 
-    public static readonly SCRIPTS_VARNAME = '$scripts';
-    public static readonly FAG_VARNAME = '$fag';
-    public static readonly RAWSET_VARNAME = '$rawset';
-    public static readonly RANGE_VARNAME = '$range';
-    public static readonly ELEMENT_VARNAME = '$element';
-    public static readonly TARGET_VARNAME = '$target';
-    public static readonly VARNAMES = [RawSet.SCRIPTS_VARNAME, RawSet.FAG_VARNAME, RawSet.RAWSET_VARNAME, RawSet.RANGE_VARNAME, RawSet.ELEMENT_VARNAME, RawSet.TARGET_VARNAME];
+    // public static readonly SCRIPTS_VARNAME = '$scripts';
+    // public static readonly FAG_VARNAME = '$fag';
+    // public static readonly RAWSET_VARNAME = '$rawset';
+    // public static readonly RANGE_VARNAME = '$range';
+    // public static readonly ELEMENT_VARNAME = '$element';
+    // public static readonly TARGET_VARNAME = '$target';
+    // public static readonly VARNAMES = [RawSet.SCRIPTS_VARNAME, RawSet.FAG_VARNAME, RawSet.RAWSET_VARNAME, RawSet.RANGE_VARNAME, RawSet.ELEMENT_VARNAME, RawSet.TARGET_VARNAME];
 
     // public viewType?: RawSetViewType;
     constructor(public uuid: string, public point: { start: Comment, end: Comment }, public fragment: DocumentFragment, public data: any = {}) { // , public thisObjPath?: string
@@ -82,10 +75,10 @@ export class RawSet {
                 script = targetAttrNames.map(it => (element.getAttribute(it))).filter(it => it).join(';');
             }
             if (script) {
-                RawSet.VARNAMES.forEach(it => {
+                EventManager.VARNAMES.forEach(it => {
                     script = script.replace(RegExp(it.replace('$', '\\$'), 'g'), `this?.___${it}`);
                 })
-                Array.from(ScriptUtils.getVariablePaths(script)).filter(it => !it.startsWith(`___${RawSet.SCRIPTS_VARNAME}`) && !it.startsWith(`___${RawSet.SCRIPTS_VARNAME}`)).forEach(it => usingTriggerVariables.add(it));
+                Array.from(ScriptUtils.getVariablePaths(script)).filter(it => !it.startsWith(`___${EventManager.SCRIPTS_VARNAME}`) && !it.startsWith(`___${EventManager.SCRIPTS_VARNAME}`)).forEach(it => usingTriggerVariables.add(it));
             }
         })
         return usingTriggerVariables;
@@ -107,10 +100,10 @@ export class RawSet {
                 range: Range.range,
                 element: cNode,
                 bindScript: `
-                    const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
-                    const ${RawSet.RAWSET_VARNAME} = this.__render.rawset;
-                    const ${RawSet.ELEMENT_VARNAME} = this.__render.element;
-                    const ${RawSet.RANGE_VARNAME} = this.__render.range;
+                    const ${EventManager.SCRIPTS_VARNAME} = this.__render.scripts;
+                    const ${EventManager.RAWSET_VARNAME} = this.__render.rawset;
+                    const ${EventManager.ELEMENT_VARNAME} = this.__render.element;
+                    const ${EventManager.RANGE_VARNAME} = this.__render.range;
             `
             }) as unknown as Render;
 
@@ -436,7 +429,7 @@ export class RawSet {
                     const repeatStr = \`${drAttr.drRepeat}\`;
                     let range = repeat;
                     if (typeof repeat === 'number') {
-                        range = ${RawSet.RANGE_VARNAME}(repeat);
+                        range = ${EventManager.RANGE_VARNAME}(repeat);
                     } 
                     for(const it of range) {
                         var destIt = it;
@@ -527,9 +520,9 @@ export class RawSet {
             if (it.drCompleteOption) {
                 // genNode.childNodes
                 ScriptUtils.eval(`
-                const ${RawSet.FAG_VARNAME} = this.__render.fag;
-                const ${RawSet.SCRIPTS_VARNAME} = this.__render.scripts;
-                const ${RawSet.RAWSET_VARNAME} = this.__render.rawset;
+                const ${EventManager.FAG_VARNAME} = this.__render.fag;
+                const ${EventManager.SCRIPTS_VARNAME} = this.__render.scripts;
+                const ${EventManager.RAWSET_VARNAME} = this.__render.rawset;
                 ${it.drCompleteOption}
                 `, Object.assign(obj, {
                     __render: Object.freeze({

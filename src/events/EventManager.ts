@@ -2,8 +2,7 @@ import {Config} from '../Config';
 import {ScriptUtils} from '../utils/script/ScriptUtils';
 import {DomUtils} from '../utils/dom/DomUtils';
 import { RawSet } from '../RawSet';
-
-export const eventManager = new class {
+export class EventManager {
     public readonly attrPrefix = 'dr-';
     public readonly eventNames = [
         'click', 'mousedown', 'mouseup', 'dblclick', 'mouseover', 'mouseout', 'mousemove', 'mouseenter', 'mouseleave', 'contextmenu',
@@ -22,6 +21,15 @@ export const eventManager = new class {
         this.attrPrefix + 'on-init',
         this.eventParam
     ];
+
+    public static readonly SCRIPTS_VARNAME = '$scripts';
+    public static readonly FAG_VARNAME = '$fag';
+    public static readonly RAWSET_VARNAME = '$rawset';
+    public static readonly RANGE_VARNAME = '$range';
+    public static readonly ELEMENT_VARNAME = '$element';
+    public static readonly TARGET_VARNAME = '$target';
+    public static readonly VARNAMES = [EventManager.SCRIPTS_VARNAME, EventManager.FAG_VARNAME, EventManager.RAWSET_VARNAME, EventManager.RANGE_VARNAME, EventManager.ELEMENT_VARNAME, EventManager.TARGET_VARNAME];
+
 
     constructor() {
         this.eventNames.forEach(it => {
@@ -330,7 +338,7 @@ export const eventManager = new class {
             if (varName.startsWith('this.')) {
                 varName = varName.replace(/this\./, '')
             }
-            RawSet.VARNAMES.forEach(it => {
+            EventManager.VARNAMES.forEach(it => {
                 raws = raws!.replace(RegExp(it.replace('$', '\\$'), 'g'), `this?.___${it}`);
             })
             const variablePaths = ScriptUtils.getVariablePaths(raws ?? '');
@@ -361,4 +369,5 @@ export const eventManager = new class {
     //     return strings;
     // }
 
-}();
+}
+export const eventManager = new EventManager();

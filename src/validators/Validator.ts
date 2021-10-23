@@ -1,4 +1,3 @@
-import {DomRenderProxy} from '../DomRenderProxy';
 
 export type Valid<T = any, E = Element> = (value?: T, target?: E, event?: Event) => boolean;
 export type ValidAction<T = any, E = Element> = (valid: boolean, value?: T, target?: E, event?: Event) => void;
@@ -51,7 +50,7 @@ export abstract class Validator<T = any, E = Element> {
 
     setEvent(event: Event | undefined) {
         if (event) {
-            this._event = DomRenderProxy.final(event);
+            this._event = this.domRenderFinal(event);
         }
         return this;
     }
@@ -62,9 +61,14 @@ export abstract class Validator<T = any, E = Element> {
 
     setTarget(target: E | undefined) {
         if (target) {
-            this._target = DomRenderProxy.final(target);
+            this._target = this.domRenderFinal(target);
         }
         return this;
+    }
+
+    private domRenderFinal(obj: any) {
+        (obj as any)._DomRender_isFinal = true;
+        return obj
     }
 
     get value(): T | undefined {

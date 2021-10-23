@@ -42,9 +42,7 @@
   },
   "include": [
     "./src/**/*",
-    "src/utils/dom/webComponentUtils.json"
   ],
-  "assets": ["src/utils/dom/webComponentUtils.js"],
   "exclude": [
     "example",
     "examples",
@@ -54,7 +52,6 @@
     "assets",
     "test-cli",
     "**/*.test.ts",
-    "src/utils/dom/webComponentUtils.js",
     "templates",
     "dist"
   ]
