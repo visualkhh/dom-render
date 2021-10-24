@@ -88,7 +88,7 @@ export class RawSet {
         const genNode = document.importNode(this.fragment, true);
         const raws: RawSet[] = [];
         const onAttrInitCallBack: { attrName: string, attrValue: string, obj: any }[] = [];
-        const onElementInitCallBack: { name: string, obj: any }[] = [];
+        const onElementInitCallBack: { name: string, obj: any, targetElement: TargetElement }[] = [];
         const drAttrs: Attrs[] = [];
 
         genNode.childNodes.forEach((cNode, key) => {
@@ -482,7 +482,8 @@ export class RawSet {
                             raws.push(...rr);
                             onElementInitCallBack.push({
                                 name,
-                                obj
+                                obj,
+                                targetElement: it
                             });
                             it?.complete?.(element, obj, this);
                         }
@@ -534,7 +535,7 @@ export class RawSet {
                 ));
             }
         })
-        onElementInitCallBack.forEach(it => config?.onElementInit?.(it.name, obj, this))
+        onElementInitCallBack.forEach(it => config?.onElementInit?.(it.name, obj, this, it.targetElement))
         onAttrInitCallBack.forEach(it => config?.onAttrInit?.(it.attrName, it.attrValue, obj, this))
         return raws;
     }
@@ -820,7 +821,10 @@ export class RawSet {
         }
     }
 
-    public static createComponentTargetElement(name: string, objFactory: (element: Element, obj: any, rawSet: RawSet) => any, template: string = '', styles: string[] = [], scripts?: { [n: string]: any }): TargetElement {
+    public static createComponentTargetElement(name: string,
+                                               objFactory: (element: Element, obj: any, rawSet: RawSet) => any,
+                                               template: string = '', styles: string[] = [], scripts?: { [n: string]: any },
+                                               complete?:(element: Element, obj: any, rawSet: RawSet) => void): TargetElement {
         const targetElement: TargetElement = {
             name,
             styles,
@@ -832,31 +836,33 @@ export class RawSet {
                 }
                 ;
                 const domrenderComponents = obj.__domrender_components;
-                const componentKey = '_' + RandomUtils.getRandomString(20)
-                // console.log('callback settttt---a-->')
+                const componentKey = '_' + RandomUtils.getRandomString(20);
+                // console.log('callback settttt---a-->', componentKey, objFactory, objFactory(element, obj, rawSet))
                 domrenderComponents[componentKey] = objFactory(element, obj, rawSet);
                 const instance = domrenderComponents[componentKey];
                 // console.log('callback settttt---b-->', obj.__domrender_components, instance)
 
+                const attribute = {} as any;
+                element.getAttributeNames().forEach(it => {
+                    attribute[it] = element.getAttribute(it);
+                });
+                const render = Object.freeze({
+                    component: instance,
+                    element: element,
+                    innerHTML: element.innerHTML,
+                    attribute: attribute,
+                    rawset: rawSet,
+                    componentKey,
+                    scripts: RawSet.setBindProperty(scripts, obj)
+                    // eslint-disable-next-line no-use-before-define
+                } as Render);
+                this.__render = render;
+
                 const oninit = element.getAttribute('dr-on-init')
                 if (oninit) {
-                    // console.log('onInit------->')
-                    const attribute = {} as any;
-                    element.getAttributeNames().forEach(it => {
-                        attribute[it] = element.getAttribute(it);
-                    });
                     const script = `var $component = this.__render.component; var $element = this.__render.$element; var $innerHTML = this.__render.$innerHTML; var $attribute = this.__render.$attribute;  ${oninit} `;
                     ScriptUtils.eval(script, Object.assign(obj, {
-                        __render: Object.freeze({
-                            component: instance,
-                            element: element,
-                            innerHTML: element.innerHTML,
-                            attribute: attribute,
-                            rawset: rawSet,
-                            scripts: RawSet.setBindProperty(scripts, obj)
-                            // eslint-disable-next-line no-use-before-define
-                        } as Render
-                        )
+                        __render: render
                     }))
                 }
                 const fag = document.createDocumentFragment();
@@ -864,7 +870,8 @@ export class RawSet {
                 element.innerHTML = innerHTML;
                 fag.append(RawSet.drThisCreate(element, `this.__domrender_components.${componentKey}`, '', true, obj))
                 return fag;
-            }
+            },
+            complete
         }
         return targetElement;
     }

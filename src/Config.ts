@@ -1,5 +1,5 @@
 import {ConstructorType} from './types/Types';
-import {RawSet} from './RawSet';
+import {RawSet, Render} from './RawSet';
 
 export type TargetElement = {
     name: string,
@@ -7,6 +7,7 @@ export type TargetElement = {
     styles?: string[],
     callBack: (target: Element, obj: any, rawSet: RawSet) => DocumentFragment,
     complete?: (target: Element, obj: any, rawSet: RawSet) => void
+    __render?: Render
 };
 
 export type TargetAttr = {
@@ -18,7 +19,7 @@ export type TargetAttr = {
 export interface Config {
     targetElements?: TargetElement[];
     targetAttrs?: TargetAttr[];
-    onElementInit?: (name: string, obj: any, rawSet: RawSet) => void;
+    onElementInit?: (name: string, obj: any, rawSet: RawSet, targetElement: TargetElement) => void;
     onAttrInit?: (name: string, attrValue: string, obj: any, rawSet: RawSet) => void;
     proxyExcludeTyps?: ConstructorType<any>[];
     proxyExcludeOnBeforeReturnSets?: string[];
