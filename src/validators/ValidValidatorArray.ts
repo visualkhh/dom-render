@@ -6,10 +6,6 @@ export class ValidValidatorArray<T = any, E = Element> extends ValidatorArray<T,
         super(value, target, event, autoValid);
     }
 
-    // validAction(): boolean {
-    //     return this.validCallBack(this.value, this.getTarget(), this.getEvent());
-    // }
-
     valid(): boolean {
         return this.validCallBack(this.value, this.getTarget(), this.getEvent());
     }

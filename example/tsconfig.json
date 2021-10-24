@@ -23,6 +23,9 @@
     /* Advanced Options */
     "forceConsistentCasingInFileNames": true,
     "removeComments": true,
+    "paths": {
+      "dom-render/*": ["../src/*"]
+    },
     //    "noImplicitAny": true,
     //    "plugins": [{ "name": "sample-ts-plugin" }],
     /* Disallow inconsistently-cased references to the same file. */

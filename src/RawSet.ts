@@ -91,8 +91,6 @@ export class RawSet {
         const onElementInitCallBack: { name: string, obj: any }[] = [];
         const drAttrs: Attrs[] = [];
 
-
-
         genNode.childNodes.forEach((cNode, key) => {
             const __render = Object.freeze({
                 rawset: this,
@@ -105,6 +103,7 @@ export class RawSet {
                     const ${EventManager.ELEMENT_VARNAME} = this.__render.element;
                     const ${EventManager.RANGE_VARNAME} = this.__render.range;
             `
+                // eslint-disable-next-line no-use-before-define
             }) as unknown as Render;
 
             const fag = document.createDocumentFragment()
@@ -114,12 +113,12 @@ export class RawSet {
                 // console.log('--->', textContent,runText, runText[0][1])
                 let n: Node;
                 if (textContent?.startsWith('#')) {
-                    const r = ScriptUtils.eval(`${__render.bindScript} return ${runText}`,Object.assign(obj, {__render}));
+                    const r = ScriptUtils.eval(`${__render.bindScript} return ${runText}`, Object.assign(obj, {__render}));
                     const template = document.createElement('template') as HTMLTemplateElement;
                     template.innerHTML = r;
                     n = template.content;
                 } else {
-                    const r = ScriptUtils.eval(`${__render.bindScript}  return ${runText}`,Object.assign(obj, {__render}));
+                    const r = ScriptUtils.eval(`${__render.bindScript}  return ${runText}`, Object.assign(obj, {__render}));
                     n = document.createTextNode(r);
                 }
                 cNode.parentNode?.replaceChild(n, cNode)
@@ -548,6 +547,7 @@ export class RawSet {
         const data = element.getAttribute(attr)
         return data;
     }
+
     public getAttributeAndDelete(element: Element, attr: string) {
         const data = element.getAttribute(attr)
         element.removeAttribute(attr);
@@ -566,7 +566,7 @@ export class RawSet {
                 if (node.nodeType === Node.TEXT_NODE) {
                     // console.log('????????', node.parentElement, node.parentElement?.getAttribute('dr-pre'));
                     // console.log('???????/',node.textContent, node.parentElement?.getAttribute('dr-pre'))
-                    //나중에
+                    // 나중에
                     // const between = StringUtils.betweenRegexpStr('[$#]\\{', '\\}', StringUtils.deleteEnter((node as Text).data ?? ''))
                     const between = RawSet.exporesionGrouops(StringUtils.deleteEnter((node as Text).data ?? ''))
                     // console.log('bbbb', between)

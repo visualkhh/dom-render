@@ -39,7 +39,7 @@ class PageValidator extends FormValidator {
     gender = new ValidValidatorArray((v, t, e) => {
         return ((v ?? []).filter(it => it.checked).length > 0);
     }).setValidAction((s, v, t, e) => {
-        console.log('ValidAction----gg**----', s)
+        console.log('ValidAction----gg**----', s, v, t)
     });
 
     equals = new ValueEqualsValidator('c').setValidAction((s, v, t, e) => {

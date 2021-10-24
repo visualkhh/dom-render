@@ -6,6 +6,9 @@
 - all internal variables are managed by proxy. (DomRenderProxy)
 ---
 
+# [📄 introduction page [link]](https://simple-boot-front.github.io/#dom-render/introduction)
+- [https://simple-boot-front.github.io/#dom-render/introduction](https://simple-boot-front.github.io/#dom-render/introduction)
+
 # 🚀 Quick start 
 ```shell
 npm install dom-render
