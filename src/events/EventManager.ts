@@ -2,6 +2,7 @@ import {Config} from '../Config';
 import {ScriptUtils} from '../utils/script/ScriptUtils';
 import {DomUtils} from '../utils/dom/DomUtils';
 import { RawSet } from '../RawSet';
+import { Range } from '../iterators/Range';
 export class EventManager {
     public readonly attrPrefix = 'dr-';
     public readonly eventNames = [
@@ -28,8 +29,16 @@ export class EventManager {
     public static readonly RANGE_VARNAME = '$range';
     public static readonly ELEMENT_VARNAME = '$element';
     public static readonly TARGET_VARNAME = '$target';
-    public static readonly VARNAMES = [EventManager.SCRIPTS_VARNAME, EventManager.FAG_VARNAME, EventManager.RAWSET_VARNAME, EventManager.RANGE_VARNAME, EventManager.ELEMENT_VARNAME, EventManager.TARGET_VARNAME];
+    public static readonly EVENT_VARNAME = '$event';
+    public static readonly VARNAMES = [EventManager.SCRIPTS_VARNAME, EventManager.FAG_VARNAME, EventManager.RAWSET_VARNAME, EventManager.RANGE_VARNAME, EventManager.ELEMENT_VARNAME, EventManager.TARGET_VARNAME, EventManager.EVENT_VARNAME];
 
+    readonly bindScript = `
+        const ${EventManager.SCRIPTS_VARNAME} = this.__render.scripts;
+        const ${EventManager.RANGE_VARNAME} = this.__render.range;
+        const ${EventManager.ELEMENT_VARNAME} = this.__render.element;
+        const ${EventManager.TARGET_VARNAME} = this.__render.target;
+        const ${EventManager.EVENT_VARNAME} = this.__render.event;
+    `
 
     constructor() {
         this.eventNames.forEach(it => {
@@ -68,9 +77,9 @@ export class EventManager {
         // Node.ELEMENT_NODE = 1
         // event
         this.eventNames.forEach(it => {
-            this.addDrEvents(obj, it, childNodes);
+            this.addDrEvents(obj, it, childNodes, config);
         });
-        this.addDrEventPram(obj, this.eventParam, childNodes);
+        this.addDrEventPram(obj, this.eventParam, childNodes, config);
 
         // value
         this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'value', (it, attribute) => {
@@ -250,14 +259,17 @@ export class EventManager {
     }
 
     // eslint-disable-next-line no-undef
-    public addDrEvents(obj: any, eventName: string, elements: Set<Element> | Set<ChildNode>) {
+    public addDrEvents(obj: any, eventName: string, elements: Set<Element> | Set<ChildNode>, config?: Config) {
         const attr = this.attrPrefix + 'event-' + eventName
         this.procAttr<HTMLInputElement>(elements, attr, (it, attribute) => {
             const script = attribute;
             it.addEventListener(eventName, (event) => {
-                ScriptUtils.eval(`const $event=this.__render.event;  const $target=$event.target; ${script} `, Object.assign(obj, {
+                ScriptUtils.eval(`${this.bindScript} ${script} `, Object.assign(obj, {
                     __render: Object.freeze({
-                        event
+                        event,
+                        target: event.target,
+                        range: Range.range,
+                        scripts: EventManager.setBindProperty(config?.scripts, obj)
                     })
                 }))
             })
@@ -265,7 +277,7 @@ export class EventManager {
     }
 
     // eslint-disable-next-line no-undef
-    public addDrEventPram(obj: any, attr: string, elements: Set<ChildNode> | Set<Element>) {
+    public addDrEventPram(obj: any, attr: string, elements: Set<ChildNode> | Set<Element>, config?: Config) {
         this.procAttr<HTMLInputElement>(elements, attr, (it, attribute, attributes) => {
             const bind: string | undefined = attributes[attr + ':bind'];
             if (bind) {
@@ -347,6 +359,18 @@ export class EventManager {
         return false;
     }
 
+    public static setBindProperty(scripts: { [p: string]: any } | undefined, obj: any): { [p: string]: any } | undefined {
+        if (scripts) {
+            // const newScripts = Object.assign({}, scripts)
+            const newScripts = Object.assign({}, scripts)
+            for (const [key, value] of Object.entries(newScripts)) {
+                if (typeof value === 'function') {
+                    newScripts[key] = value.bind(obj);
+                }
+            }
+            return newScripts;
+        }
+    }
     // public usingThisVar(raws: string): string[] {
     //     let regex = /include\(.*\)/gm;
     //     // raws = raws.replace(regex, '');

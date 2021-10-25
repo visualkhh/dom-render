@@ -94,7 +94,7 @@ export class RawSet {
         genNode.childNodes.forEach((cNode, key) => {
             const __render = Object.freeze({
                 rawset: this,
-                scripts: RawSet.setBindProperty(config?.scripts, obj),
+                scripts: EventManager.setBindProperty(config?.scripts, obj),
                 range: Range.range,
                 element: cNode,
                 bindScript: `
@@ -157,7 +157,9 @@ export class RawSet {
                         var destIt = ${drAttr.drItOption};
                         if (destIt !== undefined) {
                             n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
+                            console.log('----', n.innerHTML);
                             n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
+                            console.log('----', n.innerHTML);
                         }
                         if (this.__render.drStripOption) {
                             Array.from(n.childNodes).forEach(it => this.__fag.append(it));
@@ -528,7 +530,7 @@ export class RawSet {
                     __render: Object.freeze({
                         rawset: this,
                         fag: genNode,
-                        scripts: RawSet.setBindProperty(config?.scripts, obj)
+                        scripts: EventManager.setBindProperty(config?.scripts, obj)
                         // eslint-disable-next-line no-use-before-define
                     } as Render)
                 }
@@ -808,19 +810,6 @@ export class RawSet {
         return fag;
     }
 
-    public static setBindProperty(scripts: { [p: string]: any } | undefined, obj: any): { [p: string]: any } | undefined {
-        if (scripts) {
-            // const newScripts = Object.assign({}, scripts)
-            const newScripts = Object.assign({}, scripts)
-            for (const [key, value] of Object.entries(newScripts)) {
-                if (typeof value === 'function') {
-                    newScripts[key] = value.bind(obj);
-                }
-            }
-            return newScripts;
-        }
-    }
-
     public static createComponentTargetElement(name: string,
                                                objFactory: (element: Element, obj: any, rawSet: RawSet) => any,
                                                template: string = '', styles: string[] = [], scripts?: { [n: string]: any },
@@ -853,7 +842,7 @@ export class RawSet {
                     attribute: attribute,
                     rawset: rawSet,
                     componentKey,
-                    scripts: RawSet.setBindProperty(scripts, obj)
+                    scripts: EventManager.setBindProperty(scripts, obj)
                     // eslint-disable-next-line no-use-before-define
                 } as Render);
                 this.__render = render;
