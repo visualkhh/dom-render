@@ -3,6 +3,7 @@ import {ScriptUtils} from '../utils/script/ScriptUtils';
 import {DomUtils} from '../utils/dom/DomUtils';
 import { RawSet } from '../RawSet';
 import { Range } from '../iterators/Range';
+import { DomRenderProxy } from '../DomRenderProxy';
 export class EventManager {
     public readonly attrPrefix = 'dr-';
     public readonly eventNames = [
@@ -18,7 +19,8 @@ export class EventManager {
         this.attrPrefix + 'attr',
         this.attrPrefix + 'style',
         this.attrPrefix + 'class',
-        this.attrPrefix + 'window-event-popstate',
+        this.attrPrefix + 'window-event-' + EventManager.WINDOW_EVENT_POPSTATE,
+        this.attrPrefix + 'window-event-' + EventManager.WINDOW_EVENT_RESIZE,
         this.attrPrefix + 'on-init',
         this.eventParam
     ];
@@ -31,6 +33,10 @@ export class EventManager {
     public static readonly TARGET_VARNAME = '$target';
     public static readonly EVENT_VARNAME = '$event';
     public static readonly VARNAMES = [EventManager.SCRIPTS_VARNAME, EventManager.FAG_VARNAME, EventManager.RAWSET_VARNAME, EventManager.RANGE_VARNAME, EventManager.ELEMENT_VARNAME, EventManager.TARGET_VARNAME, EventManager.EVENT_VARNAME];
+
+    public static readonly WINDOW_EVENT_POPSTATE = 'popstate';
+    public static readonly WINDOW_EVENT_RESIZE = 'resize';
+    public static readonly WINDOW_EVENTS = [EventManager.WINDOW_EVENT_POPSTATE, EventManager.WINDOW_EVENT_RESIZE];
 
     readonly bindScript = `
         const ${EventManager.SCRIPTS_VARNAME} = this.__render.scripts;
@@ -45,18 +51,28 @@ export class EventManager {
             this.attrNames.push(this.attrPrefix + 'event-' + it);
         });
 
-        window.addEventListener('popstate', (e) => {
-            document.querySelectorAll('[dr-window-event-popstate]').forEach(it => {
-                const script = it.getAttribute('dr-window-event-popstate')
-                if (script) {
-                    ScriptUtils.eval(`const $target = this.__render.target;  ${script} `, Object.assign((it as any).obj, {
-                        __render: Object.freeze({
-                            target: it
-                        })
-                    }))
-                }
+        EventManager.WINDOW_EVENTS.forEach(eventName => {
+            window.addEventListener(eventName, (event) => {
+                const targetAttr = `dr-window-event-${eventName}`
+                document.querySelectorAll(`[${targetAttr}]`).forEach(it => {
+                    const script = it.getAttribute(targetAttr)
+                    if (script) {
+                        const obj = (it as any).obj as any;
+                        const config = obj?._DomRender_proxy?.config;
+                        ScriptUtils.eval(`${this.bindScript} ${script} `, Object.assign(obj, {
+                            __render: Object.freeze({
+                                target: DomRenderProxy.final(event.target),
+                                element: it,
+                                event: event,
+                                range: Range.range,
+                                scripts: EventManager.setBindProperty(config?.scripts, obj)
+                            })
+                        }))
+                    }
+                })
             })
         })
+
     }
 
     public findAttrElements(fragment: DocumentFragment | Element, config?: Config): Set<Element> {
@@ -91,9 +107,12 @@ export class EventManager {
                 }
             }
         })
-        // popstate
-        this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'window-event-popstate', (it, attribute) => {
-            (it as any).obj = obj;
+
+        // window event
+        EventManager.WINDOW_EVENTS.forEach(it => {
+            this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'window-event-' + it, (it, attribute) => {
+                (it as any).obj = obj;
+            })
         })
 
         // on-init event
@@ -267,6 +286,7 @@ export class EventManager {
                 ScriptUtils.eval(`${this.bindScript} ${script} `, Object.assign(obj, {
                     __render: Object.freeze({
                         event,
+                        element: it,
                         target: event.target,
                         range: Range.range,
                         scripts: EventManager.setBindProperty(config?.scripts, obj)
@@ -289,9 +309,13 @@ export class EventManager {
                 });
                 bind.split(',').forEach(eventName => {
                     it.addEventListener(eventName.trim(), (event) => {
-                        ScriptUtils.eval(`const $params = this.__render.params; const $event=this.__render.event; const $target=$event.target;  ${script} `, Object.assign(obj, {
+                        ScriptUtils.eval(`const $params = this.__render.params; ${this.bindScript}  ${script} `, Object.assign(obj, {
                             __render: Object.freeze({
                                 event,
+                                element: it,
+                                target: event.target,
+                                range: Range.range,
+                                scripts: EventManager.setBindProperty(config?.scripts, obj),
                                 params
                             })
                         }))

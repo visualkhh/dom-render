@@ -47,15 +47,6 @@ export class RawSet {
     public static readonly DR_STRIP_OPTIONNAME = 'dr-strip';
     public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_FORM_NAME, RawSet.DR_PRE_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME];
 
-    // public static readonly SCRIPTS_VARNAME = '$scripts';
-    // public static readonly FAG_VARNAME = '$fag';
-    // public static readonly RAWSET_VARNAME = '$rawset';
-    // public static readonly RANGE_VARNAME = '$range';
-    // public static readonly ELEMENT_VARNAME = '$element';
-    // public static readonly TARGET_VARNAME = '$target';
-    // public static readonly VARNAMES = [RawSet.SCRIPTS_VARNAME, RawSet.FAG_VARNAME, RawSet.RAWSET_VARNAME, RawSet.RANGE_VARNAME, RawSet.ELEMENT_VARNAME, RawSet.TARGET_VARNAME];
-
-    // public viewType?: RawSetViewType;
     constructor(public uuid: string, public point: { start: Comment, end: Comment }, public fragment: DocumentFragment, public data: any = {}) { // , public thisObjPath?: string
     }
 
@@ -477,10 +468,11 @@ export class RawSet {
                             fag.append(documentFragment)
                             const rr = RawSet.checkPointCreates(fag, config)
                             element.parentNode?.replaceChild(fag, element);
-                            const onInit = element.getAttribute('dr-on-init-component');
-                            if (onInit) {
-                                ScriptUtils.evalReturn(onInit, obj)(obj?.__componentInstances[this.uuid], this);
-                            }
+                            // TODO: 나중에 삭제?
+                            // const onInit = element.getAttribute('dr-on-init-component');
+                            // if (onInit) {
+                            //     ScriptUtils.evalReturn(onInit, obj)(obj?.__componentInstances[this.uuid], this);
+                            // }
                             raws.push(...rr);
                             onElementInitCallBack.push({
                                 name,
@@ -488,6 +480,7 @@ export class RawSet {
                                 targetElement: it
                             });
                             it?.complete?.(element, obj, this);
+                            it?.__render?.component?.onInitRender?.(it?.__render);
                         }
                     }
                 })
