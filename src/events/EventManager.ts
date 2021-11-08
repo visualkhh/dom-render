@@ -1,7 +1,6 @@
 import {Config} from '../Config';
 import {ScriptUtils} from '../utils/script/ScriptUtils';
 import {DomUtils} from '../utils/dom/DomUtils';
-import { RawSet } from '../RawSet';
 import { Range } from '../iterators/Range';
 import { DomRenderProxy } from '../DomRenderProxy';
 export class EventManager {
@@ -71,8 +70,7 @@ export class EventManager {
                     }
                 })
             })
-        })
-
+        });
     }
 
     public findAttrElements(fragment: DocumentFragment | Element, config?: Config): Set<Element> {

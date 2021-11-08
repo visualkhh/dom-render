@@ -480,7 +480,6 @@ export class RawSet {
                                 targetElement: it
                             });
                             it?.complete?.(element, obj, this);
-                            it?.__render?.component?.onInitRender?.(it?.__render);
                         }
                     }
                 })
@@ -530,7 +529,10 @@ export class RawSet {
                 ));
             }
         })
-        onElementInitCallBack.forEach(it => config?.onElementInit?.(it.name, obj, this, it.targetElement))
+        onElementInitCallBack.forEach(it => {
+            it.targetElement?.__render?.component?.onInitRender?.(it.targetElement?.__render);
+            config?.onElementInit?.(it.name, obj, this, it.targetElement);
+        });
         onAttrInitCallBack.forEach(it => config?.onAttrInit?.(it.attrName, it.attrValue, obj, this))
         return raws;
     }
