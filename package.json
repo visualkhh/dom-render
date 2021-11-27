@@ -48,8 +48,8 @@
     }
   },
   "scripts": {
-    "build": "rm -rf dist && tsc --outDir dist --declarationDir dist && rm -rf dist/dist && rollup -c",
-    "build:ts:watch": "rm -rf dist && tsc --watch --outDir dist --declarationDir dist",
+    "build": "rm -rf dist && mkdir dist && cp package.json dist && tsc --outDir dist --declarationDir dist && rm -rf dist/dist && rollup -c",
+    "build:ts:watch": "rm -rf dist && mkdir dist && cp package.json dist && tsc --watch --outDir dist --declarationDir dist",
     "bundle": "rollup -c",
     "bundle:watch": "rollup -c -w",
     "dev:start": "npm run start --workspace=dev",
