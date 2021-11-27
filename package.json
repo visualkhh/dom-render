@@ -50,7 +50,6 @@
   "scripts": {
     "build": "rm -rf dist && tsc --outDir dist --declarationDir dist && rm -rf dist/dist && rollup -c",
     "build:ts:watch": "rm -rf dist && tsc --watch --outDir dist --declarationDir dist",
-    "build:parcel": "parcel build ./src/*.ts  --out-dir=dist-parcel --out-file dom-render.js",
     "bundle": "rollup -c",
     "bundle:watch": "rollup -c -w",
     "dev:start": "npm run start --workspace=dev",

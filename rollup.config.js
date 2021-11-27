@@ -9,7 +9,7 @@ import typescript from 'rollup-plugin-typescript2';
 import sourcemaps from 'rollup-plugin-sourcemaps';
 import del from 'rollup-plugin-delete';
 export default {
-    input: 'src/DomRender.ts',
+    input: 'dist/DomRender.js',
     output: {
         sourcemap: true,
         dir: 'dist/dist',
@@ -28,7 +28,7 @@ export default {
         resolve(),
         babel({ exclude: 'node_modules/**' }),
         commonjs(),
-        typescript({ tsconfig: './tsconfig.json', clean: true }),
+        // typescript({ tsconfig: './tsconfig.json', clean: true }),
         // sourcemaps(),
         replace({
             preventAssignment: true,

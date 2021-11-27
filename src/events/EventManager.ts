@@ -1,8 +1,9 @@
 import {Config} from '../Config';
 import {ScriptUtils} from '../utils/script/ScriptUtils';
 import {DomUtils} from '../utils/dom/DomUtils';
-import { Range } from '../iterators/Range';
-import { DomRenderProxy } from '../DomRenderProxy';
+import {Range} from '../iterators/Range';
+import {DomRenderProxy} from '../DomRenderProxy';
+
 export class EventManager {
     public readonly attrPrefix = 'dr-';
     public readonly eventNames = [
@@ -50,27 +51,29 @@ export class EventManager {
             this.attrNames.push(this.attrPrefix + 'event-' + it);
         });
 
-        EventManager.WINDOW_EVENTS.forEach(eventName => {
-            window.addEventListener(eventName, (event) => {
-                const targetAttr = `dr-window-event-${eventName}`
-                document.querySelectorAll(`[${targetAttr}]`).forEach(it => {
-                    const script = it.getAttribute(targetAttr)
-                    if (script) {
-                        const obj = (it as any).obj as any;
-                        const config = obj?._DomRender_proxy?.config;
-                        ScriptUtils.eval(`${this.bindScript} ${script} `, Object.assign(obj, {
-                            __render: Object.freeze({
-                                target: DomRenderProxy.final(event.target),
-                                element: it,
-                                event: event,
-                                range: Range.range,
-                                scripts: EventManager.setBindProperty(config?.scripts, obj)
-                            })
-                        }))
-                    }
+        if (typeof window !== 'undefined') {
+            EventManager.WINDOW_EVENTS.forEach(eventName => {
+                window?.addEventListener(eventName, (event) => {
+                    const targetAttr = `dr-window-event-${eventName}`
+                    document.querySelectorAll(`[${targetAttr}]`).forEach(it => {
+                        const script = it.getAttribute(targetAttr)
+                        if (script) {
+                            const obj = (it as any).obj as any;
+                            const config = obj?._DomRender_proxy?.config;
+                            ScriptUtils.eval(`${this.bindScript} ${script} `, Object.assign(obj, {
+                                __render: Object.freeze({
+                                    target: DomRenderProxy.final(event.target),
+                                    element: it,
+                                    event: event,
+                                    range: Range.range,
+                                    scripts: EventManager.setBindProperty(config?.scripts, obj)
+                                })
+                            }))
+                        }
+                    })
                 })
-            })
-        });
+            });
+        }
     }
 
     public findAttrElements(fragment: DocumentFragment | Element, config?: Config): Set<Element> {
@@ -192,7 +195,7 @@ export class EventManager {
                         const k = key.trim();
                         if (s === 'null') {
                             it.removeAttribute(k);
-                        }  else {
+                        } else {
                             it.setAttribute(k, s);
                         }
                     })
@@ -203,7 +206,7 @@ export class EventManager {
                         const k = key.trim();
                         if (s === 'null') {
                             it.removeAttribute(k);
-                        }  else {
+                        } else {
                             it.setAttribute(k, s);
                         }
                     })
@@ -393,6 +396,7 @@ export class EventManager {
             return newScripts;
         }
     }
+
     // public usingThisVar(raws: string): string[] {
     //     let regex = /include\(.*\)/gm;
     //     // raws = raws.replace(regex, '');
@@ -414,6 +418,6 @@ export class EventManager {
     //     const strings = Array.from(usingVars);
     //     return strings;
     // }
-
 }
+
 export const eventManager = new EventManager();
