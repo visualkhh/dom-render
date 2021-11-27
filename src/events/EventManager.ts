@@ -62,7 +62,7 @@ export class EventManager {
                             const config = obj?._DomRender_proxy?.config;
                             ScriptUtils.eval(`${this.bindScript} ${script} `, Object.assign(obj, {
                                 __render: Object.freeze({
-                                    target: DomRenderProxy.final(event.target),
+                                    target: this.DomrenderProxyFinal(event.target),
                                     element: it,
                                     event: event,
                                     range: Range.range,
@@ -74,6 +74,11 @@ export class EventManager {
                 })
             });
         }
+    }
+    // 순환참조때문에 우선 여기에 뺴놓는다.
+    public DomrenderProxyFinal(obj: any) {
+        (obj as any)._DomRender_isFinal = true;
+        return obj;
     }
 
     public findAttrElements(fragment: DocumentFragment | Element, config?: Config): Set<Element> {
