@@ -381,7 +381,8 @@ export class EventManager {
                 varName = varName.replace(/this\./, '')
             }
             EventManager.VARNAMES.forEach(it => {
-                raws = raws!.replace(RegExp(it.replace('$', '\\$'), 'g'), `this?.___${it}`);
+                // raws = raws!.replace(RegExp(it.replace('$', '\\$'), 'g'), `this?.___${it}`);
+                raws = raws!.replace(RegExp(it.replace('$', '\\$'), 'g'), `this.___${it}`);
             })
             const variablePaths = ScriptUtils.getVariablePaths(raws ?? '');
             return variablePaths.has(varName)
