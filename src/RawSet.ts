@@ -67,7 +67,8 @@ export class RawSet {
             }
             if (script) {
                 EventManager.VARNAMES.forEach(it => {
-                    script = script.replace(RegExp(it.replace('$', '\\$'), 'g'), `this?.___${it}`);
+                    // script = script.replace(RegExp(it.replace('$', '\\$'), 'g'), `this?.___${it}`);
+                    script = script.replace(RegExp(it.replace('$', '\\$'), 'g'), `this.___${it}`);
                 })
                 Array.from(ScriptUtils.getVariablePaths(script)).filter(it => !it.startsWith(`___${EventManager.SCRIPTS_VARNAME}`) && !it.startsWith(`___${EventManager.SCRIPTS_VARNAME}`)).forEach(it => usingTriggerVariables.add(it));
             }
@@ -861,7 +862,8 @@ export class RawSet {
     }
 
     public static exporesionGrouops(data: string) {
-        const reg = /(?:[$#]\{(?:(([$#]\{)??[^$#]*?)\}[$#]))/g;
+        // const reg = /(?:[$#]\{(?:(([$#]\{)??[^$#]*?)\}[$#]))/g;
+        const reg = /(?:[$#]\{(?:(([$#]\{)??[^$#]?[^{]*?)\}[$#]))/g;
         return StringUtils.regexExec(reg, data);
     }
 }
