@@ -174,6 +174,14 @@ export abstract class Validator<T = any, E = Element> {
         return !this.childInValid();
     }
 
+    public childValue(): {[key: string]: any } {
+        const data = {} as any;
+        this.childValidator().filter(([k, v]) => {
+            data[k] = v.value;
+        });
+        return data;
+    }
+
     public childValidAction(): boolean {
         return !this.childInValidAction();
     }
