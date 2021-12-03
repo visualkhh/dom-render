@@ -2,7 +2,7 @@ import { RawSet } from './RawSet';
 import { eventManager } from './events/EventManager';
 import { Config } from './Config';
 import { ScriptUtils } from './utils/script/ScriptUtils';
-import {Shield} from './types/Types';
+import { DomRenderFinalProxy, Shield } from './types/Types';
 const excludeGetSetPropertys = ['onBeforeReturnGet', 'onBeforeReturnSet', '__domrender_components', '__render', '_DomRender_isFinal', '_domRender_ref', '_rawSets', '_domRender_proxy', '_targets', '_DomRender_origin', '_DomRender_ref', '_DomRender_proxy'];
 export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     public _domRender_ref = new Map<object, Set<string>>()
@@ -17,32 +17,15 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public static unFinal<T = any> (obj: T): T {
-        delete (obj as any)._DomRender_isFinal;
-        return obj;
+        return DomRenderFinalProxy.unFinal(obj)
     }
 
     public static final<T = any> (obj: T): T {
-        (obj as any)._DomRender_isFinal = true;
-        return obj;
-        // if (!('_DomRender_isFinal' in obj)) {
-        //     return new Proxy(obj as any, {
-        //         get(target: T, p: string | symbol, receiver: any): any {
-        //             if (p === '_DomRender_origin') {
-        //                 return obj;
-        //             }
-        //             return (target as any)[p];
-        //         },
-        //         has(target: any, p: string | symbol): boolean {
-        //             return p === '_DomRender_isFinal' || p in target;
-        //         }
-        //     })
-        // } else {
-        //     return obj;
-        // }
+        return DomRenderFinalProxy.final(obj)
     }
 
     public static isFinal<T = any> (obj: T) {
-        return '_DomRender_isFinal' in obj;
+        return DomRenderFinalProxy.isFinal(obj);
     }
 
     public run(objProxy: T) {

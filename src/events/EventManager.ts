@@ -3,6 +3,7 @@ import {ScriptUtils} from '../utils/script/ScriptUtils';
 import {DomUtils} from '../utils/dom/DomUtils';
 import {Range} from '../iterators/Range';
 import {DomRenderProxy} from '../DomRenderProxy';
+import { DomRenderFinalProxy } from '../types/Types';
 
 export class EventManager {
     public readonly attrPrefix = 'dr-';
@@ -62,7 +63,7 @@ export class EventManager {
                             const config = obj?._DomRender_proxy?.config;
                             ScriptUtils.eval(`${this.bindScript} ${script} `, Object.assign(obj, {
                                 __render: Object.freeze({
-                                    target: this.DomrenderProxyFinal(event.target),
+                                    target: DomRenderFinalProxy.final(event.target),
                                     element: it,
                                     event: event,
                                     range: Range.range,
@@ -75,11 +76,11 @@ export class EventManager {
             });
         }
     }
-    // 순환참조때문에 우선 여기에 뺴놓는다.
-    public DomrenderProxyFinal(obj: any) {
-        (obj as any)._DomRender_isFinal = true;
-        return obj;
-    }
+    // // 순환참조때문에 우선 여기에 뺴놓는다.
+    // public DomrenderProxyFinal(obj: any) {
+    //     (obj as any)._DomRender_isFinal = true;
+    //     return obj;
+    // }
 
     public findAttrElements(fragment: DocumentFragment | Element, config?: Config): Set<Element> {
         // const datas: {name: string, value: string | null, element: Element}[] = [];
