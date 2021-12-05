@@ -200,6 +200,14 @@ export abstract class Validator<T = any, E = Element> {
         return Object.entries(this).filter(([k, v]) => (v instanceof Validator));
     }
 
+    public childValidValidator(): [string, Validator][] {
+        return this.childValidator().filter(it => it[1].valid());
+    }
+
+    public childInValidValidator(): [string, Validator][] {
+        return this.childValidator().filter(it => it[1].inValid());
+    }
+
     public get length() {
         return (this.value as any)?.length ?? 0;
     }
