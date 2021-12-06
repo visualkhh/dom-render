@@ -191,6 +191,11 @@ export abstract class Validator<T = any, E = Element> {
         return inValid.length > 0;
     }
 
+    public childInValidValidator(): [string, Validator<any, Element>][] {
+        const inValid = this.childValidator().filter(([k, v]) => !v.valid());
+        return inValid;
+    }
+
     public childInValidAction(): boolean {
         const inValid = this.childValidator().filter(([k, v]) => !v.validAction());
         return inValid.length > 0;
