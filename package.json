@@ -57,7 +57,9 @@
     "npm-build": "npm run build && cp package.json dist && cp .npmignore dist && cp README.MD dist",
     "npm-publish": "npm run npm-build && npm publish ./dist",
     "tsc": "tsc",
+    "tsc:root-dist": "tsc --outDir ../dist-dom-render --declarationDir ../dist-dom-render",
     "tsc:watch": "rm -rf ./dist && mkdir dist && cp package.json dist && tsc --watch --sourceMap true",
+    "tsc:watch:root-dist": "rm -rf ../dist-dom-render && mkdirp ../dist-dom-render && cp package.json ../dist-dom-render && tsc  --outDir ../dist-dom-render --declarationDir ../dist-dom-render --watch --sourceMap true",
     "test": "jest --detectOpenHandles --forceExit"
   },
   "devDependencies": {
@@ -73,6 +75,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.3.1",
     "jest": "^26.6.3",
+    "mkdirp": "^1.0.4",
     "rollup": "^2.52.8",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-commonjs": "^10.1.0",
