@@ -290,7 +290,9 @@ export class EventManager {
         this.procAttr<HTMLInputElement>(elements, attr, (it, attribute) => {
             const script = attribute;
             it.addEventListener(eventName, (event) => {
-                ScriptUtils.eval(`${this.bindScript} ${script} `, Object.assign(obj, {
+                let filter = true;
+                const filterScript = it.getAttribute(`${attr}:filter`);
+                const thisTarget = Object.assign(obj, {
                     __render: Object.freeze({
                         event,
                         element: it,
@@ -298,12 +300,17 @@ export class EventManager {
                         range: Range.range,
                         scripts: EventManager.setBindProperty(config?.scripts, obj)
                     })
-                }))
+                });
+                if (filterScript) {
+                    filter = ScriptUtils.eval(`${this.bindScript} return ${filterScript}`, thisTarget)
+                }
+                if (filter) {
+                    ScriptUtils.eval(`${this.bindScript} ${script} `, thisTarget)
+                }
             })
         })
     }
 
-    // eslint-disable-next-line no-undef
     public addDrEventPram(obj: any, attr: string, elements: Set<ChildNode> | Set<Element>, config?: Config) {
         this.procAttr<HTMLInputElement>(elements, attr, (it, attribute, attributes) => {
             const bind: string | undefined = attributes[attr + ':bind'];
