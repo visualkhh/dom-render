@@ -36,6 +36,7 @@ export class RawSet {
     public static readonly DR_PRE_NAME = 'dr-pre';
     public static readonly DR_INNERHTML_NAME = 'dr-inner-html';
     public static readonly DR_INNERTEXT_NAME = 'dr-inner-text';
+    public static readonly DR_DETECT_NAME = 'dr-detect';
 
     public static readonly DR_TAGS = [];
 
@@ -45,7 +46,7 @@ export class RawSet {
     public static readonly DR_COMPLETE_OPTIONNAME = 'dr-complete';
     public static readonly DR_VAR_OPTIONNAME = 'dr-var';
     public static readonly DR_STRIP_OPTIONNAME = 'dr-strip';
-    public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_FORM_NAME, RawSet.DR_PRE_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME];
+    public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_FORM_NAME, RawSet.DR_PRE_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME, RawSet.DR_DETECT_NAME];
 
     constructor(public uuid: string, public point: { start: Comment, end: Comment }, public fragment: DocumentFragment, public data: any = {}) { // , public thisObjPath?: string
     }
@@ -66,13 +67,18 @@ export class RawSet {
                 script = targetAttrNames.map(it => (element.getAttribute(it))).filter(it => it).join(';');
             }
             if (script) {
+               // script = script.replace('}$','}');
+                // console.log('----------->', script)
                 EventManager.VARNAMES.forEach(it => {
                     // script = script.replace(RegExp(it.replace('$', '\\$'), 'g'), `this?.___${it}`);
+                    // script = script.replace(RegExp(it.replace('$', '\\$'), 'g'), `this.___${it}`);
                     script = script.replace(RegExp(it.replace('$', '\\$'), 'g'), `this.___${it}`);
                 })
+                // console.log('----------', script);
                 Array.from(ScriptUtils.getVariablePaths(script)).filter(it => !it.startsWith(`___${EventManager.SCRIPTS_VARNAME}`) && !it.startsWith(`___${EventManager.SCRIPTS_VARNAME}`)).forEach(it => usingTriggerVariables.add(it));
             }
         })
+        // console.log('usingTriggerVariable----------->', usingTriggerVariables)
         return usingTriggerVariables;
     }
 
@@ -162,7 +168,6 @@ export class RawSet {
                             fag: newTemp,
                             drStripOption: drAttr.drStripOption,
                             ...__render
-                            // eslint-disable-next-line no-use-before-define
                         } as Render)
                     }));
                     RawSet.drVarDecoding(newTemp, vars);
@@ -202,7 +207,6 @@ export class RawSet {
                                 fag: newTemp,
                                 drStripOption: drAttr.drStripOption,
                                 ...__render
-                                // eslint-disable-next-line no-use-before-define
                             } as Render)
                         }
                     ));
@@ -280,7 +284,6 @@ export class RawSet {
                             drStripOption: drAttr.drStripOption,
                             fag: newTemp,
                             ...__render
-                            // eslint-disable-next-line no-use-before-define
                         } as Render)
                     }));
                     const tempalte = document.createElement('template');
@@ -368,28 +371,30 @@ export class RawSet {
                     var i = 0; 
                     const forOf = ${drAttr.drForOf};
                     const forOfStr = \`${drAttr.drForOf}\`.trim();
-                    for(const it of forOf) {
-                        var destIt = it;
-                        if (/\\[(.*,?)\\],/g.test(forOfStr)) {
-                            if (typeof it === 'string') {
-                                destIt = it;
-                            } else {
-                                destIt = forOfStr.substring(1, forOfStr.length-1).split(',')[i];
+                    if (forOf) {
+                        for(const it of forOf) {
+                            var destIt = it;
+                            if (/\\[(.*,?)\\],/g.test(forOfStr)) {
+                                if (typeof it === 'string') {
+                                    destIt = it;
+                                } else {
+                                    destIt = forOfStr.substring(1, forOfStr.length-1).split(',')[i];
+                                }
+                            } else if (forOf.isRange) {
+                                    destIt = it;
+                            }  else {
+                                destIt = forOfStr + '[' + i +']'
                             }
-                        } else if (forOf.isRange) {
-                                destIt = it;
-                        }  else {
-                            destIt = forOfStr + '[' + i +']'
+                            const n = this.__render.element.cloneNode(true);
+                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
+                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
+                            if (this.__render.drStripOption) {
+                                Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
+                            } else {
+                                this.__render.fag.append(n);
+                            }
+                            i++;
                         }
-                        const n = this.__render.element.cloneNode(true);
-                        n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
-                        n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
-                        if (this.__render.drStripOption) {
-                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
-                        } else {
-                            this.__render.fag.append(n);
-                        }
-                        i++;
                     }
                     ${drAttr.drAfterOption ?? ''}
                     `, Object.assign(obj, {

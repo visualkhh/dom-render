@@ -215,6 +215,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public addRawSet(path: string, rawSet: RawSet) {
+        // console.log('addRawSet-->', path, rawSet)
         if (!this._rawSets.get(path)) {
             this._rawSets.set(path, new Set<RawSet>());
         }
