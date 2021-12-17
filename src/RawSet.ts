@@ -334,7 +334,7 @@ export class RawSet {
                         const n = this.__render.element.cloneNode(true);
                         var destIt = ${drAttr.drItOption};
                         if (destIt !== undefined) {
-                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt))) 
+                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForIt\\#/g, destIt))) 
                             n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
                         }
                         if (this.__render.drStripOption) {
@@ -386,7 +386,7 @@ export class RawSet {
                                 destIt = forOfStr + '[' + i +']'
                             }
                             const n = this.__render.element.cloneNode(true);
-                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
+                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIt\\#/g, destIt)))
                             n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
                             if (this.__render.drStripOption) {
                                 Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
@@ -437,7 +437,7 @@ export class RawSet {
                             destIt = repeatStr + '[' + i +']'
                         }
                         const n = this.__render.element.cloneNode(true);
-                        n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
+                        n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearRangeIt\\#/g, destIt)))
                         n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
                         
                         if (this.__render.drStripOption) {
