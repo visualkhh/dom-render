@@ -17,6 +17,7 @@ export type TargetAttr = {
 };
 
 export interface Config {
+    window: Window;
     targetElements?: TargetElement[];
     targetAttrs?: TargetAttr[];
     onElementInit?: (name: string, obj: any, rawSet: RawSet, targetElement: TargetElement) => void;

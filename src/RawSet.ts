@@ -1,11 +1,11 @@
-import {RandomUtils} from './utils/random/RandomUtils';
-import {StringUtils} from './utils/string/StringUtils';
-import {ScriptUtils} from './utils/script/ScriptUtils';
+import { RandomUtils } from './utils/random/RandomUtils';
+import { StringUtils } from './utils/string/StringUtils';
+import { ScriptUtils } from './utils/script/ScriptUtils';
 import { EventManager, eventManager } from './events/EventManager';
-import {Config, TargetElement} from './Config';
-import {Range} from './iterators/Range';
-import {Validator} from './validators/Validator';
-import {ValidatorArray} from './validators/ValidatorArray';
+import { Config, TargetElement } from './Config';
+import { Range } from './iterators/Range';
+import { Validator } from './validators/Validator';
+import { ValidatorArray } from './validators/ValidatorArray';
 
 type Attrs = {
     dr: string | null
@@ -82,8 +82,8 @@ export class RawSet {
         return usingTriggerVariables;
     }
 
-    public render(obj: any, config?: Config): RawSet[] {
-        const genNode = document.importNode(this.fragment, true);
+    public render(obj: any, config: Config): RawSet[] {
+        const genNode = config.window.document.importNode(this.fragment, true);
         const raws: RawSet[] = [];
         const onAttrInitCallBack: { attrName: string, attrValue: string, obj: any }[] = [];
         const onElementInitCallBack: { name: string, obj: any, targetElement: TargetElement }[] = [];
@@ -104,7 +104,7 @@ export class RawSet {
                 // eslint-disable-next-line no-use-before-define
             }) as unknown as Render;
 
-            const fag = document.createDocumentFragment()
+            const fag = config.window.document.createDocumentFragment()
             if (cNode.nodeType === Node.TEXT_NODE && cNode.textContent) {
                 const textContent = cNode.textContent;
                 const runText = RawSet.exporesionGrouops(textContent)[0][1];
@@ -112,12 +112,12 @@ export class RawSet {
                 let n: Node;
                 if (textContent?.startsWith('#')) {
                     const r = ScriptUtils.eval(`${__render.bindScript} return ${runText}`, Object.assign(obj, {__render}));
-                    const template = document.createElement('template') as HTMLTemplateElement;
+                    const template = config.window.document.createElement('template') as HTMLTemplateElement;
                     template.innerHTML = r;
                     n = template.content;
                 } else {
                     const r = ScriptUtils.eval(`${__render.bindScript}  return ${runText}`, Object.assign(obj, {__render}));
-                    n = document.createTextNode(r);
+                    n = config.window.document.createTextNode(r);
                 }
                 cNode.parentNode?.replaceChild(n, cNode)
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
@@ -148,7 +148,7 @@ export class RawSet {
                 if (drAttr.dr !== null && drAttr.dr.length >= 0) {
                     const itRandom = RawSet.drItOtherEncoding(element);
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
-                    const newTemp = document.createElement('temp');
+                    const newTemp = config.window.document.createElement('temp');
                     ScriptUtils.eval(`
                         ${__render.bindScript}
                         const n = $element.cloneNode(true);
@@ -172,7 +172,7 @@ export class RawSet {
                     }));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
-                    const tempalte = document.createElement('template');
+                    const tempalte = config.window.document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
                     fag.append(tempalte.content)
                     const rr = RawSet.checkPointCreates(fag, config)
@@ -183,7 +183,7 @@ export class RawSet {
                 if (drAttr.drIf) {
                     const itRandom = RawSet.drItOtherEncoding(element);
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
-                    const newTemp = document.createElement('temp');
+                    const newTemp = config.window.document.createElement('temp');
                     ScriptUtils.eval(`
                     ${__render.bindScript}
                     ${drAttr.drBeforeOption ?? ''}
@@ -212,7 +212,7 @@ export class RawSet {
                     ));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
-                    const tempalte = document.createElement('template');
+                    const tempalte = config.window.document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
                     fag.append(tempalte.content)
                     const rr = RawSet.checkPointCreates(fag, config)
@@ -223,7 +223,7 @@ export class RawSet {
                 if (drAttr.drThis) {
                     const r = ScriptUtils.evalReturn(drAttr.drThis, obj);
                     if (r) {
-                        fag.append(RawSet.drThisCreate(element, drAttr.drThis, drAttr.drVarOption ?? '', drAttr.drStripOption, obj))
+                        fag.append(RawSet.drThisCreate(element, drAttr.drThis, drAttr.drVarOption ?? '', drAttr.drStripOption, obj, config))
                         const rr = RawSet.checkPointCreates(fag, config)
                         element.parentNode?.replaceChild(fag, element);
                         raws.push(...rr)
@@ -233,7 +233,7 @@ export class RawSet {
                 }
 
                 if (drAttr.drForm) {
-                    RawSet.drFormOtherMoveAttr(element, 'name', 'temp-name');
+                    RawSet.drFormOtherMoveAttr(element, 'name', 'temp-name', config);
                     const data = ScriptUtils.evalReturn(`${drAttr.drForm}`, obj);
                     if (data instanceof Validator) {
                         data.setTarget(element);
@@ -262,12 +262,12 @@ export class RawSet {
                             }
                         }
                     })
-                    RawSet.drFormOtherMoveAttr(element, 'temp-name', 'name');
+                    RawSet.drFormOtherMoveAttr(element, 'temp-name', 'name', config);
                     raws.push(...RawSet.checkPointCreates(element, config));
                 }
 
                 if (drAttr.drInnerText) {
-                    const newTemp = document.createElement('temp');
+                    const newTemp = config.window.document.createElement('temp');
                     ScriptUtils.eval(` 
                         ${__render.bindScript}
                         const n = $element.cloneNode(true);  
@@ -286,7 +286,7 @@ export class RawSet {
                             ...__render
                         } as Render)
                     }));
-                    const tempalte = document.createElement('template');
+                    const tempalte = config.window.document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
                     fag.append(tempalte.content);
                     const rr = RawSet.checkPointCreates(fag, config);
@@ -295,7 +295,7 @@ export class RawSet {
                 }
 
                 if (drAttr.drInnerHTML) {
-                    const newTemp = document.createElement('temp');
+                    const newTemp = config.window.document.createElement('temp');
                     ScriptUtils.eval(`
                         ${__render.bindScript}
                         const n = $element.cloneNode(true);
@@ -315,7 +315,7 @@ export class RawSet {
                             // eslint-disable-next-line no-use-before-define
                         } as Render)
                     }));
-                    const tempalte = document.createElement('template');
+                    const tempalte = config.window.document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
                     fag.append(tempalte.content);
                     const rr = RawSet.checkPointCreates(fag, config);
@@ -326,7 +326,7 @@ export class RawSet {
                 if (drAttr.drFor) {
                     const itRandom = RawSet.drItOtherEncoding(element);
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
-                    const newTemp = document.createElement('temp');
+                    const newTemp = config.window.document.createElement('temp');
                     ScriptUtils.eval(`
                     ${__render.bindScript}
                     ${drAttr.drBeforeOption ?? ''}
@@ -353,7 +353,7 @@ export class RawSet {
                     }));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
-                    const tempalte = document.createElement('template');
+                    const tempalte = config.window.document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
                     fag.append(tempalte.content)
                     const rr = RawSet.checkPointCreates(fag, config)
@@ -364,7 +364,7 @@ export class RawSet {
                 if (drAttr.drForOf) {
                     const itRandom = RawSet.drItOtherEncoding(element);
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
-                    const newTemp = document.createElement('temp');
+                    const newTemp = config.window.document.createElement('temp');
                     ScriptUtils.eval(`
                     ${__render.bindScript}
                     ${drAttr.drBeforeOption ?? ''}
@@ -407,7 +407,7 @@ export class RawSet {
                     }));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
-                    const tempalte = document.createElement('template');
+                    const tempalte = config.window.document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
                     fag.append(tempalte.content)
                     const rr = RawSet.checkPointCreates(fag, config)
@@ -418,7 +418,7 @@ export class RawSet {
                 if (drAttr.drRepeat) {
                     const itRandom = RawSet.drItOtherEncoding(element);
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
-                    const newTemp = document.createElement('temp');
+                    const newTemp = config.window.document.createElement('temp');
                     ScriptUtils.eval(`
                     ${__render.bindScript}
                     ${drAttr.drBeforeOption ?? ''}
@@ -457,7 +457,7 @@ export class RawSet {
                     }));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
-                    const tempalte = document.createElement('template');
+                    const tempalte = config.window.document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
                     fag.append(tempalte.content)
                     const rr = RawSet.checkPointCreates(fag, config)
@@ -563,9 +563,9 @@ export class RawSet {
         this.point.start.parentNode?.insertBefore(genNode, this.point.start.nextSibling);
     }
 
-    public static checkPointCreates(element: Node, config?: Config): RawSet[] {
+    public static checkPointCreates(element: Node, config: Config): RawSet[] {
         // const nodeIterator = document.createTreeWalker(element, NodeFilter.SHOW_ALL, {
-        const nodeIterator = document.createNodeIterator(element, NodeFilter.SHOW_ALL, {
+        const nodeIterator = config.window.document.createNodeIterator(element, NodeFilter.SHOW_ALL, {
             acceptNode(node) {
                 if (node.nodeType === Node.TEXT_NODE) {
                     // console.log('????????', node.parentElement, node.parentElement?.getAttribute('dr-pre'));
@@ -579,8 +579,8 @@ export class RawSet {
                     // return /[$#]\{.*?\}/g.test(StringUtils.deleteEnter((node as Text).data ?? '')) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                 } else if (node.nodeType === Node.ELEMENT_NODE) {
                     const element = node as Element;
-                    const isElement = (config?.targetElements?.map(it => it.name.toLowerCase()) ?? []).includes(element.tagName.toLowerCase());
-                    const targetAttrNames = (config?.targetAttrs?.map(it => it.name) ?? []).concat(RawSet.DR_ATTRIBUTES);
+                    const isElement = (config.targetElements?.map(it => it.name.toLowerCase()) ?? []).includes(element.tagName.toLowerCase());
+                    const targetAttrNames = (config.targetAttrs?.map(it => it.name) ?? []).concat(RawSet.DR_ATTRIBUTES);
                     const isAttr = element.getAttributeNames().filter(it => targetAttrNames.includes(it.toLowerCase())).length > 0;
                     return (isAttr || isElement) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                 }
@@ -593,7 +593,7 @@ export class RawSet {
         while (currentNode = nodeIterator.nextNode()) {
             if (currentNode.nodeType === Node.TEXT_NODE) {
                 const text = (currentNode as Text).textContent ?? '';
-                const template = document.createElement('template');
+                const template = config.window.document.createElement('template');
                 // const a = StringUtils.regexExec(/\$\{.*?\}/g, text);
                 // const a = StringUtils.regexExec(/[$#]\{.*?\}/g, text);
                 // const a = StringUtils.betweenRegexpStr('[$#]\\{', '\\}', text); // <--나중에..
@@ -609,29 +609,29 @@ export class RawSet {
                 map.forEach(it => {
                     const regexArr = it.regexArr;
                     const preparedText = regexArr.input.substring(lasterIndex, regexArr.index);
-                    const start = document.createComment(`start text ${it.uuid}`);
-                    const end = document.createComment(`end text ${it.uuid}`);
+                    const start = config.window.document.createComment(`start text ${it.uuid}`);
+                    const end = config.window.document.createComment(`end text ${it.uuid}`);
                     // layout setting
                     template.content.append(document.createTextNode(preparedText)); // 사이사이값.
                     template.content.append(start);
                     template.content.append(end);
 
                     // content
-                    const fragment = document.createDocumentFragment();
-                    fragment.append(document.createTextNode(it.content))
+                    const fragment = config.window.document.createDocumentFragment();
+                    fragment.append(config.window.document.createTextNode(it.content))
                     pars.push(new RawSet(it.uuid, {
                         start,
                         end
                     }, fragment));
                     lasterIndex = regexArr.index + it.content.length;
                 })
-                template.content.append(document.createTextNode(text.substring(lasterIndex, text.length)));
+                template.content.append(config.window.document.createTextNode(text.substring(lasterIndex, text.length)));
                 currentNode?.parentNode?.replaceChild(template.content, currentNode);
             } else {
                 const uuid = RandomUtils.uuid()
-                const fragment = document.createDocumentFragment();
-                const start = document.createComment(`start ${uuid}`)
-                const end = document.createComment(`end ${uuid}`)
+                const fragment = config.window.document.createDocumentFragment();
+                const start = config.window.document.createComment(`start ${uuid}`)
+                const end = config.window.document.createComment(`end ${uuid}`)
                 currentNode?.parentNode?.insertBefore(start, currentNode);
                 currentNode?.parentNode?.insertBefore(end, currentNode.nextSibling);
                 fragment.append(currentNode);
@@ -740,9 +740,9 @@ export class RawSet {
         });
     }
 
-    public static drFormOtherMoveAttr(element: Element, as: string, to: string) {
+    public static drFormOtherMoveAttr(element: Element, as: string, to: string, config: Config) {
         element.querySelectorAll(`[${RawSet.DR_FORM_NAME}]`).forEach(subElement => {
-            const nodeIterator = document.createNodeIterator(subElement, NodeFilter.SHOW_ELEMENT, {
+            const nodeIterator = config.window.document.createNodeIterator(subElement, NodeFilter.SHOW_ELEMENT, {
                 acceptNode(node) {
                     if (node.nodeType === Node.ELEMENT_NODE) {
                         const element = node as Element;
@@ -796,8 +796,8 @@ export class RawSet {
         });
     }
 
-    public static drThisCreate(element: Element, drThis: string, drVarOption: string, drStripOption: boolean, obj: any) {
-        const fag = document.createDocumentFragment();
+    public static drThisCreate(element: Element, drThis: string, drVarOption: string, drStripOption: boolean, obj: any, config: Config) {
+        const fag = config.window.document.createDocumentFragment();
         const n = element.cloneNode(true) as Element;
         const thisRandom = this.drThisEncoding(n, drThis)
         const vars = this.drVarEncoding(n, drVarOption)
@@ -813,8 +813,12 @@ export class RawSet {
 
     public static createComponentTargetElement(name: string,
                                                objFactory: (element: Element, obj: any, rawSet: RawSet) => any,
-                                               template: string = '', styles: string[] = [], scripts?: { [n: string]: any },
-                                               complete?:(element: Element, obj: any, rawSet: RawSet) => void): TargetElement {
+                                               template: string = '',
+                                               styles: string[] = [],
+                                               scripts: { [n: string]: any } | undefined,
+                                               // complete: (element: Element, obj: any, rawSet: RawSet) => void  | undefined,
+                                               config: Config
+    ): TargetElement {
         const targetElement: TargetElement = {
             name,
             styles,
@@ -855,13 +859,13 @@ export class RawSet {
                         __render: render
                     }))
                 }
-                const fag = document.createDocumentFragment();
+                const fag = config.window.document.createDocumentFragment();
                 const innerHTML = (styles?.map(it => `<style>${it}</style>`) ?? []).join(' ') + (template ?? '');
                 element.innerHTML = innerHTML;
-                fag.append(RawSet.drThisCreate(element, `this.__domrender_components.${componentKey}`, '', true, obj))
+                fag.append(RawSet.drThisCreate(element, `this.__domrender_components.${componentKey}`, '', true, obj, config))
                 return fag;
             },
-            complete
+            // complete
         }
         return targetElement;
     }

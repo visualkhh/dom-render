@@ -48,7 +48,7 @@ export class ScriptUtils {
         return Function(`"use strict"; ${script} `).bind(thisTarget)();
     }
 
-    public static loadElement(name: string, attribute: {[key:string]: string}, target: Element = document.head) {
+    public static loadElement(name: string, attribute: {[key:string]: string}, document: Document) {
         return new Promise((resolve, reject) => {
             const tag = document.createElement(name)
             tag.onload = resolve
@@ -56,11 +56,11 @@ export class ScriptUtils {
             for (const [key, value] of Object.entries(attribute)) {
                 tag.setAttribute(key, value);
             }
-            target.append(tag)
+            document.head.append(tag)
         });
     }
 
-    public static loadStyleSheet(href: string, attribute: {[key:string]: string} = {}) {
+    public static loadStyleSheet(href: string, attribute: {[key:string]: string} = {}, document: Document) {
         // const tag = document.createElement('link');
         // tag.type = 'text/css';
         // tag.setAttribute('rel', 'stylesheet');
@@ -72,12 +72,12 @@ export class ScriptUtils {
         attribute.type = 'text/css';
         attribute.rel = 'stylesheet';
         attribute.href = href;
-        return ScriptUtils.loadElement('link', attribute);
+        return ScriptUtils.loadElement('link', attribute, document);
     }
 
-    public static loadScript(src: string, attribute: {[key:string]: string} = {}) {
+    public static loadScript(src: string, attribute: {[key:string]: string} = {}, document: Document) {
         attribute.type = 'text/javascript';
         attribute.src = src;
-        return ScriptUtils.loadElement('script', attribute);
+        return ScriptUtils.loadElement('script', attribute, document);
     }
 }

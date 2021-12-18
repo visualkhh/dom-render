@@ -10,7 +10,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     public _domRender_proxy?: T;
     public _targets = new Set<Node>();
 
-    constructor(public _domRender_origin: T, target?: Node, private config?: Config) {
+    constructor(public _domRender_origin: T, target: Node | undefined, private config: Config) {
         if (target) {
             this._targets.add(target);
         }
@@ -36,7 +36,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                 // console.log('key-------->', it)
                 const target = (obj as any)[it]
                 if (target !== undefined && target !== null && typeof target === 'object' && !DomRenderProxy.isFinal(target) && !Object.isFrozen(target) && !(obj instanceof Shield)) {
-                    const filter = this.config?.proxyExcludeTyps?.filter(it => target instanceof it) ?? []
+                    const filter = this.config.proxyExcludeTyps?.filter(it => target instanceof it) ?? []
                     if (filter.length === 0) {
                         const proxyAfter = this.proxy(objProxy, target, it);
                         (obj as any)[it] = proxyAfter;
@@ -139,7 +139,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             fullPath = this.root([p], value);
         }
 
-        if (('onBeforeReturnSet' in receiver) && typeof p === 'string' && !(this.config?.proxyExcludeOnBeforeReturnSets ?? []).concat(excludeGetSetPropertys).includes(p)) {
+        if (('onBeforeReturnSet' in receiver) && typeof p === 'string' && !(this.config.proxyExcludeOnBeforeReturnSets ?? []).concat(excludeGetSetPropertys).includes(p)) {
             (receiver as any)?.onBeforeReturnSet?.(p, value, fullPath);
         }
         return true;
@@ -173,7 +173,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                 it = it._DomRender_origin;
             }
 
-            if (('onBeforeReturnGet' in receiver) && typeof p === 'string' && !(this.config?.proxyExcludeOnBeforeReturnGets ?? []).concat(excludeGetSetPropertys).includes(p)) {
+            if (('onBeforeReturnGet' in receiver) && typeof p === 'string' && !(this.config.proxyExcludeOnBeforeReturnGets ?? []).concat(excludeGetSetPropertys).includes(p)) {
                 (receiver as any)?.onBeforeReturnGet?.(p, it, this.root([p], it, false));
             }
             return it;
@@ -185,7 +185,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     proxy(parentProxy: T, obj: T | any, p: string) {
-        const proxyTarget = (this.config?.proxyExcludeTyps?.filter(it => obj instanceof it) ?? []).length <= 0;
+        const proxyTarget = (this.config.proxyExcludeTyps?.filter(it => obj instanceof it) ?? []).length <= 0;
         if (proxyTarget && obj !== undefined && obj !== null && typeof obj === 'object' && !('_DomRender_isProxy' in obj) && !DomRenderProxy.isFinal(obj) && !Object.isFrozen(obj) && !(obj instanceof Shield)) {
             const domRender = new DomRenderProxy(obj, undefined, this.config);
             domRender.addRef(parentProxy, p);
