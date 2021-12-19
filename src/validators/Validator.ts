@@ -209,6 +209,15 @@ export abstract class Validator<T = any, E = Element> {
         return this.childValidator().filter(it => it[1].valid());
     }
 
+    public syncValue() {
+        this.value = (this.getTarget() as any)?.value;
+    }
+
+    public allSyncValue() {
+        this.childValidator().forEach(([k, e]) => {
+            e.syncValue();
+        })
+    }
     public get length() {
         return (this.value as any)?.length ?? 0;
     }

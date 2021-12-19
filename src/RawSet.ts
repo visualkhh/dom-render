@@ -23,13 +23,13 @@ type Attrs = {
     drAfterOption: string | null
     drBeforeOption: string | null
     drCompleteOption: string | null
-    drStripOption: boolean
+    drStripOption: string | null
 }
 export class RawSet {
     public static readonly DR = 'dr';
     public static readonly DR_IF_NAME = 'dr-if';
-    public static readonly DR_FOR_OF_NAME = 'dr-for-of';
     public static readonly DR_FOR_NAME = 'dr-for';
+    public static readonly DR_FOR_OF_NAME = 'dr-for-of';
     public static readonly DR_REPEAT_NAME = 'dr-repeat';
     public static readonly DR_THIS_NAME = 'dr-this';
     public static readonly DR_FORM_NAME = 'dr-form';
@@ -38,14 +38,33 @@ export class RawSet {
     public static readonly DR_INNERTEXT_NAME = 'dr-inner-text';
     public static readonly DR_DETECT_NAME = 'dr-detect';
 
-    public static readonly DR_TAGS = [];
-
     public static readonly DR_IT_OPTIONNAME = 'dr-it';
+    public static readonly DR_VAR_OPTIONNAME = 'dr-var';
     public static readonly DR_AFTER_OPTIONNAME = 'dr-after';
     public static readonly DR_BEFORE_OPTIONNAME = 'dr-before';
     public static readonly DR_COMPLETE_OPTIONNAME = 'dr-complete';
-    public static readonly DR_VAR_OPTIONNAME = 'dr-var';
     public static readonly DR_STRIP_OPTIONNAME = 'dr-strip';
+
+    public static readonly drAttrsOriginName: Attrs = {
+        dr: RawSet.DR,
+        drIf: RawSet.DR_IF_NAME,
+        drFor: RawSet.DR_FOR_NAME,
+        drForOf: RawSet.DR_FOR_OF_NAME,
+        drRepeat: RawSet.DR_REPEAT_NAME,
+        drThis: RawSet.DR_THIS_NAME,
+        drForm: RawSet.DR_FORM_NAME,
+        drPre: RawSet.DR_PRE_NAME,
+        drInnerHTML: RawSet.DR_INNERHTML_NAME,
+        drInnerText: RawSet.DR_INNERTEXT_NAME,
+        drItOption: RawSet.DR_IT_OPTIONNAME,
+        drVarOption: RawSet.DR_VAR_OPTIONNAME,
+        drAfterOption: RawSet.DR_AFTER_OPTIONNAME,
+        drBeforeOption: RawSet.DR_BEFORE_OPTIONNAME,
+        drCompleteOption: RawSet.DR_COMPLETE_OPTIONNAME,
+        drStripOption: RawSet.DR_STRIP_OPTIONNAME,
+    };
+    public static readonly DR_TAGS = [];
+
     public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_FORM_NAME, RawSet.DR_PRE_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME, RawSet.DR_DETECT_NAME];
 
     constructor(public uuid: string, public point: { start: Comment, end: Comment }, public fragment: DocumentFragment, public data: any = {}) { // , public thisObjPath?: string
@@ -120,7 +139,8 @@ export class RawSet {
                     n = config.window.document.createTextNode(r);
                 }
                 cNode.parentNode?.replaceChild(n, cNode)
-            } else if (cNode.nodeType === Node.ELEMENT_NODE) {
+            }
+            else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
                 const drAttr = {
                     dr: this.getAttributeAndDelete(element, RawSet.DR),
@@ -138,7 +158,7 @@ export class RawSet {
                     drAfterOption: this.getAttributeAndDelete(element, RawSet.DR_AFTER_OPTIONNAME),
                     drBeforeOption: this.getAttributeAndDelete(element, RawSet.DR_BEFORE_OPTIONNAME),
                     drCompleteOption: this.getAttributeAndDelete(element, RawSet.DR_COMPLETE_OPTIONNAME),
-                    drStripOption: this.getAttributeAndDelete(element, RawSet.DR_STRIP_OPTIONNAME) === 'true'
+                    drStripOption: this.getAttributeAndDelete(element, RawSet.DR_STRIP_OPTIONNAME)
                 } as Attrs;
                 drAttrs.push(drAttr);
 
@@ -155,11 +175,11 @@ export class RawSet {
                         var destIt = ${drAttr.drItOption};
                         if (destIt !== undefined) {
                             n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
-                            console.log('----', n.innerHTML);
+                            // console.log('----', n.innerHTML);
                             n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
-                            console.log('----', n.innerHTML);
+                            // console.log('----', n.innerHTML);
                         }
-                        if (this.__render.drStripOption) {
+                        if (this.__render.drStripOption === 'true') {
                             Array.from(n.childNodes).forEach(it => this.__fag.append(it));
                         } else {
                             this.__render.fag.append(n);
@@ -184,17 +204,19 @@ export class RawSet {
                     const itRandom = RawSet.drItOtherEncoding(element);
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
                     const newTemp = config.window.document.createElement('temp');
+                    // Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drIf' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v)); <-- 이부분은 다른 attr에도 적용을 할지말지 생각해야됨  엘리먼트 존재유무에 따라서 적용을 할지말지 결정해야됨
                     ScriptUtils.eval(`
                     ${__render.bindScript}
                     ${drAttr.drBeforeOption ?? ''}
                     if(${drAttr.drIf}) {
                         const n = $element.cloneNode(true);
+                        Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drIf' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));
                         var destIt = ${drAttr.drItOption};
                         if (destIt !== undefined) {
                             n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
                             n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
                         }
-                        if (this.__render.drStripOption) {
+                        if (this.__render.drStripOption === 'true') {
                             Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
                         } else {
                             this.__render.fag.append(n);
@@ -205,6 +227,8 @@ export class RawSet {
                         {
                             __render: Object.freeze({
                                 fag: newTemp,
+                                drAttr: drAttr,
+                                drAttrsOriginName: RawSet.drAttrsOriginName,
                                 drStripOption: drAttr.drStripOption,
                                 ...__render
                             } as Render)
@@ -212,12 +236,16 @@ export class RawSet {
                     ));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
+                    const bypass = (newTemp.innerHTML ??'').trim().length <= 0;
                     const tempalte = config.window.document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
                     fag.append(tempalte.content)
                     const rr = RawSet.checkPointCreates(fag, config)
                     element.parentNode?.replaceChild(fag, element);
-                    raws.push(...rr)
+                    raws.push(...rr);
+                    if (bypass) {
+                        return;
+                    }
                 }
 
                 if (drAttr.drThis) {
@@ -226,7 +254,7 @@ export class RawSet {
                         fag.append(RawSet.drThisCreate(element, drAttr.drThis, drAttr.drVarOption ?? '', drAttr.drStripOption, obj, config))
                         const rr = RawSet.checkPointCreates(fag, config)
                         element.parentNode?.replaceChild(fag, element);
-                        raws.push(...rr)
+                        raws.push(...rr);
                     } else {
                         cNode.remove();
                     }
@@ -238,12 +266,37 @@ export class RawSet {
                     if (data instanceof Validator) {
                         data.setTarget(element);
                     }
-                    element.querySelectorAll('[name]').forEach(it => {
+                    const childs = Array.from(element.querySelectorAll('[name]'));
+                    const fromName = ScriptUtils.evalReturn(element.getAttribute('dr-form:name') ?? '', obj);
+                    const thisName = fromName ?? element.getAttribute('name');
+                    // // 자기자신이 Input 대상일때
+                    if (childs.length <= 0 && thisName) {
+                        childs.push(element);
+                    }
+                    childs.forEach(it => {
                         const eventName = it.getAttribute('dr-form:event') ?? 'change'
+                        const validatorName = it.getAttribute('dr-form:validator');
                         const attrEventName = eventManager.attrPrefix + 'event-' + eventName;
-                        let varpath = it.getAttribute('name');
+                        let varpath = ScriptUtils.evalReturn(element.getAttribute('dr-form:name') ?? '', obj) ?? it.getAttribute('name');
                         if (varpath != null) {
-                            const data = ScriptUtils.evalReturn(`${drAttr.drForm}${varpath ? '.' + varpath : ''}`, obj);
+                            if (validatorName) {
+                                ScriptUtils.eval(`
+                                    ${__render.bindScript}
+                                    const validator = typeof ${validatorName} ==='function' ?  new  ${validatorName}() : ${validatorName};
+                                    // validator.setTarget($element);
+                                    // validator.value = $element.value;
+                                    ${drAttr.drForm}.${varpath} = validator;
+                                    console.log('validator---add', ${drAttr.drForm}, '${drAttr.drForm}.${varpath}', validator)
+                                `,
+                                    Object.assign(obj, {
+                                            __render: Object.freeze({
+                                                drStripOption: drAttr.drStripOption,
+                                                ...__render
+                                            } as Render)
+                                        }
+                                    ));
+                            }
+                            let data = ScriptUtils.evalReturn(`${drAttr.drForm}.${varpath}`, obj);
                             if (data instanceof ValidatorArray) {
                                 varpath = drAttr.drForm + '.' + varpath;
                                 it.setAttribute(attrEventName, `${varpath}.setArrayValue($target, $target.value, $event);`);
@@ -273,7 +326,7 @@ export class RawSet {
                         const n = $element.cloneNode(true);  
                         ${drAttr.drBeforeOption ?? ''}
                         n.innerText = ${drAttr.drInnerText};
-                        if (this.__render.drStripOption) {
+                        if (this.__render.drStripOption === 'true') {
                             Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
                         } else {
                             this.__render.fag.append(n);
@@ -301,7 +354,7 @@ export class RawSet {
                         const n = $element.cloneNode(true);
                         ${drAttr.drBeforeOption ?? ''}
                         n.innerHTML = ${drAttr.drInnerHTML};
-                        if (this.__render.drStripOption) {
+                        if (this.__render.drStripOption === 'true') {
                             Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
                         } else {
                             this.__render.fag.append(n);
@@ -337,7 +390,7 @@ export class RawSet {
                             n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForIt\\#/g, destIt))) 
                             n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
                         }
-                        if (this.__render.drStripOption) {
+                        if (this.__render.drStripOption === 'true') {
                             Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
                         } else {
                             this.__render.fag.append(n);
@@ -388,7 +441,7 @@ export class RawSet {
                             const n = this.__render.element.cloneNode(true);
                             n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIt\\#/g, destIt)))
                             n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
-                            if (this.__render.drStripOption) {
+                            if (this.__render.drStripOption === 'true') {
                                 Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
                             } else {
                                 this.__render.fag.append(n);
@@ -440,7 +493,7 @@ export class RawSet {
                         n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearRangeIt\\#/g, destIt)))
                         n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
                         
-                        if (this.__render.drStripOption) {
+                        if (this.__render.drStripOption === 'true') {
                             Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
                         } else {
                             this.__render.fag.append(n);
@@ -796,14 +849,14 @@ export class RawSet {
         });
     }
 
-    public static drThisCreate(element: Element, drThis: string, drVarOption: string, drStripOption: boolean, obj: any, config: Config) {
+    public static drThisCreate(element: Element, drThis: string, drVarOption: string, drStripOption: boolean | string | null, obj: any, config: Config) {
         const fag = config.window.document.createDocumentFragment();
         const n = element.cloneNode(true) as Element;
         const thisRandom = this.drThisEncoding(n, drThis)
         const vars = this.drVarEncoding(n, drVarOption)
         this.drVarDecoding(n, vars)
         this.drThisDecoding(n, thisRandom);
-        if (drStripOption) {
+        if (drStripOption && (drStripOption === true || drStripOption === 'true')) {
             Array.from(n.childNodes).forEach(it => fag.append(it));
         } else {
             fag.append(n)
@@ -828,7 +881,7 @@ export class RawSet {
                 if (!obj.__domrender_components) {
                     obj.__domrender_components = {};
                 }
-                ;
+
                 const domrenderComponents = obj.__domrender_components;
                 const componentKey = '_' + RandomUtils.getRandomString(20);
                 // console.log('callback settttt---a-->', componentKey, objFactory, objFactory(element, obj, rawSet))
