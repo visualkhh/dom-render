@@ -59,6 +59,14 @@ export abstract class Validator<T = any, E = Element> {
         return this._target;
     }
 
+    targetFocus() {
+        (this._target as any)?.focus?.();
+    }
+
+    targetDispatchEvent(event: Event) {
+        return (this._target as any)?.dispatchEvent(event);
+    }
+
     setTarget(target: E | undefined) {
         if (target) {
             this._target = this.domRenderFinal(target);
@@ -88,7 +96,11 @@ export abstract class Validator<T = any, E = Element> {
         this.changeValue(value);
         const target = this.getTarget() as any;
         if (target && target?.value !== undefined && target?.value !== null) {
-            target.value = this._value;
+            try {
+                target.value = this._value;
+            } catch (e) {
+                console.log('set value function is blocked ')
+            }
         }
         if (this.getAutoValidAction()) {
             this.validAction();
@@ -176,7 +188,7 @@ export abstract class Validator<T = any, E = Element> {
 
     public childValue(): {[key: string]: any } {
         const data = {} as any;
-        this.childValidator().filter(([k, v]) => {
+        this.childValidators().filter(([k, v]) => {
             data[k] = v.value;
         });
         return data;
@@ -187,26 +199,30 @@ export abstract class Validator<T = any, E = Element> {
     }
 
     public childInValid(): boolean {
-        const inValid = this.childValidator().filter(([k, v]) => !v.valid());
+        const inValid = this.childValidators().filter(([k, v]) => !v.valid());
         return inValid.length > 0;
     }
 
     public childInValidValidator(): [string, Validator<any, Element>][] {
-        const inValid = this.childValidator().filter(([k, v]) => !v.valid());
+        const inValid = this.childValidators().filter(([k, v]) => !v.valid());
         return inValid;
     }
 
     public childInValidAction(): boolean {
-        const inValid = this.childValidator().filter(([k, v]) => !v.validAction());
+        const inValid = this.childValidators().filter(([k, v]) => !v.validAction());
         return inValid.length > 0;
     }
 
-    public childValidator(): [string, Validator][] {
+    public childValidator(name: string): Validator | undefined {
+        return Object.entries(this).find(([k, v]) => ( k === name && (v instanceof Validator)))?.[1];
+    }
+
+    public childValidators(): [string, Validator][] {
         return Object.entries(this).filter(([k, v]) => (v instanceof Validator));
     }
 
     public childValidValidator(): [string, Validator][] {
-        return this.childValidator().filter(it => it[1].valid());
+        return this.childValidators().filter(it => it[1].valid());
     }
 
     public syncValue() {
@@ -214,7 +230,7 @@ export abstract class Validator<T = any, E = Element> {
     }
 
     public allSyncValue() {
-        this.childValidator().forEach(([k, e]) => {
+        this.childValidators().forEach(([k, e]) => {
             e.syncValue();
         })
     }

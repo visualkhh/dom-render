@@ -283,10 +283,7 @@ export class RawSet {
                                 ScriptUtils.eval(`
                                     ${__render.bindScript}
                                     const validator = typeof ${validatorName} ==='function' ?  new  ${validatorName}() : ${validatorName};
-                                    // validator.setTarget($element);
-                                    // validator.value = $element.value;
-                                    ${drAttr.drForm}.${varpath} = validator;
-                                    console.log('validator---add', ${drAttr.drForm}, '${drAttr.drForm}.${varpath}', validator)
+                                    ${drAttr.drForm}['${varpath}'] = validator;
                                 `,
                                     Object.assign(obj, {
                                             __render: Object.freeze({
@@ -296,21 +293,19 @@ export class RawSet {
                                         }
                                     ));
                             }
-                            let data = ScriptUtils.evalReturn(`${drAttr.drForm}.${varpath}`, obj);
+                            varpath = `${drAttr.drForm}['${varpath}']`;
+                            let data = ScriptUtils.evalReturn(`${varpath}`, obj);
                             if (data instanceof ValidatorArray) {
-                                varpath = drAttr.drForm + '.' + varpath;
-                                it.setAttribute(attrEventName, `${varpath}.setArrayValue($target, $target.value, $event);`);
+                                it.setAttribute(attrEventName, `${varpath}.setArrayValue($target, $target.value, $event); ${it.getAttribute(attrEventName)??''};`);
                                 data.addValidator((it as any).value, it);
                             } else if (data instanceof Validator) {
-                                const fieldPath = drAttr.drForm + '.' + varpath;
-                                varpath += (varpath ? '.value' : 'value');
-                                varpath = drAttr.drForm + '.' + varpath;
+                                // varpath += (varpath ? '.value' : 'value');
+                                // varpath = drAttr.drForm + '.' + varpath;
                                 // it.setAttribute(attrEventName, `${varpath} = $target.value; ${target}=$target; ${event}=$event;`);
-                                it.setAttribute(attrEventName, `${fieldPath}.set($target.value, $target, $event);`);
+                                it.setAttribute(attrEventName, `${varpath}.set($target.value, $target, $event); ${it.getAttribute(attrEventName)??''};`);
                                 data.setTarget(it);
                                 data.value = (it as any).value;
                             } else {
-                                varpath = drAttr.drForm + '.' + varpath;
                                 it.setAttribute(attrEventName, `${varpath} = $target.value;`);
                             }
                         }
