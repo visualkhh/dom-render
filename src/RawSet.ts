@@ -263,15 +263,19 @@ export class RawSet {
                 if (drAttr.drForm) {
                     RawSet.drFormOtherMoveAttr(element, 'name', 'temp-name', config);
                     const data = ScriptUtils.evalReturn(`${drAttr.drForm}`, obj);
-                    if (data instanceof Validator) {
-                        data.setTarget(element);
-                    }
+
                     const childs = Array.from(element.querySelectorAll('[name]'));
+
                     const fromName = ScriptUtils.evalReturn(element.getAttribute('dr-form:name') ?? '', obj);
                     const thisName = fromName ?? element.getAttribute('name');
+                    // console.log('dr-form:name', thisName, element.getAttribute('dr-form:name'), obj, element);
                     // // 자기자신이 Input 대상일때
                     if (childs.length <= 0 && thisName) {
                         childs.push(element);
+                    } else {
+                        if (data instanceof Validator) {
+                            data.setTarget(element);
+                        }
                     }
                     childs.forEach(it => {
                         const eventName = it.getAttribute('dr-form:event') ?? 'change'
