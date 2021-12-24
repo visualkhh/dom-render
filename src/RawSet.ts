@@ -6,6 +6,7 @@ import { Config, TargetElement } from './Config';
 import { Range } from './iterators/Range';
 import { Validator } from './validators/Validator';
 import { ValidatorArray } from './validators/ValidatorArray';
+import {DomRenderFinalProxy} from './types/Types';
 
 type Attrs = {
     dr: string | null
@@ -523,9 +524,9 @@ export class RawSet {
                     if (name.toLowerCase() === element.tagName.toLowerCase()) {
                         const documentFragment = it.callBack(element, obj, this);
                         if (documentFragment) {
-                            fag.append(documentFragment)
-                            const rr = RawSet.checkPointCreates(fag, config)
-                            element.parentNode?.replaceChild(fag, element);
+                            // fag.append(documentFragment)
+                            const rr = RawSet.checkPointCreates(documentFragment, config)
+                            element.parentNode?.replaceChild(documentFragment, element);
                             // TODO: 나중에 삭제?
                             // const onInit = element.getAttribute('dr-on-init-component');
                             // if (onInit) {
@@ -548,11 +549,9 @@ export class RawSet {
                     if (attrValue && attrName) {
                         const documentFragment = it.callBack(element, attrValue, obj, this);
                         if (documentFragment) {
-                            fag.append(documentFragment);
-                            // fag.firstElementChild?.setAttribute('dr','');
-                            // console.log('?????', Array.from(fag.childNodes))
-                            const rr = RawSet.checkPointCreates(fag, config)
-                            element.parentNode?.replaceChild(fag, element);
+                            // fag.append(documentFragment);
+                            const rr = RawSet.checkPointCreates(documentFragment, config)
+                            element.parentNode?.replaceChild(documentFragment, element);
                             raws.push(...rr);
                             onAttrInitCallBack.push({
                                 attrName,
@@ -616,7 +615,7 @@ export class RawSet {
     }
 
     public static checkPointCreates(element: Node, config: Config): RawSet[] {
-        // const nodeIterator = document.createTreeWalker(element, NodeFilter.SHOW_ALL, {
+      //  const thisVariableName = (element as any).__domrender_this_variable_name;
         const nodeIterator = config.window.document.createNodeIterator(element, NodeFilter.SHOW_ALL, {
             acceptNode(node) {
                 if (node.nodeType === Node.TEXT_NODE) {
@@ -684,6 +683,7 @@ export class RawSet {
                 const fragment = config.window.document.createDocumentFragment();
                 const start = config.window.document.createComment(`start ${uuid}`)
                 const end = config.window.document.createComment(`end ${uuid}`)
+                //console.log('start--', uuid)
                 currentNode?.parentNode?.insertBefore(start, currentNode);
                 currentNode?.parentNode?.insertBefore(end, currentNode.nextSibling);
                 fragment.append(currentNode);
@@ -860,6 +860,8 @@ export class RawSet {
         } else {
             fag.append(n)
         }
+        // (fag as any).__domrender_this_variable_name = drThis;
+        // console.log('set __domrender_this_variable_name', (fag as any).__domrender_this_variable_name)
         return fag;
     }
 
@@ -904,18 +906,21 @@ export class RawSet {
                 } as Render);
                 this.__render = render;
 
+                instance['__domrender_component_new'] = instance['__domrender_component_new'] ?? new Proxy({}, new DomRenderFinalProxy());
+                instance['__domrender_component_new'].innerHTML = element.innerHTML;
+                instance['__domrender_component_new'].creator = obj;
+                const applayTemplate = template.replace('#innerHTML#', element.innerHTML);
                 const oninit = element.getAttribute('dr-on-init')
+                console.log('oninit', oninit)
                 if (oninit) {
                     const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${oninit} `;
                     ScriptUtils.eval(script, Object.assign(obj, {
                         __render: render
                     }))
                 }
-                const fag = config.window.document.createDocumentFragment();
-                const innerHTML = (styles?.map(it => `<style>${it}</style>`) ?? []).join(' ') + (template ?? '');
+                const innerHTML = (styles?.map(it => `<style>${it}</style>`) ?? []).join(' ') + (applayTemplate ?? '');
                 element.innerHTML = innerHTML;
-                fag.append(RawSet.drThisCreate(element, `this.__domrender_components.${componentKey}`, '', true, obj, config))
-                return fag;
+                return RawSet.drThisCreate(element, `this.__domrender_components.${componentKey}`, '', true, obj, config);
             },
             // complete
         }
