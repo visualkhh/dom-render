@@ -2,7 +2,7 @@ import { RandomUtils } from './utils/random/RandomUtils';
 import { StringUtils } from './utils/string/StringUtils';
 import { ScriptUtils } from './utils/script/ScriptUtils';
 import { EventManager, eventManager } from './events/EventManager';
-import { Config, TargetElement } from './Config';
+import {Config, TargetAttr, TargetElement} from './Config';
 import { Range } from './iterators/Range';
 import { Validator } from './validators/Validator';
 import { ValidatorArray } from './validators/ValidatorArray';
@@ -68,7 +68,7 @@ export class RawSet {
 
     public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_FORM_NAME, RawSet.DR_PRE_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME, RawSet.DR_DETECT_NAME];
 
-    constructor(public uuid: string, public point: { start: Comment, end: Comment }, public fragment: DocumentFragment, public data: any = {}) { // , public thisObjPath?: string
+    constructor(public uuid: string, public point: { start: Comment, end: Comment, thisVariableName?: string | null}, public fragment: DocumentFragment, public data: any = {}) { // , public thisObjPath?: string
     }
 
     get isConnected() {
@@ -124,7 +124,7 @@ export class RawSet {
                 // eslint-disable-next-line no-use-before-define
             }) as unknown as Render;
 
-            const fag = config.window.document.createDocumentFragment()
+            const fag = config.window.document.createDocumentFragment();
             if (cNode.nodeType === Node.TEXT_NODE && cNode.textContent) {
                 const textContent = cNode.textContent;
                 const runText = RawSet.exporesionGrouops(textContent)[0][1];
@@ -615,7 +615,8 @@ export class RawSet {
     }
 
     public static checkPointCreates(element: Node, config: Config): RawSet[] {
-      //  const thisVariableName = (element as any).__domrender_this_variable_name;
+       const thisVariableName = (element as any).__domrender_this_variable_name;
+        // console.log('checkPointCreates thisVariableName', thisVariableName);
         const nodeIterator = config.window.document.createNodeIterator(element, NodeFilter.SHOW_ALL, {
             acceptNode(node) {
                 if (node.nodeType === Node.TEXT_NODE) {
@@ -672,7 +673,8 @@ export class RawSet {
                     fragment.append(config.window.document.createTextNode(it.content))
                     pars.push(new RawSet(it.uuid, {
                         start,
-                        end
+                        end,
+                        thisVariableName
                     }, fragment));
                     lasterIndex = regexArr.index + it.content.length;
                 })
@@ -689,7 +691,8 @@ export class RawSet {
                 fragment.append(currentNode);
                 pars.push(new RawSet(uuid, {
                     start,
-                    end
+                    end,
+                    thisVariableName
                 }, fragment))
             }
         }
@@ -860,9 +863,27 @@ export class RawSet {
         } else {
             fag.append(n)
         }
-        // (fag as any).__domrender_this_variable_name = drThis;
+        (fag as any).__domrender_this_variable_name = drThis;
         // console.log('set __domrender_this_variable_name', (fag as any).__domrender_this_variable_name)
         return fag;
+    }
+
+    public static createComponentTargetAttribute(name: string, getThisObj: (element: Element, attrValue: string, obj: any, rawSet: RawSet) => any, factory: (element: Element, attrValue: string, obj: any, rawSet: RawSet)=> DocumentFragment) {
+        const targetAttribute: TargetAttr = {
+            name,
+            callBack(element: Element, attrValue: string, obj: any, rawSet: RawSet): DocumentFragment {
+                const thisObj = getThisObj(element, attrValue, obj, rawSet);
+                if (thisObj) {
+                    thisObj['__domrender_component_new'] = thisObj['__domrender_component_new'] ?? new Proxy({}, new DomRenderFinalProxy());
+                    thisObj['__domrender_component_new'].innerHTML = element.innerHTML;
+                    thisObj['__domrender_component_new'].rootCreator = new Proxy(obj, new DomRenderFinalProxy());
+                    thisObj['__domrender_component_new'].creator =  new Proxy(rawSet.point.thisVariableName ? ScriptUtils.evalReturn(rawSet.point.thisVariableName, obj) : obj, new DomRenderFinalProxy());
+                }
+                return factory(element, attrValue, obj, rawSet);
+            }
+
+        }
+        return targetAttribute;
     }
 
     public static createComponentTargetElement(name: string,
@@ -907,11 +928,23 @@ export class RawSet {
                 this.__render = render;
 
                 instance['__domrender_component_new'] = instance['__domrender_component_new'] ?? new Proxy({}, new DomRenderFinalProxy());
+                // instance['__domrender_component_new'] =  {};
                 instance['__domrender_component_new'].innerHTML = element.innerHTML;
-                instance['__domrender_component_new'].creator = obj;
-                const applayTemplate = template.replace('#innerHTML#', element.innerHTML);
+                instance['__domrender_component_new'].rootCreator = new Proxy(obj, new DomRenderFinalProxy());
+                instance['__domrender_component_new'].creator =  new Proxy(rawSet.point.thisVariableName ? ScriptUtils.evalReturn(rawSet.point.thisVariableName, obj) : obj, new DomRenderFinalProxy());
+
+                let applayTemplate = element.innerHTML;
+                if (applayTemplate) {
+                    if (rawSet.point.thisVariableName) {
+                        // console.log('------1->', applayTemplate, rawSet.point.thisVariableName)
+                        applayTemplate = applayTemplate.replace(/this\./g, 'this.__domrender_component_new.rootCreator.');
+                        // console.log('------2->', applayTemplate, rawSet.point.thisVariableName)
+                    }
+                    applayTemplate = template.replace('#innerHTML#', applayTemplate);
+                }
+
                 const oninit = element.getAttribute('dr-on-init')
-                console.log('oninit', oninit)
+                // console.log('oninit', oninit)
                 if (oninit) {
                     const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${oninit} `;
                     ScriptUtils.eval(script, Object.assign(obj, {
