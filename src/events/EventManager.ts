@@ -6,6 +6,7 @@ import {DomRenderProxy} from '../DomRenderProxy';
 import { DomRenderFinalProxy } from '../types/Types';
 
 export class EventManager {
+    public static ownerVariablePathAttrName = 'dr-owner-variable-path';
     public readonly attrPrefix = 'dr-';
     public readonly eventNames = [
         'click', 'mousedown', 'mouseup', 'dblclick', 'mouseover', 'mouseout', 'mousemove', 'mouseenter', 'mouseleave', 'contextmenu',
@@ -99,6 +100,11 @@ export class EventManager {
         // console.log('eventManager applyEvent==>', obj, childNodes, config)
         // Node.ELEMENT_NODE = 1
         // event
+        // childNodes.forEach(it => {
+        //     if (it instanceof Element) {
+        //         it.setAttribute('dr-thieVariableName', 'this')
+        //     }
+        // })
         this.eventNames.forEach(it => {
             this.addDrEvents(obj, it, childNodes, config);
         });
@@ -123,20 +129,35 @@ export class EventManager {
         })
 
         // on-init event
-        this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'on-init', (it, varName) => {
-            if (varName) {
-                if (typeof this.getValue(obj, varName) === 'function') {
-                    this.getValue(obj, varName)(it)
-                } else {
-                    this.setValue(obj, varName, it)
-                }
+        this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'on-init', (it, attribute) => {
+            let script = attribute;
+            if (script) {
+                script = 'return ' + script;
+            }
+            if (script) {
+                const data = ScriptUtils.eval(`${this.bindScript}; ${script} `, Object.assign(obj, {
+                    __render: Object.freeze({
+                        element: it
+                    })
+                }))
+                // console.log('onInit--->', obj, varName, it)
+                // if (typeof this.getValue(obj, varName) === 'function') {
+                //     this.getValue(obj, varName)(it);
+                // } else {
+                //     this.setValue(obj, varName, it);
+                // }
             }
         })
 
         // value-link event
         this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'value-link', (it, varName) => {
             if (varName) {
-                const value = this.getValue(obj, varName);
+                const ownerVariablePathName = it.getAttribute(EventManager.ownerVariablePathAttrName);
+                let bindObj = obj;
+                if (ownerVariablePathName) {
+                    bindObj = ScriptUtils.evalReturn(ownerVariablePathName, obj);
+                }
+                const value = this.getValue(obj, varName, bindObj);
                 if (typeof value === 'function' && value) {
                     value(it.value)
                 } else {
@@ -147,8 +168,8 @@ export class EventManager {
                     }
                 }
                 it.addEventListener('input', (eit) => {
-                    if (typeof this.getValue(obj, varName) === 'function') {
-                        this.getValue(obj, varName)(it.value, eit)
+                    if (typeof this.getValue(obj, varName, bindObj) === 'function') {
+                        this.getValue(obj, varName, bindObj)(it.value, eit)
                     } else {
                         this.setValue(obj, varName, it.value)
                     }
@@ -169,12 +190,16 @@ export class EventManager {
         // console.log('-changeVar-->', obj, elements, varName)
         // value-link event
         this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'value-link', (it, attribute) => {
-            // console.log('-------?')
+            const ownerVariablePathName = it.getAttribute(EventManager.ownerVariablePathAttrName);
+            let bindObj = obj;
+            if (ownerVariablePathName) {
+                bindObj = ScriptUtils.evalReturn(ownerVariablePathName, obj);
+            }
             if (attribute && attribute === varName) {
-                if (typeof this.getValue(obj, attribute) === 'function') {
-                    this.getValue(obj, attribute)(it.value);
+                if (typeof this.getValue(obj, attribute, bindObj) === 'function') {
+                    this.getValue(obj, attribute, bindObj)(it.value);
                 } else {
-                    const value = this.getValue(obj, attribute);
+                    const value = this.getValue(obj, attribute, bindObj);
                     if (value !== undefined && value !== null) {
                         it.value = value;
                     }
@@ -365,11 +390,11 @@ export class EventManager {
         })
     }
 
-    public getValue<T = any>(obj: any, name: string, value?: any): T {
+    public getValue<T = any>(obj: any, name: string, bindObj?: any): T {
         // let r = obj[name];
         let r = ScriptUtils.evalReturn(name, obj);
         if (typeof r === 'function') {
-            r = r.bind(obj);
+            r = r.bind(bindObj??obj);
         }
         return r;
     }

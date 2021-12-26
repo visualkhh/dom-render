@@ -856,6 +856,9 @@ export class RawSet {
     public static drThisCreate(element: Element, drThis: string, drVarOption: string, drStripOption: boolean | string | null, obj: any, config: Config) {
         const fag = config.window.document.createDocumentFragment();
         const n = element.cloneNode(true) as Element;
+        n.querySelectorAll(eventManager.attrNames.map(it => `[${it}]`).join(',')).forEach(it => {
+            it.setAttribute(EventManager.ownerVariablePathAttrName, 'this');
+        })
         const thisRandom = this.drThisEncoding(n, drThis)
         const vars = this.drVarEncoding(n, drVarOption)
         this.drVarDecoding(n, vars)
@@ -875,13 +878,17 @@ export class RawSet {
             name,
             callBack(element: Element, attrValue: string, obj: any, rawSet: RawSet): DocumentFragment {
                 const thisObj = getThisObj(element, attrValue, obj, rawSet);
+                const data = factory(element, attrValue, obj, rawSet);
+                rawSet.point.thisVariableName = (data as any).__domrender_this_variable_name;
                 if (thisObj) {
                     thisObj['__domrender_component_new'] = thisObj['__domrender_component_new'] ?? new Proxy({}, new DomRenderFinalProxy());
+                    thisObj['__domrender_component_new'].thisVariableName = rawSet.point.thisVariableName;
+                    thisObj['__domrender_component_new'].rawSet = rawSet;
                     thisObj['__domrender_component_new'].innerHTML = element.innerHTML;
                     thisObj['__domrender_component_new'].rootCreator = new Proxy(obj, new DomRenderFinalProxy());
                     thisObj['__domrender_component_new'].creator =  new Proxy(rawSet.point.thisVariableName ? ScriptUtils.evalReturn(rawSet.point.thisVariableName, obj) : obj, new DomRenderFinalProxy());
                 }
-                return factory(element, attrValue, obj, rawSet);
+                return data;
             }
 
         }
@@ -930,7 +937,8 @@ export class RawSet {
                 this.__render = render;
 
                 instance['__domrender_component_new'] = instance['__domrender_component_new'] ?? new Proxy({}, new DomRenderFinalProxy());
-                // instance['__domrender_component_new'] =  {};
+                instance['__domrender_component_new'].thisVariableName = rawSet.point.thisVariableName;
+                instance['__domrender_component_new'].rawSet = rawSet;
                 instance['__domrender_component_new'].innerHTML = element.innerHTML;
                 instance['__domrender_component_new'].rootCreator = new Proxy(obj, new DomRenderFinalProxy());
                 instance['__domrender_component_new'].creator =  new Proxy(rawSet.point.thisVariableName ? ScriptUtils.evalReturn(rawSet.point.thisVariableName, obj) : obj, new DomRenderFinalProxy());
@@ -938,9 +946,7 @@ export class RawSet {
                 let applayTemplate = element.innerHTML;
                 if (applayTemplate) {
                     if (rawSet.point.thisVariableName) {
-                        // console.log('------1->', applayTemplate, rawSet.point.thisVariableName)
                         applayTemplate = applayTemplate.replace(/this\./g, 'this.__domrender_component_new.rootCreator.');
-                        // console.log('------2->', applayTemplate, rawSet.point.thisVariableName)
                     }
                     applayTemplate = template.replace('#innerHTML#', applayTemplate);
                 }
@@ -955,7 +961,9 @@ export class RawSet {
                 }
                 const innerHTML = (styles?.map(it => `<style>${it}</style>`) ?? []).join(' ') + (applayTemplate ?? '');
                 element.innerHTML = innerHTML;
-                return RawSet.drThisCreate(element, `this.__domrender_components.${componentKey}`, '', true, obj, config);
+                const data = RawSet.drThisCreate(element, `this.__domrender_components.${componentKey}`, '', true, obj, config);
+
+                return data;
             },
             // complete
         }
