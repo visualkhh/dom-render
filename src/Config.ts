@@ -20,8 +20,8 @@ export interface Config {
     window: Window;
     targetElements?: TargetElement[];
     targetAttrs?: TargetAttr[];
-    onElementInit?: (name: string, obj: any, rawSet: RawSet, targetElement: TargetElement) => void;
-    onAttrInit?: (name: string, attrValue: string, obj: any, rawSet: RawSet) => void;
+    onElementInit?: (name: string, obj: any, rawSet: RawSet, targetElement: TargetElement) => any;
+    onAttrInit?: (name: string, attrValue: string, obj: any, rawSet: RawSet) => any;
     proxyExcludeTyps?: ConstructorType<any>[];
     proxyExcludeOnBeforeReturnSets?: string[];
     proxyExcludeOnBeforeReturnGets?: string[];

@@ -586,11 +586,13 @@ export class RawSet {
                 ));
             }
         })
-        onElementInitCallBack.forEach(it => {
+        for (const it of onElementInitCallBack) {
             it.targetElement?.__render?.component?.onInitRender?.(it.targetElement?.__render);
-            config?.onElementInit?.(it.name, obj, this, it.targetElement);
-        });
-        onAttrInitCallBack.forEach(it => config?.onAttrInit?.(it.attrName, it.attrValue, obj, this))
+            const r = config?.onElementInit?.(it.name, obj, this, it.targetElement);
+        }
+        for (const it of onAttrInitCallBack) {
+            const r = config?.onAttrInit?.(it.attrName, it.attrValue, obj, this);
+        }
         return raws;
     }
 
