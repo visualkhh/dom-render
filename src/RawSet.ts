@@ -519,10 +519,12 @@ export class RawSet {
                 }
 
                 // config detecting
+                // console.log('config targetElement-->', config?.targetElements)
                 config?.targetElements?.forEach(it => {
                     const name = it.name;
                     if (name.toLowerCase() === element.tagName.toLowerCase()) {
                         const documentFragment = it.callBack(element, obj, this);
+                        // console.log('target-->',name, documentFragment)
                         if (documentFragment) {
                             // fag.append(documentFragment)
                             const rr = RawSet.checkPointCreates(documentFragment, config)
@@ -948,8 +950,8 @@ export class RawSet {
                     if (rawSet.point.thisVariableName) {
                         applayTemplate = applayTemplate.replace(/this\./g, 'this.__domrender_component_new.rootCreator.');
                     }
-                    applayTemplate = template.replace('#innerHTML#', applayTemplate);
                 }
+                applayTemplate = template.replace('#innerHTML#', applayTemplate);
 
                 const oninit = element.getAttribute('dr-on-init')
                 // console.log('oninit', oninit)
