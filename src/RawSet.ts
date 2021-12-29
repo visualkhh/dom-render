@@ -439,6 +439,7 @@ export class RawSet {
                                 destIt = forOfStr + '[' + i +']'
                             }
                             const n = this.__render.element.cloneNode(true);
+                            Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drForOf' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));
                             n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIt\\#/g, destIt)))
                             n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
                             if (this.__render.drStripOption === 'true') {
@@ -453,6 +454,8 @@ export class RawSet {
                     `, Object.assign(obj, {
                         __render: Object.freeze({
                             drStripOption: drAttr.drStripOption,
+                            drAttr: drAttr,
+                            drAttrsOriginName: RawSet.drAttrsOriginName,
                             fag: newTemp,
                             ...__render
                             // eslint-disable-next-line no-use-before-define
@@ -463,8 +466,9 @@ export class RawSet {
                     const tempalte = config.window.document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
                     fag.append(tempalte.content)
-                    const rr = RawSet.checkPointCreates(fag, config)
+                    const rr = RawSet.checkPointCreates(fag, config);
                     element.parentNode?.replaceChild(fag, element);
+                    //const rrr = rr.flatMap(it => it.render(obj, config));// .flat();
                     raws.push(...rr)
                 }
 
@@ -522,7 +526,7 @@ export class RawSet {
                 // console.log('config targetElement-->', config?.targetElements)
                 config?.targetElements?.forEach(it => {
                     const name = it.name;
-                    if (name.toLowerCase() === element.tagName.toLowerCase()) {
+                    if (name.toLowerCase() === element.tagName.toLowerCase() && (!drAttr.drForOf && !drAttr.drFor && !drAttr.drRepeat)) {
                         const documentFragment = it.callBack(element, obj, this);
                         // console.log('target-->',name, documentFragment)
                         if (documentFragment) {
@@ -548,7 +552,7 @@ export class RawSet {
                     const attrName = it.name;
                     const attrValue = this.getAttributeAndDelete(element, attrName)
                     // console.log('?????attrValue', attrName, attrValue)
-                    if (attrValue && attrName) {
+                    if (attrValue && attrName && (!drAttr.drForOf && !drAttr.drFor && !drAttr.drRepeat)) {
                         const documentFragment = it.callBack(element, attrValue, obj, this);
                         if (documentFragment) {
                             // fag.append(documentFragment);
@@ -685,6 +689,7 @@ export class RawSet {
                 template.content.append(config.window.document.createTextNode(text.substring(lasterIndex, text.length)));
                 currentNode?.parentNode?.replaceChild(template.content, currentNode);
             } else {
+                // console.log('------------->', currentNode)
                 const uuid = RandomUtils.uuid()
                 const fragment = config.window.document.createDocumentFragment();
                 const start = config.window.document.createComment(`start ${uuid}`)
@@ -957,6 +962,7 @@ export class RawSet {
                 // console.log('oninit', oninit)
                 if (oninit) {
                     const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${oninit} `;
+                    // console.log('--->onInit--?', oninit, script, obj)
                     ScriptUtils.eval(script, Object.assign(obj, {
                         __render: render
                     }))
