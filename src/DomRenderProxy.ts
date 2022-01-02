@@ -1,4 +1,4 @@
-import { RawSet } from './RawSet';
+import { CreatorMetaData, RawSet, Render } from './RawSet';
 import { eventManager } from './events/EventManager';
 import { Config } from './Config';
 import { ScriptUtils } from './utils/script/ScriptUtils';
@@ -50,6 +50,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public initRender(target: Node) {
+        const innerHTML = (target as any).innerHTML ?? '';
         this._targets.add(target);
         const rawSets = RawSet.checkPointCreates(target, this.config);
         eventManager.applyEvent(this._domRender_proxy, eventManager.findAttrElements(target as Element, this.config), this.config);
@@ -64,7 +65,13 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             }
         })
         this.render(this.getRawSets());
-        (this._domRender_proxy as any)?.onInitRender?.();
+        const render = {target} as Render;
+        const creatorMetaData = {
+            creator: this._domRender_proxy,
+            rootCreator: this._domRender_proxy,
+            innerHTML,
+        } as CreatorMetaData;
+        (this._domRender_proxy as any)?.onInitRender?.({render, creatorMetaData});
     }
 
     public getRawSets() {

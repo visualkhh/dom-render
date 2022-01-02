@@ -1,5 +1,5 @@
 import {ConstructorType} from './types/Types';
-import {RawSet, Render} from './RawSet';
+import { CreatorMetaData, RawSet, Render } from './RawSet';
 
 export type TargetElement = {
     name: string,
@@ -8,6 +8,7 @@ export type TargetElement = {
     callBack: (target: Element, obj: any, rawSet: RawSet) => DocumentFragment,
     complete?: (target: Element, obj: any, rawSet: RawSet) => void
     __render?: Render
+    __creatorMetaData?: CreatorMetaData
 };
 
 export type TargetAttr = {

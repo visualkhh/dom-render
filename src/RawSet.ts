@@ -6,7 +6,7 @@ import {Config, TargetAttr, TargetElement} from './Config';
 import { Range } from './iterators/Range';
 import { Validator } from './validators/Validator';
 import { ValidatorArray } from './validators/ValidatorArray';
-import {DomRenderFinalProxy} from './types/Types';
+import { DomRenderFinalProxy } from './types/Types';
 
 type Attrs = {
     dr: string | null
@@ -106,7 +106,7 @@ export class RawSet {
         const genNode = config.window.document.importNode(this.fragment, true);
         const raws: RawSet[] = [];
         const onAttrInitCallBack: { attrName: string, attrValue: string, obj: any }[] = [];
-        const onElementInitCallBack: { name: string, obj: any, targetElement: TargetElement }[] = [];
+        const onElementInitCallBack: { name: string, obj: any, targetElement: TargetElement, creatorMetaData: CreatorMetaData }[] = [];
         const drAttrs: Attrs[] = [];
 
         genNode.childNodes.forEach((cNode, key) => {
@@ -542,7 +542,8 @@ export class RawSet {
                             onElementInitCallBack.push({
                                 name,
                                 obj,
-                                targetElement: it
+                                targetElement: it,
+                                creatorMetaData: it.__creatorMetaData as CreatorMetaData
                             });
                             it?.complete?.(element, obj, this);
                         }
@@ -593,7 +594,7 @@ export class RawSet {
             }
         })
         for (const it of onElementInitCallBack) {
-            it.targetElement?.__render?.component?.onInitRender?.(it.targetElement?.__render);
+            it.targetElement?.__render?.component?.onInitRender?.({render: it.targetElement?.__render, creatorMetaData: it.targetElement?.__creatorMetaData});
             const r = config?.onElementInit?.(it.name, obj, this, it.targetElement);
         }
         for (const it of onAttrInitCallBack) {
@@ -888,12 +889,12 @@ export class RawSet {
                 const data = factory(element, attrValue, obj, rawSet);
                 rawSet.point.thisVariableName = (data as any).__domrender_this_variable_name;
                 if (thisObj) {
-                    thisObj['__domrender_component_new'] = thisObj['__domrender_component_new'] ?? new Proxy({}, new DomRenderFinalProxy());
-                    thisObj['__domrender_component_new'].thisVariableName = rawSet.point.thisVariableName;
-                    thisObj['__domrender_component_new'].rawSet = rawSet;
-                    thisObj['__domrender_component_new'].innerHTML = element.innerHTML;
-                    thisObj['__domrender_component_new'].rootCreator = new Proxy(obj, new DomRenderFinalProxy());
-                    thisObj['__domrender_component_new'].creator =  new Proxy(rawSet.point.thisVariableName ? ScriptUtils.evalReturn(rawSet.point.thisVariableName, obj) : obj, new DomRenderFinalProxy());
+                    const i = thisObj['__domrender_component_new'] = (thisObj['__domrender_component_new'] ?? new Proxy({}, new DomRenderFinalProxy())) as CreatorMetaData;
+                    i.thisVariableName = rawSet.point.thisVariableName;
+                    i.rawSet = rawSet;
+                    i.innerHTML = element.innerHTML;
+                    i.rootCreator = new Proxy(obj, new DomRenderFinalProxy());
+                    i.creator =  new Proxy(rawSet.point.thisVariableName ? ScriptUtils.evalReturn(rawSet.point.thisVariableName, obj) : obj, new DomRenderFinalProxy());
                 }
                 return data;
             }
@@ -943,13 +944,13 @@ export class RawSet {
                 } as Render);
                 this.__render = render;
 
-                instance['__domrender_component_new'] = instance['__domrender_component_new'] ?? new Proxy({}, new DomRenderFinalProxy());
-                instance['__domrender_component_new'].thisVariableName = rawSet.point.thisVariableName;
-                instance['__domrender_component_new'].rawSet = rawSet;
-                instance['__domrender_component_new'].innerHTML = element.innerHTML;
-                instance['__domrender_component_new'].rootCreator = new Proxy(obj, new DomRenderFinalProxy());
-                instance['__domrender_component_new'].creator =  new Proxy(rawSet.point.thisVariableName ? ScriptUtils.evalReturn(rawSet.point.thisVariableName, obj) : obj, new DomRenderFinalProxy());
-
+                const i = instance['__domrender_component_new'] = (instance['__domrender_component_new'] ?? new Proxy({}, new DomRenderFinalProxy())) as CreatorMetaData;
+                i.thisVariableName = rawSet.point.thisVariableName;
+                i.rawSet = rawSet;
+                i.innerHTML = element.innerHTML;
+                i.rootCreator = new Proxy(obj, new DomRenderFinalProxy());
+                i.creator =  new Proxy(rawSet.point.thisVariableName ? ScriptUtils.evalReturn(rawSet.point.thisVariableName, obj) : obj, new DomRenderFinalProxy());
+                this.__creatorMetaData = i;
                 let applayTemplate = element.innerHTML;
                 if (applayTemplate) {
                     if (rawSet.point.thisVariableName) {
@@ -986,10 +987,19 @@ export class RawSet {
 }
 
 export type Render = {
-    rawset: RawSet;
-    scripts: { [n: string]: any };
+    rawset?: RawSet;
+    scripts?: { [n: string]: any };
     bindScript?: string;
     element?: any;
     range?: any;
     [n: string]: any
+}
+
+export type CreatorMetaData = {
+    thisVariableName?: string | null;
+    rawSet: RawSet;
+    innerHTML: string;
+    rootCreator: any;
+    creator: any;
+    // render?: Render;
 }
