@@ -946,6 +946,7 @@ export class RawSet {
 
                 const i = instance['__domrender_component_new'] = (instance['__domrender_component_new'] ?? new Proxy({}, new DomRenderFinalProxy())) as CreatorMetaData;
                 i.thisVariableName = rawSet.point.thisVariableName;
+                i.thisFullVariableName = `this.__domrender_components.${componentKey}`;
                 i.rawSet = rawSet;
                 i.innerHTML = element.innerHTML;
                 i.rootCreator = new Proxy(obj, new DomRenderFinalProxy());
@@ -998,6 +999,7 @@ export type Render = {
 
 export type CreatorMetaData = {
     thisVariableName?: string | null;
+    thisFullVariableName?: string | null;
     rawSet: RawSet;
     innerHTML: string;
     rootCreator: any;
