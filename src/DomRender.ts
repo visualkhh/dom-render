@@ -21,3 +21,4 @@ export class DomRender {
         return robj;
     }
 }
+export default DomRender;
