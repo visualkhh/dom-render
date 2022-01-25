@@ -401,7 +401,7 @@ export class EventManager {
 
     public setValue(obj: any, name: string, value?: any) {
         name = name.replaceAll('this.', 'this.this.')
-        ScriptUtils.eval(`${name} = this.value`, {
+        ScriptUtils.eval(`${name} = this.value;`, {
             this: obj,
             value: value
         })

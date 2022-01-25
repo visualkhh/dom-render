@@ -95,7 +95,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public root(paths: string[], value?: any, lastDoneExecute = true) {
-        // console.log('root--->', paths, value, this._domRender_ref, this._domRender_origin)
+        // console.log('root--->', paths, value, this._domRender_ref, this._domRender_origin);
         const fullPaths: string[] = []
         if (this._domRender_ref.size > 0) {
             this._domRender_ref.forEach((it, key) => {
@@ -136,7 +136,12 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public set(target: T, p: string | symbol, value: any, receiver: T): boolean {
-        // console.log('set--?', p, target, value);
+        console.log('set--?', p, target, value);
+        if ('__render' === p) {
+            (target as any)[p] = value;
+            return true;
+        }
+
         if (typeof p === 'string') {
             value = this.proxy(receiver, value, p);
         }
