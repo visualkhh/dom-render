@@ -2,7 +2,6 @@ import {Config} from '../Config';
 import {ScriptUtils} from '../utils/script/ScriptUtils';
 import {DomUtils} from '../utils/dom/DomUtils';
 import {Range} from '../iterators/Range';
-import {DomRenderProxy} from '../DomRenderProxy';
 import { DomRenderFinalProxy } from '../types/Types';
 
 export class EventManager {

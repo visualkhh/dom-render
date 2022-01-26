@@ -59,7 +59,7 @@ export class Range implements Iterable<number> {
         }
     }
 
-    toArray() {
-        return [...this];
-    }
+    // toArray() {
+    //     return [...this];
+    // }
 }

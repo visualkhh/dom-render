@@ -14,9 +14,11 @@ export class ScriptUtils {
 
             get(target: any, p: string | symbol, receiver: any): any {
                 let items;
-                if (typeof p === 'string') {
+                if (typeof p === 'string' && isNaN(Number(p))) {
                     items = this.prefix ? this.prefix + '.' + p : p;
-                    // console.log('add?', items)
+                    this.usingVars.add(items)
+                } else if (typeof p === 'string' && !isNaN(Number(p))) {
+                    items = this.prefix ? this.prefix + '[' + p + ']' : p;
                     this.usingVars.add(items)
                 }
                 return new Proxy(() => {
@@ -33,6 +35,7 @@ export class ScriptUtils {
         } catch (e) {
             console.error(e);
         }
+        // console.log('------->', usingVars);
         return usingVars;
     }
 

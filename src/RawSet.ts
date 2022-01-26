@@ -95,7 +95,7 @@ export class RawSet {
                     script = script.replace(RegExp(it.replace('$', '\\$'), 'g'), `this.___${it}`);
                 })
                 // console.log('----------', script);
-                Array.from(ScriptUtils.getVariablePaths(script)).filter(it => !it.startsWith(`___${EventManager.SCRIPTS_VARNAME}`) && !it.startsWith(`___${EventManager.SCRIPTS_VARNAME}`)).forEach(it => usingTriggerVariables.add(it));
+                Array.from(ScriptUtils.getVariablePaths(script)).filter(it => !it.startsWith(`___${EventManager.SCRIPTS_VARNAME}`)).forEach(it => usingTriggerVariables.add(it));
             }
         })
         // console.log('usingTriggerVariable----------->', usingTriggerVariables)

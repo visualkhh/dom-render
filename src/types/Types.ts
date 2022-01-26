@@ -1,6 +1,3 @@
-import { RawSet } from '../RawSet';
-import { TargetElement } from 'src/Config';
-
 export interface ConstructorType<T> {
     new(...args: any[]): T;
 }
