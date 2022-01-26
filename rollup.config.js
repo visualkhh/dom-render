@@ -34,7 +34,7 @@ export default {
         // }),
         resolve(),
         commonjs(),
-        typescript({ tsconfig: 'tsconfig.json' }),
+        typescript({ tsconfig: 'tsconfig.rollup.json' }),
         // typescript({ tsconfig: './tsconfig.front.json', clean: true }),
         // sourcemaps(),
         // replace({

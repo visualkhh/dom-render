@@ -13,7 +13,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
 //    "outDir": "./dist",
-//    "declaration": true,
+    "declaration": true,
     "baseUrl": "src",
 //    "noImplicitAny": true,
 //    "plugins": [{ "name": "sample-ts-plugin" }],
