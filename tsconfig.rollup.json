@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "declaration": false,
 //    "typeRoots": ["./node_modules/@types", "./types", "jest"],
 //    "types" : ["node", "index", "rxjs"],
     "outDir": "./dist/dist"

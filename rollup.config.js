@@ -14,7 +14,9 @@ export default {
         sourcemap: true,
         dir: 'dist/dist',
         entryFileNames: 'bundle.js',
-        format: 'cjs'
+        format: 'cjs',
+        esModule: false,
+        // intro: `if (!Object.defineProperty) Object.defineProperty = function(obj, prop, descriptor) {obj[prop] = descriptor.value;};`
     },
     plugins: [
         // babel(),
@@ -47,11 +49,11 @@ export default {
         //     "Object.defineProperty(exports, '__esModule', { value: true });": "try{if(!exports) {var exports = {}}}catch (e) {var exports = {}} Object.defineProperty(exports, '__esModule', { value: true });",
         //     delimiters: ['\n', '\n']
         // }),
-        replace({
-            preventAssignment: true,
-            "Object.defineProperty(exports, '__esModule', { value: true });": "try{if(!exports) {var exports = {}}}catch (e) {var exports = {}} Object.defineProperty(exports, '__esModule', { value: true });",
-            delimiters: ['\n', '\n']
-        }),
+        // replace({
+        //     preventAssignment: true,
+        //     "Object.defineProperty(exports, '__esModule', { value: true });": "try{if(!exports) {var exports = {}}}catch (e) {var exports = {}} Object.defineProperty(exports, '__esModule', { value: true });",
+        //     delimiters: ['\n', '\n']
+        // }),
         del({ targets: ['dist/dist/*'] })
     ]
 };
