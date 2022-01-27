@@ -139,7 +139,11 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public set(target: T, p: string | symbol, value: any, receiver: T): boolean {
-        if (typeof p === 'string' && excludeGetSetPropertys.includes(p)) {
+        // if (typeof p === 'string' && excludeGetSetPropertys.includes(p)) {
+        //     (target as any)[p] = value;
+        //     return true;
+        // }
+        if (typeof p === 'string' && '__render' === p) {
             (target as any)[p] = value;
             return true;
         }
