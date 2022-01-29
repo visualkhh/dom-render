@@ -387,8 +387,8 @@ export class RawSet {
                         const n = this.__render.element.cloneNode(true);
                         var destIt = ${drAttr.drItOption};
                         if (destIt !== undefined) {
-                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForIt\\#/g, destIt))) 
-                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
+                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForIt\\#/g, destIt).replace(/\\#nearForIndex\\#/g, destIt))) 
+                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt).replace(/\\#index\\#/g, destIt);
                         }
                         if (this.__render.drStripOption === 'true') {
                             Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
@@ -440,8 +440,8 @@ export class RawSet {
                             }
                             const n = this.__render.element.cloneNode(true);
                             Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drForOf' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));
-                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIt\\#/g, destIt)))
-                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
+                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIt\\#/g, destIt).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIndex\\#/g, i)))
+                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt).replace(/\\#index\\#/g, i);
                             if (this.__render.drStripOption === 'true') {
                                 Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
                             } else {
@@ -494,8 +494,8 @@ export class RawSet {
                             destIt = repeatStr + '[' + i +']'
                         }
                         const n = this.__render.element.cloneNode(true);
-                        n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearRangeIt\\#/g, destIt)))
-                        n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
+                        n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearRangeIt\\#/g, destIt).replace(/\\#nearRangeIndex\\#/g, destIt)))
+                        n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt).replace(/\\#index\\#/g, destIt);
                         
                         if (this.__render.drStripOption === 'true') {
                             Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
