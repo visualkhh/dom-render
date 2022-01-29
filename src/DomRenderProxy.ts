@@ -113,7 +113,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                 const iterable = this._rawSets.get(fullPathStr);
                 // array check
                 let front = strings.slice(0, strings.length - 1).map(it => isNaN(Number(it)) ? '.'+it : `[${it}]`).join('');
-                front = front.replace(/\.\[/g, '[');
+                // front = front.replace(/\.\[/g, '[');
                 // const front = strings.slice(0, strings.length - 1).join('.');
                 // front = front.replace(/\.\[/g, '[');
                 const last = strings[strings.length - 1]
