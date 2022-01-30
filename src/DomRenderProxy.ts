@@ -145,7 +145,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             (target as any)[p] = value;
             return true;
         }
-        console.log('set proxy-->', target, p, value, this._rawSets, this._domRender_ref)
+        // console.log('set proxy-->', target, p, value, this._rawSets, this._domRender_ref)
         // if (typeof p === 'string' && '__render' === p) {
         //     (target as any)[p] = value;
         //     return true;
