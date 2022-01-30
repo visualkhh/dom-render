@@ -13,7 +13,7 @@ export class DomRender {
         }
         if (!config) {
             config = {window} as Config;
-        } 
+        }
         const domRender = new DomRenderProxy(obj, target, config);
         const dest = new Proxy(obj, domRender)
         robj = dest;
@@ -21,4 +21,4 @@ export class DomRender {
         return robj;
     }
 }
-export default DomRender;
+// export default DomRender;

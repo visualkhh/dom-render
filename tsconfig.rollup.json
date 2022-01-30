@@ -1,6 +1,8 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "sourceMap": false,
+//    "module": "ESNext",
     "declaration": false,
 //    "typeRoots": ["./node_modules/@types", "./types", "jest"],
 //    "types" : ["node", "index", "rxjs"],
