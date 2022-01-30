@@ -108,7 +108,8 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             })
         } else {
             const strings = paths.reverse();
-            const fullPathStr = strings.join('.');
+            // const fullPathStr = strings.join('.');
+            const fullPathStr = strings.map(it => isNaN(Number(it)) ? '.'+it : `[${it}]`).join('').slice(1);
             if (lastDoneExecute) {
                 const iterable = this._rawSets.get(fullPathStr);
                 // array check
@@ -118,7 +119,8 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                 // front = front.replace(/\.\[/g, '[');
                 const last = strings[strings.length - 1]
                 // console.log('root-else-->', fullPathStr, iterable, front, last)
-                if (!isNaN(Number(last)) && Array.isArray(ScriptUtils.evalReturn('this' + front, this._domRender_proxy))) {
+                // if (!isNaN(Number(last)) && Array.isArray(ScriptUtils.evalReturn('this' + front, this._domRender_proxy))) {
+                if (last === 'length' && Array.isArray(ScriptUtils.evalReturn('this' + front, this._domRender_proxy))) {
                     const aIterable = this._rawSets.get(front.slice(1));
                     if (aIterable) {
                         this.render(Array.from(aIterable));
@@ -143,6 +145,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             (target as any)[p] = value;
             return true;
         }
+        console.log('set proxy-->', target, p, value, this._rawSets, this._domRender_ref)
         // if (typeof p === 'string' && '__render' === p) {
         //     (target as any)[p] = value;
         //     return true;
