@@ -12,12 +12,12 @@ import commonjs from "@rollup/plugin-commonjs";
 export default {
     input: 'src/DomRender.ts',
     output: {
-        sourcemap: false,
+        sourcemap: true,
         dir: 'dist/dist',
         entryFileNames: 'bundle.js',
         format: 'cjs',
         esModule: false,
-        intro: `try{if(!exports){exports = {};} }catch(e){exports = {}};`
+        intro: `try{if(!exports){exports = {};} }catch(e){var exports = {}};`
         // intro: `try{exports}catch(e){exports = {}}; if (!Object.defineProperty) Object.defineProperty = function(obj, prop, descriptor) {obj[prop] = descriptor.value;};`
     },
     plugins: [
