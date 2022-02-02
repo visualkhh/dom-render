@@ -83,15 +83,22 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public render(raws?: RawSet[]) {
+        const removeRawSets: RawSet[] = [];
         (raws ?? this.getRawSets()).forEach(it => {
             it.getUsingTriggerVariables(this.config).forEach(path => this.addRawSet(path, it))
             if (it.point.start.isConnected && it.point.start.isConnected) {
                 const rawSets = it.render(this._domRender_proxy, this.config);
                 this.render(rawSets);
             } else {
-                this.removeRawSet(it)
+                removeRawSets.push(it);
+                // this.removeRawSet(it)
             }
-        })
+        });
+
+        if (removeRawSets.length > 0) {
+            this.removeRawSet(...removeRawSets)
+        }
+
     }
 
     public root(paths: string[], value?: any, lastDoneExecute = true) {
@@ -244,14 +251,35 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         this._rawSets.get(path)?.add(rawSet);
     }
 
-    public removeRawSet(raws: RawSet) {
+    // public removeRawSet(...raws: RawSet[]) {
+    //     this._rawSets.forEach(it => {
+    //         raws.forEach(sit => it.delete(sit));
+    //     })
+    //     this.garbageRawSet();
+    // }
+
+    public removeRawSet(...raws: RawSet[]) {
         this._rawSets.forEach(it => {
-            it.delete(raws)
+            it.forEach(sit => {
+                if (!sit.isConnected) {
+                    it.delete(sit);
+                } else if (raws.includes(sit)) {
+                    it.delete(sit);
+                }
+            });
         })
-        this.garbageRawSet();
+        this.targetGarbageRawSet();
     }
 
-    public garbageRawSet() {
+    private targetGarbageRawSet() {
+        this._targets.forEach(it => {
+            if (!it.isConnected) {
+                this._targets.delete(it);
+            }
+        })
+    }
+
+    private garbageRawSet() {
         this._targets.forEach(it => {
             if (!it.isConnected) {
                 this._targets.delete(it);
