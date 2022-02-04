@@ -1,6 +1,6 @@
 {
   "name": "dom-render",
-  "version": "1.0.67",
+  "version": "1.0.68",
   "main": "DomRender.js",
   "license": "MIT",
   "description": "dom-render",
@@ -54,7 +54,7 @@
     "bundle:watch": "rollup -c -w",
     "dev:start": "npm run start --workspace=dev",
     "dev:serve": "npm run serve --workspace=dev",
-    "npm-build": "npm run build && cp package.json dist && cp .npmignore dist && cp README.MD dist",
+    "npm-build": "npm run build && cp package.json dist && cp .npmignore dist && cp README.MD dist && rm -rf dist/dist/bundle.js.map",
     "npm-publish": "npm run npm-build && npm publish ./dist",
     "tsc": "tsc",
     "setting:root-dist": "rm -rf ../dist-dom-render && mkdirp ../dist-dom-render && cp package-root-dist.json ../dist-dom-render/package.json",
