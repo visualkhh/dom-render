@@ -34,8 +34,11 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         if (obj) {
             Object.keys(obj).forEach(it => {
                 // console.log('key-------->', it)
-                const target = (obj as any)[it]
+                const target = (obj as any)[it];
                 if (target !== undefined && target !== null && typeof target === 'object' && !DomRenderProxy.isFinal(target) && !Object.isFrozen(target) && !(obj instanceof Shield)) {
+                    // console.log('target-------->', it, target);
+                    // console.count('target')
+                    // console.log('target-------->')
                     const filter = this.config.proxyExcludeTyps?.filter(it => target instanceof it) ?? []
                     if (filter.length === 0) {
                         const proxyAfter = this.proxy(objProxy, target, it);
@@ -82,13 +85,16 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         return Array.from(set);
     }
 
-    public render(raws?: RawSet[]) {
+    public render(raws?: RawSet[]) {/*console.log('------------------->', raws);
+        raws?.forEach(it => console.log(it.uuid))*/
         const removeRawSets: RawSet[] = [];
         (raws ?? this.getRawSets()).forEach(it => {
             it.getUsingTriggerVariables(this.config).forEach(path => this.addRawSet(path, it))
             if (it.point.start.isConnected && it.point.start.isConnected) {
                 const rawSets = it.render(this._domRender_proxy, this.config);
-                this.render(rawSets);
+                if (rawSets && rawSets.length > 0) {
+                    this.render(rawSets);
+                }
             } else {
                 removeRawSets.push(it);
                 // this.removeRawSet(it)
