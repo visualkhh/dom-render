@@ -144,7 +144,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                 this._targets.forEach(it => {
                     if (it.nodeType === Node.DOCUMENT_FRAGMENT_NODE || it.nodeType === Node.ELEMENT_NODE) {
                         const targets = eventManager.findAttrElements((it as DocumentFragment | Element), this.config);
-                        eventManager.changeVar(this._domRender_proxy, targets, `this.${fullPathStr}`)
+                        eventManager.changeVar(this._domRender_proxy, targets, `this.${fullPathStr}`, this.config)
                     }
                 })
             }

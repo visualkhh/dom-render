@@ -994,6 +994,7 @@ export type Render = {
     bindScript?: string;
     element?: any;
     range?: any;
+    value?: any;
     [n: string]: any
 }
 

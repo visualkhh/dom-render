@@ -26,6 +26,7 @@ export class EventManager {
         this.eventParam
     ];
 
+    public static readonly VALUE_VARNAME = '$value';
     public static readonly SCRIPTS_VARNAME = '$scripts';
     public static readonly FAG_VARNAME = '$fag';
     public static readonly RAWSET_VARNAME = '$rawset';
@@ -40,6 +41,7 @@ export class EventManager {
     public static readonly WINDOW_EVENTS = [EventManager.WINDOW_EVENT_POPSTATE, EventManager.WINDOW_EVENT_RESIZE];
 
     readonly bindScript = `
+        const ${EventManager.VALUE_VARNAME} = this.__render.value;
         const ${EventManager.SCRIPTS_VARNAME} = this.__render.scripts;
         const ${EventManager.RANGE_VARNAME} = this.__render.range;
         const ${EventManager.ELEMENT_VARNAME} = this.__render.element;
@@ -149,34 +151,70 @@ export class EventManager {
         })
 
         // value-link event
-        this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'value-link', (it, varName) => {
+        const valueLinkAttrName = this.attrPrefix + 'value-link';
+        this.procAttr<HTMLInputElement>(childNodes, valueLinkAttrName, (it, varName) => {
             if (varName) {
                 const ownerVariablePathName = it.getAttribute(EventManager.ownerVariablePathAttrName);
+                const mapScript = it.getAttribute(`${valueLinkAttrName}:map`);
+                // const inMapScript = it.getAttribute(`${valueLinkAttrName}:in-map`);
                 let bindObj = obj;
                 if (ownerVariablePathName) {
                     bindObj = ScriptUtils.evalReturn(ownerVariablePathName, obj);
                 }
-                const value = this.getValue(obj, varName, bindObj);
-                if (typeof value === 'function' && value) {
-                    value(it.value)
-                } else {
-                    if (value) {
-                        this.setValue(obj, varName, value)
-                    } else {
-                        this.setValue(obj, varName, it.value)
+                const getValue = this.getValue(obj, varName, bindObj);
+                // 아래 나중에 리팩토링 필요함
+                if (typeof getValue === 'function' && getValue) {
+                    let setValue = it.value;
+                    if (mapScript) {
+                        setValue = ScriptUtils.eval(`${this.bindScript} return ${mapScript}`, Object.assign(bindObj, {__render: Object.freeze({element: it, target: bindObj, range: Range.range, value: setValue,  scripts: EventManager.setBindProperty(config?.scripts, obj)})}));
                     }
+                    getValue(setValue)
+                    // 여기서 value가 먼저냐 value-link가 먼저냐 선을 정해야되는거네...
+                } else if (getValue) {
+                    let setValue = getValue;
+                    if (mapScript) {
+                        setValue = ScriptUtils.eval(`${this.bindScript} return ${mapScript}`, Object.assign(bindObj, {__render: Object.freeze({element: it, target: bindObj, range: Range.range, value: setValue,  scripts: EventManager.setBindProperty(config?.scripts, obj)})}));
+                    }
+                    it.value = setValue;
+                    // this.setValue(obj, varName, setValue)
                 }
-                it.addEventListener('input', (eit) => {
+                // } else if (getValue) { // 이구분이 있어야되나?? 없어도될것같은데..
+                //     let setValue = getValue;
+                //     if (inMapScript) {
+                //         setValue = ScriptUtils.eval(`${this.bindScript} return ${inMapScript}`, Object.assign(bindObj, {__render: Object.freeze({element: it, target: bindObj, range: Range.range, value: setValue,  scripts: EventManager.setBindProperty(config?.scripts, obj)})}));
+                //     }
+                //     this.setValue(obj, varName, setValue)
+                // } else {
+                //     let setValue = it.value;
+                //     if (mapScript) {
+                //         setValue = ScriptUtils.eval(`${this.bindScript} return ${mapScript}`, Object.assign(bindObj, {__render: Object.freeze({element: it, target: bindObj, range: Range.range, value: setValue,  scripts: EventManager.setBindProperty(config?.scripts, obj)})}));
+                //     }
+                //     this.setValue(obj, varName, setValue)
+                // }
+
+                it.addEventListener('input', (event) => {
+                    let value = it.value;
+                    if (mapScript) {
+                        value = ScriptUtils.eval(`${this.bindScript} return ${mapScript}`, Object.assign(bindObj, {
+                            __render: Object.freeze({
+                                event,
+                                element: it,
+                                target: event.target,
+                                range: Range.range,
+                                scripts: EventManager.setBindProperty(config?.scripts, obj)
+                            })
+                        }));
+                    }
                     if (typeof this.getValue(obj, varName, bindObj) === 'function') {
-                        this.getValue(obj, varName, bindObj)(it.value, eit)
+                        this.getValue(obj, varName, bindObj)(value, event)
                     } else {
-                        this.setValue(obj, varName, it.value)
+                        this.setValue(obj, varName, value)
                     }
                 })
             }
         })
 
-        this.changeVar(obj, childNodes, undefined);
+        this.changeVar(obj, childNodes, undefined, config);
         // console.log('eventManager-applyEvent-->', config?.applyEvents)
         const elements = Array.from(childNodes).filter(it => it.nodeType === 1).map(it => it as Element);
         elements.forEach(it => {
@@ -185,23 +223,31 @@ export class EventManager {
     }
 
     // eslint-disable-next-line no-undef
-    public changeVar(obj: any, elements: Set<Element> | Set<ChildNode>, varName?: string) { // , config?: Config
+    public changeVar(obj: any, elements: Set<Element> | Set<ChildNode>, varName?: string, config?: Config) {
         // console.log('-changeVar-->', obj, elements, varName)
         // value-link event
-        this.procAttr<HTMLInputElement>(elements, this.attrPrefix + 'value-link', (it, attribute) => {
+        const valueLinkAttrName = this.attrPrefix + 'value-link';
+        this.procAttr<HTMLInputElement>(elements, valueLinkAttrName, (it, attribute) => {
             const ownerVariablePathName = it.getAttribute(EventManager.ownerVariablePathAttrName);
             let bindObj = obj;
             if (ownerVariablePathName) {
                 bindObj = ScriptUtils.evalReturn(ownerVariablePathName, obj);
             }
+            const mapScript = it.getAttribute(`${valueLinkAttrName}:map`);
             if (attribute && attribute === varName) {
-                if (typeof this.getValue(obj, attribute, bindObj) === 'function') {
-                    this.getValue(obj, attribute, bindObj)(it.value);
-                } else {
-                    const value = this.getValue(obj, attribute, bindObj);
-                    if (value !== undefined && value !== null) {
-                        it.value = value;
+                const getValue = this.getValue(obj, attribute, bindObj);
+                if (typeof getValue === 'function' && getValue) {
+                    let setValue = it.value;
+                    if (mapScript) {
+                        setValue = ScriptUtils.eval(`${this.bindScript} return ${mapScript}`, Object.assign(bindObj, {__render: Object.freeze({element: it, target: bindObj, range: Range.range, value: setValue,  scripts: EventManager.setBindProperty(config?.scripts, obj)})}));
                     }
+                    getValue(setValue);
+                } else { //  if (getValue !== undefined && getValue !== null)
+                    let setValue = getValue;
+                    if (mapScript) {
+                        setValue = ScriptUtils.eval(`${this.bindScript} return ${mapScript}`, Object.assign(bindObj, {__render: Object.freeze({element: it, target: bindObj, range: Range.range, value: setValue,  scripts: EventManager.setBindProperty(config?.scripts, obj)})}));
+                    }
+                    it.value = setValue;
                 }
             }
         })
