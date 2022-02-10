@@ -2,19 +2,19 @@ import {ConstructorType} from './types/Types';
 import { CreatorMetaData, RawSet, Render } from './RawSet';
 
 export type TargetElement = {
-    name: string,
-    template?: string,
-    styles?: string[],
-    callBack: (target: Element, obj: any, rawSet: RawSet) => DocumentFragment,
-    complete?: (target: Element, obj: any, rawSet: RawSet) => void
-    __render?: Render
-    __creatorMetaData?: CreatorMetaData
+    name: string;
+    template?: string;
+    styles?: string[];
+    callBack: (target: Element, obj: any, rawSet: RawSet) => DocumentFragment;
+    complete?: (target: Element, obj: any, rawSet: RawSet) => void;
+    __render?: Render;
+    __creatorMetaData?: CreatorMetaData;
 };
 
 export type TargetAttr = {
-    name: string,
-    callBack: (target: Element, attrValue: string, obj: any, rawSet: RawSet) => DocumentFragment,
-    complete?: (target: Element, attrValue: string, obj: any, rawSet: RawSet) => void
+    name: string;
+    callBack: (target: Element, attrValue: string, obj: any, rawSet: RawSet) => DocumentFragment;
+    complete?: (target: Element, attrValue: string, obj: any, rawSet: RawSet) => void;
 };
 
 export interface Config {

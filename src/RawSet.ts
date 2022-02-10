@@ -524,39 +524,52 @@ export class RawSet {
 
                 // config detecting
                 // console.log('config targetElement-->', config?.targetElements)
-                config?.targetElements?.forEach(it => {
-                    const name = it.name;
-                    if (name.toLowerCase() === element.tagName.toLowerCase() && (!drAttr.drForOf && !drAttr.drFor && !drAttr.drRepeat)) {
-                        const documentFragment = it.callBack(element, obj, this);
-                        // console.log('target-->',name, documentFragment)
-                        if (documentFragment) {
-                            // fag.append(documentFragment)
-                            const rr = RawSet.checkPointCreates(documentFragment, config)
-                            element.parentNode?.replaceChild(documentFragment, element);
-                            // TODO: 나중에 삭제?
-                            // const onInit = element.getAttribute('dr-on-init-component');
-                            // if (onInit) {
-                            //     ScriptUtils.evalReturn(onInit, obj)(obj?.__componentInstances[this.uuid], this);
-                            // }
-                            raws.push(...rr);
-                            onElementInitCallBack.push({
-                                name,
-                                obj,
-                                targetElement: it,
-                                creatorMetaData: it.__creatorMetaData as CreatorMetaData
-                            });
-                            it?.complete?.(element, obj, this);
-                        }
+                const targetElement = config?.targetElements?.find(it => (!drAttr.drForOf && !drAttr.drFor && !drAttr.drRepeat) && it.name.toLowerCase() === element.tagName.toLowerCase());
+                if (targetElement) {
+                    const documentFragment = targetElement.callBack(element, obj, this);
+                    // console.log('target-->',name, documentFragment)
+                    if (documentFragment) {
+                        // fag.append(documentFragment)
+                        const rr = RawSet.checkPointCreates(documentFragment, config)
+                        element.parentNode?.replaceChild(documentFragment, element);
+                        raws.push(...rr);
+                        onElementInitCallBack.push({
+                            name: targetElement.name.toLowerCase(),
+                            obj,
+                            targetElement,
+                            creatorMetaData: targetElement.__creatorMetaData as CreatorMetaData
+                        });
+                        targetElement?.complete?.(element, obj, this);
                     }
-                })
-                config?.targetAttrs?.forEach(it => {
-                    const attrName = it.name;
+                }
+                // config?.targetElements?.forEach(it => {
+                //     const name = it.name;
+                //     if (name.toLowerCase() === element.tagName.toLowerCase() && (!drAttr.drForOf && !drAttr.drFor && !drAttr.drRepeat)) {
+                //         const documentFragment = it.callBack(element, obj, this);
+                //         // console.log('target-->',name, documentFragment)
+                //         if (documentFragment) {
+                //             // fag.append(documentFragment)
+                //             const rr = RawSet.checkPointCreates(documentFragment, config)
+                //             element.parentNode?.replaceChild(documentFragment, element);
+                //             raws.push(...rr);
+                //             onElementInitCallBack.push({
+                //                 name,
+                //                 obj,
+                //                 targetElement: it,
+                //                 creatorMetaData: it.__creatorMetaData as CreatorMetaData
+                //             });
+                //             it?.complete?.(element, obj, this);
+                //         }
+                //     }
+                // })
+                const attributeNames = this.getAttributeNames(element);
+                const targetAttr = config?.targetAttrs?.find(it => (!drAttr.drForOf && !drAttr.drFor && !drAttr.drRepeat) && attributeNames.includes(it.name));
+                if (targetAttr) {
+                    const attrName = targetAttr.name;
                     const attrValue = this.getAttributeAndDelete(element, attrName)
-                    // console.log('?????attrValue', attrName, attrValue)
                     if (attrValue && attrName && (!drAttr.drForOf && !drAttr.drFor && !drAttr.drRepeat)) {
-                        const documentFragment = it.callBack(element, attrValue, obj, this);
+                        const documentFragment = targetAttr.callBack(element, attrValue, obj, this);
                         if (documentFragment) {
-                            // fag.append(documentFragment);
                             const rr = RawSet.checkPointCreates(documentFragment, config)
                             element.parentNode?.replaceChild(documentFragment, element);
                             raws.push(...rr);
@@ -565,10 +578,30 @@ export class RawSet {
                                 attrValue,
                                 obj
                             });
-                            it?.complete?.(element, attrValue, obj, this);
+                            targetAttr?.complete?.(element, attrValue, obj, this);
                         }
                     }
-                })
+                }
+                // config?.targetAttrs?.forEach(it => {
+                //     const attrName = it.name;
+                //     const attrValue = this.getAttributeAndDelete(element, attrName)
+                //     // console.log('?????attrValue', attrName, attrValue)
+                //     if (attrValue && attrName && (!drAttr.drForOf && !drAttr.drFor && !drAttr.drRepeat)) {
+                //         const documentFragment = it.callBack(element, attrValue, obj, this);
+                //         if (documentFragment) {
+                //             // fag.append(documentFragment);
+                //             const rr = RawSet.checkPointCreates(documentFragment, config)
+                //             element.parentNode?.replaceChild(documentFragment, element);
+                //             raws.push(...rr);
+                //             onAttrInitCallBack.push({
+                //                 attrName,
+                //                 attrValue,
+                //                 obj
+                //             });
+                //             it?.complete?.(element, attrValue, obj, this);
+                //         }
+                //     }
+                // })
             }
         })
 
@@ -587,7 +620,6 @@ export class RawSet {
                         rawset: this,
                         fag: genNode,
                         scripts: EventManager.setBindProperty(config?.scripts, obj)
-                        // eslint-disable-next-line no-use-before-define
                     } as Render)
                 }
                 ));
@@ -605,6 +637,10 @@ export class RawSet {
 
     public applyEvent(obj: any, fragment = this.fragment, config?: Config) {
         eventManager.applyEvent(obj, eventManager.findAttrElements(fragment, config), config)
+    }
+
+    public getAttributeNames(element: Element) {
+        return element.getAttributeNames();
     }
 
     public getAttribute(element: Element, attr: string) {
@@ -920,12 +956,21 @@ export class RawSet {
                 if (!obj.__domrender_components) {
                     obj.__domrender_components = {};
                 }
-
                 const domrenderComponents = obj.__domrender_components;
                 const componentKey = '_' + RandomUtils.getRandomString(20);
                 // console.log('callback settttt---a-->', componentKey, objFactory, objFactory(element, obj, rawSet))
                 domrenderComponents[componentKey] = objFactory(element, obj, rawSet);
                 const instance = domrenderComponents[componentKey];
+                const onCreate = element.getAttribute('dr-on-create')
+                let createParam = undefined;
+                if (onCreate) {
+                //     const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${onCreate} `;
+                //     const script = `${onCreate} `;
+                    createParam = ScriptUtils.evalReturn(onCreate, obj);
+                }
+                instance?.onCreateRender?.(createParam);
+
+
                 // console.log('callback settttt---b-->', obj.__domrender_components, instance)
 
                 const attribute = {} as any;
@@ -996,7 +1041,18 @@ export type Render = {
     range?: any;
     value?: any;
     [n: string]: any
+
+    // component?: any;
+    // componentKey?: string;
+    // component
+    // element
+    // innerHTML
+    // attribute
+    // rawset
+    // componentKey
+    // scripts
 }
+
 
 export type CreatorMetaData = {
     thisVariableName?: string | null;

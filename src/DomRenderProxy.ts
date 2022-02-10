@@ -53,16 +53,23 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public initRender(target: Node) {
+        const onCreate = (target as any).getAttribute?.('dr-on-create');
+        let createParam = undefined;
+        if (onCreate) {
+            createParam = ScriptUtils.evalReturn(onCreate, this._domRender_proxy);
+        }
+        (this._domRender_proxy as any)?.onCreateRender?.(createParam);
+
         const innerHTML = (target as any).innerHTML ?? '';
         this._targets.add(target);
         const rawSets = RawSet.checkPointCreates(target, this.config);
         eventManager.applyEvent(this._domRender_proxy, eventManager.findAttrElements(target as Element, this.config), this.config);
         rawSets.forEach(it => {
-            const strings = it.getUsingTriggerVariables(this.config);
-            if (strings.size <= 0) {
+            const variables = it.getUsingTriggerVariables(this.config);
+            if (variables.size <= 0) {
                 this.addRawSet('', it);
             } else {
-                strings.forEach(sit => {
+                variables.forEach(sit => {
                     this.addRawSet(sit, it);
                 })
             }
