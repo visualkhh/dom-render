@@ -12,4 +12,8 @@ export class FormValidator<E = HTMLFormElement> extends Validator<void, E> {
     valid(): boolean {
         return this.childValid()
     }
+
+    reset() {
+        this.targetReset();
+    }
 }

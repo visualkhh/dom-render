@@ -63,6 +63,10 @@ export abstract class Validator<T = any, E = Element> {
         (this._target as any)?.focus?.();
     }
 
+    targetReset() {
+        (this._target as any)?.reset?.();
+    }
+
     targetDispatchEvent(event: Event) {
         return (this._target as any)?.dispatchEvent(event);
     }
