@@ -1002,9 +1002,10 @@ export class RawSet {
                     if (rawSet.point.thisVariableName) {
                         applayTemplate = applayTemplate.replace(/this\./g, 'this.__domrender_component_new.rootCreator.');
                     }
-                    applayTemplate = applayTemplate.replace(/\$component\./g, 'this.');
+                    // applayTemplate = applayTemplate.replace(/\$component\./g, 'this.');
+                    applayTemplate = applayTemplate.replace(/#component#/g, 'this');
                 }
-                applayTemplate = template.replace('#innerHTML#', applayTemplate);
+                applayTemplate = template.replace(/#innerHTML#/g, applayTemplate);
 
                 const oninit = element.getAttribute('dr-on-init')
                 // console.log('oninit', oninit)
