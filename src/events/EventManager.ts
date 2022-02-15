@@ -6,23 +6,28 @@ import { DomRenderFinalProxy } from '../types/Types';
 
 export class EventManager {
     public static ownerVariablePathAttrName = 'dr-owner-variable-path';
-    public readonly attrPrefix = 'dr-';
+    public static readonly attrPrefix = 'dr-';
     public readonly eventNames = [
         'click', 'mousedown', 'mouseup', 'dblclick', 'mouseover', 'mouseout', 'mousemove', 'mouseenter', 'mouseleave', 'contextmenu',
         'keyup', 'keydown', 'keypress',
         'change', 'input', 'submit', 'resize', 'focus', 'blur'];
 
-    public readonly eventParam = this.attrPrefix + 'event';
-
+    public readonly eventParam = EventManager.attrPrefix + 'event';
+    public static readonly onInitAttrName = EventManager.attrPrefix + 'on-init';
+    public static readonly valueAttrName = EventManager.attrPrefix + 'value';
+    public static readonly valueLinkAttrName = EventManager.attrPrefix + 'value-link';
+    public static readonly attrAttrName = EventManager.attrPrefix + 'attr';
+    public static readonly styleAttrName = EventManager.attrPrefix + 'style';
+    public static readonly classAttrName = EventManager.attrPrefix + 'class';
     public readonly attrNames = [
-        this.attrPrefix + 'value',
-        this.attrPrefix + 'value-link',
-        this.attrPrefix + 'attr',
-        this.attrPrefix + 'style',
-        this.attrPrefix + 'class',
-        this.attrPrefix + 'window-event-' + EventManager.WINDOW_EVENT_POPSTATE,
-        this.attrPrefix + 'window-event-' + EventManager.WINDOW_EVENT_RESIZE,
-        this.attrPrefix + 'on-init',
+        EventManager.valueAttrName,
+        EventManager.valueLinkAttrName,
+        EventManager.attrAttrName,
+        EventManager.styleAttrName,
+        EventManager.classAttrName,
+        EventManager.attrPrefix + 'window-event-' + EventManager.WINDOW_EVENT_POPSTATE,
+        EventManager.attrPrefix + 'window-event-' + EventManager.WINDOW_EVENT_RESIZE,
+        EventManager.onInitAttrName,
         this.eventParam
     ];
 
@@ -51,7 +56,7 @@ export class EventManager {
 
     constructor() {
         this.eventNames.forEach(it => {
-            this.attrNames.push(this.attrPrefix + 'event-' + it);
+            this.attrNames.push(EventManager.attrPrefix + 'event-' + it);
         });
 
         if (typeof window !== 'undefined') {
@@ -112,7 +117,7 @@ export class EventManager {
         this.addDrEventPram(obj, this.eventParam, childNodes, config);
 
         // value
-        this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'value', (it, attribute) => {
+        this.procAttr<HTMLInputElement>(childNodes, EventManager.valueAttrName, (it, attribute) => {
             const script = attribute;
             if (script) {
                 const data = ScriptUtils.evalReturn(script, obj);
@@ -124,13 +129,13 @@ export class EventManager {
 
         // window event
         EventManager.WINDOW_EVENTS.forEach(it => {
-            this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'window-event-' + it, (it, attribute) => {
+            this.procAttr<HTMLInputElement>(childNodes, EventManager.attrPrefix + 'window-event-' + it, (it, attribute) => {
                 (it as any).obj = obj;
             })
         })
 
         // on-init event
-        this.procAttr<HTMLInputElement>(childNodes, this.attrPrefix + 'on-init', (it, attribute) => {
+        this.procAttr<HTMLInputElement>(childNodes, EventManager.onInitAttrName, (it, attribute) => {
             let script = attribute;
             if (script) {
                 script = 'return ' + script;
@@ -151,11 +156,10 @@ export class EventManager {
         })
 
         // value-link event
-        const valueLinkAttrName = this.attrPrefix + 'value-link';
-        this.procAttr<HTMLInputElement>(childNodes, valueLinkAttrName, (it, varName) => {
+        this.procAttr<HTMLInputElement>(childNodes, EventManager.valueLinkAttrName, (it, varName) => {
             if (varName) {
                 const ownerVariablePathName = it.getAttribute(EventManager.ownerVariablePathAttrName);
-                const mapScript = it.getAttribute(`${valueLinkAttrName}:map`);
+                const mapScript = it.getAttribute(`${EventManager.valueLinkAttrName}:map`);
                 // const inMapScript = it.getAttribute(`${valueLinkAttrName}:in-map`);
                 let bindObj = obj;
                 if (ownerVariablePathName) {
@@ -226,14 +230,13 @@ export class EventManager {
     public changeVar(obj: any, elements: Set<Element> | Set<ChildNode>, varName?: string, config?: Config) {
         // console.log('-changeVar-->', obj, elements, varName)
         // value-link event
-        const valueLinkAttrName = this.attrPrefix + 'value-link';
-        this.procAttr<HTMLInputElement>(elements, valueLinkAttrName, (it, attribute) => {
+        this.procAttr<HTMLInputElement>(elements, EventManager.valueLinkAttrName, (it, attribute) => {
             const ownerVariablePathName = it.getAttribute(EventManager.ownerVariablePathAttrName);
             let bindObj = obj;
             if (ownerVariablePathName) {
                 bindObj = ScriptUtils.evalReturn(ownerVariablePathName, obj);
             }
-            const mapScript = it.getAttribute(`${valueLinkAttrName}:map`);
+            const mapScript = it.getAttribute(`${EventManager.valueLinkAttrName}:map`);
             if (attribute && attribute === varName) {
                 const getValue = this.getValue(obj, attribute, bindObj);
                 if (typeof getValue === 'function' && getValue) {
@@ -253,7 +256,7 @@ export class EventManager {
         })
 
         // attribute
-        this.procAttr(elements, this.attrPrefix + 'attr', (it, attribute) => {
+        this.procAttr(elements, EventManager.attrAttrName, (it, attribute) => {
             let script = attribute;
             if (script) {
                 script = 'return ' + script;
@@ -298,7 +301,7 @@ export class EventManager {
             }
         })
         // style
-        this.procAttr(elements, this.attrPrefix + 'style', (it, attribute) => {
+        this.procAttr(elements, EventManager.styleAttrName, (it, attribute) => {
             let script = attribute;
             if (script) {
                 script = 'return ' + script;
@@ -323,7 +326,7 @@ export class EventManager {
             }
         })
         // class
-        this.procAttr(elements, this.attrPrefix + 'class', (it, attribute) => {
+        this.procAttr(elements, EventManager.classAttrName, (it, attribute) => {
             let script = attribute;
             if (script) {
                 script = 'return ' + script;
@@ -356,7 +359,7 @@ export class EventManager {
 
     // eslint-disable-next-line no-undef
     public addDrEvents(obj: any, eventName: string, elements: Set<Element> | Set<ChildNode>, config?: Config) {
-        const attr = this.attrPrefix + 'event-' + eventName
+        const attr = EventManager.attrPrefix + 'event-' + eventName
         this.procAttr<HTMLInputElement>(elements, attr, (it, attribute) => {
             const script = attribute;
             it.addEventListener(eventName, (event) => {

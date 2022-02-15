@@ -281,7 +281,7 @@ export class RawSet {
                     childs.forEach(it => {
                         const eventName = it.getAttribute('dr-form:event') ?? 'change'
                         const validatorName = it.getAttribute('dr-form:validator');
-                        const attrEventName = eventManager.attrPrefix + 'event-' + eventName;
+                        const attrEventName = EventManager.attrPrefix + 'event-' + eventName;
                         let varpath = ScriptUtils.evalReturn(element.getAttribute('dr-form:name') ?? '', obj) ?? it.getAttribute('name');
                         if (varpath != null) {
                             if (validatorName) {
@@ -1007,7 +1007,7 @@ export class RawSet {
                 }
                 applayTemplate = template.replace(/#innerHTML#/g, applayTemplate);
 
-                const oninit = element.getAttribute('dr-on-init')
+                const oninit = element.getAttribute(EventManager.onInitAttrName);
                 // console.log('oninit', oninit)
                 if (oninit) {
                     const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${oninit} `;
