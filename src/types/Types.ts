@@ -4,10 +4,6 @@ export interface ConstructorType<T> {
 export class Shield {
     [name: string]: any
 }
-
-
-
-
 export class DomRenderFinalProxy<T extends object> implements ProxyHandler<T> {
     set(target: T, p: string | symbol, value: any, receiver: any): boolean {
         (target as any)[p] = value;

@@ -58,8 +58,4 @@ export class Range implements Iterable<number> {
             return new Range(first, last ?? 0, step);
         }
     }
-
-    // toArray() {
-    //     return [...this];
-    // }
 }

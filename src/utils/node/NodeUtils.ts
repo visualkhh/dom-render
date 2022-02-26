@@ -19,12 +19,4 @@ export class NodeUtils {
     static addNode(targetNode: Node, newNode: Node) {
         return targetNode.parentNode?.insertBefore(newNode, targetNode.nextSibling);
     }
-
-
-    // static childNodes(): ChildNode[] {
-    //     return Array.prototype.slice.call(element.querySelectorAll(selector));
-    // }
-    // static nodeListToArray(nodeList: NodeListOf<Element>) {
-    //     Array.prototype.slice.call(nodeList);
-    // }
 }
