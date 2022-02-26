@@ -1,76 +1,118 @@
-![Single Page Application Framworks](assets/banner.png)
-[![npm version](https://img.shields.io/badge/npm-v1.0.44-blue)](https://www.npmjs.com/package/dom-render) [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE.md) [![Chat](https://img.shields.io/badge/discord-20%20online-brightgreen?logo=discord)](https://discord.gg/PW56dpns) [![Github](https://img.shields.io/badge/-github-black?logo=github)](https://github.com/visualkhh/dom-render)
-# Our primary goals are
-- view template engine
-- Dom control and reorder
-- all internal variables are managed by proxy. (DomRenderProxy)
----
-
-# [📄 introduction page [link]](https://simple-boot-front.github.io/#dom-render/introduction)
-- [https://simple-boot-front.github.io/#dom-render/introduction](https://simple-boot-front.github.io/#dom-render/introduction)
+DOM-RENDER  
+===   
+[![typescript](https://img.shields.io/badge/-npm-black?logo=npm)](https://www.npmjs.com/package/dom-render) [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE.md)
+* view template engine
+* Dom control and reorder and render
+* all internal variables are managed by proxy. (DomRenderProxy)
 
 # 🚀 Quick start 
-```shell
-npm install dom-render
-````
----
-# 😃 examples
-- [examples project](./example)
---- 
+```html
+<script src="https://visualkhh.github.io/dom-render/cdn/dom-render@1.0.69.js"></script>
+```
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body id="app">
+${this.name}$
+<script src="https://visualkhh.github.io/dom-render/cdn/dom-render@1.0.69.js"></script>
+<script>
+  let data = {
+    name: 'my name is dom-render'
+  };
+  data = DomRender.run(data , document.querySelector('#app'));
+</script>
+</body>
+</html>
+```
 
-# 📄 Code description
-## initialized
+## Print and Call Expression
+<details>
+  <summary>${...}$, #{...}# <strong>🔻(click)</strong></summary>
+
+### ${}$ innerTEXT, #{}# innerHTML
 ```html
-<!doctype html><html lang="en"><body id="app"></body></html>
+<body id="app">
+${this.name}$  <!-- outout: <i>my name is dom-render</i> -->
+#{this.name}# <!-- outout text is italic: my name is dom-render -->
+<script>
+  let data = {
+    name: '<i>my name is dom-render</i>'
+  };
+  data = DomRender.run(data , document.querySelector('#app'));
+</script>
+</body>
 ```
-```typescript
-const target = document.querySelector('#app');
-const data = DomRender.run({name: 'my name is dom-render'}, target);
-data.name = 'modify name';
-```
-## print and call
+</details>
+
+# dom-render attributes
+
+## control, print Statement
+<details>
+  <summary>dr-if<strong>🔻(click)</strong></summary>
+
+### if element render
 ```html
-<div>${this.name}$</div>
-<div>${this.office.addr.first}$, ${this.office.addr.last}$, ${this.office.addr.street}$ (${this.office.name}$)</div>
-<div dr="this.office.addr.street">${this.getOfficeFullAddr()}$</div>
+<body id="app">
+  <div dr-if="true">true</div>  <!-- render -->
+  <div dr-if="this.gender === 'M'">gender: M</div> <!-- No Render -->
+<script>
+  let data = {
+    gender: 'F'
+  };
+  data = DomRender.run(data , document.querySelector('#app'));
+</script>
+</body>
 ```
-## dr-if
-```html
-<div dr-if="true">true</div>
-<div dr-if="this.gender==='M'">gender: M</div>
-```
-## dr-for, dr-for-of
+</details>
+
+<details>
+  <summary>dr-for, dr-for-of<strong>🔻(click)</strong></summary>
+
 ```html
 <div dr-for="var i = 0; i < this.friends.length; i++"> friend</div>
 <div dr-for-of="this.friends"> ${#it#.name}$</div>
 <div dr-for-of="$range(10, 20)"><div>${#it#}$</div><div>
 <div dr-for="var i = 1 ; i <= 9 ; i++" dr-it="i">
-    ${#it#}$ *
-    <scope dr-for="var y = 1 ; y <= 9 ; y++" dr-it="y" dr-var="superIt=#it#" dr-strip="true">
-        #it# = ${var.superIt * #it#}$
-    </scope>
+  ${#it#}$ *
+  <scope dr-for="var y = 1 ; y <= 9 ; y++" dr-it="y" dr-var="superIt=#it#" dr-strip="true">
+    #it# = ${var.superIt * #it#}$
+  </scope>
 </div>
 ```
+</details>
 
-## dr-repeat
+<details>
+  <summary>dr-repeat<strong>🔻(click)</strong></summary>
+
 ```html
 <div dr-repeat="10"><div>#it#</div></div>
 <div dr-repeat="$range(10, 20)"><div>#it#</div></div>
 <div dr-repeat="$range(10, 20, 5)"><div>#it#</div></div>
 <div dr-repeat="$range('10..5, 2')"><div>#it#</div></div>
 ```
+</details>
 
-## dr-inner-text, dr-inner-html
+<details>
+  <summary>dr-inner-text, dr-inner-html<strong>🔻(click)</strong></summary>
+
 ```html
 <div dr-inner-text="'<b>aa</b> <button dr-event-click=\'alert(1)\'>aa</button>'"> friend</div>
 <div dr-inner-html="'<b>aa</b> <button dr-event-click=\'alert(1)\'>aa</button>'"> friend</div>
 ```
+</details>
+
 
 ## event
-dr-event-(name) 
-- click, mousedown, mouseup, dblclick, mouseover, mouseout, mousemove, mouseenter, mouseleave, contextmenu, keyup, keydown, keypress, change, input, submit, resize, focus, blur
-- ref: element 
-- variable: $event, $target
+<details>
+  <summary>dr-event-(name)<strong>🔻(click)</strong></summary>
+
+* click, mousedown, mouseup, dblclick, mouseover, mouseout, mousemove, mouseenter, mouseleave, contextmenu, keyup, keydown, keypress, change, input, submit, resize, focus, blur
+* ref: element
+* variable: $event, $target
 ```html
 click: <button dr-event-click="this.name = 'name' + new Date()">click</button> <br>
 change: <input type="text" dr-event-change="this.name = $target.value"> <br>
@@ -80,92 +122,113 @@ keyup: <input type="text" dr-event-keyup="this.name = $target.value"> <br>
 keydown: <input type="text" dr-event-keydown="this.name = $target.value"><br>
 submit: <form dr-event-submit="console.log($event); $event.preventDefault();"><input type="text"> <button type="submit">submit</button></form><br>
 ```
+</details>
 
-dr-window-event-popstate
-- ref: window 
-- variable: $target
+<details>
+  <summary>dr-window-event-popstate<strong>🔻(click)</strong></summary>
+
+* ref: window
+* variable: $target
+
 ```html
 window-event-popstate: <input type="text" dr-window-event-popstate="alert(this.name)"><br>
 ```
+</details>
 
-dr-event
-- other event
-- ref: element
-- variable: $params, $event
+<details>
+  <summary>dr-event<strong>🔻(click)</strong></summary>
+
+* other event
+* ref: element
+* variable: $params, $event
+
+
 ```html
 <input dr-event:bind='eventName1, eventName2' dr-event="console.log('event', $params, $event)"  type="text">
 ```
+</details>
 
-## dr-value, value-link
-dr-value
-- The value is assigned the first time.
 
-dr-value-link
-- Value and variable values are referencing each other. It affects each other when changing. (Immediate reflection event: input)
+
+## value
+<details>
+  <summary>dr-value, value-link<strong>🔻(click)</strong></summary>
+
+* dr-value
+  * The value is assigned the first time.
+* dr-value-link
+  * Value and variable values are referencing each other. It affects each other when changing. (Immediate reflection event: input)
+
 ```html
 dr-value: <input type="text" dr-value="this.office.name"> <br>
 dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
 ```
+</details>
 
-## dr-attr
+## other
+<details>
+  <summary>dr-attr<strong>🔻(click)</strong></summary>
+
 ```html
 <textarea dr-attr="{rows: this.age/2, cols: this.age}"></textarea>
 <div dr-attr="{wow: '123', good: 123444}"></div>
 <div dr-attr="['wow=123', 'good=123444']"></div>
 <div dr-attr="'wow=123, good=123444'"></div>
 ```
+</details>
 
-## dr-class
+<details>
+  <summary>dr-class<strong>🔻(click)</strong></summary>
+
 ```html
-<div dr-class="{big: this.age > 50, red: this.age > 50}">
-<div dr-class="'big yellow ' + (this.age > 50 ? 'old' : 'young')">
-<div dr-class="['small', 'yellow']">
+<div dr-class="{big: this.age > 50, red: this.age > 50}"></div>
+<div dr-class="'big yellow ' + (this.age > 50 ? 'old' : 'young')"></div>
+<div dr-class="['small', 'yellow']"></div>
 ```
+</details>
 
-## dr-style
+<details>
+  <summary>dr-style<strong>🔻(click)</strong></summary>
+
 ```html
 <div dr-style="{fontSize: this.age + 'px'}"> style </div>
 <div dr-style="{'font-size': '20px'}"> style</div>
 <div dr-style="'font-size: ' + this.age +'px; margin: ' + this.age + 'px'"> style </div>
 <div dr-style="['font-size: ' + this.age +'px', 'margin: ' + this.age + 'px']"> style </div>
 ```
+</details>
 
+<details>
+  <summary>dr-strip<strong>🔻(click)</strong></summary>
 
-## dr-strip
-as-is
 ```html
-<div dr-strip="true"><span>hello</span></div>
+<div dr-strip="true"><span>hello</span></div> <!-- output html : <span>hello</span> -->
 ```
-to-be
-```html
-<span>hello</span>
-```
+</details>
 
-## dr-on-init
-```html
-<input dr-on-init="this.onInitElement">
-```
+<details>
+  <summary>dr-before, dr-after<strong>🔻(click)</strong></summary>
 
-## dr-before, dr-after
 ```html
 <div dr-before="console.log('process before')" dr-after="console.log('process after')"></div>
 ```
-## dr-complete
+</details>
+
+<details>
+  <summary>dr-complete<strong>🔻(click)</strong></summary>
+
 ```html
 <select dr-value-link="this.currentContry" dr-event-change="this.contryChange($event)">
-    <option dr-for-of="this.languages" dr-value="#it#.key" dr-complete="this.currentContry='defaultValue'">${#it#.title}$</option>
+  <option dr-for-of="this.languages" dr-value="#it#.key" dr-complete="this.currentContry='defaultValue'">${#it#.title}$</option>
 </select>
 ```
+</details>
 
----
-# LifeCycle
-```
+## LifeCycle
 * OnInitRender
-  - onInitRender(): init render call
-```
----
+  * onInitRender(): init render call
 
-# Script
+## Script
 ```typescript
 new DomRender.run(obj, target, {
   scripts: {
