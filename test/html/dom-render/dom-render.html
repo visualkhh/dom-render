@@ -13,13 +13,17 @@
     <button type="submit">submit</button>
 </form>
 <script>
-    // const pageFormValidator = new DomRender.FormValidator();
-    // pageFormValidator.name = new DomRender.NotEmptyValidator();
-    // pageFormValidator.age = new DomRender.NotEmptyValidator();
+    const form = new FormValidator();
+    form.name = new NotEmptyValidator();
+    form.age = new NotEmptyValidator();
     let data = {
-        form: {},
+        form,
         submit() {
-            console.log(this.form);
+            if (this.form.valid()){
+                console.log('valid');
+            } else {
+                console.log('inValid');
+            }
         }
     };
     data = DomRender.run(data , document.querySelector('#app'));

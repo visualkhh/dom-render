@@ -254,67 +254,31 @@ dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
 
 <details>
   <summary>validator<strong>🔻(click)</strong></summary>
-</details>
-
-
-```typescript
-class User {
-  form = {};
-  submit() {
-    const form = (this.form as any)
-    console.log('submit->', form, form.name, form.age, form.addr);
-  }
-}
-```
-
-# validator
-```typescript
-class PageValidator extends FormValidator { 
-    required = new RequiredValidator();
-    notEmpty = new NotEmptyValidator();
-    empty = new EmptyValidator();
-    regexp = new RegExpTestValidator(/[0-9]/);
-    mix = new MultipleValidator([new RequiredValidator(), new NotEmptyValidator()]);
-
-    all = new ValidValidatorArray((v, t, e) => {
-        return !((v ?? []).filter(it => !it.checked).length > 0);
-    });
-
-    gender = new ValidValidatorArray((v, t, e) => {
-        return ((v ?? []).filter(it => it.checked).length > 0);
-    });
-}
-class User {
-  form = new PageValidator();
-  submit() {
-    console.log('submit valid->', this.form.valid());
-  }
-  
-  changeData() {
-    this.form.required.value = 'new value';    
-  }
-}
-```
 
 ```html
+<body id="app">
 <form dr-form="this.form" dr-event-submit="this.submit(); $event.preventDefault();">
-    <h2>validator</h2>
-    required: <input name="required"> <br>
-    notEmpty: <input name="notEmpty"> <br>
-    empty: <input name="empty"> <br>
-    regexp: /[0-9]/ <input name="regexp"> <br>
-    <h2>mix validator</h2>
-    required, notEmpty: <input name="mix"> <br>
-    <h2>all check required</h2>
-    <input name="all" type="checkbox" value="a">a <br>
-    <input name="all" type="checkbox" value="b">b <br>
-
-    <h2>gender chose one</h2>
-    <input name="gender" type="radio" value="male"> Male <br>
-    <input name="gender" type="radio" value="female"> Female<br>
-
-    <button type="submit">check valid</button>
+    name: <input name="name">
+    age: <input name="age">
+    <button type="submit">submit</button>
 </form>
+<script>
+    const form = new FormValidator();
+    form.name = new NotEmptyValidator();
+    form.age = new NotEmptyValidator();
+    let data = {
+        form,
+        submit() {
+            if (this.form.valid()){
+                console.log('valid');
+            } else {
+                console.log('inValid');
+            }
+        }
+    };
+    data = DomRender.run(data , document.querySelector('#app'));
+</script>
+</body>
 ```
 validator
 - Validator (abstract)
@@ -350,33 +314,28 @@ validator
 - ValidValidatorArray
 - ValueEqualsValidator
 - ValueNotEqualsValidator
+</details>
 
 
-# Class
-## Range
-```typescript
+
+## Class
+<details>
+  <summary>Range<strong>🔻(click)</strong></summary>
+
+```javascript
 const range = new Range(100,55, 10);
 for (let data of new Range(100,55, 10)) {
   console.log(data);
 }
 const rangeArray = new Range(100,55, 10).toArray();
 ```
+</details>
 
-# Detect Get, Set
-OnBeforeReturnSet
-```typescript
-export interface OnBeforeReturnSet {
-    onBeforeReturnSet(name: string, value: any, fullPath?: string[]): void;
-}
-```
-OnBeforeReturnGet
-```typescript
-export interface OnBeforeReturnGet {
-    onBeforeReturnGet(name: string, value: any, fullPath?: string[]): void;
-}
-```
+## Detect Get, Set
+<details>
+  <summary>Method Proxy<strong>🔻(click)</strong></summary>
 
-using detect
+### using detect
 ```typescript
 {
     name: 'dom-render'
@@ -393,7 +352,23 @@ exclude detect property: Config
 - proxyExcludeOnBeforeReturnSets: ['propertyName']
 ---
 
-# Proxy
+### OnBeforeReturnSet
+```typescript
+export interface OnBeforeReturnSet {
+    onBeforeReturnSet(name: string, value: any, fullPath?: string[]): void;
+}
+```
+### OnBeforeReturnGet
+```typescript
+export interface OnBeforeReturnGet {
+    onBeforeReturnGet(name: string, value: any, fullPath?: string[]): void;
+}
+```
+</details>
+
+
+
+## Proxy
 all internal variables are managed by proxy. (DomRenderProxy)
 ### exclude proxy (situation: Maximum call stack error)
 exclude detect property: Config
@@ -439,21 +414,19 @@ const data = config.scripts.concat('head', 'tail')
 ---
 # Component
 ```typescript
-export namespace Profile {
-  export const templat = '<div>aaaaa${this.name}aaaaa </div>';
-  export const styles = ['p {color: red}', 'div {margin: ${this.margin} + \'px\' }'];
-  export class Component {
-    public name = 'default name';
-    public margin = 5;
-    public say() {
-        console.log('say!~')
-    }
+const templat = '<div>aaaaa${this.name}aaaaa </div>';
+const styles = ['p {color: red}', 'div {margin: ${this.margin} + \'px\' }'];
+class Component {
+  public name = 'default name';
+  public margin = 5;
+  public say() {
+      console.log('say!~')
   }
 }
 
 new DomRender.run(obj, target, {
   targetElements: [
-    RawSet.createComponentTargetElement('my-element', (e, o, r) => new Profile.Component(), Profile.templat, Profile.styles, scripts)
+    RawSet.createComponentTargetElement('my-element', (e, o, r) => new Component(), templat, styles, scripts)
   ],
 });
 ```
@@ -469,7 +442,6 @@ using component
     - $innerHTML: element innerHTML string
 ---
 
-----
 # License
 * MIT
 * visualkhh@gmail.com

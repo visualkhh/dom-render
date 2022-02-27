@@ -962,17 +962,13 @@ export class RawSet {
                 domrenderComponents[componentKey] = objFactory(element, obj, rawSet);
                 const instance = domrenderComponents[componentKey];
                 const onCreate = element.getAttribute('dr-on-create')
-                let createParam = undefined;
+                let createParam;
                 if (onCreate) {
                     //     const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${onCreate} `;
                     //     const script = `${onCreate} `;
                     createParam = ScriptUtils.evalReturn(onCreate, obj);
                 }
                 instance?.onCreateRender?.(createParam);
-
-
-                // console.log('callback settttt---b-->', obj.__domrender_components, instance)
-
                 const attribute = {} as any;
                 element.getAttributeNames().forEach(it => {
                     attribute[it] = element.getAttribute(it);
@@ -1002,16 +998,13 @@ export class RawSet {
                     if (rawSet.point.thisVariableName) {
                         applayTemplate = applayTemplate.replace(/this\./g, 'this.__domrender_component_new.rootCreator.');
                     }
-                    // applayTemplate = applayTemplate.replace(/\$component\./g, 'this.');
                     applayTemplate = applayTemplate.replace(/#component#/g, 'this');
                 }
                 applayTemplate = template.replace(/#innerHTML#/g, applayTemplate);
 
                 const oninit = element.getAttribute(EventManager.onInitAttrName);
-                // console.log('oninit', oninit)
                 if (oninit) {
                     const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${oninit} `;
-                    // console.log('--->onInit--?', oninit, script, obj)
                     ScriptUtils.eval(script, Object.assign(obj, {
                         __render: render
                     }))
@@ -1021,7 +1014,7 @@ export class RawSet {
                 const data = RawSet.drThisCreate(element, `this.__domrender_components.${componentKey}`, '', true, obj, config);
 
                 return data;
-            },
+            }
             // complete
         }
         return targetElement;
