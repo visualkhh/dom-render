@@ -238,6 +238,7 @@ export abstract class Validator<T = any, E = Element> {
             e.syncValue();
         })
     }
+
     public get length() {
         return (this.value as any)?.length ?? 0;
     }

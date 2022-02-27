@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script src="https://visualkhh.github.io/dom-render/cdn/dom-render@1.0.69.js"></script>
+<!--<script src="bundle.js"></script>-->
+<body id="app">
+<form dr-form="this.form" dr-event-submit="this.submit(); $event.preventDefault();">
+    name: <input name="name">
+    age: <input name="age">
+    <button type="submit">submit</button>
+</form>
+<script>
+    // const pageFormValidator = new DomRender.FormValidator();
+    // pageFormValidator.name = new DomRender.NotEmptyValidator();
+    // pageFormValidator.age = new DomRender.NotEmptyValidator();
+    let data = {
+        form: {},
+        submit() {
+            console.log(this.form);
+        }
+    };
+    data = DomRender.run(data , document.querySelector('#app'));
+</script>
+</body>
+</html>

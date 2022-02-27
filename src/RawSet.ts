@@ -1,12 +1,12 @@
-import { RandomUtils } from './utils/random/RandomUtils';
-import { StringUtils } from './utils/string/StringUtils';
-import { ScriptUtils } from './utils/script/ScriptUtils';
-import { EventManager, eventManager } from './events/EventManager';
+import {RandomUtils} from './utils/random/RandomUtils';
+import {StringUtils} from './utils/string/StringUtils';
+import {ScriptUtils} from './utils/script/ScriptUtils';
+import {EventManager, eventManager} from './events/EventManager';
 import {Config, TargetAttr, TargetElement} from './Config';
-import { Range } from './iterators/Range';
-import { Validator } from './validators/Validator';
-import { ValidatorArray } from './validators/ValidatorArray';
-import { DomRenderFinalProxy } from './types/Types';
+import {Range} from './iterators/Range';
+import {Validator} from './validators/Validator';
+import {ValidatorArray} from './validators/ValidatorArray';
+import {DomRenderFinalProxy} from './types/Types';
 
 type Attrs = {
     dr: string | null
@@ -26,6 +26,7 @@ type Attrs = {
     drCompleteOption: string | null
     drStripOption: string | null
 }
+
 export class RawSet {
     public static readonly DR = 'dr';
     public static readonly DR_IF_NAME = 'dr-if';
@@ -68,7 +69,7 @@ export class RawSet {
 
     public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_FORM_NAME, RawSet.DR_PRE_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME, RawSet.DR_DETECT_NAME];
 
-    constructor(public uuid: string, public point: { start: Comment, end: Comment, thisVariableName?: string | null}, public fragment: DocumentFragment, public data: any = {}) { // , public thisObjPath?: string
+    constructor(public uuid: string, public point: { start: Comment, end: Comment, thisVariableName?: string | null }, public fragment: DocumentFragment, public data: any = {}) { // , public thisObjPath?: string
     }
 
     get isConnected() {
@@ -87,7 +88,7 @@ export class RawSet {
                 script = targetAttrNames.map(it => (element.getAttribute(it))).filter(it => it).join(';');
             }
             if (script) {
-               // script = script.replace('}$','}');
+                // script = script.replace('}$','}');
                 // console.log('----------->', script)
                 EventManager.VARNAMES.forEach(it => {
                     // script = script.replace(RegExp(it.replace('$', '\\$'), 'g'), `this?.___${it}`);
@@ -140,8 +141,7 @@ export class RawSet {
                     n = config.window.document.createTextNode(r);
                 }
                 cNode.parentNode?.replaceChild(n, cNode)
-            }
-            else if (cNode.nodeType === Node.ELEMENT_NODE) {
+            } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
                 const drAttr = {
                     dr: this.getAttributeAndDelete(element, RawSet.DR),
@@ -237,7 +237,7 @@ export class RawSet {
                     ));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
-                    const bypass = (newTemp.innerHTML ??'').trim().length <= 0;
+                    const bypass = (newTemp.innerHTML ?? '').trim().length <= 0;
                     const tempalte = config.window.document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
                     fag.append(tempalte.content)
@@ -301,13 +301,13 @@ export class RawSet {
                             varpath = `${drAttr.drForm}['${varpath}']`;
                             let data = ScriptUtils.evalReturn(`${varpath}`, obj);
                             if (data instanceof ValidatorArray) {
-                                it.setAttribute(attrEventName, `${varpath}.setArrayValue($target, $target.value, $event); ${it.getAttribute(attrEventName)??''};`);
+                                it.setAttribute(attrEventName, `${varpath}.setArrayValue($target, $target.value, $event); ${it.getAttribute(attrEventName) ?? ''};`);
                                 data.addValidator((it as any).value, it);
                             } else if (data instanceof Validator) {
                                 // varpath += (varpath ? '.value' : 'value');
                                 // varpath = drAttr.drForm + '.' + varpath;
                                 // it.setAttribute(attrEventName, `${varpath} = $target.value; ${target}=$target; ${event}=$event;`);
-                                it.setAttribute(attrEventName, `${varpath}.set($target.value, $target, $event); ${it.getAttribute(attrEventName)??''};`);
+                                it.setAttribute(attrEventName, `${varpath}.set($target.value, $target, $event); ${it.getAttribute(attrEventName) ?? ''};`);
                                 data.setTarget(it);
                                 data.value = (it as any).value;
                             } else {
@@ -616,12 +616,12 @@ export class RawSet {
                 const ${EventManager.RAWSET_VARNAME} = this.__render.rawset;
                 ${it.drCompleteOption}
                 `, Object.assign(obj, {
-                    __render: Object.freeze({
-                        rawset: this,
-                        fag: genNode,
-                        scripts: EventManager.setBindProperty(config?.scripts, obj)
-                    } as Render)
-                }
+                        __render: Object.freeze({
+                            rawset: this,
+                            fag: genNode,
+                            scripts: EventManager.setBindProperty(config?.scripts, obj)
+                        } as Render)
+                    }
                 ));
             }
         })
@@ -660,7 +660,7 @@ export class RawSet {
     }
 
     public static checkPointCreates(element: Node, config: Config): RawSet[] {
-       const thisVariableName = (element as any).__domrender_this_variable_name;
+        const thisVariableName = (element as any).__domrender_this_variable_name;
         // console.log('checkPointCreates thisVariableName', thisVariableName);
         const nodeIterator = config.window.document.createNodeIterator(element, NodeFilter.SHOW_ALL, {
             acceptNode(node) {
@@ -917,7 +917,7 @@ export class RawSet {
         return fag;
     }
 
-    public static createComponentTargetAttribute(name: string, getThisObj: (element: Element, attrValue: string, obj: any, rawSet: RawSet) => any, factory: (element: Element, attrValue: string, obj: any, rawSet: RawSet)=> DocumentFragment) {
+    public static createComponentTargetAttribute(name: string, getThisObj: (element: Element, attrValue: string, obj: any, rawSet: RawSet) => any, factory: (element: Element, attrValue: string, obj: any, rawSet: RawSet) => DocumentFragment) {
         const targetAttribute: TargetAttr = {
             name,
             callBack(element: Element, attrValue: string, obj: any, rawSet: RawSet): DocumentFragment {
@@ -930,7 +930,7 @@ export class RawSet {
                     i.rawSet = rawSet;
                     i.innerHTML = element.innerHTML;
                     i.rootCreator = new Proxy(obj, new DomRenderFinalProxy());
-                    i.creator =  new Proxy(rawSet.point.thisVariableName ? ScriptUtils.evalReturn(rawSet.point.thisVariableName, obj) : obj, new DomRenderFinalProxy());
+                    i.creator = new Proxy(rawSet.point.thisVariableName ? ScriptUtils.evalReturn(rawSet.point.thisVariableName, obj) : obj, new DomRenderFinalProxy());
                 }
                 return data;
             }
@@ -964,8 +964,8 @@ export class RawSet {
                 const onCreate = element.getAttribute('dr-on-create')
                 let createParam = undefined;
                 if (onCreate) {
-                //     const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${onCreate} `;
-                //     const script = `${onCreate} `;
+                    //     const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${onCreate} `;
+                    //     const script = `${onCreate} `;
                     createParam = ScriptUtils.evalReturn(onCreate, obj);
                 }
                 instance?.onCreateRender?.(createParam);
@@ -995,7 +995,7 @@ export class RawSet {
                 i.rawSet = rawSet;
                 i.innerHTML = element.innerHTML;
                 i.rootCreator = new Proxy(obj, new DomRenderFinalProxy());
-                i.creator =  new Proxy(rawSet.point.thisVariableName ? ScriptUtils.evalReturn(rawSet.point.thisVariableName, obj) : obj, new DomRenderFinalProxy());
+                i.creator = new Proxy(rawSet.point.thisVariableName ? ScriptUtils.evalReturn(rawSet.point.thisVariableName, obj) : obj, new DomRenderFinalProxy());
                 this.__creatorMetaData = i;
                 let applayTemplate = element.innerHTML;
                 if (applayTemplate) {
@@ -1053,7 +1053,6 @@ export type Render = {
     // componentKey
     // scripts
 }
-
 
 export type CreatorMetaData = {
     thisVariableName?: string | null;

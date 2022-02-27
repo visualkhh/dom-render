@@ -29,7 +29,7 @@ ${this.name}$
 </html>
 ```
 
-## Print and Call Expression
+## Expression
 <details>
   <summary>${...}$, #{...}# <strong>🔻(click)</strong></summary>
 
@@ -224,65 +224,39 @@ dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
 ```
 </details>
 
-## LifeCycle
-* OnInitRender
-  * onInitRender(): init render call
+## dr-form
+<details>
+  <summary>form<strong>🔻(click)</strong></summary>
+* event: change  
+* modify change: dr-form:event="input"
 
-## Script
-```typescript
-new DomRender.run(obj, target, {
-  scripts: {
-    concat: function (head: string, tail: string) {
-      return head + tail; 
-    }
-  }
-});
-```
-using script
-```typescript
-const data = config.scripts.concat('head', 'tail')
-```
 ```html
-<div>${$scripts.concat('head', 'tail')}</div>
-<div dr-if="$scripts.concat('wow', 'good') === 'wowgood'"> is wowgood</div>
-```
-
----
-# Component
-```typescript
-export namespace Profile {
-  export const templat = '<div>aaaaa${this.name}aaaaa </div>';
-  export const styles = ['p {color: red}', 'div {margin: ${this.margin} + \'px\' }'];
-  export class Component {
-    public name = 'default name';
-    public margin = 5;
-    public say() {
-        console.log('say!~')
+<body id="app">
+<form dr-form="this.form" dr-event-submit="this.submit(); $event.preventDefault();">
+  name: <input name="name">
+  age: <input name="age">
+  <button type="submit">submit</button>
+</form>
+<script>
+  let data = {
+    form: {},
+    submit() {
+      console.log(this.form);
     }
-  }
-}
-
-new DomRender.run(obj, target, {
-  targetElements: [
-    RawSet.createComponentTargetElement('my-element', (e, o, r) => new Profile.Component(), Profile.templat, Profile.styles, scripts)
-  ],
-});
+  };
+  data = DomRender.run(data , document.querySelector('#app'));
+</script>
+</body>
+<!-- 💥 submit call --> 
+<!-- console: {name: 'name data', age: 'age data'}  -->
 ```
-using component
-```html
-<my-element dr-on-init="$component.say();"></my-element>
-```
-- attribute
-  - dr-on-init: component created init call script
-    - $component: component  instance
-    - $element: element instance
-    - $attribute: element attribute object
-    - $innerHTML: element innerHTML string
----
+</details>
 
-# dr-form
-- event: change
-- modify change: dr-form:event="input"
+<details>
+  <summary>validator<strong>🔻(click)</strong></summary>
+</details>
+
+
 ```typescript
 class User {
   form = {};
@@ -291,14 +265,6 @@ class User {
     console.log('submit->', form, form.name, form.age, form.addr);
   }
 }
-```
-```html
-<form dr-form="this.form" dr-event-submit="this.submit(); $event.preventDefault();">
-  name: <input name="name">
-  age: <input name="age">
-  addr: <input dr-form:event="input" name="addr">
-  <button type="submit">submit</button>
-</form>
 ```
 
 # validator
@@ -445,34 +411,64 @@ Code base
 {name : DomRenderProxy.final({...})}
 ```
 --- 
-# Config
+
+
+## LifeCycle
+* OnInitRender
+  * onInitRender(): init render call
+
+## Script
 ```typescript
-export type TargetElement = {
-    _name: string,
-    template?: string,
-    styles?: string[],
-    callBack: (target: Element, obj: any, rawSet: RawSet) => DocumentFragment,
-    complete?: (target: Element, obj: any, rawSet: RawSet) => void
-};
-
-export type TargetAttr = {
-    name: string,
-    callBack: (target: Element, attrValue: string, obj: any, rawSet: RawSet) => DocumentFragment,
-    complete?: (target: Element, attrValue: string, obj: any, rawSet: RawSet) => void
-};
-
-export interface Config {
-    targetElements?: TargetElement[];
-    targetAttrs?: TargetAttr[];
-    onElementInit?: (name: string, obj: any, rawSet: RawSet) => void;
-    onAttrInit?: (name: string, attrValue: string, obj: any, rawSet: RawSet) => void;
-    proxyExcludeTyps?: ConstructorType<any>[];
-    proxyExcludeOnBeforeReturnSets?: string[];
-    proxyExcludeOnBeforeReturnGets?: string[];
-    scripts?: { [n: string]: any };
-    applyEvents?: { attrName: string, callBack: (elements: Element, attrValue: string, obj: any) => void }[];
-}
+new DomRender.run(obj, target, {
+  scripts: {
+    concat: function (head: string, tail: string) {
+      return head + tail; 
+    }
+  }
+});
 ```
+using script
+```typescript
+const data = config.scripts.concat('head', 'tail')
+```
+```html
+<div>${$scripts.concat('head', 'tail')}</div>
+<div dr-if="$scripts.concat('wow', 'good') === 'wowgood'"> is wowgood</div>
+```
+
+---
+# Component
+```typescript
+export namespace Profile {
+  export const templat = '<div>aaaaa${this.name}aaaaa </div>';
+  export const styles = ['p {color: red}', 'div {margin: ${this.margin} + \'px\' }'];
+  export class Component {
+    public name = 'default name';
+    public margin = 5;
+    public say() {
+        console.log('say!~')
+    }
+  }
+}
+
+new DomRender.run(obj, target, {
+  targetElements: [
+    RawSet.createComponentTargetElement('my-element', (e, o, r) => new Profile.Component(), Profile.templat, Profile.styles, scripts)
+  ],
+});
+```
+using component
+```html
+<my-element dr-on-init="$component.say();"></my-element>
+```
+- attribute
+  - dr-on-init: component created init call script
+    - $component: component  instance
+    - $element: element instance
+    - $attribute: element attribute object
+    - $innerHTML: element innerHTML string
+---
+
 ----
 # License
 * MIT

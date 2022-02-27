@@ -19,39 +19,39 @@ PERFORMANCE OF THIS SOFTWARE.
 
 /* global Reflect, Promise */
 var extendStatics = function (d, b) {
-  extendStatics = Object.setPrototypeOf || {
-    __proto__: []
-  } instanceof Array && function (d, b) {
-    d.__proto__ = b;
-  } || function (d, b) {
-    for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p];
-  };
+    extendStatics = Object.setPrototypeOf || {
+        __proto__: []
+    } instanceof Array && function (d, b) {
+        d.__proto__ = b;
+    } || function (d, b) {
+        for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p];
+    };
 
-  return extendStatics(d, b);
+    return extendStatics(d, b);
 };
 
 function __extends(d, b) {
-  if (typeof b !== "function" && b !== null) throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-  extendStatics(d, b);
+    if (typeof b !== "function" && b !== null) throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+    extendStatics(d, b);
 
-  function __() {
-    this.constructor = d;
-  }
-
-  d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-}
-var __assign = function () {
-  __assign = Object.assign || function __assign(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-      s = arguments[i];
-
-      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    function __() {
+        this.constructor = d;
     }
 
-    return t;
-  };
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+var __assign = function () {
+    __assign = Object.assign || function __assign(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
 
-  return __assign.apply(this, arguments);
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+
+        return t;
+    };
+
+    return __assign.apply(this, arguments);
 };
 
 var ValidUtils = /** @class */ (function () {
@@ -1462,7 +1462,7 @@ var RawSet = /** @class */ (function () {
                     var newTemp = config.window.document.createElement('temp');
                     ScriptUtils.eval("\n                        ".concat(__render.bindScript, "\n                        const n = $element.cloneNode(true);\n                        ").concat((_q = drAttr_1.drBeforeOption) !== null && _q !== void 0 ? _q : '', "\n                        n.innerHTML = ").concat(drAttr_1.drInnerHTML, ";\n                        if (this.__render.drStripOption === 'true') {\n                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));\n                        } else {\n                            this.__render.fag.append(n);\n                        }\n                        ").concat((_r = drAttr_1.drAfterOption) !== null && _r !== void 0 ? _r : '', "\n                    "), Object.assign(obj, {
                         __render: Object.freeze(__assign({ drStripOption: drAttr_1.drStripOption, fag: newTemp }, __render
-                        // eslint-disable-next-line no-use-before-define
+                            // eslint-disable-next-line no-use-before-define
                         ))
                     }));
                     var tempalte = config.window.document.createElement('template');
@@ -1494,7 +1494,7 @@ var RawSet = /** @class */ (function () {
                     var newTemp = config.window.document.createElement('temp');
                     ScriptUtils.eval("\n                    ".concat(__render.bindScript, "\n                    ").concat((_y = drAttr_1.drBeforeOption) !== null && _y !== void 0 ? _y : '', "\n                    var i = 0; \n                    const forOf = ").concat(drAttr_1.drForOf, ";\n                    const forOfStr = `").concat(drAttr_1.drForOf, "`.trim();\n                    if (forOf) {\n                        for(const it of forOf) {\n                            var destIt = it;\n                            if (/\\[(.*,?)\\],/g.test(forOfStr)) {\n                                if (typeof it === 'string') {\n                                    destIt = it;\n                                } else {\n                                    destIt = forOfStr.substring(1, forOfStr.length-1).split(',')[i];\n                                }\n                            } else if (forOf.isRange) {\n                                    destIt = it;\n                            }  else {\n                                destIt = forOfStr + '[' + i +']'\n                            }\n                            const n = this.__render.element.cloneNode(true);\n                            Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drForOf' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));\n                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIt\\#/g, destIt).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIndex\\#/g, i)))\n                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt).replace(/\\#index\\#/g, i);\n                            if (this.__render.drStripOption === 'true') {\n                                Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));\n                            } else {\n                                this.__render.fag.append(n);\n                            }\n                            i++;\n                        }\n                    }\n                    ").concat((_z = drAttr_1.drAfterOption) !== null && _z !== void 0 ? _z : '', "\n                    "), Object.assign(obj, {
                         __render: Object.freeze(__assign({ drStripOption: drAttr_1.drStripOption, drAttr: drAttr_1, drAttrsOriginName: RawSet.drAttrsOriginName, fag: newTemp }, __render
-                        // eslint-disable-next-line no-use-before-define
+                            // eslint-disable-next-line no-use-before-define
                         ))
                     }));
                     RawSet.drVarDecoding(newTemp, vars);
@@ -1928,9 +1928,9 @@ var RawSet = /** @class */ (function () {
         };
         return targetAttribute;
     };
-    RawSet.createComponentTargetElement = function (name, objFactory, template, styles, scripts, 
-    // complete: (element: Element, obj: any, rawSet: RawSet) => void  | undefined,
-    config) {
+    RawSet.createComponentTargetElement = function (name, objFactory, template, styles, scripts,
+                                                    // complete: (element: Element, obj: any, rawSet: RawSet) => void  | undefined,
+                                                    config) {
         if (template === void 0) { template = ''; }
         if (styles === void 0) { styles = []; }
         var targetElement = {
@@ -2385,5 +2385,693 @@ var DomRender = /** @class */ (function () {
 }());
 // export default DomRender;
 
+var RenderManager = /** @class */ (function () {
+    function RenderManager() {
+    }
+    RenderManager.render = function (obj, target) {
+        if (target === void 0) { target = Object.keys(obj); }
+        var domRenderProxy = obj._DomRender_proxy;
+        if (domRenderProxy) {
+            target.forEach(function (it) {
+                domRenderProxy.root([it], obj[it]);
+            });
+        }
+    };
+    return RenderManager;
+}());
+
+var AllCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(AllCheckedValidatorArray, _super);
+    function AllCheckedValidatorArray(value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        return _super.call(this, value, target, event, autoValid) || this;
+    }
+    AllCheckedValidatorArray.prototype.valid = function () {
+        var _a;
+        return !(((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return !it.checked; }).length > 0);
+    };
+    return AllCheckedValidatorArray;
+}(ValidatorArray));
+
+var CheckedValidator = /** @class */ (function (_super) {
+    __extends(CheckedValidator, _super);
+    function CheckedValidator(value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        return _super.call(this, value, target, event, autoValid) || this;
+    }
+    CheckedValidator.prototype.valid = function () {
+        var _a, _b;
+        return (_b = (_a = this.getTarget()) === null || _a === void 0 ? void 0 : _a.checked) !== null && _b !== void 0 ? _b : false;
+    };
+    return CheckedValidator;
+}(Validator));
+
+var AllUnCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(AllUnCheckedValidatorArray, _super);
+    function AllUnCheckedValidatorArray(value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        return _super.call(this, value, target, event, autoValid) || this;
+    }
+    AllUnCheckedValidatorArray.prototype.valid = function () {
+        var _a;
+        return !(((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return it.checked; }).length > 0);
+    };
+    return AllUnCheckedValidatorArray;
+}(ValidatorArray));
+
+var CountEqualsCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(CountEqualsCheckedValidatorArray, _super);
+    function CountEqualsCheckedValidatorArray(count, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.count = count;
+        return _this;
+    }
+    CountEqualsCheckedValidatorArray.prototype.valid = function () {
+        var _a;
+        return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return it.checked; }).length === this.count;
+    };
+    return CountEqualsCheckedValidatorArray;
+}(ValidatorArray));
+
+var CountEqualsUnCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(CountEqualsUnCheckedValidatorArray, _super);
+    function CountEqualsUnCheckedValidatorArray(count, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.count = count;
+        return _this;
+    }
+    CountEqualsUnCheckedValidatorArray.prototype.valid = function () {
+        var _a;
+        return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return !it.checked; }).length === this.count;
+    };
+    return CountEqualsUnCheckedValidatorArray;
+}(ValidatorArray));
+
+var CountGreaterThanCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(CountGreaterThanCheckedValidatorArray, _super);
+    function CountGreaterThanCheckedValidatorArray(count, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.count = count;
+        return _this;
+    }
+    CountGreaterThanCheckedValidatorArray.prototype.valid = function () {
+        var _a;
+        return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return it.checked; }).length > this.count;
+    };
+    return CountGreaterThanCheckedValidatorArray;
+}(ValidatorArray));
+
+var CountGreaterThanEqualsCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(CountGreaterThanEqualsCheckedValidatorArray, _super);
+    function CountGreaterThanEqualsCheckedValidatorArray(count, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.count = count;
+        return _this;
+    }
+    CountGreaterThanEqualsCheckedValidatorArray.prototype.valid = function () {
+        var _a;
+        return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return it.checked; }).length >= this.count;
+    };
+    return CountGreaterThanEqualsCheckedValidatorArray;
+}(ValidatorArray));
+
+var CountGreaterThanUnCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(CountGreaterThanUnCheckedValidatorArray, _super);
+    function CountGreaterThanUnCheckedValidatorArray(count, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.count = count;
+        return _this;
+    }
+    CountGreaterThanUnCheckedValidatorArray.prototype.valid = function () {
+        var _a;
+        return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return !it.checked; }).length > this.count;
+    };
+    return CountGreaterThanUnCheckedValidatorArray;
+}(ValidatorArray));
+
+var CountGreaterThanEqualsUnCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(CountGreaterThanEqualsUnCheckedValidatorArray, _super);
+    function CountGreaterThanEqualsUnCheckedValidatorArray(count, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.count = count;
+        return _this;
+    }
+    CountGreaterThanEqualsUnCheckedValidatorArray.prototype.valid = function () {
+        var _a;
+        return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return !it.checked; }).length >= this.count;
+    };
+    return CountGreaterThanEqualsUnCheckedValidatorArray;
+}(ValidatorArray));
+
+var CountLessThanCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(CountLessThanCheckedValidatorArray, _super);
+    function CountLessThanCheckedValidatorArray(count, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.count = count;
+        return _this;
+    }
+    CountLessThanCheckedValidatorArray.prototype.valid = function () {
+        var _a;
+        return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return it.checked; }).length < this.count;
+    };
+    return CountLessThanCheckedValidatorArray;
+}(ValidatorArray));
+
+var CountLessThanEqualsUnCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(CountLessThanEqualsUnCheckedValidatorArray, _super);
+    function CountLessThanEqualsUnCheckedValidatorArray(count, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.count = count;
+        return _this;
+    }
+    CountLessThanEqualsUnCheckedValidatorArray.prototype.valid = function () {
+        var _a;
+        return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return !it.checked; }).length <= this.count;
+    };
+    return CountLessThanEqualsUnCheckedValidatorArray;
+}(ValidatorArray));
+
+var CountLessThanEqualsCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(CountLessThanEqualsCheckedValidatorArray, _super);
+    function CountLessThanEqualsCheckedValidatorArray(count, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.count = count;
+        return _this;
+    }
+    CountLessThanEqualsCheckedValidatorArray.prototype.valid = function () {
+        var _a;
+        return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return it.checked; }).length <= this.count;
+    };
+    return CountLessThanEqualsCheckedValidatorArray;
+}(ValidatorArray));
+
+var ExcludeCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(ExcludeCheckedValidatorArray, _super);
+    function ExcludeCheckedValidatorArray(include, allRequired, value, target, event, autoValid) {
+        if (allRequired === void 0) { allRequired = false; }
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.include = include;
+        _this.allRequired = allRequired;
+        return _this;
+    }
+    ExcludeCheckedValidatorArray.prototype.valid = function () {
+        var _this = this;
+        var _a;
+        var valus = (_a = this.value) !== null && _a !== void 0 ? _a : [];
+        var unCheckedValue = valus.filter(function (it) { return !it.checked; }).map(function (it) { return it.value; });
+        return unCheckedValue.length > 0 &&
+            (!(unCheckedValue.filter(function (it) { return !_this.include.includes(it); }).length > 0)) &&
+            (this.allRequired ? unCheckedValue.filter(function (it) { return _this.include.includes(it); }).length === this.include.length : true);
+    };
+    return ExcludeCheckedValidatorArray;
+}(ValidatorArray));
+
+var CountUnCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(CountUnCheckedValidatorArray, _super);
+    function CountUnCheckedValidatorArray(count, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.count = count;
+        return _this;
+    }
+    CountUnCheckedValidatorArray.prototype.valid = function () {
+        var _a;
+        return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return !it.checked; }).length >= this.count;
+    };
+    return CountUnCheckedValidatorArray;
+}(ValidatorArray));
+
+var EmptyValidator = /** @class */ (function (_super) {
+    __extends(EmptyValidator, _super);
+    function EmptyValidator(value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        return _super.call(this, value, target, event, autoValid) || this;
+    }
+    EmptyValidator.prototype.valid = function () {
+        var _a, _b;
+        var value = this.value;
+        return value === undefined || value === null || ((_b = (_a = value) === null || _a === void 0 ? void 0 : _a.length) !== null && _b !== void 0 ? _b : 0) <= 0;
+    };
+    return EmptyValidator;
+}(Validator));
+
+var IncludeCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(IncludeCheckedValidatorArray, _super);
+    function IncludeCheckedValidatorArray(include, allRequired, value, target, event, autoValid) {
+        if (allRequired === void 0) { allRequired = false; }
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.include = include;
+        _this.allRequired = allRequired;
+        return _this;
+    }
+    IncludeCheckedValidatorArray.prototype.valid = function () {
+        var _this = this;
+        var _a;
+        var valus = (_a = this.value) !== null && _a !== void 0 ? _a : [];
+        var checkedValue = valus.filter(function (it) { return it.checked; }).map(function (it) { return it.value; });
+        return checkedValue.length > 0 &&
+            (!(checkedValue.filter(function (it) { return !_this.include.includes(it); }).length > 0)) &&
+            (this.allRequired ? checkedValue.filter(function (it) { return _this.include.includes(it); }).length === this.include.length : true);
+    };
+    return IncludeCheckedValidatorArray;
+}(ValidatorArray));
+
+var FormValidator = /** @class */ (function (_super) {
+    __extends(FormValidator, _super);
+    function FormValidator(target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        return _super.call(this, undefined, target, event, autoValid) || this;
+    }
+    FormValidator.prototype.validAction = function () {
+        return _super.prototype.childValidAction.call(this);
+    };
+    FormValidator.prototype.valid = function () {
+        return this.childValid();
+    };
+    FormValidator.prototype.reset = function () {
+        this.targetReset();
+    };
+    return FormValidator;
+}(Validator));
+
+var MultipleValidator = /** @class */ (function (_super) {
+    __extends(MultipleValidator, _super);
+    function MultipleValidator(validators, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.validators = validators.map(function (it) {
+            it.setAutoValid(false);
+            it.setAutoValidAction(false);
+            return it;
+        });
+        _this.validators.forEach(function (it) {
+            it.set(_this.value, _this.getTarget(), _this.getEvent());
+        });
+        return _this;
+    }
+    MultipleValidator.prototype.changeValue = function (value) {
+        var _this = this;
+        this.validators.forEach(function (it) { return it.set(_this.value, _this.getTarget(), _this.getEvent()); });
+    };
+    MultipleValidator.prototype.validAction = function () {
+        return !(this.validators.filter(function (it) { return !it.validAction(); }).length > 0);
+    };
+    MultipleValidator.prototype.valid = function () {
+        // console.log('mm', this.validators)
+        return !(this.validators.filter(function (it) { return !it.valid(); }).length > 0);
+    };
+    return MultipleValidator;
+}(Validator));
+
+var NotEmptyValidator = /** @class */ (function (_super) {
+    __extends(NotEmptyValidator, _super);
+    function NotEmptyValidator(value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        return _super.call(this, value, target, event, autoValid) || this;
+    }
+    NotEmptyValidator.prototype.valid = function () {
+        var _a, _b;
+        var value = this.value;
+        // console.log('NotEmptyValidator', value, value !== undefined && value !== null && ((value as any)?.length ?? 0) > 0)
+        return value !== undefined && value !== null && ((_b = (_a = value) === null || _a === void 0 ? void 0 : _a.length) !== null && _b !== void 0 ? _b : 0) > 0;
+    };
+    return NotEmptyValidator;
+}(Validator));
+
+var PassValidator = /** @class */ (function (_super) {
+    __extends(PassValidator, _super);
+    function PassValidator(value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        return _super.call(this, value, target, event, autoValid) || this;
+    }
+    PassValidator.prototype.valid = function () {
+        return true;
+    };
+    return PassValidator;
+}(Validator));
+
+var RequiredValidator = /** @class */ (function (_super) {
+    __extends(RequiredValidator, _super);
+    function RequiredValidator(value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        return _super.call(this, value, target, event, autoValid) || this;
+    }
+    RequiredValidator.prototype.valid = function () {
+        var value = this.value;
+        // console.log('required', value, value !== undefined && value !== null)
+        return value !== undefined && value !== null;
+    };
+    return RequiredValidator;
+}(Validator));
+
+var CountLessThanUnCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(CountLessThanUnCheckedValidatorArray, _super);
+    function CountLessThanUnCheckedValidatorArray(count, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.count = count;
+        return _this;
+    }
+    CountLessThanUnCheckedValidatorArray.prototype.valid = function () {
+        var _a;
+        return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return !it.checked; }).length < this.count;
+    };
+    return CountLessThanUnCheckedValidatorArray;
+}(ValidatorArray));
+
+var NotRegExpTestValidator = /** @class */ (function (_super) {
+    __extends(NotRegExpTestValidator, _super);
+    function NotRegExpTestValidator(regexp, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.regexp = DomRenderProxy.final(regexp);
+        return _this;
+    }
+    NotRegExpTestValidator.prototype.valid = function () {
+        var _a;
+        var value = this.value;
+        var regExp = (_a = this.regexp._DomRender_origin) !== null && _a !== void 0 ? _a : this.regexp;
+        if (value) {
+            return !regExp.test(value);
+        }
+        else {
+            return true;
+        }
+    };
+    return NotRegExpTestValidator;
+}(Validator));
+
+var UnCheckedValidator = /** @class */ (function (_super) {
+    __extends(UnCheckedValidator, _super);
+    function UnCheckedValidator(value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        return _super.call(this, value, target, event, autoValid) || this;
+    }
+    UnCheckedValidator.prototype.valid = function () {
+        var _a, _b;
+        return !((_b = (_a = this.getTarget()) === null || _a === void 0 ? void 0 : _a.checked) !== null && _b !== void 0 ? _b : false);
+    };
+    return UnCheckedValidator;
+}(Validator));
+
+var RegExpTestValidator = /** @class */ (function (_super) {
+    __extends(RegExpTestValidator, _super);
+    function RegExpTestValidator(regexp, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.regexp = DomRenderProxy.final(regexp);
+        return _this;
+    }
+    RegExpTestValidator.prototype.valid = function () {
+        var _a;
+        var value = this.value;
+        var regExp = (_a = this.regexp._DomRender_origin) !== null && _a !== void 0 ? _a : this.regexp;
+        // console.log('regexp-->', value, this.regexp, regExp.test(value))
+        if (value) {
+            return regExp.test(value);
+        }
+        else {
+            return false;
+        }
+    };
+    return RegExpTestValidator;
+}(Validator));
+
+var ValidMultipleValidator = /** @class */ (function (_super) {
+    __extends(ValidMultipleValidator, _super);
+    function ValidMultipleValidator(validMultipleCallback, validators, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, validators, value, target, event, autoValid) || this;
+        _this.validMultipleCallback = validMultipleCallback;
+        _this.validators = validators;
+        return _this;
+    }
+    ValidMultipleValidator.prototype.valid = function () {
+        return this.validMultipleCallback(this.validators, this.value, this.getTarget(), this.getEvent());
+    };
+    return ValidMultipleValidator;
+}(MultipleValidator));
+
+var ValidValidator = /** @class */ (function (_super) {
+    __extends(ValidValidator, _super);
+    function ValidValidator(validCallBack, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.validCallBack = validCallBack;
+        return _this;
+    }
+    ValidValidator.prototype.valid = function (value, target, event) {
+        return this.validCallBack(value, target, event);
+    };
+    return ValidValidator;
+}(Validator));
+
+var ValidValidatorArray = /** @class */ (function (_super) {
+    __extends(ValidValidatorArray, _super);
+    function ValidValidatorArray(validCallBack, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.validCallBack = validCallBack;
+        return _this;
+    }
+    ValidValidatorArray.prototype.valid = function () {
+        return this.validCallBack(this.value, this.getTarget(), this.getEvent());
+    };
+    return ValidValidatorArray;
+}(ValidatorArray));
+
+var ValueEqualsValidator = /** @class */ (function (_super) {
+    __extends(ValueEqualsValidator, _super);
+    function ValueEqualsValidator(equalsValue, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.equalsValue = equalsValue;
+        return _this;
+    }
+    ValueEqualsValidator.prototype.valid = function () {
+        return this.value === this.equalsValue;
+    };
+    return ValueEqualsValidator;
+}(Validator));
+
+var ValueNotEqualsValidator = /** @class */ (function (_super) {
+    __extends(ValueNotEqualsValidator, _super);
+    function ValueNotEqualsValidator(equalsValue, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.equalsValue = equalsValue;
+        return _this;
+    }
+    ValueNotEqualsValidator.prototype.valid = function () {
+        return this.value !== this.equalsValue;
+    };
+    return ValueNotEqualsValidator;
+}(Validator));
+
+var LocationUtils = /** @class */ (function () {
+    function LocationUtils() {
+    }
+    LocationUtils.hash = function (window) {
+        return window.location.hash.replace('#', '');
+    };
+    LocationUtils.hashPath = function (window) {
+        return '/' + window.location.hash.replace('#', '').split('?')[0];
+    };
+    LocationUtils.hashQueryParams = function (window) {
+        var s = window.location.hash.replace('#', '').split('?')[1] || '';
+        return this.queryStringToMap(s);
+    };
+    LocationUtils.path = function (window) {
+        return window.location.pathname;
+    };
+    LocationUtils.pathQueryParamsObject = function (window) {
+        return this.queryStringToObject(window.location.search.substring(1));
+    };
+    LocationUtils.hashQueryParamsObject = function (window) {
+        var _a;
+        return this.queryStringToObject((_a = window.location.hash.split('?').pop()) !== null && _a !== void 0 ? _a : '');
+    };
+    LocationUtils.pathQueryParams = function (window) {
+        return this.queryStringToMap(window.location.search.substring(1));
+    };
+    LocationUtils.queryStringToMap = function (s) {
+        var params = new Map();
+        var vars = s.split('&') || [];
+        vars.forEach(function (it) {
+            var kv = it.split('=') || [];
+            if (kv[0] && kv[0].length > 0) {
+                params.set(kv[0], kv[1]);
+            }
+        });
+        return params;
+    };
+    LocationUtils.queryStringToObject = function (s) {
+        var params = {};
+        var vars = s.split('&') || [];
+        vars.forEach(function (it) {
+            var kv = it.split('=') || [];
+            if (kv[0] && kv[0].length > 0) {
+                params[kv[0]] = kv[1];
+            }
+        });
+        return params;
+    };
+    return LocationUtils;
+}());
+
+var StorageUtils = /** @class */ (function () {
+    function StorageUtils() {
+    }
+    StorageUtils.setLocalStorageItem = function (k, v, window) {
+        if (typeof v === 'object') {
+            v = JSON.stringify(v);
+        }
+        window.localStorage.setItem(k, v);
+    };
+    StorageUtils.getLocalStorageItem = function (k, window) {
+        return window.localStorage.getItem(k);
+    };
+    StorageUtils.cutLocalStorageItem = function (k, window) {
+        var data = StorageUtils.getLocalStorageItem(k, window);
+        StorageUtils.removeLocalStorageItem(k, window);
+        return data;
+    };
+    StorageUtils.removeLocalStorageItem = function (k, window) {
+        return window.localStorage.removeItem(k);
+    };
+    StorageUtils.getLocalStorageJsonItem = function (k, window) {
+        var item = window.localStorage.getItem(k);
+        if (item) {
+            try {
+                return JSON.parse(item);
+            }
+            catch (e) {
+                return undefined;
+            }
+        }
+        else {
+            return undefined;
+        }
+    };
+    StorageUtils.cutLocalStorageJsonItem = function (k, window) {
+        var item = StorageUtils.getLocalStorageJsonItem(k, window);
+        StorageUtils.removeLocalStorageItem(k, window);
+        return item;
+    };
+    StorageUtils.clearLocalStorage = function (window) {
+        window.localStorage.clear();
+    };
+    return StorageUtils;
+}());
+
+var NodeUtils = /** @class */ (function () {
+    function NodeUtils() {
+    }
+    // https://stackoverflow.com/questions/3955229/remove-all-child-elements-of-a-dom-node-in-javascript
+    NodeUtils.removeAllChildNode = function (node) {
+        while (node === null || node === void 0 ? void 0 : node.firstChild) {
+            node.firstChild.remove();
+        }
+    };
+    NodeUtils.appendChild = function (parentNode, childNode) {
+        return parentNode.appendChild(childNode);
+    };
+    NodeUtils.replaceNode = function (targetNode, newNode) {
+        var _a;
+        // console.log('repalceNode', targetNode, newNode, targetNode.parentNode)
+        return (_a = targetNode.parentNode) === null || _a === void 0 ? void 0 : _a.replaceChild(newNode, targetNode);
+    };
+    NodeUtils.addNode = function (targetNode, newNode) {
+        var _a;
+        return (_a = targetNode.parentNode) === null || _a === void 0 ? void 0 : _a.insertBefore(newNode, targetNode.nextSibling);
+    };
+    return NodeUtils;
+}());
+
+var ClipBoardUtils = /** @class */ (function () {
+    function ClipBoardUtils() {
+    }
+    ClipBoardUtils.readText = function (clipboard) {
+        if (clipboard === void 0) { clipboard = navigator.clipboard; }
+        return clipboard.readText();
+    };
+    ClipBoardUtils.read = function (clipboard) {
+        if (clipboard === void 0) { clipboard = navigator.clipboard; }
+        return clipboard.read();
+    };
+    ClipBoardUtils.writeText = function (data, clipboard) {
+        if (clipboard === void 0) { clipboard = navigator.clipboard; }
+        return clipboard.writeText(data);
+    };
+    ClipBoardUtils.write = function (data, clipboard) {
+        if (clipboard === void 0) { clipboard = navigator.clipboard; }
+        return clipboard.write(data);
+    };
+    return ClipBoardUtils;
+}());
+
+exports.AllCheckedValidatorArray = AllCheckedValidatorArray;
+exports.AllUnCheckedValidatorArray = AllUnCheckedValidatorArray;
+exports.CheckedValidator = CheckedValidator;
+exports.ClipBoardUtils = ClipBoardUtils;
+exports.CountEqualsCheckedValidatorArray = CountEqualsCheckedValidatorArray;
+exports.CountEqualsUnCheckedValidatorArray = CountEqualsUnCheckedValidatorArray;
+exports.CountGreaterThanCheckedValidatorArray = CountGreaterThanCheckedValidatorArray;
+exports.CountGreaterThanEqualsCheckedValidatorArray = CountGreaterThanEqualsCheckedValidatorArray;
+exports.CountGreaterThanEqualsUnCheckedValidatorArray = CountGreaterThanEqualsUnCheckedValidatorArray;
+exports.CountGreaterThanUnCheckedValidatorArray = CountGreaterThanUnCheckedValidatorArray;
+exports.CountLessThanCheckedValidatorArray = CountLessThanCheckedValidatorArray;
+exports.CountLessThanEqualsCheckedValidatorArray = CountLessThanEqualsCheckedValidatorArray;
+exports.CountLessThanEqualsUnCheckedValidatorArray = CountLessThanEqualsUnCheckedValidatorArray;
+exports.CountLessThanUnCheckedValidatorArray = CountLessThanUnCheckedValidatorArray;
+exports.CountUnCheckedValidatorArray = CountUnCheckedValidatorArray;
 exports.DomRender = DomRender;
+exports.DomRenderFinalProxy = DomRenderFinalProxy;
+exports.DomRenderProxy = DomRenderProxy;
+exports.DomUtils = DomUtils;
+exports.EmptyValidator = EmptyValidator;
+exports.EventManager = EventManager;
+exports.ExcludeCheckedValidatorArray = ExcludeCheckedValidatorArray;
+exports.FormValidator = FormValidator;
+exports.IncludeCheckedValidatorArray = IncludeCheckedValidatorArray;
+exports.LocationUtils = LocationUtils;
+exports.MultipleValidator = MultipleValidator;
+exports.NodeUtils = NodeUtils;
+exports.NonPassValidator = NonPassValidator;
+exports.NotEmptyValidator = NotEmptyValidator;
+exports.NotRegExpTestValidator = NotRegExpTestValidator;
+exports.PassValidator = PassValidator;
+exports.RandomUtils = RandomUtils;
+exports.Range = Range;
+exports.RangeIterator = RangeIterator;
+exports.RangeResult = RangeResult;
+exports.RawSet = RawSet;
+exports.RegExpTestValidator = RegExpTestValidator;
+exports.RenderManager = RenderManager;
+exports.RequiredValidator = RequiredValidator;
+exports.ScriptUtils = ScriptUtils;
+exports.Shield = Shield;
+exports.StorageUtils = StorageUtils;
+exports.StringUtils = StringUtils;
+exports.UnCheckedValidator = UnCheckedValidator;
+exports.ValidMultipleValidator = ValidMultipleValidator;
+exports.ValidUtils = ValidUtils;
+exports.ValidValidator = ValidValidator;
+exports.ValidValidatorArray = ValidValidatorArray;
+exports.Validator = Validator;
+exports.ValidatorArray = ValidatorArray;
+exports.ValueEqualsValidator = ValueEqualsValidator;
+exports.ValueNotEqualsValidator = ValueNotEqualsValidator;
+exports.eventManager = eventManager;
 //# sourceMappingURL=bundle.js.map
