@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "target": "es5",
+    "module": "ES2015",
+    "strict": true,
+    "moduleResolution": "node",                  /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
+    "esModuleInterop": true,
+    "experimentalDecorators": true,              /* Enables experimental support for ES7 decorators. */
+    "emitDecoratorMetadata": true,               /* Enables experimental support for emitting type metadata for decorators. */
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+//    "declaration": true,
+//    "baseUrl": "src",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext",
+      "es5",
+      "es2015",
+      "es2019",
+      "scripthost",
+      "es2015.proxy",
+      "es2015.collection"
+    ]
+  },
+  "exclude": [
+    "example",
+    "examples",
+    "rollup.config.js",
+    "test",
+    "cli",
+    "assets",
+    "test-cli",
+    "**/*.test.ts",
+    "templates",
+    "dist"
+  ]
+}

@@ -29,6 +29,10 @@ ${this.name}$
 </html>
 ```
 
+# 😃 examples
+- [examples](./examples)
+
+
 ## Expression
 <details>
   <summary>${...}$, #{...}# <strong>🔻(click)</strong></summary>

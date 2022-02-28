@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>examples</title>
+</head>
+<script src="bundle.js" defer="defer"></script>
+<body id="app">
+${this.name}$
+<h1>component</h1>
+<profile dr-on-init="$component.name='jhone'; $component.age=55;"><b>detail-1</b></profile>
+<profile dr-on-init="$component.name='cal'; $component.age=56;"><b>detail-2</b></profile>
+<profile dr-on-init="$component.name='rose'; $component.age=57;"><b>detail-3</b></profile>
+<profile dr-on-init="$component.name='papa'; $component.age=58;"><b>detail-4</b></profile>
+<h1>scripts</h1>
+<div>
+    ${$scripts.concat('hello', 'tail')}$
+</div>
+
+<h1>attr</h1>
+<button link="this.link">
+link attribute
+</button>
+</body>
+</html>

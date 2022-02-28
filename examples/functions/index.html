@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>examples</title>
+</head>
+<script src="bundle.js" defer="defer"></script>
+<body id="app">
+<h1>functions</h1>
+
+<h3>expression</h3>
+<div>${this.tagStr}$</div>
+<div>#{this.tagStr}#</div>
+
+<h3>dr-if</h3>
+<div dr-if="this.drIf">true</div>
+<div dr-if="!this.drIf">false</div>
+
+<h3>dr-for</h3>
+<div dr-for="var i = 0 ; i < 3; i++" dr-it="i">#it#</div>
+
+<h3>dr-for-of</h3>
+<div dr-for-of="this.users">${#it#.name}$, ${#it#.age}$</div>
+
+<h3>dr-repeat</h3>
+<h4>dr-repeat="10"</h4>
+<div dr-repeat="10"><div>#it#</div></div>
+<h4>dr-repeat="$range(10, 20)"</h4>
+<div dr-repeat="$range(10, 20)"><div>#it#</div></div>
+<h4>dr-repeat="$range(10, 20, 5)"</h4>
+<div dr-repeat="$range(10, 20, 5)"><div>#it#</div></div>
+<h4>dr-repeat="$range('10..5, 2')"</h4>
+<div dr-repeat="$range('10..5, 2')"><div>#it#</div></div>
+
+<h3>dr-inner-text</h3>
+<div dr-inner-text="this.tagStr"></div>
+<h3>dr-inner-html</h3>
+<div dr-inner-html="this.tagStr"></div>
+
+<h3>event</h3>
+<h4>${this.name}$</h4>
+<div>
+    click: <button dr-event-click="this.name = 'name' + new Date()">click</button> <br>
+    change: <input type="text" dr-event-change="this.name = $target.value"> <br>
+    input: <input type="text" dr-event-input="this.name = $target.value"> <br>
+    keyup: <input type="text" dr-event-keyup="this.name = $target.value"> <br>
+    keydown: <input type="text" dr-event-keydown="this.name = $target.value"><br>
+    submit: <form dr-event-submit="console.log($event); $event.preventDefault();"><input type="text"> <button type="submit">submit</button></form><br>
+</div>
+
+<h3>dr-value</h3>
+<div>
+    <input type="text" dr-value="this.name">
+</div>
+<h3>dr-value-link</h3>
+<h4>${this.name}$</h4>
+<div>
+    <input type="text" dr-value-link="this.name">
+</div>
+
+<h3>dr-attr</h3>
+<div>
+    <textarea dr-attr="{rows: this.age/5, cols: this.age}"></textarea><br>
+    <input type="text" dr-attr="{value: '123', readonly: 'readonly'}"><br>
+    <input type="text" dr-attr="['value=123', 'disabled=disabled']"><br>
+    <input dr-attr="'value=123, type=range, min=1, max=300'"><br>
+</div>
+
+<h3>dr-class</h3>
+<style>
+    .old {
+        font-weight: initial;
+    }
+    .yong {
+        font-weight: bold;
+    }
+    .big {
+        font-size: 25px;
+    }
+    .small {
+        font-size: 2px;
+    }
+    .yellow {
+        color: yellow;
+    }
+</style>
+<div dr-class="{big: this.age > 50, red: this.age > 50}">data</div>
+<div dr-class="'big yellow ' + (this.age > 50 ? 'old' : 'young')">data</div>
+<div dr-class="['small', 'yellow']">data</div>
+
+<h3>dr-style</h3>
+<div dr-style="{fontSize: this.age + 'px'}"> style </div>
+<div dr-style="{'font-size': '20px'}"> style</div>
+<div dr-style="'font-size: ' + this.age +'px; margin: ' + this.age + 'px'"> style </div>
+<div dr-style="['font-size: ' + this.age +'px', 'margin: ' + this.age + 'px']"> style </div>
+
+<h3>dr-strip</h3>
+<div dr-strip="true"><span>hello</span></div> <!-- output html : <span>hello</span> -->
+
+<h3>dr-before, dr-after</h3>
+<div dr-if="this.drIf" dr-before="console.log('process before')" dr-after="console.log('process after')"></div>
+<h3>dr-complete</h3>
+<select dr-value-link="this.value">
+    <option dr-for-of="this.users" dr-value="#it#.name" dr-complete="this.value='Jack'">${#it#.name}$ ${#it#.age}$</option>
+</select>
+
+<h3>dr-form</h3>
+<form dr-form="this.form" dr-event-submit="this.submit($event)">
+    <input type="text" name="name">
+    <input type="text" name="addr">
+    <button type="submit">submit</button>
+</form>
+</body>
+</html>
