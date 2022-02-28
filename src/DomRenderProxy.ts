@@ -92,16 +92,22 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         return Array.from(set);
     }
 
-    public render(raws?: RawSet[]) {/*console.log('------------------->', raws);
-        raws?.forEach(it => console.log(it.uuid))*/
+    public render(raws?: RawSet[]) {
         const removeRawSets: RawSet[] = [];
         (raws ?? this.getRawSets()).forEach(it => {
             it.getUsingTriggerVariables(this.config).forEach(path => this.addRawSet(path, it))
             if (it.point.start.isConnected && it.point.start.isConnected) {
-                const rawSets = it.render(this._domRender_proxy, this.config);
-                if (rawSets && rawSets.length > 0) {
-                    this.render(rawSets);
+
+                if (it.detect?.action) {
+                    it.detect.action();
+                } else {
+                    const rawSets = it.render(this._domRender_proxy, this.config);
+                    if (rawSets && rawSets.length > 0) {
+                        this.render(rawSets);
+                    }
                 }
+
+
             } else {
                 removeRawSets.push(it);
                 // this.removeRawSet(it)
@@ -114,7 +120,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
 
     }
 
-    public root(paths: string[], value?: any, lastDoneExecute = true) {
+    public root(paths: string[], value?: any, lastDoneExecute = true): string[] {
         // console.log('root--->', paths, value, this._domRender_ref, this._domRender_origin);
         const fullPaths: string[] = []
         if (this._domRender_ref.size > 0) {
@@ -165,7 +171,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             (target as any)[p] = value;
             return true;
         }
-        // console.log('set proxy-->', target, p, value, this._rawSets, this._domRender_ref)
+        // console.log('set proxy-->', target, p, value, this._rawSets, this._domRender_ref);
         // if (typeof p === 'string' && '__render' === p) {
         //     (target as any)[p] = value;
         //     return true;
@@ -180,7 +186,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         if (typeof p === 'string') {
             fullPath = this.root([p], value);
         }
-
+        // console.log('full path:', fullPath);
         if (('onBeforeReturnSet' in receiver) && typeof p === 'string' && !(this.config.proxyExcludeOnBeforeReturnSets ?? []).concat(excludeGetSetPropertys).includes(p)) {
             (receiver as any)?.onBeforeReturnSet?.(p, value, fullPath);
         }

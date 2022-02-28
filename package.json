@@ -59,7 +59,7 @@
     "tsc": "tsc",
     "setting:root-dist": "rm -rf ../dist-dom-render && mkdirp ../dist-dom-render && cp package-root-dist.json ../dist-dom-render/package.json",
     "tsc:root-dist": "npm run setting:root-dist && tsc --outDir ../dist-dom-render --declarationDir ../dist-dom-render",
-    "tsc:watch": "rm -rf ./dist && mkdir dist && cp package.json dist && tsc --watch --sourceMap true",
+    "tsc:watch": "rm -rf ./dist && mkdir dist && cp package.json dist && tsc --watch --outDir dist --declarationDir dist --sourceMap true",
     "tsc:watch:root-dist": "npm run setting:root-dist && tsc  --outDir ../dist-dom-render --declarationDir ../dist-dom-render --watch --sourceMap true",
     "test": "jest --detectOpenHandles --forceExit"
   },
