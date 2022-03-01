@@ -31,8 +31,9 @@
     "url": "https://github.com/visualkhh/dom-render"
   },
   "scripts": {
-    "start": "sbf serve --path dist",
-    "start:watch": "sbf serve --path dist --watch",
+    "start": "rollup -c && sbf serve --path ./dist --port 4500",
+    "serve": "sbf serve --path dist",
+    "serve:watch": "sbf serve --path dist --watch",
     "bundle": "rollup -c",
     "bundle:watch": "rollup -c -w"
   },

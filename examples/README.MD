@@ -17,7 +17,6 @@ npm run npm-build
 ```shell
 cd examples/{examples-name}
 npm install
-npm run bundle
 npm start
 ```
 
