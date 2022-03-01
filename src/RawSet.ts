@@ -216,7 +216,7 @@ export class RawSet {
                    keepgoing = ScriptUtils.eval(`
                     ${__render.bindScript}
                     ${drAttr.drBeforeOption ?? ''}
-                    if ($rawset.data === ${drAttr.drIf}) {
+                    if ($rawset.data === (${drAttr.drIf})) {
                         return false;
                     } 
                     $rawset.data = ${drAttr.drIf} 
