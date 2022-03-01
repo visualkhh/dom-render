@@ -21,7 +21,7 @@ const scripts = {
     }
 }
 config.scripts = scripts;
-const component = RawSet.createComponentTargetElement('profile', (e, o, r) => new User(), template, undefined, config.scripts, config);
+const component = RawSet.createComponentTargetElement('profile', (e, o, r) => new User(), template, undefined, config);
 config.targetElements = [component];
 const targetAttribute = RawSet.createComponentTargetAttribute(
     'link',
