@@ -430,7 +430,7 @@ class Component {
 
 new DomRender.run(obj, target, {
   targetElements: [
-    RawSet.createComponentTargetElement('my-element', (e, o, r) => new Component(), templat, styles, scripts)
+    RawSet.createComponentTargetElement('my-element', (e, o, r) => new Component(), templat, styles, config)
   ],
 });
 ```
