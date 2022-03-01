@@ -245,7 +245,7 @@ export class RawSet {
                     const bypass = (newTemp.innerHTML ?? '').trim().length <= 0;
                     const tempalte = config.window.document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
-                    console.log(tempalte.innerHTML)
+                    // console.log(tempalte.innerHTML)
                     fag.append(tempalte.content)
                     const rr = RawSet.checkPointCreates(fag, config)
                     element.parentNode?.replaceChild(fag, element);
@@ -993,7 +993,7 @@ export class RawSet {
                 }
                 const innerHTML = (styles?.map(it => `<style>${it}</style>`) ?? []).join(' ') + (applayTemplate ?? '');
                 element.innerHTML = innerHTML;
-                console.log('------>', element.innerHTML, obj)
+                // console.log('------>', element.innerHTML, obj)
                 let data = RawSet.drThisCreate(element, `this.__domrender_components.${componentKey}`, '', true, obj, config);
 
                 // 넘어온 innerHTML에 this가 있는걸 다시 복호화해서 제대로 작동하도록한다.

@@ -39,7 +39,10 @@ export class EventManager {
     public static readonly ELEMENT_VARNAME = '$element';
     public static readonly TARGET_VARNAME = '$target';
     public static readonly EVENT_VARNAME = '$event';
-    public static readonly VARNAMES = [EventManager.SCRIPTS_VARNAME, EventManager.FAG_VARNAME, EventManager.RAWSET_VARNAME, EventManager.RANGE_VARNAME, EventManager.ELEMENT_VARNAME, EventManager.TARGET_VARNAME, EventManager.EVENT_VARNAME];
+    public static readonly COMPONENT_VARNAME = '$component';
+    public static readonly INNERHTML_VARNAME = '$innerHTML';
+    public static readonly ATTRIBUTE_VARNAME = '$attribute';
+    public static readonly VARNAMES = [EventManager.SCRIPTS_VARNAME, EventManager.FAG_VARNAME, EventManager.RAWSET_VARNAME, EventManager.RANGE_VARNAME, EventManager.ELEMENT_VARNAME, EventManager.TARGET_VARNAME, EventManager.EVENT_VARNAME, EventManager.COMPONENT_VARNAME, EventManager.INNERHTML_VARNAME, EventManager.ATTRIBUTE_VARNAME];
 
     public static readonly WINDOW_EVENT_POPSTATE = 'popstate';
     public static readonly WINDOW_EVENT_RESIZE = 'resize';
