@@ -40,7 +40,7 @@ export class RawSet {
     public static readonly DR_INNERTEXT_NAME = 'dr-inner-text';
     public static readonly DR_DETECT_NAME = 'dr-detect';
 
-    public static readonly DR_DETECT_ACTION_NAME = 'dr-detect-action';
+    // public static readonly DR_DETECT_ACTION_NAME = 'dr-detect-action';
 
     public static readonly DR_IT_OPTIONNAME = 'dr-it';
     public static readonly DR_VAR_OPTIONNAME = 'dr-var';
@@ -115,7 +115,9 @@ export class RawSet {
         const onElementInitCallBack: { name: string, obj: any, targetElement: TargetElement, creatorMetaData: CreatorMetaData }[] = [];
         const drAttrs: Attrs[] = [];
 
-        genNode.childNodes.forEach((cNode, key) => {
+        let keepgoing = true;
+        nodeLoops:
+        for (let cNode of Array.from(genNode.childNodes.values())) {
             const __render = Object.freeze({
                 rawset: this,
                 scripts: EventManager.setBindProperty(config?.scripts, obj),
@@ -169,7 +171,7 @@ export class RawSet {
                 drAttrs.push(drAttr);
 
                 if (drAttr.drPre != null) {
-                    return;
+                    break;
                 }
                 if (drAttr.dr !== null && drAttr.dr.length >= 0) {
                     const itRandom = RawSet.drItOtherEncoding(element);
@@ -211,10 +213,14 @@ export class RawSet {
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
                     const newTemp = config.window.document.createElement('temp');
                     // Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drIf' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v)); <-- 이부분은 다른 attr에도 적용을 할지말지 생각해야됨  엘리먼트 존재유무에 따라서 적용을 할지말지 결정해야됨
-                    ScriptUtils.eval(`
+                   keepgoing = ScriptUtils.eval(`
                     ${__render.bindScript}
                     ${drAttr.drBeforeOption ?? ''}
-                    if(${drAttr.drIf}) {
+                    if ($rawset.data === ${drAttr.drIf}) {
+                        return false;
+                    } 
+                    $rawset.data = ${drAttr.drIf} 
+                    if($rawset.data) {
                         const n = $element.cloneNode(true);
                         Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drIf' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));
                         var destIt = ${drAttr.drItOption};
@@ -228,7 +234,8 @@ export class RawSet {
                             this.__render.fag.append(n);
                         }
                     }
-                    ${drAttr.drAfterOption ?? ''}
+                    ${drAttr.drAfterOption ?? ''};
+                    return true;
                     `, Object.assign(obj,
                         {
                             __render: Object.freeze({
@@ -240,6 +247,10 @@ export class RawSet {
                             } as Render)
                         }
                     ));
+                    // console.log('keepgoing', keepgoing);
+                    if (keepgoing === false) {
+                        break;
+                    }
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
                     const bypass = (newTemp.innerHTML ?? '').trim().length <= 0;
@@ -251,7 +262,7 @@ export class RawSet {
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr);
                     if (bypass) {
-                        return;
+                        break;
                     }
                 }
                 // console.log('-------------')
@@ -537,7 +548,7 @@ export class RawSet {
                         const documentFragment = targetElement.callBack(element, obj, this);
                         // console.log('target-->',name, documentFragment)
                         if (documentFragment) {
-                            const detectAction = element.getAttribute(RawSet.DR_DETECT_ACTION_NAME);
+                            const detectAction = element.getAttribute(RawSet.DR_DETECT_NAME);
                             if (detectAction && (documentFragment as any).render) {
                                 this.detect = {action: () => {
                                     const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${detectAction} `;
@@ -582,34 +593,36 @@ export class RawSet {
                     }
                 }
             }
-        })
-
-        this.applyEvent(obj, genNode, config);
-        this.replaceBody(genNode);
-        drAttrs.forEach(it => {
-            if (it.drCompleteOption) {
-                // genNode.childNodes
-                ScriptUtils.eval(`
-                const ${EventManager.FAG_VARNAME} = this.__render.fag;
-                const ${EventManager.SCRIPTS_VARNAME} = this.__render.scripts;
-                const ${EventManager.RAWSET_VARNAME} = this.__render.rawset;
-                ${it.drCompleteOption}
-                `, Object.assign(obj, {
-                        __render: Object.freeze({
-                            rawset: this,
-                            fag: genNode,
-                            scripts: EventManager.setBindProperty(config?.scripts, obj)
-                        } as Render)
-                    }
-                ));
-            }
-        })
-        for (const it of onElementInitCallBack) {
-            it.targetElement?.__render?.component?.onInitRender?.({render: it.targetElement?.__render, creatorMetaData: it.targetElement?.__creatorMetaData});
-            const r = config?.onElementInit?.(it.name, obj, this, it.targetElement);
         }
-        for (const it of onAttrInitCallBack) {
-            const r = config?.onAttrInit?.(it.attrName, it.attrValue, obj, this);
+
+        if (keepgoing) {
+            this.applyEvent(obj, genNode, config);
+            this.replaceBody(genNode);
+            drAttrs.forEach(it => {
+                if (it.drCompleteOption) {
+                    // genNode.childNodes
+                    ScriptUtils.eval(`
+                    const ${EventManager.FAG_VARNAME} = this.__render.fag;
+                    const ${EventManager.SCRIPTS_VARNAME} = this.__render.scripts;
+                    const ${EventManager.RAWSET_VARNAME} = this.__render.rawset;
+                    ${it.drCompleteOption}
+                    `, Object.assign(obj, {
+                            __render: Object.freeze({
+                                rawset: this,
+                                fag: genNode,
+                                scripts: EventManager.setBindProperty(config?.scripts, obj)
+                            } as Render)
+                        }
+                    ));
+                }
+            })
+            for (const it of onElementInitCallBack) {
+                it.targetElement?.__render?.component?.onInitRender?.({render: it.targetElement?.__render, creatorMetaData: it.targetElement?.__creatorMetaData});
+                const r = config?.onElementInit?.(it.name, obj, this, it.targetElement);
+            }
+            for (const it of onAttrInitCallBack) {
+                const r = config?.onAttrInit?.(it.attrName, it.attrValue, obj, this);
+            }
         }
         return raws;
     }
@@ -922,7 +935,7 @@ export class RawSet {
                                                objFactory: (element: Element, obj: any, rawSet: RawSet) => any,
                                                template: string = '',
                                                styles: string[] = [],
-                                               scripts: { [n: string]: any } | undefined,
+                                               // scripts: { [n: string]: any } | undefined,
                                                // complete: (element: Element, obj: any, rawSet: RawSet) => void  | undefined,
                                                config: Config
     ): TargetElement {
@@ -959,7 +972,7 @@ export class RawSet {
                     attribute: attribute,
                     rawset: rawSet,
                     componentKey,
-                    scripts: EventManager.setBindProperty(scripts, obj)
+                    scripts: EventManager.setBindProperty(config.scripts??{}, obj)
                     // eslint-disable-next-line no-use-before-define
                 } as Render);
                 this.__render = render;
@@ -984,7 +997,7 @@ export class RawSet {
                 }
                 applayTemplate = template.replace(/#innerHTML#/g, applayTemplate);
 
-                const oninit = element.getAttribute(EventManager.onInitAttrName);
+                const oninit = element.getAttribute(EventManager.onInitAttrName); // dr-on-init
                 if (oninit) {
                     const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${oninit} `;
                     ScriptUtils.eval(script, Object.assign(obj, {

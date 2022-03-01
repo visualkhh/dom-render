@@ -14,6 +14,7 @@ export class EventManager {
 
     public readonly eventParam = EventManager.attrPrefix + 'event';
     public static readonly onInitAttrName = EventManager.attrPrefix + 'on-init';
+    // public static readonly onComponentInitAttrName = EventManager.attrPrefix + 'on-component-init';
     public static readonly valueAttrName = EventManager.attrPrefix + 'value';
     public static readonly valueLinkAttrName = EventManager.attrPrefix + 'value-link';
     public static readonly attrAttrName = EventManager.attrPrefix + 'attr';

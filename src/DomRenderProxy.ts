@@ -96,8 +96,8 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         const removeRawSets: RawSet[] = [];
         (raws ?? this.getRawSets()).forEach(it => {
             it.getUsingTriggerVariables(this.config).forEach(path => this.addRawSet(path, it))
-            if (it.point.start.isConnected && it.point.start.isConnected) {
-
+            // console.log('------->', it, it.isConnected)
+            if (it.isConnected) {
                 if (it.detect?.action) {
                     it.detect.action();
                 } else {
@@ -106,8 +106,6 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                         this.render(rawSets);
                     }
                 }
-
-
             } else {
                 removeRawSets.push(it);
                 // this.removeRawSet(it)
