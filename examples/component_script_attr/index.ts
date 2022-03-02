@@ -6,8 +6,13 @@ import {ScriptUtils} from 'dom-render/utils/script/ScriptUtils';
 class User {
     name?: string;
     age?: number;
+    details = 'details information';
+    constructor() {
+        console.log('User constructor');
+    }
 }
 class Data {
+    toggle = true;
     name = 'my name is dom-render';
     link = 'https://naver.com';
 }

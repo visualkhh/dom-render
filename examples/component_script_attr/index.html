@@ -8,10 +8,22 @@
 <body id="app">
 ${this.name}$
 <h1>component</h1>
-<profile dr-on-init="$component.name='jhone'; $component.age=55;"><b>detail-1</b></profile>
+<profile dr-on-init="$component.name='jhone'; $component.age=55;"><b>${#component#.details}$</b></profile>
 <profile dr-on-init="$component.name='cal'; $component.age=56;"><b>detail-2</b></profile>
-<profile dr-on-init="$component.name='rose'; $component.age=57;"><b>detail-3</b></profile>
-<profile dr-on-init="$component.name='papa'; $component.age=58;"><b>detail-4</b></profile>
+<profile dr-on-init="$component.name='rose'; $component.age=57;">
+    <profile dr-on-init="$component.name='rose-sub'; $component.age=156;">
+        <b>${this.name}$</b>
+    </profile>
+</profile>
+<h3>component data link and detect</h3>
+<profile dr-if="this.toggle" dr-detect="$component.age = this.age" dr-on-init="$component.name='papa'; $component.age=58;">
+    <b>${this.name}$</b>
+</profile>
+
+<button dr-event-click="this.name = new Date().toString();">change name</button>
+<button dr-event-click="this.age = Date.now();">change age</button>
+<button dr-event-click="this.toggle = !this.toggle;">change toggle</button>
+
 <h1>scripts</h1>
 <div>
     ${$scripts.concat('hello', 'tail')}$
