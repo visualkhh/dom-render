@@ -995,7 +995,7 @@ export class RawSet {
                 }
                 applayTemplate = template.replace(/#innerHTML#/g, applayTemplate);
 
-                const oninit = element.getAttribute(EventManager.onInitAttrName); // dr-on-init
+                const oninit = element.getAttribute(`${EventManager.attrPrefix}on-component-init`); // dr-on-component-init
                 if (oninit) {
                     const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${oninit} `;
                     ScriptUtils.eval(script, Object.assign(obj, {
