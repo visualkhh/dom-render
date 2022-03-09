@@ -8,10 +8,10 @@
 <body id="app">
 ${this.name}$
 <h1>component</h1>
-<profile dr-on-init="$component.name='jhone'; $component.age=55;"><b>${#component#.details}$</b></profile>
-<profile dr-on-init="$component.name='cal'; $component.age=56;"><b>detail-2</b></profile>
-<profile dr-on-init="$component.name='rose'; $component.age=57;">
-    <profile dr-on-init="$component.name='rose-sub'; $component.age=156;">
+<profile dr-on-component-init="$component.name='jhone'; $component.age=55;"><b>${#component#.details}$</b></profile>
+<profile dr-on-component-init="$component.name='cal'; $component.age=56;"><b>detail-2</b></profile>
+<profile dr-on-component-init="$component.name='rose'; $component.age=57;">
+    <profile dr-on-component-init="$component.name='rose-sub'; $component.age=156;">
         <b>${this.name}$</b>
     </profile>
 </profile>

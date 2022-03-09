@@ -436,10 +436,10 @@ new DomRender.run(obj, target, {
 ```
 using component
 ```html
-<my-element dr-on-init="$component.say();"></my-element>
+<my-element dr-on-component-init="$component.say();"></my-element>
 ```
 - attribute
-  - dr-on-init: component created init call script
+  - dr-on-component-init: component created init call script
     - $component: component  instance
     - $element: element instance
     - $attribute: element attribute object
