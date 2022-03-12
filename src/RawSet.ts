@@ -11,6 +11,7 @@ import {DomRenderFinalProxy} from './types/Types';
 type Attrs = {
     dr: string | null
     drIf: string | null
+    drAppender: string | null
     drFor: string | null
     drForOf: string | null
     drRepeat: string | null
@@ -36,6 +37,7 @@ export class RawSet {
     public static readonly DR_THIS_NAME = 'dr-this';
     public static readonly DR_FORM_NAME = 'dr-form';
     public static readonly DR_PRE_NAME = 'dr-pre';
+    public static readonly DR_APPENDER_NAME = 'dr-appender';
     public static readonly DR_INNERHTML_NAME = 'dr-inner-html';
     public static readonly DR_INNERTEXT_NAME = 'dr-inner-text';
     public static readonly DR_DETECT_NAME = 'dr-detect';
@@ -54,6 +56,7 @@ export class RawSet {
         drIf: RawSet.DR_IF_NAME,
         drFor: RawSet.DR_FOR_NAME,
         drForOf: RawSet.DR_FOR_OF_NAME,
+        drAppender: RawSet.DR_APPENDER_NAME,
         drRepeat: RawSet.DR_REPEAT_NAME,
         drThis: RawSet.DR_THIS_NAME,
         drForm: RawSet.DR_FORM_NAME,
@@ -70,7 +73,7 @@ export class RawSet {
 
     public static readonly DR_TAGS = [];
 
-    public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_FORM_NAME, RawSet.DR_PRE_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME, RawSet.DR_DETECT_NAME];
+    public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_APPENDER_NAME, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_FORM_NAME, RawSet.DR_PRE_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME, RawSet.DR_DETECT_NAME];
 
     constructor(
         public uuid: string,
@@ -150,6 +153,7 @@ export class RawSet {
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
                 const drAttr = {
+                    drAppender: this.getDrAppendAttributeAndDelete(element, obj),
                     dr: this.getAttributeAndDelete(element, RawSet.DR),
                     drIf: this.getAttributeAndDelete(element, RawSet.DR_IF_NAME),
                     drFor: this.getAttributeAndDelete(element, RawSet.DR_FOR_NAME),
@@ -206,7 +210,6 @@ export class RawSet {
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr)
                 }
-
                 else if (drAttr.drIf) {
                     const itRandom = RawSet.drItOtherEncoding(element);
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
@@ -275,7 +278,6 @@ export class RawSet {
                         cNode.remove();
                     }
                 }
-
                 else if (drAttr.drForm) {
                     RawSet.drFormOtherMoveAttr(element, 'name', 'temp-name', config);
                     const data = ScriptUtils.evalReturn(`${drAttr.drForm}`, obj);
@@ -333,7 +335,6 @@ export class RawSet {
                     RawSet.drFormOtherMoveAttr(element, 'temp-name', 'name', config);
                     raws.push(...RawSet.checkPointCreates(element, config));
                 }
-
                 else if (drAttr.drInnerText) {
                     const newTemp = config.window.document.createElement('temp');
                     ScriptUtils.eval(` 
@@ -361,7 +362,6 @@ export class RawSet {
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr);
                 }
-
                 else if (drAttr.drInnerHTML) {
                     const newTemp = config.window.document.createElement('temp');
                     ScriptUtils.eval(`
@@ -390,7 +390,6 @@ export class RawSet {
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr);
                 }
-
                 else if (drAttr.drFor) {
                     const itRandom = RawSet.drItOtherEncoding(element);
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
@@ -428,7 +427,6 @@ export class RawSet {
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr)
                 }
-
                 else if (drAttr.drForOf) {
                     const itRandom = RawSet.drItOtherEncoding(element);
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
@@ -486,7 +484,78 @@ export class RawSet {
                     // const rrr = rr.flatMap(it => it.render(obj, config));// .flat();
                     raws.push(...rr)
                 }
+                else if (drAttr.drAppender) {
+                    const itRandom = RawSet.drItOtherEncoding(element);
+                    const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
+                    const newTemp = config.window.document.createElement('temp');
+                    ScriptUtils.eval(`
+                    try{
+                    ${__render.bindScript}
+                    ${drAttr.drBeforeOption ?? ''}
+                    // console.log('attr->', '${drAttr.drAppender}');
+                    var i = 0; 
+                    const forOf = ${drAttr.drAppender};
+                    const forOfStr = \`${drAttr.drAppender}\`.trim();
+                    // console.log('--------', forOf, forOfStr);
+                    if (forOf) {
+                        for(const it of forOf) {
+                            // console.log('-tt-----', it)
+                            var destIt = it;
+                            if (/\\[(.*,?)\\],/g.test(forOfStr)) {
+                                if (typeof it === 'string') {
+                                    destIt = it;
+                                } else {
+                                    destIt = forOfStr.substring(1, forOfStr.length-1).split(',')[i];
+                                }
+                            } else if (forOf.isRange) {
+                                    destIt = it;
+                            }  else {
+                                destIt = forOfStr + '[' + i +']'
+                            }
+                            // console.log(this.__render.element)
+                            const n = this.__render.element.cloneNode(true);
+                            // console.log('------', this.__render.element, n);
+                            Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drAppender' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));
+                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIt\\#/g, destIt).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIndex\\#/g, i)))
+                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt).replace(/\\#index\\#/g, i);
+                            if (this.__render.drStripOption === 'true') {
+                                Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
+                            } else {
+                                this.__render.fag.append(n);
+                            }
+                            i++;
+                        }
+                        
+                        const n = this.__render.element.cloneNode(true);
+                        const vartarget = '${drAttr.drAppender}'.replace(/\\[[0-9]\\]$/g, '');
+                        const next = vartarget + '[' + (${drAttr.drAppender}.index + 1) + ']';
+                        // console.log('ssssaaaa-', next)
 
+                        n.setAttribute('dr-appender', next);
+                        this.__render.fag.append(n);
+                    }
+                    ${drAttr.drAfterOption ?? ''}
+                    }catch(e){}
+                    `, Object.assign(obj, {
+                        __render: Object.freeze({
+                            drStripOption: drAttr.drStripOption,
+                            drAttr: drAttr,
+                            drAttrsOriginName: RawSet.drAttrsOriginName,
+                            fag: newTemp,
+                            ...__render
+                            // eslint-disable-next-line no-use-before-define
+                        } as Render)
+                    }));
+                    RawSet.drVarDecoding(newTemp, vars);
+                    RawSet.drItOtherDecoding(newTemp, itRandom);
+                    const tempalte = config.window.document.createElement('template');
+                    tempalte.innerHTML = newTemp.innerHTML;
+                    fag.append(tempalte.content)
+                    const rr = RawSet.checkPointCreates(fag, config);
+                    element.parentNode?.replaceChild(fag, element);
+                    // const rrr = rr.flatMap(it => it.render(obj, config));// .flat();
+                    raws.push(...rr)
+                }
                 else if (drAttr.drRepeat) {
                     const itRandom = RawSet.drItOtherEncoding(element);
                     const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
@@ -536,7 +605,6 @@ export class RawSet {
                     element.parentNode?.replaceChild(fag, element);
                     raws.push(...rr)
                 }
-
                 else {
                     // config detecting
                     // console.log('config targetElement-->', config?.targetElements)
@@ -641,6 +709,32 @@ export class RawSet {
     public getAttributeAndDelete(element: Element, attr: string) {
         const data = element.getAttribute(attr)
         element.removeAttribute(attr);
+        return data;
+    }
+
+    public getDrAppendAttributeAndDelete(element: Element, obj: any) {
+        let data = element.getAttribute(RawSet.DR_APPENDER_NAME);
+        // if (data && !/\[[0-9]+\]/g.test(data)) {
+        if (data && !/\[.+\]/g.test(data)) {
+            const currentIndex = ScriptUtils.evalReturn(`${data}?.length -1`, obj);
+            // console.log('------?', currentIndex)
+            // if (currentIndex === undefined || isNaN(currentIndex)) {
+            //     return undefined;
+            // }
+            // const currentIndex = ScriptUtils.evalReturn(`${data}.length`, obj);
+            data = `${data}[${currentIndex}]`;
+            element.setAttribute(RawSet.DR_APPENDER_NAME, data)
+            // element.setAttribute(RawSet.DR_IF_NAME, data);
+            // element.setAttribute('dr-id', data);
+            // console.log('-->', element)
+        }
+
+        // if (data && !/\.childs\[[0-9]+\]/g.test(data)) {
+        //     const currentIndex = ScriptUtils.evalReturn(`${data}.currentIndex`, obj);
+        //     data = `${data}.childs[${currentIndex}]`;
+        //     element.setAttribute(RawSet.DR_APPENDER_NAME, data)
+        // }
+        element.removeAttribute(RawSet.DR_APPENDER_NAME);
         return data;
     }
 

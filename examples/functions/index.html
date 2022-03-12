@@ -6,6 +6,7 @@
 </head>
 <script src="bundle.js" defer="defer"></script>
 <body id="app">
+
 <h1>functions</h1>
 
 <h3>expression</h3>
@@ -31,6 +32,15 @@
 <div dr-repeat="$range(10, 20, 5)"><div>#it#</div></div>
 <h4>dr-repeat="$range('10..5, 2')"</h4>
 <div dr-repeat="$range('10..5, 2')"><div>#it#</div></div>
+
+<h3>appender</h3>
+<ul>
+    <li dr-appender="this.appender">
+        ${#it#}$
+    </li>
+</ul>
+<button dr-event-click="this.append()">appending</button>
+<button dr-event-click="this.modifyAppender(0)">idx 0 modify</button>
 
 <h3>dr-inner-text</h3>
 <div dr-inner-text="this.tagStr"></div>
