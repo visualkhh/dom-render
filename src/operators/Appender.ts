@@ -26,15 +26,13 @@ export class AppenderContainer {
         // this.childs.push(new Appender(appender.index + 1));
     }
 
-    // clear(): void {
-    //     console.log('length', this.length);
-    //     for (let i = 0; i < this.length; i++) {
-    //     //     console.log('------clear', i, this[i]);
-    //         this[i] = [];
-    //         delete this[i];
-    //     }
-    //     this.length = 0;
-    // }
+    clear(): void {
+        // console.log('length', this.length);
+        for (let i = 0; i < this.length; i++) {
+            delete this[i];
+        }
+        this.length = 0;
+    }
 
     // get currentAppender(): Appender {
     //     return this.childs[this.childs.length - 2];

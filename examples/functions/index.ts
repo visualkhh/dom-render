@@ -34,6 +34,11 @@ class Data {
         console.log('----', this.appender)
     }
 
+    clearAppend() {
+        this.appender.clear()
+        console.log('----', this.appender)
+    }
+
     modifyAppender(idx: number) {
         // @ts-ignore
         this.appender[idx][0] = RandomUtils.uuid();

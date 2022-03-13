@@ -23,6 +23,7 @@ type Attrs = {
     drItOption: string | null
     drVarOption: string | null
     drAfterOption: string | null
+    drNextOption: string | null
     drBeforeOption: string | null
     drCompleteOption: string | null
     drStripOption: string | null
@@ -47,6 +48,7 @@ export class RawSet {
     public static readonly DR_IT_OPTIONNAME = 'dr-it';
     public static readonly DR_VAR_OPTIONNAME = 'dr-var';
     public static readonly DR_AFTER_OPTIONNAME = 'dr-after';
+    public static readonly DR_NEXT_OPTIONNAME = 'dr-next';
     public static readonly DR_BEFORE_OPTIONNAME = 'dr-before';
     public static readonly DR_COMPLETE_OPTIONNAME = 'dr-complete';
     public static readonly DR_STRIP_OPTIONNAME = 'dr-strip';
@@ -66,6 +68,7 @@ export class RawSet {
         drItOption: RawSet.DR_IT_OPTIONNAME,
         drVarOption: RawSet.DR_VAR_OPTIONNAME,
         drAfterOption: RawSet.DR_AFTER_OPTIONNAME,
+        drNextOption: RawSet.DR_NEXT_OPTIONNAME,
         drBeforeOption: RawSet.DR_BEFORE_OPTIONNAME,
         drCompleteOption: RawSet.DR_COMPLETE_OPTIONNAME,
         drStripOption: RawSet.DR_STRIP_OPTIONNAME
@@ -153,11 +156,11 @@ export class RawSet {
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
                 const drAttr = {
-                    drAppender: this.getDrAppendAttributeAndDelete(element, obj),
                     dr: this.getAttributeAndDelete(element, RawSet.DR),
                     drIf: this.getAttributeAndDelete(element, RawSet.DR_IF_NAME),
                     drFor: this.getAttributeAndDelete(element, RawSet.DR_FOR_NAME),
                     drForOf: this.getAttributeAndDelete(element, RawSet.DR_FOR_OF_NAME),
+                    drAppender: this.getAttributeAndDelete(element, RawSet.DR_APPENDER_NAME),
                     drRepeat: this.getAttributeAndDelete(element, RawSet.DR_REPEAT_NAME),
                     drThis: this.getAttributeAndDelete(element, RawSet.DR_THIS_NAME),
                     drForm: this.getAttributeAndDelete(element, RawSet.DR_FORM_NAME),
@@ -166,6 +169,7 @@ export class RawSet {
                     drInnerText: this.getAttributeAndDelete(element, RawSet.DR_INNERTEXT_NAME),
                     drItOption: this.getAttributeAndDelete(element, RawSet.DR_IT_OPTIONNAME),
                     drVarOption: this.getAttributeAndDelete(element, RawSet.DR_VAR_OPTIONNAME),
+                    drNextOption: this.getAttributeAndDelete(element, RawSet.DR_NEXT_OPTIONNAME),
                     drAfterOption: this.getAttributeAndDelete(element, RawSet.DR_AFTER_OPTIONNAME),
                     drBeforeOption: this.getAttributeAndDelete(element, RawSet.DR_BEFORE_OPTIONNAME),
                     drCompleteOption: this.getAttributeAndDelete(element, RawSet.DR_COMPLETE_OPTIONNAME),
@@ -452,7 +456,7 @@ export class RawSet {
                                 destIt = forOfStr + '[' + i +']'
                             }
                             const n = this.__render.element.cloneNode(true);
-                            Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drForOf' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));
+                            Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drForOf' && k !== 'drNextOption' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));
                             n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIt\\#/g, destIt).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIndex\\#/g, i)))
                             n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt).replace(/\\#index\\#/g, i);
                             if (this.__render.drStripOption === 'true') {
@@ -461,6 +465,15 @@ export class RawSet {
                                 this.__render.fag.append(n);
                             }
                             i++;
+                        }
+                        
+                        if('${drAttr.drNextOption}' !== 'null') {
+                            const n = this.__render.element.cloneNode(true);
+                            Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drForOf' && k !== 'drNextOption' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));
+                            const [name, idx] = '${drAttr.drNextOption}'.split(',');
+                            n.setAttribute('dr-for-of', name + '[' + idx + ']');
+                            n.setAttribute('dr-next', name + ',' +  (Number(idx) + 1));
+                            this.__render.fag.append(n);
                         }
                     }
                     ${drAttr.drAfterOption ?? ''}
@@ -492,48 +505,26 @@ export class RawSet {
                     try{
                     ${__render.bindScript}
                     ${drAttr.drBeforeOption ?? ''}
-                    // console.log('attr->', '${drAttr.drAppender}');
-                    var i = 0; 
-                    const forOf = ${drAttr.drAppender};
-                    const forOfStr = \`${drAttr.drAppender}\`.trim();
-                    // console.log('--------', forOf, forOfStr);
-                    if (forOf) {
-                        for(const it of forOf) {
-                            // console.log('-tt-----', it)
-                            var destIt = it;
-                            if (/\\[(.*,?)\\],/g.test(forOfStr)) {
-                                if (typeof it === 'string') {
-                                    destIt = it;
-                                } else {
-                                    destIt = forOfStr.substring(1, forOfStr.length-1).split(',')[i];
-                                }
-                            } else if (forOf.isRange) {
-                                    destIt = it;
-                            }  else {
-                                destIt = forOfStr + '[' + i +']'
-                            }
-                            // console.log(this.__render.element)
-                            const n = this.__render.element.cloneNode(true);
-                            // console.log('------', this.__render.element, n);
-                            Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drAppender' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));
-                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIt\\#/g, destIt).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIndex\\#/g, i)))
-                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt).replace(/\\#index\\#/g, i);
-                            if (this.__render.drStripOption === 'true') {
-                                Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
-                            } else {
-                                this.__render.fag.append(n);
-                            }
-                            i++;
-                        }
+                        const ifWrap = document.createElement('div');
+                        ifWrap.setAttribute('dr-strip', 'true');
+                        ifWrap.setAttribute('dr-if', '${drAttr.drAppender} && ${drAttr.drAppender}.length > 0');
+                        
+                        // console.log('----', ${drAttr.drAppender}.length);
                         
                         const n = this.__render.element.cloneNode(true);
-                        const vartarget = '${drAttr.drAppender}'.replace(/\\[[0-9]\\]$/g, '');
-                        const next = vartarget + '[' + (${drAttr.drAppender}.index + 1) + ']';
-                        // console.log('ssssaaaa-', next)
-
-                        n.setAttribute('dr-appender', next);
-                        this.__render.fag.append(n);
-                    }
+                        Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drAppender' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));
+                        n.setAttribute('dr-for-of', '${drAttr.drAppender}[' + (${drAttr.drAppender}.length-1) + ']');
+                        n.setAttribute('dr-next', '${drAttr.drAppender},' + ${drAttr.drAppender}.length);
+                        ifWrap.append(n);
+                        
+                        // n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIt\\#/g, destIt).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIndex\\#/g, i)))
+                        // n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt).replace(/\\#index\\#/g, i);
+                        // if (this.__render.drStripOption === 'true') {
+                        // Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
+                        // } else {
+                        // this.__render.fag.append(n);
+                        // }
+                        this.__render.fag.append(ifWrap);
                     ${drAttr.drAfterOption ?? ''}
                     }catch(e){}
                     `, Object.assign(obj, {
@@ -810,7 +801,6 @@ export class RawSet {
                 template.content.append(config.window.document.createTextNode(text.substring(lasterIndex, text.length)));
                 currentNode?.parentNode?.replaceChild(template.content, currentNode);
             } else {
-                // console.log('------------->', currentNode)
                 const uuid = RandomUtils.uuid()
                 const fragment = config.window.document.createDocumentFragment();
                 const start = config.window.document.createComment(`start ${uuid}`)
