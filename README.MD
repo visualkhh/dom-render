@@ -334,11 +334,10 @@ validator
 const config: Config = {
   window
 };
-config.targetElements = [
-  RawSet.createComponentTargetElement('page-main', (e, o, r) => new Main(), MainTemplate, undefined, config),
-  RawSet.createComponentTargetElement('page-second', (e, o, r) => new Second(), SecondTemplate, undefined, config),
-  RawSet.createComponentTargetElement('page-detail', (e, o, r) => new Detail(), DetailTemplate, undefined, config)
-];
+DomRender.addComponent(config, {type: Main, tagName: 'page-main'}, {template: MainTemplate})
+        .add({type: Second, tagName: 'page-second'}, {template: SecondTemplate})
+        .add({type: Detail, tagName: 'page-detail'}, {template: DetailTemplate});
+config.routerType = 'hash';
 config.routerType = 'hash';
 const data = DomRender.run(new Data(), document.querySelector('#app')!, config);
 ```
@@ -476,23 +475,76 @@ const data = config.scripts.concat('head', 'tail')
 ```
 
 ---
-# Component
-```typescript
-const templat = '<div>aaaaa${this.name}aaaaa </div>';
-const styles = ['p {color: red}', 'div {margin: ${this.margin} + \'px\' }'];
-class Component {
-  public name = 'default name';
-  public margin = 5;
-  public say() {
-      console.log('say!~')
-  }
-}
+# Component, Attribute, AttributeCallBack
+# 😃 examples
+- [examples](./examples/component_script_attr)
+```html
+<body id="app">
+${this.name}$
+<h1>component</h1>
+<profile dr-on-component-init="$component.name='jhone'; $component.age=55;"><b>${#component#.details}$</b></profile>
+<profile dr-on-component-init="$component.name='cal'; $component.age=56;"><b>detail-2</b></profile>
+<profile dr-on-component-init="$component.name='rose'; $component.age=57;">
+    <profile dr-on-component-init="$component.name='rose-sub'; $component.age=156;">
+        <b>${this.name}$</b>
+    </profile>
+</profile>
+<h3>component data link and detect</h3>
+<Profile dr-if="this.toggle" dr-detect="$component.age = this.age" dr-on-component-init="$component.name='papa'; $component.age=58;">
+    <b>${this.name}$</b>
+</Profile>
 
-new DomRender.run(obj, target, {
-  targetElements: [
-    RawSet.createComponentTargetElement('my-element', (e, o, r) => new Component(), templat, styles, config)
-  ],
-});
+<button dr-event-click="this.name = new Date().toString();">change name</button>
+<button dr-event-click="this.age = Date.now();">change age</button>
+<button dr-event-click="this.toggle = !this.toggle;">change toggle</button>
+
+<j1>component constructor, on-create, dr-on-component-init</j1>
+<home dr-constructor="[this.name, this.age, 'home welcom']" dr-on-create="{type: 'onCreate', data: 'datadata'}" dr-on-component-init="$component.onInit('data')"></home>
+
+
+
+<h1>scripts</h1>
+<div>
+    ${$scripts.concat('hello', 'tail')}$
+</div>
+
+<h1>attr</h1>
+<button link="this.link">
+link attribute
+</button>
+<h1>attrCallBack</h1>
+<input id="callback" type="text" wow>
+</body>
+```
+```typescript
+DomRender
+        .addComponent(config, {type: Profile}, {template: ProfileTemplate})
+        .add({type: Home}, {template: HomeTemplate});
+
+DomRender.addAttribute(config, 'link',
+        (element: Element, attrValue: string, obj: any, rawSet: RawSet) => {
+          return obj;
+        },
+        (element: Element, attrValue: string, obj: any, rawSet: RawSet) => {
+          const fag = window.document.createDocumentFragment();
+          if (attrValue) {
+            const n = element.cloneNode(true) as Element;
+            attrValue = ScriptUtils.eval(`return ${attrValue}`, obj)
+            n.addEventListener('click', () => {
+              location.href = attrValue;
+            });
+            fag.append(n);
+          }
+          return fag;
+        }
+);
+
+DomRender.addAttributeCallBack(config, 'wow', (e, a, o) => {
+  e.addEventListener('click', (event) => {
+    alert((event.target as any).value);
+  })
+})
+const data = DomRender.run(new Data(), document.querySelector('#app')!, config);
 ```
 using component
 ```html

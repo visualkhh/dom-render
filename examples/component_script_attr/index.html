@@ -16,13 +16,18 @@ ${this.name}$
     </profile>
 </profile>
 <h3>component data link and detect</h3>
-<profile dr-if="this.toggle" dr-detect="$component.age = this.age" dr-on-init="$component.name='papa'; $component.age=58;">
+<Profile dr-if="this.toggle" dr-detect="$component.age = this.age" dr-on-component-init="$component.name='papa'; $component.age=58;">
     <b>${this.name}$</b>
-</profile>
+</Profile>
 
 <button dr-event-click="this.name = new Date().toString();">change name</button>
 <button dr-event-click="this.age = Date.now();">change age</button>
 <button dr-event-click="this.toggle = !this.toggle;">change toggle</button>
+
+<j1>component constructor, on-create, dr-on-component-init</j1>
+<home dr-constructor="[this.name, this.age, 'home welcom']" dr-on-create="{type: 'onCreate', data: 'datadata'}" dr-on-component-init="$component.onInit('data')"></home>
+
+
 
 <h1>scripts</h1>
 <div>
@@ -33,5 +38,7 @@ ${this.name}$
 <button link="this.link">
 link attribute
 </button>
+<h1>attrCallBack</h1>
+<input id="callback" type="text" wow>
 </body>
 </html>

@@ -1025,7 +1025,7 @@ export class RawSet {
     }
 
     public static createComponentTargetElement(name: string,
-        objFactory: (element: Element, obj: any, rawSet: RawSet) => any,
+        objFactory: (element: Element, obj: any, rawSet: RawSet, counstructorParam: any[]) => any,
         template: string = '',
         styles: string[] = [],
         config: Config
@@ -1041,14 +1041,9 @@ export class RawSet {
                 }
                 const domrenderComponents = obj.__domrender_components;
                 const componentKey = '_' + RandomUtils.getRandomString(20);
-                // console.log('callback settttt---a-->', componentKey, objFactory, objFactory(element, obj, rawSet))
-                domrenderComponents[componentKey] = objFactory(element, obj, rawSet);
-                const instance = domrenderComponents[componentKey];
                 const attribute = DomUtils.getAttributeToObject(element);
-                const onCreate = element.getAttribute('dr-on-create')
                 const renderScript = 'var $component = this.__render.component; var $element = this.__render.element; var $router = this.__render.router; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;';
-                const render = Object.freeze({
-                    component: instance,
+                let render = Object.freeze({
                     element: element,
                     innerHTML: element.innerHTML,
                     attribute: attribute,
@@ -1058,6 +1053,24 @@ export class RawSet {
                     scripts: EventManager.setBindProperty(config.scripts ?? {}, obj)
                     // eslint-disable-next-line no-use-before-define
                 } as Render);
+                const constructor = element.getAttribute('dr-constructor');
+                let constructorParam = [];
+                if (constructor) {
+                    const script = `${renderScript} return ${constructor} `;
+                    let param = ScriptUtils.eval(script, obj) ?? [];
+                    if (!Array.isArray(param)) {
+                        param = [param];
+                    }
+                    constructorParam = param;
+                }
+                domrenderComponents[componentKey] = objFactory(element, obj, rawSet, constructorParam);
+                const instance = domrenderComponents[componentKey];
+                render = {
+                    component: instance,
+                    ...render
+                }
+
+                const onCreate = element.getAttribute('dr-on-create')
                 this.__render = render;
 
                 let createParam;

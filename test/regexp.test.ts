@@ -11,4 +11,20 @@ describe('Test', () => {
         expect(200).toBe(200)
         done()
     })
+    test('regexp2', async (done) => {
+        let message = '/asdasd/ood';
+        // let message = '/asdasd/{path:second\\/?[0-9]?}/go/{a/sd}ood';
+        const data = StringUtils.regexExec(/(\{(?:\{??[^\{]*?\}))/g, message);
+        data.forEach((item, idx) => {
+            message = message.replace(item[0], `{${idx}}`)
+        })
+        console.log('-->', message)
+        data.forEach((item, idx) => {
+            message = message.replace(`{${idx}}`, item[0])
+        })
+        console.log('-->', message)
+
+        expect(200).toBe(200)
+        done()
+    })
 })

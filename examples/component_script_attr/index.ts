@@ -1,20 +1,17 @@
 import {DomRender} from 'dom-render';
 import {Config} from 'dom-render/Config';
 import {RawSet} from 'dom-render/RawSet';
-import template from './profile.html';
 import {ScriptUtils} from 'dom-render/utils/script/ScriptUtils';
-class User {
-    name?: string;
-    age?: number;
-    details = 'details information';
-    constructor() {
-        console.log('User constructor');
-    }
-}
+import {Profile} from './components/profile/profile';
+import ProfileTemplate from './components/profile/profile.html';
+import {Home} from './components/home/home';
+import HomeTemplate from './components/home/home.html';
+
 class Data {
     toggle = true;
     name = 'my name is dom-render';
     link = 'https://naver.com';
+    age = 55;
 }
 
 const config = {
@@ -26,10 +23,11 @@ const scripts = {
     }
 }
 config.scripts = scripts;
-const component = RawSet.createComponentTargetElement('profile', (e, o, r) => new User(), template, undefined, config);
-config.targetElements = [component];
-const targetAttribute = RawSet.createComponentTargetAttribute(
-    'link',
+DomRender
+    .addComponent(config, {type: Profile}, {template: ProfileTemplate})
+    .add({type: Home}, {template: HomeTemplate});
+
+DomRender.addAttribute(config, 'link',
     (element: Element, attrValue: string, obj: any, rawSet: RawSet) => {
         return obj;
     },
@@ -46,5 +44,11 @@ const targetAttribute = RawSet.createComponentTargetAttribute(
         return fag;
     }
 );
-config.targetAttrs = [targetAttribute];
+
+DomRender.addAttributeCallBack(config, 'wow', (e, a, o) => {
+    e.addEventListener('click', (event) => {
+        alert((event.target as any).value);
+    })
+})
+
 const data = DomRender.run(new Data(), document.querySelector('#app')!, config);

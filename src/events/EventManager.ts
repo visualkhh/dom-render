@@ -229,7 +229,7 @@ export class EventManager {
         // console.log('eventManager-applyEvent-->', config?.applyEvents)
         const elements = Array.from(childNodes).filter(it => it.nodeType === 1).map(it => it as Element);
         elements.forEach(it => {
-            config?.applyEvents?.filter(ta => it.getAttribute(ta.attrName)).forEach(ta => ta.callBack(it, it.getAttribute(ta.attrName)!, obj))
+            config?.applyEvents?.filter(ta => it.getAttribute(ta.attrName) !== null).forEach(ta => ta.callBack(it, it.getAttribute(ta.attrName)!, obj))
         });
     }
 

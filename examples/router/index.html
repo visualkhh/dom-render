@@ -10,14 +10,19 @@
     <h1>examples header</h1>
     <h2>${this.name}$</h2>
     <div>
-        <button dr-event-click="$router.go('/')">main</button>
-        <button dr-event-click="$router.go('/second', {secondata: 555})">second</button>
-        <button dr-event-click="$router.go('/detail/25?name=zzz')">detail</button>
+        <div><button dr-event-click="$router.go('/')">main</button></div>
+        <div>
+            <button dr-event-click="$router.go('/second', {secondata: 555})">second</button>
+            <button dr-event-click="$router.go('/second/5')">second/1</button>
+            <button dr-event-click="$router.go('/second/wow')">second/2</button>
+        </div>
+        <div><button dr-event-click="$router.go('/detail/25?name=zzz')">detail</button></div>
     </div>
 </header>
 <main>
     <page-main dr-if="$router.test('/')"></page-main>
     <page-second dr-if="$router.test('/second')"></page-second>
+    <page-second dr-if="$router.testRegexp('/second/?[0-9]?')"></page-second>
     <page-detail url='/detail/{id:[0-9]+}' dr-if="$router.test($attribute.url)" dr-on-create="$router.getRouteData($attribute.url)"></page-detail>
     <div>
         ${this.count}$
