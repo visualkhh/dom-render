@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>examples</title>
+</head>
+<script src="bundle.js" defer="defer"></script>
+<body id="app">
+<header>
+    <h1>examples header</h1>
+    <h2>${this.name}$</h2>
+    <div>
+        <button dr-event-click="$router.go('/')">main</button>
+        <button dr-event-click="$router.go('/second', {secondata: 555})">second</button>
+        <button dr-event-click="$router.go('/detail/25?name=zzz')">detail</button>
+    </div>
+</header>
+<main>
+    <page-main dr-if="$router.test('/')"></page-main>
+    <page-second dr-if="$router.test('/second')"></page-second>
+    <page-detail url='/detail/{id:[0-9]+}' dr-if="$router.test($attribute.url)" dr-on-create="$router.getRouteData($attribute.url)"></page-detail>
+    <div>
+        ${this.count}$
+    <button dr-event-click="this.plusCount()">count  pluse++</button>
+    </div>
+</main>
+<footer>footer</footer>
+</body>
+</html>

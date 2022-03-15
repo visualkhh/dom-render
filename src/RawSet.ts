@@ -7,6 +7,7 @@ import {Range} from './iterators/Range';
 import {Validator} from './validators/Validator';
 import {ValidatorArray} from './validators/ValidatorArray';
 import {DomRenderFinalProxy} from './types/Types';
+import {DomUtils} from './utils/dom/DomUtils';
 
 type Attrs = {
     dr: string | null
@@ -106,6 +107,7 @@ export class RawSet {
                     // script = script.replace(RegExp(it.replace('$', '\\$'), 'g'), `this?.___${it}`);
                     // script = script.replace(RegExp(it.replace('$', '\\$'), 'g'), `this.___${it}`);
                     script = script.replace(RegExp(it.replace('$', '\\$'), 'g'), `this.___${it}`);
+                    // console.log('scripts-->', script)
                 })
                 // console.log('----------', script);
                 Array.from(ScriptUtils.getVariablePaths(script)).filter(it => !it.startsWith(`___${EventManager.SCRIPTS_VARNAME}`)).forEach(it => usingTriggerVariables.add(it));
@@ -123,16 +125,24 @@ export class RawSet {
         const drAttrs: Attrs[] = [];
 
         for (const cNode of Array.from(genNode.childNodes.values())) {
+            let attribute = {};
+            if (cNode.nodeType === Node.ELEMENT_NODE) {
+                attribute = DomUtils.getAttributeToObject(cNode as Element);
+            }
             const __render = Object.freeze({
                 rawset: this,
                 scripts: EventManager.setBindProperty(config?.scripts, obj),
+                router: config?.router,
                 range: Range.range,
                 element: cNode,
+                attribute: attribute,
                 bindScript: `
                     const ${EventManager.SCRIPTS_VARNAME} = this.__render.scripts;
                     const ${EventManager.RAWSET_VARNAME} = this.__render.rawset;
                     const ${EventManager.ELEMENT_VARNAME} = this.__render.element;
+                    const ${EventManager.ATTRIBUTE_VARNAME} = this.__render.attribute;
                     const ${EventManager.RANGE_VARNAME} = this.__render.range;
+                    const ${EventManager.ROUTER_VARNAME} = this.__render.router;
             `
                 // eslint-disable-next-line no-use-before-define
             }) as unknown as Render;
@@ -155,6 +165,7 @@ export class RawSet {
                 cNode.parentNode?.replaceChild(n, cNode)
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
+
                 const drAttr = {
                     dr: this.getAttributeAndDelete(element, RawSet.DR),
                     drIf: this.getAttributeAndDelete(element, RawSet.DR_IF_NAME),
@@ -1017,8 +1028,6 @@ export class RawSet {
         objFactory: (element: Element, obj: any, rawSet: RawSet) => any,
         template: string = '',
         styles: string[] = [],
-        // scripts: { [n: string]: any } | undefined,
-        // complete: (element: Element, obj: any, rawSet: RawSet) => void  | undefined,
         config: Config
     ): TargetElement {
         const targetElement: TargetElement = {
@@ -1035,29 +1044,31 @@ export class RawSet {
                 // console.log('callback settttt---a-->', componentKey, objFactory, objFactory(element, obj, rawSet))
                 domrenderComponents[componentKey] = objFactory(element, obj, rawSet);
                 const instance = domrenderComponents[componentKey];
+                const attribute = DomUtils.getAttributeToObject(element);
                 const onCreate = element.getAttribute('dr-on-create')
-                let createParam;
-                if (onCreate) {
-                    //     const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${onCreate} `;
-                    //     const script = `${onCreate} `;
-                    createParam = ScriptUtils.evalReturn(onCreate, obj);
-                }
-                instance?.onCreateRender?.(createParam);
-                const attribute = {} as any;
-                element.getAttributeNames().forEach(it => {
-                    attribute[it] = element.getAttribute(it);
-                });
+                const renderScript = 'var $component = this.__render.component; var $element = this.__render.element; var $router = this.__render.router; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;';
                 const render = Object.freeze({
                     component: instance,
                     element: element,
                     innerHTML: element.innerHTML,
                     attribute: attribute,
                     rawset: rawSet,
+                    router: config.router,
                     componentKey,
                     scripts: EventManager.setBindProperty(config.scripts ?? {}, obj)
                     // eslint-disable-next-line no-use-before-define
                 } as Render);
                 this.__render = render;
+
+                let createParam;
+                if (onCreate) {
+                    const script = `${renderScript} return ${onCreate} `;
+                    createParam = ScriptUtils.eval(script, obj);
+                    if (createParam) {
+                        instance?.onCreateRender?.(createParam);
+                    }
+                }
+
 
                 const i = instance.__domrender_component_new = (instance.__domrender_component_new ?? new Proxy({}, new DomRenderFinalProxy())) as CreatorMetaData;
                 i.thisVariableName = rawSet.point.thisVariableName;
@@ -1081,7 +1092,7 @@ export class RawSet {
 
                 const oninit = element.getAttribute(`${EventManager.attrPrefix}on-component-init`); // dr-on-component-init
                 if (oninit) {
-                    const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${oninit} `;
+                    const script = `${renderScript}  ${oninit} `;
                     ScriptUtils.eval(script, Object.assign(obj, {
                         __render: render
                     }))
@@ -1118,6 +1129,8 @@ export type Render = {
     scripts?: { [n: string]: any };
     bindScript?: string;
     element?: any;
+    attribute?: any;
+    router?: any;
     range?: any;
     value?: any;
     [n: string]: any

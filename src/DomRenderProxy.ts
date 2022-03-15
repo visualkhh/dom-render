@@ -10,7 +10,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     public _domRender_proxy?: T;
     public _targets = new Set<Node>();
 
-    constructor(public _domRender_origin: T, target: Node | undefined, private config: Config) {
+    constructor(public _domRender_origin: T, target: Node | undefined, public config: Config) {
         if (target) {
             this._targets.add(target);
         }
@@ -92,7 +92,15 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         return Array.from(set);
     }
 
-    public render(raws?: RawSet[]) {
+    public render(raws?: RawSet[] | string) {
+        if (typeof raws === 'string') {
+            const iter = this._rawSets.get(raws);
+            if (iter) {
+                raws = Array.from(iter);
+            } else {
+                raws = undefined;
+            }
+        }
         const removeRawSets: RawSet[] = [];
         (raws ?? this.getRawSets()).forEach(it => {
             it.getUsingTriggerVariables(this.config).forEach(path => this.addRawSet(path, it))
@@ -131,18 +139,12 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             })
         } else {
             const strings = paths.reverse();
-            // const fullPathStr = strings.join('.');
-            const fullPathStr = strings.map(it => isNaN(Number(it)) ? '.'+it : `[${it}]`).join('').slice(1);
+            const fullPathStr = strings.map(it => isNaN(Number(it)) ? '.' + it : `[${it}]`).join('').slice(1);
             if (lastDoneExecute) {
                 const iterable = this._rawSets.get(fullPathStr);
                 // array check
                 const front = strings.slice(0, strings.length - 1).map(it => isNaN(Number(it)) ? '.' + it : `[${it}]`).join('');
-                // front = front.replace(/\.\[/g, '[');
-                // const front = strings.slice(0, strings.length - 1).join('.');
-                // front = front.replace(/\.\[/g, '[');
                 const last = strings[strings.length - 1]
-                // console.log('root-else-->', fullPathStr, iterable, front, last)
-                // if (!isNaN(Number(last)) && Array.isArray(ScriptUtils.evalReturn('this' + front, this._domRender_proxy))) {
                 const data = ScriptUtils.evalReturn('this' + front, this._domRender_proxy);
                 if (last === 'length' && Array.isArray(data)) {
                     const aIterable = this._rawSets.get(front.slice(1));
@@ -165,7 +167,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public set(target: T, p: string | symbol, value: any, receiver: T): boolean {
-        if (typeof p === 'string' &&  p !== '__domrender_components' && excludeGetSetPropertys.includes(p)) {
+        if (typeof p === 'string' && p !== '__domrender_components' && excludeGetSetPropertys.includes(p)) {
             (target as any)[p] = value;
             return true;
         }

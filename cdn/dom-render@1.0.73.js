@@ -452,7 +452,7 @@ var EventManager = /** @class */ (function () {
             EventManager.onInitAttrName,
             this.eventParam
         ];
-        this.bindScript = "\n        const ".concat(EventManager.VALUE_VARNAME, " = this.__render.value;\n        const ").concat(EventManager.SCRIPTS_VARNAME, " = this.__render.scripts;\n        const ").concat(EventManager.RANGE_VARNAME, " = this.__render.range;\n        const ").concat(EventManager.ELEMENT_VARNAME, " = this.__render.element;\n        const ").concat(EventManager.TARGET_VARNAME, " = this.__render.target;\n        const ").concat(EventManager.EVENT_VARNAME, " = this.__render.event;\n    ");
+        this.bindScript = "\n        const ".concat(EventManager.VALUE_VARNAME, " = this.__render.value;\n        const ").concat(EventManager.SCRIPTS_VARNAME, " = this.__render.scripts;\n        const ").concat(EventManager.RANGE_VARNAME, " = this.__render.range;\n        const ").concat(EventManager.ROUTER_VARNAME, " = this.__render.router;\n        const ").concat(EventManager.ATTRIBUTE_VARNAME, " = this.__render.attribute;\n        const ").concat(EventManager.ELEMENT_VARNAME, " = this.__render.element;\n        const ").concat(EventManager.TARGET_VARNAME, " = this.__render.target;\n        const ").concat(EventManager.EVENT_VARNAME, " = this.__render.event;\n    ");
         this.eventNames.forEach(function (it) {
             _this.attrNames.push(EventManager.attrPrefix + 'event-' + it);
         });
@@ -772,12 +772,15 @@ var EventManager = /** @class */ (function () {
             it.addEventListener(eventName, function (event) {
                 var filter = true;
                 var filterScript = it.getAttribute("".concat(attr, ":filter"));
+                var attribute = DomUtils.getAttributeToObject(it);
                 var thisTarget = Object.assign(obj, {
                     __render: Object.freeze({
                         event: event,
                         element: it,
                         target: event.target,
                         range: Range.range,
+                        attribute: attribute,
+                        router: config === null || config === void 0 ? void 0 : config.router,
                         scripts: EventManager.setBindProperty(config === null || config === void 0 ? void 0 : config.scripts, obj)
                     })
                 });
@@ -895,6 +898,7 @@ var EventManager = /** @class */ (function () {
     EventManager.ownerVariablePathAttrName = 'dr-owner-variable-path';
     EventManager.attrPrefix = 'dr-';
     EventManager.onInitAttrName = EventManager.attrPrefix + 'on-init';
+    // public static readonly onComponentInitAttrName = EventManager.attrPrefix + 'on-component-init';
     EventManager.valueAttrName = EventManager.attrPrefix + 'value';
     EventManager.valueLinkAttrName = EventManager.attrPrefix + 'value-link';
     EventManager.attrAttrName = EventManager.attrPrefix + 'attr';
@@ -905,10 +909,14 @@ var EventManager = /** @class */ (function () {
     EventManager.FAG_VARNAME = '$fag';
     EventManager.RAWSET_VARNAME = '$rawset';
     EventManager.RANGE_VARNAME = '$range';
+    EventManager.ROUTER_VARNAME = '$router';
     EventManager.ELEMENT_VARNAME = '$element';
     EventManager.TARGET_VARNAME = '$target';
     EventManager.EVENT_VARNAME = '$event';
-    EventManager.VARNAMES = [EventManager.SCRIPTS_VARNAME, EventManager.FAG_VARNAME, EventManager.RAWSET_VARNAME, EventManager.RANGE_VARNAME, EventManager.ELEMENT_VARNAME, EventManager.TARGET_VARNAME, EventManager.EVENT_VARNAME];
+    EventManager.COMPONENT_VARNAME = '$component';
+    EventManager.INNERHTML_VARNAME = '$innerHTML';
+    EventManager.ATTRIBUTE_VARNAME = '$attribute';
+    EventManager.VARNAMES = [EventManager.SCRIPTS_VARNAME, EventManager.FAG_VARNAME, EventManager.RAWSET_VARNAME, EventManager.RANGE_VARNAME, EventManager.ROUTER_VARNAME, EventManager.ELEMENT_VARNAME, EventManager.TARGET_VARNAME, EventManager.EVENT_VARNAME, EventManager.COMPONENT_VARNAME, EventManager.INNERHTML_VARNAME, EventManager.ATTRIBUTE_VARNAME];
     EventManager.WINDOW_EVENT_POPSTATE = 'popstate';
     EventManager.WINDOW_EVENT_RESIZE = 'resize';
     EventManager.WINDOW_EVENTS = [EventManager.WINDOW_EVENT_POPSTATE, EventManager.WINDOW_EVENT_RESIZE];
@@ -1245,11 +1253,12 @@ var ValidatorArray = /** @class */ (function (_super) {
 }(Validator));
 
 var RawSet = /** @class */ (function () {
-    function RawSet(uuid, point, fragment, data) {
+    function RawSet(uuid, point, fragment, detect, data) {
         if (data === void 0) { data = {}; }
         this.uuid = uuid;
         this.point = point;
         this.fragment = fragment;
+        this.detect = detect;
         this.data = data;
     }
     Object.defineProperty(RawSet.prototype, "isConnected", {
@@ -1279,6 +1288,7 @@ var RawSet = /** @class */ (function () {
                     // script = script.replace(RegExp(it.replace('$', '\\$'), 'g'), `this?.___${it}`);
                     // script = script.replace(RegExp(it.replace('$', '\\$'), 'g'), `this.___${it}`);
                     script = script.replace(RegExp(it.replace('$', '\\$'), 'g'), "this.___".concat(it));
+                    // console.log('scripts-->', script)
                 });
                 // console.log('----------', script);
                 Array.from(ScriptUtils.getVariablePaths(script)).filter(function (it) { return !it.startsWith("___".concat(EventManager.SCRIPTS_VARNAME)); }).forEach(function (it) { return usingTriggerVariables.add(it); });
@@ -1289,20 +1299,25 @@ var RawSet = /** @class */ (function () {
     };
     RawSet.prototype.render = function (obj, config) {
         var _this = this;
-        var _a, _b, _c, _d, _e, _f, _g, _h;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22;
         var genNode = config.window.document.importNode(this.fragment, true);
         var raws = [];
         var onAttrInitCallBack = [];
         var onElementInitCallBack = [];
         var drAttrs = [];
-        genNode.childNodes.forEach(function (cNode, key) {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10;
+        var _loop_1 = function (cNode) {
+            var attribute = {};
+            if (cNode.nodeType === Node.ELEMENT_NODE) {
+                attribute = DomUtils.getAttributeToObject(cNode);
+            }
             var __render = Object.freeze({
-                rawset: _this,
+                rawset: this_1,
                 scripts: EventManager.setBindProperty(config === null || config === void 0 ? void 0 : config.scripts, obj),
+                router: config === null || config === void 0 ? void 0 : config.router,
                 range: Range.range,
                 element: cNode,
-                bindScript: "\n                    const ".concat(EventManager.SCRIPTS_VARNAME, " = this.__render.scripts;\n                    const ").concat(EventManager.RAWSET_VARNAME, " = this.__render.rawset;\n                    const ").concat(EventManager.ELEMENT_VARNAME, " = this.__render.element;\n                    const ").concat(EventManager.RANGE_VARNAME, " = this.__render.range;\n            ")
+                attribute: attribute,
+                bindScript: "\n                    const ".concat(EventManager.SCRIPTS_VARNAME, " = this.__render.scripts;\n                    const ").concat(EventManager.RAWSET_VARNAME, " = this.__render.rawset;\n                    const ").concat(EventManager.ELEMENT_VARNAME, " = this.__render.element;\n                    const ").concat(EventManager.ATTRIBUTE_VARNAME, " = this.__render.attribute;\n                    const ").concat(EventManager.RANGE_VARNAME, " = this.__render.range;\n                    const ").concat(EventManager.ROUTER_VARNAME, " = this.__render.router;\n            ")
                 // eslint-disable-next-line no-use-before-define
             });
             var fag = config.window.document.createDocumentFragment();
@@ -1326,26 +1341,28 @@ var RawSet = /** @class */ (function () {
             else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 var element_2 = cNode;
                 var drAttr_1 = {
-                    dr: _this.getAttributeAndDelete(element_2, RawSet.DR),
-                    drIf: _this.getAttributeAndDelete(element_2, RawSet.DR_IF_NAME),
-                    drFor: _this.getAttributeAndDelete(element_2, RawSet.DR_FOR_NAME),
-                    drForOf: _this.getAttributeAndDelete(element_2, RawSet.DR_FOR_OF_NAME),
-                    drRepeat: _this.getAttributeAndDelete(element_2, RawSet.DR_REPEAT_NAME),
-                    drThis: _this.getAttributeAndDelete(element_2, RawSet.DR_THIS_NAME),
-                    drForm: _this.getAttributeAndDelete(element_2, RawSet.DR_FORM_NAME),
-                    drPre: _this.getAttributeAndDelete(element_2, RawSet.DR_PRE_NAME),
-                    drInnerHTML: _this.getAttributeAndDelete(element_2, RawSet.DR_INNERHTML_NAME),
-                    drInnerText: _this.getAttributeAndDelete(element_2, RawSet.DR_INNERTEXT_NAME),
-                    drItOption: _this.getAttributeAndDelete(element_2, RawSet.DR_IT_OPTIONNAME),
-                    drVarOption: _this.getAttributeAndDelete(element_2, RawSet.DR_VAR_OPTIONNAME),
-                    drAfterOption: _this.getAttributeAndDelete(element_2, RawSet.DR_AFTER_OPTIONNAME),
-                    drBeforeOption: _this.getAttributeAndDelete(element_2, RawSet.DR_BEFORE_OPTIONNAME),
-                    drCompleteOption: _this.getAttributeAndDelete(element_2, RawSet.DR_COMPLETE_OPTIONNAME),
-                    drStripOption: _this.getAttributeAndDelete(element_2, RawSet.DR_STRIP_OPTIONNAME)
+                    dr: this_1.getAttributeAndDelete(element_2, RawSet.DR),
+                    drIf: this_1.getAttributeAndDelete(element_2, RawSet.DR_IF_NAME),
+                    drFor: this_1.getAttributeAndDelete(element_2, RawSet.DR_FOR_NAME),
+                    drForOf: this_1.getAttributeAndDelete(element_2, RawSet.DR_FOR_OF_NAME),
+                    drAppender: this_1.getAttributeAndDelete(element_2, RawSet.DR_APPENDER_NAME),
+                    drRepeat: this_1.getAttributeAndDelete(element_2, RawSet.DR_REPEAT_NAME),
+                    drThis: this_1.getAttributeAndDelete(element_2, RawSet.DR_THIS_NAME),
+                    drForm: this_1.getAttributeAndDelete(element_2, RawSet.DR_FORM_NAME),
+                    drPre: this_1.getAttributeAndDelete(element_2, RawSet.DR_PRE_NAME),
+                    drInnerHTML: this_1.getAttributeAndDelete(element_2, RawSet.DR_INNERHTML_NAME),
+                    drInnerText: this_1.getAttributeAndDelete(element_2, RawSet.DR_INNERTEXT_NAME),
+                    drItOption: this_1.getAttributeAndDelete(element_2, RawSet.DR_IT_OPTIONNAME),
+                    drVarOption: this_1.getAttributeAndDelete(element_2, RawSet.DR_VAR_OPTIONNAME),
+                    drNextOption: this_1.getAttributeAndDelete(element_2, RawSet.DR_NEXT_OPTIONNAME),
+                    drAfterOption: this_1.getAttributeAndDelete(element_2, RawSet.DR_AFTER_OPTIONNAME),
+                    drBeforeOption: this_1.getAttributeAndDelete(element_2, RawSet.DR_BEFORE_OPTIONNAME),
+                    drCompleteOption: this_1.getAttributeAndDelete(element_2, RawSet.DR_COMPLETE_OPTIONNAME),
+                    drStripOption: this_1.getAttributeAndDelete(element_2, RawSet.DR_STRIP_OPTIONNAME)
                 };
                 drAttrs.push(drAttr_1);
                 if (drAttr_1.drPre != null) {
-                    return;
+                    return "break";
                 }
                 if (drAttr_1.dr !== null && drAttr_1.dr.length >= 0) {
                     var itRandom = RawSet.drItOtherEncoding(element_2);
@@ -1363,28 +1380,33 @@ var RawSet = /** @class */ (function () {
                     (_c = element_2.parentNode) === null || _c === void 0 ? void 0 : _c.replaceChild(fag, element_2);
                     raws.push.apply(raws, rr);
                 }
-                if (drAttr_1.drIf) {
+                else if (drAttr_1.drIf) {
                     var itRandom = RawSet.drItOtherEncoding(element_2);
                     var vars = RawSet.drVarEncoding(element_2, (_d = drAttr_1.drVarOption) !== null && _d !== void 0 ? _d : '');
                     var newTemp = config.window.document.createElement('temp');
                     // Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drIf' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v)); <-- 이부분은 다른 attr에도 적용을 할지말지 생각해야됨  엘리먼트 존재유무에 따라서 적용을 할지말지 결정해야됨
-                    ScriptUtils.eval("\n                    ".concat(__render.bindScript, "\n                    ").concat((_e = drAttr_1.drBeforeOption) !== null && _e !== void 0 ? _e : '', "\n                    if(").concat(drAttr_1.drIf, ") {\n                        const n = $element.cloneNode(true);\n                        Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drIf' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));\n                        var destIt = ").concat(drAttr_1.drItOption, ";\n                        if (destIt !== undefined) {\n                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))\n                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);\n                        }\n                        if (this.__render.drStripOption === 'true') {\n                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));\n                        } else {\n                            this.__render.fag.append(n);\n                        }\n                    }\n                    ").concat((_f = drAttr_1.drAfterOption) !== null && _f !== void 0 ? _f : '', "\n                    "), Object.assign(obj, {
+                    var keepgoing = ScriptUtils.eval("\n                    ".concat(__render.bindScript, "\n                    ").concat((_e = drAttr_1.drBeforeOption) !== null && _e !== void 0 ? _e : '', "\n                    if ($rawset.data === (").concat(drAttr_1.drIf, ")) {\n                        return false;\n                    } \n                    $rawset.data = ").concat(drAttr_1.drIf, " \n                    if($rawset.data) {\n                        const n = $element.cloneNode(true);\n                        Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drIf' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));\n                        var destIt = ").concat(drAttr_1.drItOption, ";\n                        if (destIt !== undefined) {\n                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))\n                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);\n                        }\n                        if (this.__render.drStripOption === 'true') {\n                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));\n                        } else {\n                            this.__render.fag.append(n);\n                        }\n                    }\n                    ").concat((_f = drAttr_1.drAfterOption) !== null && _f !== void 0 ? _f : '', ";\n                    return true;\n                    "), Object.assign(obj, {
                         __render: Object.freeze(__assign({ fag: newTemp, drAttr: drAttr_1, drAttrsOriginName: RawSet.drAttrsOriginName, drStripOption: drAttr_1.drStripOption }, __render))
                     }));
+                    // console.log('keepgoing', keepgoing);
+                    if (keepgoing === false) {
+                        return { value: raws };
+                    }
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
                     var bypass = ((_g = newTemp.innerHTML) !== null && _g !== void 0 ? _g : '').trim().length <= 0;
                     var tempalte = config.window.document.createElement('template');
                     tempalte.innerHTML = newTemp.innerHTML;
+                    // console.log(tempalte.innerHTML)
                     fag.append(tempalte.content);
                     var rr = RawSet.checkPointCreates(fag, config);
                     (_h = element_2.parentNode) === null || _h === void 0 ? void 0 : _h.replaceChild(fag, element_2);
                     raws.push.apply(raws, rr);
                     if (bypass) {
-                        return;
+                        return "continue";
                     }
                 }
-                if (drAttr_1.drThis) {
+                else if (drAttr_1.drThis) {
                     var r = ScriptUtils.evalReturn(drAttr_1.drThis, obj);
                     if (r) {
                         fag.append(RawSet.drThisCreate(element_2, drAttr_1.drThis, (_j = drAttr_1.drVarOption) !== null && _j !== void 0 ? _j : '', drAttr_1.drStripOption, obj, config));
@@ -1396,7 +1418,7 @@ var RawSet = /** @class */ (function () {
                         cNode.remove();
                     }
                 }
-                if (drAttr_1.drForm) {
+                else if (drAttr_1.drForm) {
                     RawSet.drFormOtherMoveAttr(element_2, 'name', 'temp-name', config);
                     var data = ScriptUtils.evalReturn("".concat(drAttr_1.drForm), obj);
                     var childs = Array.from(element_2.querySelectorAll('[name]'));
@@ -1446,7 +1468,7 @@ var RawSet = /** @class */ (function () {
                     RawSet.drFormOtherMoveAttr(element_2, 'temp-name', 'name', config);
                     raws.push.apply(raws, RawSet.checkPointCreates(element_2, config));
                 }
-                if (drAttr_1.drInnerText) {
+                else if (drAttr_1.drInnerText) {
                     var newTemp = config.window.document.createElement('temp');
                     ScriptUtils.eval(" \n                        ".concat(__render.bindScript, "\n                        const n = $element.cloneNode(true);  \n                        ").concat((_m = drAttr_1.drBeforeOption) !== null && _m !== void 0 ? _m : '', "\n                        n.innerText = ").concat(drAttr_1.drInnerText, ";\n                        if (this.__render.drStripOption === 'true') {\n                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));\n                        } else {\n                            this.__render.fag.append(n);\n                        }\n                        ").concat((_o = drAttr_1.drAfterOption) !== null && _o !== void 0 ? _o : '', "\n                    "), Object.assign(obj, {
                         __render: Object.freeze(__assign({ drStripOption: drAttr_1.drStripOption, fag: newTemp }, __render))
@@ -1458,7 +1480,7 @@ var RawSet = /** @class */ (function () {
                     (_p = element_2.parentNode) === null || _p === void 0 ? void 0 : _p.replaceChild(fag, element_2);
                     raws.push.apply(raws, rr);
                 }
-                if (drAttr_1.drInnerHTML) {
+                else if (drAttr_1.drInnerHTML) {
                     var newTemp = config.window.document.createElement('temp');
                     ScriptUtils.eval("\n                        ".concat(__render.bindScript, "\n                        const n = $element.cloneNode(true);\n                        ").concat((_q = drAttr_1.drBeforeOption) !== null && _q !== void 0 ? _q : '', "\n                        n.innerHTML = ").concat(drAttr_1.drInnerHTML, ";\n                        if (this.__render.drStripOption === 'true') {\n                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));\n                        } else {\n                            this.__render.fag.append(n);\n                        }\n                        ").concat((_r = drAttr_1.drAfterOption) !== null && _r !== void 0 ? _r : '', "\n                    "), Object.assign(obj, {
                         __render: Object.freeze(__assign({ drStripOption: drAttr_1.drStripOption, fag: newTemp }, __render
@@ -1472,7 +1494,7 @@ var RawSet = /** @class */ (function () {
                     (_s = element_2.parentNode) === null || _s === void 0 ? void 0 : _s.replaceChild(fag, element_2);
                     raws.push.apply(raws, rr);
                 }
-                if (drAttr_1.drFor) {
+                else if (drAttr_1.drFor) {
                     var itRandom = RawSet.drItOtherEncoding(element_2);
                     var vars = RawSet.drVarEncoding(element_2, (_t = drAttr_1.drVarOption) !== null && _t !== void 0 ? _t : '');
                     var newTemp = config.window.document.createElement('temp');
@@ -1488,11 +1510,11 @@ var RawSet = /** @class */ (function () {
                     (_w = element_2.parentNode) === null || _w === void 0 ? void 0 : _w.replaceChild(fag, element_2);
                     raws.push.apply(raws, rr);
                 }
-                if (drAttr_1.drForOf) {
+                else if (drAttr_1.drForOf) {
                     var itRandom = RawSet.drItOtherEncoding(element_2);
                     var vars = RawSet.drVarEncoding(element_2, (_x = drAttr_1.drVarOption) !== null && _x !== void 0 ? _x : '');
                     var newTemp = config.window.document.createElement('temp');
-                    ScriptUtils.eval("\n                    ".concat(__render.bindScript, "\n                    ").concat((_y = drAttr_1.drBeforeOption) !== null && _y !== void 0 ? _y : '', "\n                    var i = 0; \n                    const forOf = ").concat(drAttr_1.drForOf, ";\n                    const forOfStr = `").concat(drAttr_1.drForOf, "`.trim();\n                    if (forOf) {\n                        for(const it of forOf) {\n                            var destIt = it;\n                            if (/\\[(.*,?)\\],/g.test(forOfStr)) {\n                                if (typeof it === 'string') {\n                                    destIt = it;\n                                } else {\n                                    destIt = forOfStr.substring(1, forOfStr.length-1).split(',')[i];\n                                }\n                            } else if (forOf.isRange) {\n                                    destIt = it;\n                            }  else {\n                                destIt = forOfStr + '[' + i +']'\n                            }\n                            const n = this.__render.element.cloneNode(true);\n                            Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drForOf' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));\n                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIt\\#/g, destIt).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIndex\\#/g, i)))\n                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt).replace(/\\#index\\#/g, i);\n                            if (this.__render.drStripOption === 'true') {\n                                Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));\n                            } else {\n                                this.__render.fag.append(n);\n                            }\n                            i++;\n                        }\n                    }\n                    ").concat((_z = drAttr_1.drAfterOption) !== null && _z !== void 0 ? _z : '', "\n                    "), Object.assign(obj, {
+                    ScriptUtils.eval("\n                    ".concat(__render.bindScript, "\n                    ").concat((_y = drAttr_1.drBeforeOption) !== null && _y !== void 0 ? _y : '', "\n                    var i = 0; \n                    const forOf = ").concat(drAttr_1.drForOf, ";\n                    const forOfStr = `").concat(drAttr_1.drForOf, "`.trim();\n                    if (forOf) {\n                        for(const it of forOf) {\n                            var destIt = it;\n                            if (/\\[(.*,?)\\],/g.test(forOfStr)) {\n                                if (typeof it === 'string') {\n                                    destIt = it;\n                                } else {\n                                    destIt = forOfStr.substring(1, forOfStr.length-1).split(',')[i];\n                                }\n                            } else if (forOf.isRange) {\n                                    destIt = it;\n                            }  else {\n                                destIt = forOfStr + '[' + i +']'\n                            }\n                            const n = this.__render.element.cloneNode(true);\n                            Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drForOf' && k !== 'drNextOption' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));\n                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIt\\#/g, destIt).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIndex\\#/g, i)))\n                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt).replace(/\\#index\\#/g, i);\n                            if (this.__render.drStripOption === 'true') {\n                                Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));\n                            } else {\n                                this.__render.fag.append(n);\n                            }\n                            i++;\n                        }\n                        \n                        if('").concat(drAttr_1.drNextOption, "' !== 'null') {\n                            const n = this.__render.element.cloneNode(true);\n                            Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drForOf' && k !== 'drNextOption' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));\n                            const [name, idx] = '").concat(drAttr_1.drNextOption, "'.split(',');\n                            n.setAttribute('dr-for-of', name + '[' + idx + ']');\n                            n.setAttribute('dr-next', name + ',' +  (Number(idx) + 1));\n                            this.__render.fag.append(n);\n                        }\n                    }\n                    ").concat((_z = drAttr_1.drAfterOption) !== null && _z !== void 0 ? _z : '', "\n                    "), Object.assign(obj, {
                         __render: Object.freeze(__assign({ drStripOption: drAttr_1.drStripOption, drAttr: drAttr_1, drAttrsOriginName: RawSet.drAttrsOriginName, fag: newTemp }, __render
                             // eslint-disable-next-line no-use-before-define
                         ))
@@ -1504,15 +1526,17 @@ var RawSet = /** @class */ (function () {
                     fag.append(tempalte.content);
                     var rr = RawSet.checkPointCreates(fag, config);
                     (_0 = element_2.parentNode) === null || _0 === void 0 ? void 0 : _0.replaceChild(fag, element_2);
-                    //const rrr = rr.flatMap(it => it.render(obj, config));// .flat();
+                    // const rrr = rr.flatMap(it => it.render(obj, config));// .flat();
                     raws.push.apply(raws, rr);
                 }
-                if (drAttr_1.drRepeat) {
+                else if (drAttr_1.drAppender) {
                     var itRandom = RawSet.drItOtherEncoding(element_2);
                     var vars = RawSet.drVarEncoding(element_2, (_1 = drAttr_1.drVarOption) !== null && _1 !== void 0 ? _1 : '');
                     var newTemp = config.window.document.createElement('temp');
-                    ScriptUtils.eval("\n                    ".concat(__render.bindScript, "\n                    ").concat((_2 = drAttr_1.drBeforeOption) !== null && _2 !== void 0 ? _2 : '', "\n                    var i = 0; \n                    const repeat = ").concat(drAttr_1.drRepeat, ";\n                    const repeatStr = `").concat(drAttr_1.drRepeat, "`;\n                    let range = repeat;\n                    if (typeof repeat === 'number') {\n                        range = ").concat(EventManager.RANGE_VARNAME, "(repeat);\n                    } \n                    for(const it of range) {\n                        var destIt = it;\n                        if (range.isRange) {\n                            destIt = it;\n                        }  else {\n                            destIt = repeatStr + '[' + i +']'\n                        }\n                        const n = this.__render.element.cloneNode(true);\n                        n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearRangeIt\\#/g, destIt).replace(/\\#nearRangeIndex\\#/g, destIt)))\n                        n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt).replace(/\\#index\\#/g, destIt);\n                        \n                        if (this.__render.drStripOption === 'true') {\n                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));\n                        } else {\n                            this.__render.fag.append(n);\n                        }\n                        i++;\n                    }\n                    ").concat((_3 = drAttr_1.drAfterOption) !== null && _3 !== void 0 ? _3 : '', "\n                    "), Object.assign(obj, {
-                        __render: Object.freeze(__assign({ fag: newTemp, drStripOption: drAttr_1.drStripOption }, __render))
+                    ScriptUtils.eval("\n                    try{\n                    ".concat(__render.bindScript, "\n                    ").concat((_2 = drAttr_1.drBeforeOption) !== null && _2 !== void 0 ? _2 : '', "\n                        const ifWrap = document.createElement('div');\n                        ifWrap.setAttribute('dr-strip', 'true');\n                        ifWrap.setAttribute('dr-if', '").concat(drAttr_1.drAppender, " && ").concat(drAttr_1.drAppender, ".length > 0');\n                        \n                        // console.log('----', ").concat(drAttr_1.drAppender, ".length);\n                        \n                        const n = this.__render.element.cloneNode(true);\n                        Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drAppender' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));\n                        n.setAttribute('dr-for-of', '").concat(drAttr_1.drAppender, "[' + (").concat(drAttr_1.drAppender, ".length-1) + ']');\n                        n.setAttribute('dr-next', '").concat(drAttr_1.drAppender, ",' + ").concat(drAttr_1.drAppender, ".length);\n                        ifWrap.append(n);\n                        \n                        // n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIt\\#/g, destIt).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIndex\\#/g, i)))\n                        // n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt).replace(/\\#index\\#/g, i);\n                        // if (this.__render.drStripOption === 'true') {\n                        // Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));\n                        // } else {\n                        // this.__render.fag.append(n);\n                        // }\n                        this.__render.fag.append(ifWrap);\n                    ").concat((_3 = drAttr_1.drAfterOption) !== null && _3 !== void 0 ? _3 : '', "\n                    }catch(e){}\n                    "), Object.assign(obj, {
+                        __render: Object.freeze(__assign({ drStripOption: drAttr_1.drStripOption, drAttr: drAttr_1, drAttrsOriginName: RawSet.drAttrsOriginName, fag: newTemp }, __render
+                            // eslint-disable-next-line no-use-before-define
+                        ))
                     }));
                     RawSet.drVarDecoding(newTemp, vars);
                     RawSet.drItOtherDecoding(newTemp, itRandom);
@@ -1521,90 +1545,91 @@ var RawSet = /** @class */ (function () {
                     fag.append(tempalte.content);
                     var rr = RawSet.checkPointCreates(fag, config);
                     (_4 = element_2.parentNode) === null || _4 === void 0 ? void 0 : _4.replaceChild(fag, element_2);
+                    // const rrr = rr.flatMap(it => it.render(obj, config));// .flat();
                     raws.push.apply(raws, rr);
                 }
-                // config detecting
-                // console.log('config targetElement-->', config?.targetElements)
-                var targetElement = (_5 = config === null || config === void 0 ? void 0 : config.targetElements) === null || _5 === void 0 ? void 0 : _5.find(function (it) { return (!drAttr_1.drForOf && !drAttr_1.drFor && !drAttr_1.drRepeat) && it.name.toLowerCase() === element_2.tagName.toLowerCase(); });
-                if (targetElement) {
-                    var documentFragment = targetElement.callBack(element_2, obj, _this);
-                    // console.log('target-->',name, documentFragment)
-                    if (documentFragment) {
-                        // fag.append(documentFragment)
-                        var rr = RawSet.checkPointCreates(documentFragment, config);
-                        (_6 = element_2.parentNode) === null || _6 === void 0 ? void 0 : _6.replaceChild(documentFragment, element_2);
-                        raws.push.apply(raws, rr);
-                        onElementInitCallBack.push({
-                            name: targetElement.name.toLowerCase(),
-                            obj: obj,
-                            targetElement: targetElement,
-                            creatorMetaData: targetElement.__creatorMetaData
-                        });
-                        (_7 = targetElement === null || targetElement === void 0 ? void 0 : targetElement.complete) === null || _7 === void 0 ? void 0 : _7.call(targetElement, element_2, obj, _this);
-                    }
+                else if (drAttr_1.drRepeat) {
+                    var itRandom = RawSet.drItOtherEncoding(element_2);
+                    var vars = RawSet.drVarEncoding(element_2, (_5 = drAttr_1.drVarOption) !== null && _5 !== void 0 ? _5 : '');
+                    var newTemp = config.window.document.createElement('temp');
+                    ScriptUtils.eval("\n                    ".concat(__render.bindScript, "\n                    ").concat((_6 = drAttr_1.drBeforeOption) !== null && _6 !== void 0 ? _6 : '', "\n                    var i = 0; \n                    const repeat = ").concat(drAttr_1.drRepeat, ";\n                    const repeatStr = `").concat(drAttr_1.drRepeat, "`;\n                    let range = repeat;\n                    if (typeof repeat === 'number') {\n                        range = ").concat(EventManager.RANGE_VARNAME, "(repeat);\n                    } \n                    for(const it of range) {\n                        var destIt = it;\n                        if (range.isRange) {\n                            destIt = it;\n                        }  else {\n                            destIt = repeatStr + '[' + i +']'\n                        }\n                        const n = this.__render.element.cloneNode(true);\n                        n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearRangeIt\\#/g, destIt).replace(/\\#nearRangeIndex\\#/g, destIt)))\n                        n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt).replace(/\\#index\\#/g, destIt);\n                        \n                        if (this.__render.drStripOption === 'true') {\n                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));\n                        } else {\n                            this.__render.fag.append(n);\n                        }\n                        i++;\n                    }\n                    ").concat((_7 = drAttr_1.drAfterOption) !== null && _7 !== void 0 ? _7 : '', "\n                    "), Object.assign(obj, {
+                        __render: Object.freeze(__assign({ fag: newTemp, drStripOption: drAttr_1.drStripOption }, __render))
+                    }));
+                    RawSet.drVarDecoding(newTemp, vars);
+                    RawSet.drItOtherDecoding(newTemp, itRandom);
+                    var tempalte = config.window.document.createElement('template');
+                    tempalte.innerHTML = newTemp.innerHTML;
+                    fag.append(tempalte.content);
+                    var rr = RawSet.checkPointCreates(fag, config);
+                    (_8 = element_2.parentNode) === null || _8 === void 0 ? void 0 : _8.replaceChild(fag, element_2);
+                    raws.push.apply(raws, rr);
                 }
-                // config?.targetElements?.forEach(it => {
-                //     const name = it.name;
-                //     if (name.toLowerCase() === element.tagName.toLowerCase() && (!drAttr.drForOf && !drAttr.drFor && !drAttr.drRepeat)) {
-                //         const documentFragment = it.callBack(element, obj, this);
-                //         // console.log('target-->',name, documentFragment)
-                //         if (documentFragment) {
-                //             // fag.append(documentFragment)
-                //             const rr = RawSet.checkPointCreates(documentFragment, config)
-                //             element.parentNode?.replaceChild(documentFragment, element);
-                //             raws.push(...rr);
-                //             onElementInitCallBack.push({
-                //                 name,
-                //                 obj,
-                //                 targetElement: it,
-                //                 creatorMetaData: it.__creatorMetaData as CreatorMetaData
-                //             });
-                //             it?.complete?.(element, obj, this);
-                //         }
-                //     }
-                // })
-                var attributeNames_1 = _this.getAttributeNames(element_2);
-                var targetAttr = (_8 = config === null || config === void 0 ? void 0 : config.targetAttrs) === null || _8 === void 0 ? void 0 : _8.find(function (it) { return (!drAttr_1.drForOf && !drAttr_1.drFor && !drAttr_1.drRepeat) && attributeNames_1.includes(it.name); });
-                if (targetAttr) {
-                    var attrName = targetAttr.name;
-                    var attrValue = _this.getAttributeAndDelete(element_2, attrName);
-                    if (attrValue && attrName && (!drAttr_1.drForOf && !drAttr_1.drFor && !drAttr_1.drRepeat)) {
-                        var documentFragment = targetAttr.callBack(element_2, attrValue, obj, _this);
-                        if (documentFragment) {
-                            var rr = RawSet.checkPointCreates(documentFragment, config);
-                            (_9 = element_2.parentNode) === null || _9 === void 0 ? void 0 : _9.replaceChild(documentFragment, element_2);
+                else {
+                    // config detecting
+                    // console.log('config targetElement-->', config?.targetElements)
+                    // const targetElement = config?.targetElements?.find(it => (!drAttr.drIf && !drAttr.drForOf && !drAttr.drFor && !drAttr.drRepeat) && it.name.toLowerCase() === element.tagName.toLowerCase());
+                    var targetElement = (_9 = config === null || config === void 0 ? void 0 : config.targetElements) === null || _9 === void 0 ? void 0 : _9.find(function (it) { return it.name.toLowerCase() === element_2.tagName.toLowerCase(); });
+                    if (targetElement) {
+                        var documentFragment_1 = targetElement.callBack(element_2, obj, this_1);
+                        // console.log('target-->',name, documentFragment)
+                        if (documentFragment_1) {
+                            var detectAction_1 = element_2.getAttribute(RawSet.DR_DETECT_NAME);
+                            if (detectAction_1 && documentFragment_1.render) {
+                                this_1.detect = {
+                                    action: function () {
+                                        var script = "var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ".concat(detectAction_1, " ");
+                                        ScriptUtils.eval(script, Object.assign(obj, {
+                                            __render: documentFragment_1.render
+                                        }));
+                                    }
+                                };
+                            }
+                            // fag.append(documentFragment)
+                            var rr = RawSet.checkPointCreates(documentFragment_1, config);
+                            (_10 = element_2.parentNode) === null || _10 === void 0 ? void 0 : _10.replaceChild(documentFragment_1, element_2);
                             raws.push.apply(raws, rr);
-                            onAttrInitCallBack.push({
-                                attrName: attrName,
-                                attrValue: attrValue,
-                                obj: obj
+                            onElementInitCallBack.push({
+                                name: targetElement.name.toLowerCase(),
+                                obj: obj,
+                                targetElement: targetElement,
+                                creatorMetaData: targetElement.__creatorMetaData
                             });
-                            (_10 = targetAttr === null || targetAttr === void 0 ? void 0 : targetAttr.complete) === null || _10 === void 0 ? void 0 : _10.call(targetAttr, element_2, attrValue, obj, _this);
+                            (_11 = targetElement === null || targetElement === void 0 ? void 0 : targetElement.complete) === null || _11 === void 0 ? void 0 : _11.call(targetElement, element_2, obj, this_1);
+                        }
+                    }
+                    var attributeNames_1 = this_1.getAttributeNames(element_2);
+                    // const targetAttr = config?.targetAttrs?.find(it => (!drAttr.drForOf && !drAttr.drFor && !drAttr.drRepeat) && attributeNames.includes(it.name));
+                    var targetAttr = (_12 = config === null || config === void 0 ? void 0 : config.targetAttrs) === null || _12 === void 0 ? void 0 : _12.find(function (it) { return attributeNames_1.includes(it.name); });
+                    if (targetAttr) {
+                        var attrName = targetAttr.name;
+                        var attrValue = this_1.getAttributeAndDelete(element_2, attrName);
+                        if (attrValue && attrName && (!drAttr_1.drForOf && !drAttr_1.drFor && !drAttr_1.drRepeat)) {
+                            var documentFragment = targetAttr.callBack(element_2, attrValue, obj, this_1);
+                            if (documentFragment) {
+                                var rr = RawSet.checkPointCreates(documentFragment, config);
+                                (_13 = element_2.parentNode) === null || _13 === void 0 ? void 0 : _13.replaceChild(documentFragment, element_2);
+                                raws.push.apply(raws, rr);
+                                onAttrInitCallBack.push({
+                                    attrName: attrName,
+                                    attrValue: attrValue,
+                                    obj: obj
+                                });
+                                (_14 = targetAttr === null || targetAttr === void 0 ? void 0 : targetAttr.complete) === null || _14 === void 0 ? void 0 : _14.call(targetAttr, element_2, attrValue, obj, this_1);
+                            }
                         }
                     }
                 }
-                // config?.targetAttrs?.forEach(it => {
-                //     const attrName = it.name;
-                //     const attrValue = this.getAttributeAndDelete(element, attrName)
-                //     // console.log('?????attrValue', attrName, attrValue)
-                //     if (attrValue && attrName && (!drAttr.drForOf && !drAttr.drFor && !drAttr.drRepeat)) {
-                //         const documentFragment = it.callBack(element, attrValue, obj, this);
-                //         if (documentFragment) {
-                //             // fag.append(documentFragment);
-                //             const rr = RawSet.checkPointCreates(documentFragment, config)
-                //             element.parentNode?.replaceChild(documentFragment, element);
-                //             raws.push(...rr);
-                //             onAttrInitCallBack.push({
-                //                 attrName,
-                //                 attrValue,
-                //                 obj
-                //             });
-                //             it?.complete?.(element, attrValue, obj, this);
-                //         }
-                //     }
-                // })
             }
-        });
+        };
+        var this_1 = this;
+        for (var _i = 0, _23 = Array.from(genNode.childNodes.values()); _i < _23.length; _i++) {
+            var cNode = _23[_i];
+            var state_1 = _loop_1(cNode);
+            if (typeof state_1 === "object")
+                return state_1.value;
+            if (state_1 === "break")
+                break;
+        }
         this.applyEvent(obj, genNode, config);
         this.replaceBody(genNode);
         drAttrs.forEach(function (it) {
@@ -1619,14 +1644,14 @@ var RawSet = /** @class */ (function () {
                 }));
             }
         });
-        for (var _i = 0, onElementInitCallBack_1 = onElementInitCallBack; _i < onElementInitCallBack_1.length; _i++) {
-            var it_1 = onElementInitCallBack_1[_i];
-            (_d = (_c = (_b = (_a = it_1.targetElement) === null || _a === void 0 ? void 0 : _a.__render) === null || _b === void 0 ? void 0 : _b.component) === null || _c === void 0 ? void 0 : _c.onInitRender) === null || _d === void 0 ? void 0 : _d.call(_c, { render: (_e = it_1.targetElement) === null || _e === void 0 ? void 0 : _e.__render, creatorMetaData: (_f = it_1.targetElement) === null || _f === void 0 ? void 0 : _f.__creatorMetaData });
-            (_g = config === null || config === void 0 ? void 0 : config.onElementInit) === null || _g === void 0 ? void 0 : _g.call(config, it_1.name, obj, this, it_1.targetElement);
+        for (var _24 = 0, onElementInitCallBack_1 = onElementInitCallBack; _24 < onElementInitCallBack_1.length; _24++) {
+            var it_1 = onElementInitCallBack_1[_24];
+            (_18 = (_17 = (_16 = (_15 = it_1.targetElement) === null || _15 === void 0 ? void 0 : _15.__render) === null || _16 === void 0 ? void 0 : _16.component) === null || _17 === void 0 ? void 0 : _17.onInitRender) === null || _18 === void 0 ? void 0 : _18.call(_17, { render: (_19 = it_1.targetElement) === null || _19 === void 0 ? void 0 : _19.__render, creatorMetaData: (_20 = it_1.targetElement) === null || _20 === void 0 ? void 0 : _20.__creatorMetaData });
+            (_21 = config === null || config === void 0 ? void 0 : config.onElementInit) === null || _21 === void 0 ? void 0 : _21.call(config, it_1.name, obj, this, it_1.targetElement);
         }
-        for (var _j = 0, onAttrInitCallBack_1 = onAttrInitCallBack; _j < onAttrInitCallBack_1.length; _j++) {
-            var it_2 = onAttrInitCallBack_1[_j];
-            (_h = config === null || config === void 0 ? void 0 : config.onAttrInit) === null || _h === void 0 ? void 0 : _h.call(config, it_2.attrName, it_2.attrValue, obj, this);
+        for (var _25 = 0, onAttrInitCallBack_1 = onAttrInitCallBack; _25 < onAttrInitCallBack_1.length; _25++) {
+            var it_2 = onAttrInitCallBack_1[_25];
+            (_22 = config === null || config === void 0 ? void 0 : config.onAttrInit) === null || _22 === void 0 ? void 0 : _22.call(config, it_2.attrName, it_2.attrValue, obj, this);
         }
         return raws;
     };
@@ -1644,6 +1669,30 @@ var RawSet = /** @class */ (function () {
     RawSet.prototype.getAttributeAndDelete = function (element, attr) {
         var data = element.getAttribute(attr);
         element.removeAttribute(attr);
+        return data;
+    };
+    RawSet.prototype.getDrAppendAttributeAndDelete = function (element, obj) {
+        var data = element.getAttribute(RawSet.DR_APPENDER_NAME);
+        // if (data && !/\[[0-9]+\]/g.test(data)) {
+        if (data && !/\[.+\]/g.test(data)) {
+            var currentIndex = ScriptUtils.evalReturn("".concat(data, "?.length -1"), obj);
+            // console.log('------?', currentIndex)
+            // if (currentIndex === undefined || isNaN(currentIndex)) {
+            //     return undefined;
+            // }
+            // const currentIndex = ScriptUtils.evalReturn(`${data}.length`, obj);
+            data = "".concat(data, "[").concat(currentIndex, "]");
+            element.setAttribute(RawSet.DR_APPENDER_NAME, data);
+            // element.setAttribute(RawSet.DR_IF_NAME, data);
+            // element.setAttribute('dr-id', data);
+            // console.log('-->', element)
+        }
+        // if (data && !/\.childs\[[0-9]+\]/g.test(data)) {
+        //     const currentIndex = ScriptUtils.evalReturn(`${data}.currentIndex`, obj);
+        //     data = `${data}.childs[${currentIndex}]`;
+        //     element.setAttribute(RawSet.DR_APPENDER_NAME, data)
+        // }
+        element.removeAttribute(RawSet.DR_APPENDER_NAME);
         return data;
     };
     RawSet.prototype.replaceBody = function (genNode) {
@@ -1681,7 +1730,7 @@ var RawSet = /** @class */ (function () {
         });
         var pars = [];
         var currentNode;
-        var _loop_1 = function () {
+        var _loop_2 = function () {
             if (currentNode.nodeType === Node.TEXT_NODE) {
                 var text = (_a = currentNode.textContent) !== null && _a !== void 0 ? _a : '';
                 var template_1 = config.window.document.createElement('template');
@@ -1720,12 +1769,11 @@ var RawSet = /** @class */ (function () {
                 (_b = currentNode === null || currentNode === void 0 ? void 0 : currentNode.parentNode) === null || _b === void 0 ? void 0 : _b.replaceChild(template_1.content, currentNode);
             }
             else {
-                // console.log('------------->', currentNode)
                 var uuid = RandomUtils.uuid();
                 var fragment = config.window.document.createDocumentFragment();
                 var start = config.window.document.createComment("start ".concat(uuid));
                 var end = config.window.document.createComment("end ".concat(uuid));
-                //console.log('start--', uuid)
+                // console.log('start--', uuid)
                 (_c = currentNode === null || currentNode === void 0 ? void 0 : currentNode.parentNode) === null || _c === void 0 ? void 0 : _c.insertBefore(start, currentNode);
                 (_d = currentNode === null || currentNode === void 0 ? void 0 : currentNode.parentNode) === null || _d === void 0 ? void 0 : _d.insertBefore(end, currentNode.nextSibling);
                 fragment.append(currentNode);
@@ -1738,7 +1786,7 @@ var RawSet = /** @class */ (function () {
         };
         // eslint-disable-next-line no-cond-assign
         while (currentNode = nodeIterator.nextNode()) {
-            _loop_1();
+            _loop_2();
         }
         // console.log('check-->', pars)
         return pars;
@@ -1916,7 +1964,7 @@ var RawSet = /** @class */ (function () {
                 var data = factory(element, attrValue, obj, rawSet);
                 rawSet.point.thisVariableName = data.__domrender_this_variable_name;
                 if (thisObj) {
-                    var i = thisObj['__domrender_component_new'] = ((_a = thisObj['__domrender_component_new']) !== null && _a !== void 0 ? _a : new Proxy({}, new DomRenderFinalProxy()));
+                    var i = thisObj.__domrender_component_new = ((_a = thisObj.__domrender_component_new) !== null && _a !== void 0 ? _a : new Proxy({}, new DomRenderFinalProxy()));
                     i.thisVariableName = rawSet.point.thisVariableName;
                     i.rawSet = rawSet;
                     i.innerHTML = element.innerHTML;
@@ -1928,9 +1976,7 @@ var RawSet = /** @class */ (function () {
         };
         return targetAttribute;
     };
-    RawSet.createComponentTargetElement = function (name, objFactory, template, styles, scripts,
-                                                    // complete: (element: Element, obj: any, rawSet: RawSet) => void  | undefined,
-                                                    config) {
+    RawSet.createComponentTargetElement = function (name, objFactory, template, styles, config) {
         if (template === void 0) { template = ''; }
         if (styles === void 0) { styles = []; }
         var targetElement = {
@@ -1938,7 +1984,7 @@ var RawSet = /** @class */ (function () {
             styles: styles,
             template: template,
             callBack: function (element, obj, rawSet) {
-                var _a, _b, _c;
+                var _a, _b, _c, _d;
                 // console.log('callback------->')
                 if (!obj.__domrender_components) {
                     obj.__domrender_components = {};
@@ -1948,31 +1994,30 @@ var RawSet = /** @class */ (function () {
                 // console.log('callback settttt---a-->', componentKey, objFactory, objFactory(element, obj, rawSet))
                 domrenderComponents[componentKey] = objFactory(element, obj, rawSet);
                 var instance = domrenderComponents[componentKey];
+                var attribute = DomUtils.getAttributeToObject(element);
                 var onCreate = element.getAttribute('dr-on-create');
-                var createParam = undefined;
-                if (onCreate) {
-                    //     const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${onCreate} `;
-                    //     const script = `${onCreate} `;
-                    createParam = ScriptUtils.evalReturn(onCreate, obj);
-                }
-                (_a = instance === null || instance === void 0 ? void 0 : instance.onCreateRender) === null || _a === void 0 ? void 0 : _a.call(instance, createParam);
-                // console.log('callback settttt---b-->', obj.__domrender_components, instance)
-                var attribute = {};
-                element.getAttributeNames().forEach(function (it) {
-                    attribute[it] = element.getAttribute(it);
-                });
+                var renderScript = 'var $component = this.__render.component; var $element = this.__render.element; var $router = this.__render.router; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;';
                 var render = Object.freeze({
                     component: instance,
                     element: element,
                     innerHTML: element.innerHTML,
                     attribute: attribute,
                     rawset: rawSet,
+                    router: config.router,
                     componentKey: componentKey,
-                    scripts: EventManager.setBindProperty(scripts, obj)
+                    scripts: EventManager.setBindProperty((_a = config.scripts) !== null && _a !== void 0 ? _a : {}, obj)
                     // eslint-disable-next-line no-use-before-define
                 });
                 this.__render = render;
-                var i = instance['__domrender_component_new'] = ((_b = instance['__domrender_component_new']) !== null && _b !== void 0 ? _b : new Proxy({}, new DomRenderFinalProxy()));
+                var createParam;
+                if (onCreate) {
+                    var script = "".concat(renderScript, " return ").concat(onCreate, " ");
+                    createParam = ScriptUtils.eval(script, obj);
+                    if (createParam) {
+                        (_b = instance === null || instance === void 0 ? void 0 : instance.onCreateRender) === null || _b === void 0 ? void 0 : _b.call(instance, createParam);
+                    }
+                }
+                var i = instance.__domrender_component_new = ((_c = instance.__domrender_component_new) !== null && _c !== void 0 ? _c : new Proxy({}, new DomRenderFinalProxy()));
                 i.thisVariableName = rawSet.point.thisVariableName;
                 i.thisFullVariableName = "this.__domrender_components.".concat(componentKey);
                 i.rawSet = rawSet;
@@ -1981,28 +2026,37 @@ var RawSet = /** @class */ (function () {
                 i.creator = new Proxy(rawSet.point.thisVariableName ? ScriptUtils.evalReturn(rawSet.point.thisVariableName, obj) : obj, new DomRenderFinalProxy());
                 this.__creatorMetaData = i;
                 var applayTemplate = element.innerHTML;
+                var innerHTMLThisRandom;
                 if (applayTemplate) {
-                    if (rawSet.point.thisVariableName) {
-                        applayTemplate = applayTemplate.replace(/this\./g, 'this.__domrender_component_new.rootCreator.');
-                    }
-                    // applayTemplate = applayTemplate.replace(/\$component\./g, 'this.');
+                    // if (rawSet.point.thisVariableName) {
+                    // 넘어온 innerHTML에 this가 있으면 해당안되게 우선 치환.
+                    innerHTMLThisRandom = RandomUtils.uuid();
+                    applayTemplate = applayTemplate.replace(/this\./g, innerHTMLThisRandom);
+                    // }
                     applayTemplate = applayTemplate.replace(/#component#/g, 'this');
                 }
                 applayTemplate = template.replace(/#innerHTML#/g, applayTemplate);
-                var oninit = element.getAttribute(EventManager.onInitAttrName);
-                // console.log('oninit', oninit)
+                var oninit = element.getAttribute("".concat(EventManager.attrPrefix, "on-component-init")); // dr-on-component-init
                 if (oninit) {
-                    var script = "var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ".concat(oninit, " ");
-                    // console.log('--->onInit--?', oninit, script, obj)
+                    var script = "".concat(renderScript, "  ").concat(oninit, " ");
                     ScriptUtils.eval(script, Object.assign(obj, {
                         __render: render
                     }));
                 }
-                var innerHTML = ((_c = styles === null || styles === void 0 ? void 0 : styles.map(function (it) { return "<style>".concat(it, "</style>"); })) !== null && _c !== void 0 ? _c : []).join(' ') + (applayTemplate !== null && applayTemplate !== void 0 ? applayTemplate : '');
+                var innerHTML = ((_d = styles === null || styles === void 0 ? void 0 : styles.map(function (it) { return "<style>".concat(it, "</style>"); })) !== null && _d !== void 0 ? _d : []).join(' ') + (applayTemplate !== null && applayTemplate !== void 0 ? applayTemplate : '');
                 element.innerHTML = innerHTML;
+                // console.log('------>', element.innerHTML, obj)
                 var data = RawSet.drThisCreate(element, "this.__domrender_components.".concat(componentKey), '', true, obj, config);
+                // 넘어온 innerHTML에 this가 있는걸 다시 복호화해서 제대로 작동하도록한다.
+                if (innerHTMLThisRandom) {
+                    var template_2 = config.window.document.createElement('template');
+                    template_2.content.append(data);
+                    template_2.innerHTML = template_2.innerHTML.replace(RegExp(innerHTMLThisRandom, 'g'), 'this.');
+                    data = template_2.content;
+                }
+                data.render = render;
                 return data;
-            },
+            }
             // complete
         };
         return targetElement;
@@ -2020,12 +2074,15 @@ var RawSet = /** @class */ (function () {
     RawSet.DR_THIS_NAME = 'dr-this';
     RawSet.DR_FORM_NAME = 'dr-form';
     RawSet.DR_PRE_NAME = 'dr-pre';
+    RawSet.DR_APPENDER_NAME = 'dr-appender';
     RawSet.DR_INNERHTML_NAME = 'dr-inner-html';
     RawSet.DR_INNERTEXT_NAME = 'dr-inner-text';
     RawSet.DR_DETECT_NAME = 'dr-detect';
+    // public static readonly DR_DETECT_ACTION_NAME = 'dr-detect-action';
     RawSet.DR_IT_OPTIONNAME = 'dr-it';
     RawSet.DR_VAR_OPTIONNAME = 'dr-var';
     RawSet.DR_AFTER_OPTIONNAME = 'dr-after';
+    RawSet.DR_NEXT_OPTIONNAME = 'dr-next';
     RawSet.DR_BEFORE_OPTIONNAME = 'dr-before';
     RawSet.DR_COMPLETE_OPTIONNAME = 'dr-complete';
     RawSet.DR_STRIP_OPTIONNAME = 'dr-strip';
@@ -2034,6 +2091,7 @@ var RawSet = /** @class */ (function () {
         drIf: RawSet.DR_IF_NAME,
         drFor: RawSet.DR_FOR_NAME,
         drForOf: RawSet.DR_FOR_OF_NAME,
+        drAppender: RawSet.DR_APPENDER_NAME,
         drRepeat: RawSet.DR_REPEAT_NAME,
         drThis: RawSet.DR_THIS_NAME,
         drForm: RawSet.DR_FORM_NAME,
@@ -2043,12 +2101,13 @@ var RawSet = /** @class */ (function () {
         drItOption: RawSet.DR_IT_OPTIONNAME,
         drVarOption: RawSet.DR_VAR_OPTIONNAME,
         drAfterOption: RawSet.DR_AFTER_OPTIONNAME,
+        drNextOption: RawSet.DR_NEXT_OPTIONNAME,
         drBeforeOption: RawSet.DR_BEFORE_OPTIONNAME,
         drCompleteOption: RawSet.DR_COMPLETE_OPTIONNAME,
-        drStripOption: RawSet.DR_STRIP_OPTIONNAME,
+        drStripOption: RawSet.DR_STRIP_OPTIONNAME
     };
     RawSet.DR_TAGS = [];
-    RawSet.DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_FORM_NAME, RawSet.DR_PRE_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME, RawSet.DR_DETECT_NAME];
+    RawSet.DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_APPENDER_NAME, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_FORM_NAME, RawSet.DR_PRE_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME, RawSet.DR_DETECT_NAME];
     return RawSet;
 }());
 
@@ -2127,7 +2186,7 @@ var DomRenderProxy = /** @class */ (function () {
         var creatorMetaData = {
             creator: this._domRender_proxy,
             rootCreator: this._domRender_proxy,
-            innerHTML: innerHTML,
+            innerHTML: innerHTML
         };
         (_g = (_f = this._domRender_proxy) === null || _f === void 0 ? void 0 : _f.onInitRender) === null || _g === void 0 ? void 0 : _g.call(_f, { render: render, creatorMetaData: creatorMetaData });
     };
@@ -2140,13 +2199,29 @@ var DomRenderProxy = /** @class */ (function () {
     };
     DomRenderProxy.prototype.render = function (raws) {
         var _this = this;
+        if (typeof raws === 'string') {
+            var iter = this._rawSets.get(raws);
+            if (iter) {
+                raws = Array.from(iter);
+            }
+            else {
+                raws = undefined;
+            }
+        }
         var removeRawSets = [];
         (raws !== null && raws !== void 0 ? raws : this.getRawSets()).forEach(function (it) {
+            var _a;
             it.getUsingTriggerVariables(_this.config).forEach(function (path) { return _this.addRawSet(path, it); });
-            if (it.point.start.isConnected && it.point.start.isConnected) {
-                var rawSets = it.render(_this._domRender_proxy, _this.config);
-                if (rawSets && rawSets.length > 0) {
-                    _this.render(rawSets);
+            // console.log('------->', it, it.isConnected)
+            if (it.isConnected) {
+                if ((_a = it.detect) === null || _a === void 0 ? void 0 : _a.action) {
+                    it.detect.action();
+                }
+                else {
+                    var rawSets = it.render(_this._domRender_proxy, _this.config);
+                    if (rawSets && rawSets.length > 0) {
+                        _this.render(rawSets);
+                    }
                 }
             }
             else {
@@ -2176,19 +2251,14 @@ var DomRenderProxy = /** @class */ (function () {
         }
         else {
             var strings = paths.reverse();
-            // const fullPathStr = strings.join('.');
             var fullPathStr_1 = strings.map(function (it) { return isNaN(Number(it)) ? '.' + it : "[".concat(it, "]"); }).join('').slice(1);
             if (lastDoneExecute) {
                 var iterable = this._rawSets.get(fullPathStr_1);
                 // array check
                 var front = strings.slice(0, strings.length - 1).map(function (it) { return isNaN(Number(it)) ? '.' + it : "[".concat(it, "]"); }).join('');
-                // front = front.replace(/\.\[/g, '[');
-                // const front = strings.slice(0, strings.length - 1).join('.');
-                // front = front.replace(/\.\[/g, '[');
                 var last = strings[strings.length - 1];
-                // console.log('root-else-->', fullPathStr, iterable, front, last)
-                // if (!isNaN(Number(last)) && Array.isArray(ScriptUtils.evalReturn('this' + front, this._domRender_proxy))) {
-                if (last === 'length' && Array.isArray(ScriptUtils.evalReturn('this' + front, this._domRender_proxy))) {
+                var data = ScriptUtils.evalReturn('this' + front, this._domRender_proxy);
+                if (last === 'length' && Array.isArray(data)) {
                     var aIterable = this._rawSets.get(front.slice(1));
                     if (aIterable) {
                         this.render(Array.from(aIterable));
@@ -2214,7 +2284,7 @@ var DomRenderProxy = /** @class */ (function () {
             target[p] = value;
             return true;
         }
-        // console.log('set proxy-->', target, p, value, this._rawSets, this._domRender_ref)
+        // console.log('set proxy-->', target, p, value, this._rawSets, this._domRender_ref);
         // if (typeof p === 'string' && '__render' === p) {
         //     (target as any)[p] = value;
         //     return true;
@@ -2228,6 +2298,7 @@ var DomRenderProxy = /** @class */ (function () {
         if (typeof p === 'string') {
             fullPath = this.root([p], value);
         }
+        // console.log('full path:', fullPath);
         if (('onBeforeReturnSet' in receiver) && typeof p === 'string' && !((_a = this.config.proxyExcludeOnBeforeReturnSets) !== null && _a !== void 0 ? _a : []).concat(excludeGetSetPropertys).includes(p)) {
             (_c = (_b = receiver) === null || _b === void 0 ? void 0 : _b.onBeforeReturnSet) === null || _c === void 0 ? void 0 : _c.call(_b, p, value, fullPath);
         }
@@ -2360,10 +2431,210 @@ var DomRenderProxy = /** @class */ (function () {
     return DomRenderProxy;
 }());
 
+var Router = /** @class */ (function () {
+    function Router(rootObj, window) {
+        this.rootObj = rootObj;
+        this.window = window;
+        this.go(this.getUrl());
+    }
+    Router.prototype.attach = function () {
+        var proxy = this.rootObj._DomRender_proxy;
+        if (proxy) {
+            var key = "___".concat(EventManager.ROUTER_VARNAME, ".test");
+            proxy.render(key);
+        }
+    };
+    Router.prototype.getRouteData = function (urlExpression) {
+        var newVar = {
+            path: this.getPath(),
+            url: this.getUrl(),
+            searchParams: this.getSearchParams()
+        };
+        var data = this.getData();
+        if (data) {
+            newVar.data = data;
+        }
+        if (urlExpression) {
+            var data_1 = this.getPathData(urlExpression);
+            if (data_1) {
+                newVar.pathData = data_1;
+            }
+        }
+        return newVar;
+    };
+    // eslint-disable-next-line no-dupe-class-members
+    Router.prototype.go = function (path, urlExpressionOrData, dataOrTitle, title) {
+        // console.log('go-->', path, urlExpressionOrData, dataOrTitle, title);
+        if (typeof urlExpressionOrData === 'string') {
+            var pathData = this.getPathData(urlExpressionOrData, path);
+            if (pathData) {
+                dataOrTitle = dataOrTitle !== null && dataOrTitle !== void 0 ? dataOrTitle : {};
+                dataOrTitle = __assign(__assign({}, dataOrTitle), pathData);
+            }
+            this.set(path, dataOrTitle, title !== null && title !== void 0 ? title : '');
+        }
+        else {
+            this.set(path, urlExpressionOrData, dataOrTitle !== null && dataOrTitle !== void 0 ? dataOrTitle : '');
+        }
+        this.attach();
+    };
+    Router.prototype.getPathData = function (urlExpression, currentUrl) {
+        if (currentUrl === void 0) { currentUrl = this.getPath(); }
+        // console.log('getPathData-->', urlExpression, currentUrl);
+        var urls = currentUrl.split('?')[0].split('/');
+        var urlExpressions = urlExpression.split('/');
+        if (urls.length !== urlExpressions.length) {
+            return;
+        }
+        var data = {};
+        for (var i = 0; i < urlExpressions.length; i++) {
+            var it_1 = urlExpressions[i];
+            var urlit = urls[i];
+            // ex) {serialNo:[0-9]+} or {no}  ..
+            var execResult = /^\{(.+)\}$/g.exec(it_1);
+            if (!execResult) {
+                if (it_1 !== urlit) {
+                    return;
+                }
+                continue;
+            }
+            // regex check
+            var _a = execResult[1].split(':'), name_1 = _a[0], regex = _a[1]; // group1
+            if (regex && !new RegExp(regex).test(urlit)) {
+                return;
+            }
+            data[name_1] = urlit;
+        }
+        return data;
+    };
+    return Router;
+}());
+
+var PathRouter = /** @class */ (function (_super) {
+    __extends(PathRouter, _super);
+    function PathRouter() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    PathRouter.prototype.test = function (urlExpression) {
+        if (this.getPathData(urlExpression)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
+    PathRouter.prototype.getData = function () {
+        return this.window.history.state;
+    };
+    PathRouter.prototype.getSearchParams = function () {
+        return (new URL(this.window.document.location.href)).searchParams;
+    };
+    PathRouter.prototype.set = function (path, data, title) {
+        if (title === void 0) { title = ''; }
+        this.window.history.pushState(data, title, path);
+    };
+    PathRouter.prototype.getUrl = function () {
+        var url = new URL(this.window.document.location.href);
+        return url.pathname + url.search;
+    };
+    PathRouter.prototype.getPath = function () {
+        return this.window.location.pathname;
+    };
+    return PathRouter;
+}(Router));
+
+var LocationUtils = /** @class */ (function () {
+    function LocationUtils() {
+    }
+    LocationUtils.hash = function (window) {
+        return window.location.hash.replace('#', '');
+    };
+    LocationUtils.hashPath = function (window) {
+        return window.location.hash.replace('#', '').split('?')[0];
+    };
+    LocationUtils.hashSearch = function (window) {
+        return window.location.hash.replace('#', '').split('?')[1];
+    };
+    LocationUtils.hashQueryParams = function (window) {
+        var s = window.location.hash.replace('#', '').split('?')[1] || '';
+        return this.queryStringToMap(s);
+    };
+    LocationUtils.path = function (window) {
+        return window.location.pathname;
+    };
+    LocationUtils.pathQueryParamsObject = function (window) {
+        return this.queryStringToObject(window.location.search.substring(1));
+    };
+    LocationUtils.hashQueryParamsObject = function (window) {
+        var _a;
+        return this.queryStringToObject((_a = window.location.hash.split('?').pop()) !== null && _a !== void 0 ? _a : '');
+    };
+    LocationUtils.pathQueryParams = function (window) {
+        return this.queryStringToMap(window.location.search.substring(1));
+    };
+    LocationUtils.queryStringToMap = function (s) {
+        var params = new Map();
+        var vars = s.split('&') || [];
+        vars.forEach(function (it) {
+            var kv = it.split('=') || [];
+            if (kv[0] && kv[0].length > 0) {
+                params.set(kv[0], kv[1]);
+            }
+        });
+        return params;
+    };
+    LocationUtils.queryStringToObject = function (s) {
+        var params = {};
+        var vars = s.split('&') || [];
+        vars.forEach(function (it) {
+            var kv = it.split('=') || [];
+            if (kv[0] && kv[0].length > 0) {
+                params[kv[0]] = kv[1];
+            }
+        });
+        return params;
+    };
+    return LocationUtils;
+}());
+
+var HashRouter = /** @class */ (function (_super) {
+    __extends(HashRouter, _super);
+    function HashRouter() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    HashRouter.prototype.test = function (urlExpression) {
+        if (this.getPathData(urlExpression)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
+    HashRouter.prototype.getData = function () {
+        return this.window.history.state;
+    };
+    HashRouter.prototype.getSearchParams = function () {
+        return new URLSearchParams(LocationUtils.hashSearch(this.window));
+    };
+    HashRouter.prototype.set = function (path, data, title) {
+        if (title === void 0) { title = ''; }
+        path = '#' + path;
+        this.window.history.pushState(data, title, path);
+    };
+    HashRouter.prototype.getUrl = function () {
+        return LocationUtils.hash(this.window) || '/';
+    };
+    HashRouter.prototype.getPath = function () {
+        return LocationUtils.hashPath(this.window) || '/';
+    };
+    return HashRouter;
+}(Router));
+
 var DomRender = /** @class */ (function () {
     function DomRender() {
     }
     DomRender.run = function (obj, target, config) {
+        var _a, _b;
         var robj = obj;
         if ('_DomRender_isProxy' in obj) {
             if (target) {
@@ -2375,9 +2646,16 @@ var DomRender = /** @class */ (function () {
         if (!config) {
             config = { window: window };
         }
+        config.routerType = config.routerType || 'hash';
         var domRender = new DomRenderProxy(obj, target, config);
         var dest = new Proxy(obj, domRender);
         robj = dest;
+        if (config.routerType === 'path') {
+            config.router = (_a = config.router) !== null && _a !== void 0 ? _a : new PathRouter(robj, config.window);
+        }
+        else if (config.routerType === 'hash') {
+            config.router = (_b = config.router) !== null && _b !== void 0 ? _b : new HashRouter(robj, config.window);
+        }
         domRender.run(robj);
         return robj;
     };
@@ -2400,6 +2678,41 @@ var RenderManager = /** @class */ (function () {
     return RenderManager;
 }());
 
+var Appender = /** @class */ (function () {
+    function Appender(index) {
+        this.index = index;
+    }
+    return Appender;
+}());
+var AppenderContainer = /** @class */ (function () {
+    // [keys: string]: any;
+    function AppenderContainer() {
+        this.length = 0;
+        // (this.childs as any).isAppender = true;
+    }
+    AppenderContainer.prototype.push = function () {
+        var items = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            items[_i] = arguments[_i];
+        }
+        // console.log('----2>', this.length)
+        items.index = this.length;
+        this[this.length++] = items;
+        // console.log('---22->', this.length)
+        // const appender = this.childs[this.lastIndex];
+        // appender.values = items;
+        // this.childs.push(new Appender(appender.index + 1));
+    };
+    AppenderContainer.prototype.clear = function () {
+        // console.log('length', this.length);
+        for (var i = 0; i < this.length; i++) {
+            delete this[i];
+        }
+        this.length = 0;
+    };
+    return AppenderContainer;
+}());
+
 var AllCheckedValidatorArray = /** @class */ (function (_super) {
     __extends(AllCheckedValidatorArray, _super);
     function AllCheckedValidatorArray(value, target, event, autoValid) {
@@ -2411,6 +2724,19 @@ var AllCheckedValidatorArray = /** @class */ (function (_super) {
         return !(((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return !it.checked; }).length > 0);
     };
     return AllCheckedValidatorArray;
+}(ValidatorArray));
+
+var AllUnCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(AllUnCheckedValidatorArray, _super);
+    function AllUnCheckedValidatorArray(value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        return _super.call(this, value, target, event, autoValid) || this;
+    }
+    AllUnCheckedValidatorArray.prototype.valid = function () {
+        var _a;
+        return !(((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return it.checked; }).length > 0);
+    };
+    return AllUnCheckedValidatorArray;
 }(ValidatorArray));
 
 var CheckedValidator = /** @class */ (function (_super) {
@@ -2425,19 +2751,6 @@ var CheckedValidator = /** @class */ (function (_super) {
     };
     return CheckedValidator;
 }(Validator));
-
-var AllUnCheckedValidatorArray = /** @class */ (function (_super) {
-    __extends(AllUnCheckedValidatorArray, _super);
-    function AllUnCheckedValidatorArray(value, target, event, autoValid) {
-        if (autoValid === void 0) { autoValid = true; }
-        return _super.call(this, value, target, event, autoValid) || this;
-    }
-    AllUnCheckedValidatorArray.prototype.valid = function () {
-        var _a;
-        return !(((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return it.checked; }).length > 0);
-    };
-    return AllUnCheckedValidatorArray;
-}(ValidatorArray));
 
 var CountEqualsCheckedValidatorArray = /** @class */ (function (_super) {
     __extends(CountEqualsCheckedValidatorArray, _super);
@@ -2499,21 +2812,6 @@ var CountGreaterThanEqualsCheckedValidatorArray = /** @class */ (function (_supe
     return CountGreaterThanEqualsCheckedValidatorArray;
 }(ValidatorArray));
 
-var CountGreaterThanUnCheckedValidatorArray = /** @class */ (function (_super) {
-    __extends(CountGreaterThanUnCheckedValidatorArray, _super);
-    function CountGreaterThanUnCheckedValidatorArray(count, value, target, event, autoValid) {
-        if (autoValid === void 0) { autoValid = true; }
-        var _this = _super.call(this, value, target, event, autoValid) || this;
-        _this.count = count;
-        return _this;
-    }
-    CountGreaterThanUnCheckedValidatorArray.prototype.valid = function () {
-        var _a;
-        return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return !it.checked; }).length > this.count;
-    };
-    return CountGreaterThanUnCheckedValidatorArray;
-}(ValidatorArray));
-
 var CountGreaterThanEqualsUnCheckedValidatorArray = /** @class */ (function (_super) {
     __extends(CountGreaterThanEqualsUnCheckedValidatorArray, _super);
     function CountGreaterThanEqualsUnCheckedValidatorArray(count, value, target, event, autoValid) {
@@ -2527,6 +2825,21 @@ var CountGreaterThanEqualsUnCheckedValidatorArray = /** @class */ (function (_su
         return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return !it.checked; }).length >= this.count;
     };
     return CountGreaterThanEqualsUnCheckedValidatorArray;
+}(ValidatorArray));
+
+var CountGreaterThanUnCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(CountGreaterThanUnCheckedValidatorArray, _super);
+    function CountGreaterThanUnCheckedValidatorArray(count, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.count = count;
+        return _this;
+    }
+    CountGreaterThanUnCheckedValidatorArray.prototype.valid = function () {
+        var _a;
+        return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return !it.checked; }).length > this.count;
+    };
+    return CountGreaterThanUnCheckedValidatorArray;
 }(ValidatorArray));
 
 var CountLessThanCheckedValidatorArray = /** @class */ (function (_super) {
@@ -2544,21 +2857,6 @@ var CountLessThanCheckedValidatorArray = /** @class */ (function (_super) {
     return CountLessThanCheckedValidatorArray;
 }(ValidatorArray));
 
-var CountLessThanEqualsUnCheckedValidatorArray = /** @class */ (function (_super) {
-    __extends(CountLessThanEqualsUnCheckedValidatorArray, _super);
-    function CountLessThanEqualsUnCheckedValidatorArray(count, value, target, event, autoValid) {
-        if (autoValid === void 0) { autoValid = true; }
-        var _this = _super.call(this, value, target, event, autoValid) || this;
-        _this.count = count;
-        return _this;
-    }
-    CountLessThanEqualsUnCheckedValidatorArray.prototype.valid = function () {
-        var _a;
-        return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return !it.checked; }).length <= this.count;
-    };
-    return CountLessThanEqualsUnCheckedValidatorArray;
-}(ValidatorArray));
-
 var CountLessThanEqualsCheckedValidatorArray = /** @class */ (function (_super) {
     __extends(CountLessThanEqualsCheckedValidatorArray, _super);
     function CountLessThanEqualsCheckedValidatorArray(count, value, target, event, autoValid) {
@@ -2574,26 +2872,34 @@ var CountLessThanEqualsCheckedValidatorArray = /** @class */ (function (_super) 
     return CountLessThanEqualsCheckedValidatorArray;
 }(ValidatorArray));
 
-var ExcludeCheckedValidatorArray = /** @class */ (function (_super) {
-    __extends(ExcludeCheckedValidatorArray, _super);
-    function ExcludeCheckedValidatorArray(include, allRequired, value, target, event, autoValid) {
-        if (allRequired === void 0) { allRequired = false; }
+var CountLessThanEqualsUnCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(CountLessThanEqualsUnCheckedValidatorArray, _super);
+    function CountLessThanEqualsUnCheckedValidatorArray(count, value, target, event, autoValid) {
         if (autoValid === void 0) { autoValid = true; }
         var _this = _super.call(this, value, target, event, autoValid) || this;
-        _this.include = include;
-        _this.allRequired = allRequired;
+        _this.count = count;
         return _this;
     }
-    ExcludeCheckedValidatorArray.prototype.valid = function () {
-        var _this = this;
+    CountLessThanEqualsUnCheckedValidatorArray.prototype.valid = function () {
         var _a;
-        var valus = (_a = this.value) !== null && _a !== void 0 ? _a : [];
-        var unCheckedValue = valus.filter(function (it) { return !it.checked; }).map(function (it) { return it.value; });
-        return unCheckedValue.length > 0 &&
-            (!(unCheckedValue.filter(function (it) { return !_this.include.includes(it); }).length > 0)) &&
-            (this.allRequired ? unCheckedValue.filter(function (it) { return _this.include.includes(it); }).length === this.include.length : true);
+        return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return !it.checked; }).length <= this.count;
     };
-    return ExcludeCheckedValidatorArray;
+    return CountLessThanEqualsUnCheckedValidatorArray;
+}(ValidatorArray));
+
+var CountLessThanUnCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(CountLessThanUnCheckedValidatorArray, _super);
+    function CountLessThanUnCheckedValidatorArray(count, value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.count = count;
+        return _this;
+    }
+    CountLessThanUnCheckedValidatorArray.prototype.valid = function () {
+        var _a;
+        return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return !it.checked; }).length < this.count;
+    };
+    return CountLessThanUnCheckedValidatorArray;
 }(ValidatorArray));
 
 var CountUnCheckedValidatorArray = /** @class */ (function (_super) {
@@ -2625,6 +2931,46 @@ var EmptyValidator = /** @class */ (function (_super) {
     return EmptyValidator;
 }(Validator));
 
+var ExcludeCheckedValidatorArray = /** @class */ (function (_super) {
+    __extends(ExcludeCheckedValidatorArray, _super);
+    function ExcludeCheckedValidatorArray(include, allRequired, value, target, event, autoValid) {
+        if (allRequired === void 0) { allRequired = false; }
+        if (autoValid === void 0) { autoValid = true; }
+        var _this = _super.call(this, value, target, event, autoValid) || this;
+        _this.include = include;
+        _this.allRequired = allRequired;
+        return _this;
+    }
+    ExcludeCheckedValidatorArray.prototype.valid = function () {
+        var _this = this;
+        var _a;
+        var valus = (_a = this.value) !== null && _a !== void 0 ? _a : [];
+        var unCheckedValue = valus.filter(function (it) { return !it.checked; }).map(function (it) { return it.value; });
+        return unCheckedValue.length > 0 &&
+            (!(unCheckedValue.filter(function (it) { return !_this.include.includes(it); }).length > 0)) &&
+            (this.allRequired ? unCheckedValue.filter(function (it) { return _this.include.includes(it); }).length === this.include.length : true);
+    };
+    return ExcludeCheckedValidatorArray;
+}(ValidatorArray));
+
+var FormValidator = /** @class */ (function (_super) {
+    __extends(FormValidator, _super);
+    function FormValidator(target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        return _super.call(this, undefined, target, event, autoValid) || this;
+    }
+    FormValidator.prototype.validAction = function () {
+        return _super.prototype.childValidAction.call(this);
+    };
+    FormValidator.prototype.valid = function () {
+        return this.childValid();
+    };
+    FormValidator.prototype.reset = function () {
+        this.targetReset();
+    };
+    return FormValidator;
+}(Validator));
+
 var IncludeCheckedValidatorArray = /** @class */ (function (_super) {
     __extends(IncludeCheckedValidatorArray, _super);
     function IncludeCheckedValidatorArray(include, allRequired, value, target, event, autoValid) {
@@ -2646,24 +2992,6 @@ var IncludeCheckedValidatorArray = /** @class */ (function (_super) {
     };
     return IncludeCheckedValidatorArray;
 }(ValidatorArray));
-
-var FormValidator = /** @class */ (function (_super) {
-    __extends(FormValidator, _super);
-    function FormValidator(target, event, autoValid) {
-        if (autoValid === void 0) { autoValid = true; }
-        return _super.call(this, undefined, target, event, autoValid) || this;
-    }
-    FormValidator.prototype.validAction = function () {
-        return _super.prototype.childValidAction.call(this);
-    };
-    FormValidator.prototype.valid = function () {
-        return this.childValid();
-    };
-    FormValidator.prototype.reset = function () {
-        this.targetReset();
-    };
-    return FormValidator;
-}(Validator));
 
 var MultipleValidator = /** @class */ (function (_super) {
     __extends(MultipleValidator, _super);
@@ -2709,47 +3037,6 @@ var NotEmptyValidator = /** @class */ (function (_super) {
     return NotEmptyValidator;
 }(Validator));
 
-var PassValidator = /** @class */ (function (_super) {
-    __extends(PassValidator, _super);
-    function PassValidator(value, target, event, autoValid) {
-        if (autoValid === void 0) { autoValid = true; }
-        return _super.call(this, value, target, event, autoValid) || this;
-    }
-    PassValidator.prototype.valid = function () {
-        return true;
-    };
-    return PassValidator;
-}(Validator));
-
-var RequiredValidator = /** @class */ (function (_super) {
-    __extends(RequiredValidator, _super);
-    function RequiredValidator(value, target, event, autoValid) {
-        if (autoValid === void 0) { autoValid = true; }
-        return _super.call(this, value, target, event, autoValid) || this;
-    }
-    RequiredValidator.prototype.valid = function () {
-        var value = this.value;
-        // console.log('required', value, value !== undefined && value !== null)
-        return value !== undefined && value !== null;
-    };
-    return RequiredValidator;
-}(Validator));
-
-var CountLessThanUnCheckedValidatorArray = /** @class */ (function (_super) {
-    __extends(CountLessThanUnCheckedValidatorArray, _super);
-    function CountLessThanUnCheckedValidatorArray(count, value, target, event, autoValid) {
-        if (autoValid === void 0) { autoValid = true; }
-        var _this = _super.call(this, value, target, event, autoValid) || this;
-        _this.count = count;
-        return _this;
-    }
-    CountLessThanUnCheckedValidatorArray.prototype.valid = function () {
-        var _a;
-        return ((_a = this.value) !== null && _a !== void 0 ? _a : []).filter(function (it) { return !it.checked; }).length < this.count;
-    };
-    return CountLessThanUnCheckedValidatorArray;
-}(ValidatorArray));
-
 var NotRegExpTestValidator = /** @class */ (function (_super) {
     __extends(NotRegExpTestValidator, _super);
     function NotRegExpTestValidator(regexp, value, target, event, autoValid) {
@@ -2772,17 +3059,16 @@ var NotRegExpTestValidator = /** @class */ (function (_super) {
     return NotRegExpTestValidator;
 }(Validator));
 
-var UnCheckedValidator = /** @class */ (function (_super) {
-    __extends(UnCheckedValidator, _super);
-    function UnCheckedValidator(value, target, event, autoValid) {
+var PassValidator = /** @class */ (function (_super) {
+    __extends(PassValidator, _super);
+    function PassValidator(value, target, event, autoValid) {
         if (autoValid === void 0) { autoValid = true; }
         return _super.call(this, value, target, event, autoValid) || this;
     }
-    UnCheckedValidator.prototype.valid = function () {
-        var _a, _b;
-        return !((_b = (_a = this.getTarget()) === null || _a === void 0 ? void 0 : _a.checked) !== null && _b !== void 0 ? _b : false);
+    PassValidator.prototype.valid = function () {
+        return true;
     };
-    return UnCheckedValidator;
+    return PassValidator;
 }(Validator));
 
 var RegExpTestValidator = /** @class */ (function (_super) {
@@ -2806,6 +3092,33 @@ var RegExpTestValidator = /** @class */ (function (_super) {
         }
     };
     return RegExpTestValidator;
+}(Validator));
+
+var RequiredValidator = /** @class */ (function (_super) {
+    __extends(RequiredValidator, _super);
+    function RequiredValidator(value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        return _super.call(this, value, target, event, autoValid) || this;
+    }
+    RequiredValidator.prototype.valid = function () {
+        var value = this.value;
+        // console.log('required', value, value !== undefined && value !== null)
+        return value !== undefined && value !== null;
+    };
+    return RequiredValidator;
+}(Validator));
+
+var UnCheckedValidator = /** @class */ (function (_super) {
+    __extends(UnCheckedValidator, _super);
+    function UnCheckedValidator(value, target, event, autoValid) {
+        if (autoValid === void 0) { autoValid = true; }
+        return _super.call(this, value, target, event, autoValid) || this;
+    }
+    UnCheckedValidator.prototype.valid = function () {
+        var _a, _b;
+        return !((_b = (_a = this.getTarget()) === null || _a === void 0 ? void 0 : _a.checked) !== null && _b !== void 0 ? _b : false);
+    };
+    return UnCheckedValidator;
 }(Validator));
 
 var ValidMultipleValidator = /** @class */ (function (_super) {
@@ -2879,55 +3192,50 @@ var ValueNotEqualsValidator = /** @class */ (function (_super) {
     return ValueNotEqualsValidator;
 }(Validator));
 
-var LocationUtils = /** @class */ (function () {
-    function LocationUtils() {
+var ClipBoardUtils = /** @class */ (function () {
+    function ClipBoardUtils() {
     }
-    LocationUtils.hash = function (window) {
-        return window.location.hash.replace('#', '');
+    ClipBoardUtils.readText = function (clipboard) {
+        if (clipboard === void 0) { clipboard = navigator.clipboard; }
+        return clipboard.readText();
     };
-    LocationUtils.hashPath = function (window) {
-        return '/' + window.location.hash.replace('#', '').split('?')[0];
+    ClipBoardUtils.read = function (clipboard) {
+        if (clipboard === void 0) { clipboard = navigator.clipboard; }
+        return clipboard.read();
     };
-    LocationUtils.hashQueryParams = function (window) {
-        var s = window.location.hash.replace('#', '').split('?')[1] || '';
-        return this.queryStringToMap(s);
+    ClipBoardUtils.writeText = function (data, clipboard) {
+        if (clipboard === void 0) { clipboard = navigator.clipboard; }
+        return clipboard.writeText(data);
     };
-    LocationUtils.path = function (window) {
-        return window.location.pathname;
+    ClipBoardUtils.write = function (data, clipboard) {
+        if (clipboard === void 0) { clipboard = navigator.clipboard; }
+        return clipboard.write(data);
     };
-    LocationUtils.pathQueryParamsObject = function (window) {
-        return this.queryStringToObject(window.location.search.substring(1));
+    return ClipBoardUtils;
+}());
+
+var NodeUtils = /** @class */ (function () {
+    function NodeUtils() {
+    }
+    // https://stackoverflow.com/questions/3955229/remove-all-child-elements-of-a-dom-node-in-javascript
+    NodeUtils.removeAllChildNode = function (node) {
+        while (node === null || node === void 0 ? void 0 : node.firstChild) {
+            node.firstChild.remove();
+        }
     };
-    LocationUtils.hashQueryParamsObject = function (window) {
+    NodeUtils.appendChild = function (parentNode, childNode) {
+        return parentNode.appendChild(childNode);
+    };
+    NodeUtils.replaceNode = function (targetNode, newNode) {
         var _a;
-        return this.queryStringToObject((_a = window.location.hash.split('?').pop()) !== null && _a !== void 0 ? _a : '');
+        // console.log('repalceNode', targetNode, newNode, targetNode.parentNode)
+        return (_a = targetNode.parentNode) === null || _a === void 0 ? void 0 : _a.replaceChild(newNode, targetNode);
     };
-    LocationUtils.pathQueryParams = function (window) {
-        return this.queryStringToMap(window.location.search.substring(1));
+    NodeUtils.addNode = function (targetNode, newNode) {
+        var _a;
+        return (_a = targetNode.parentNode) === null || _a === void 0 ? void 0 : _a.insertBefore(newNode, targetNode.nextSibling);
     };
-    LocationUtils.queryStringToMap = function (s) {
-        var params = new Map();
-        var vars = s.split('&') || [];
-        vars.forEach(function (it) {
-            var kv = it.split('=') || [];
-            if (kv[0] && kv[0].length > 0) {
-                params.set(kv[0], kv[1]);
-            }
-        });
-        return params;
-    };
-    LocationUtils.queryStringToObject = function (s) {
-        var params = {};
-        var vars = s.split('&') || [];
-        vars.forEach(function (it) {
-            var kv = it.split('=') || [];
-            if (kv[0] && kv[0].length > 0) {
-                params[kv[0]] = kv[1];
-            }
-        });
-        return params;
-    };
-    return LocationUtils;
+    return NodeUtils;
 }());
 
 var StorageUtils = /** @class */ (function () {
@@ -2975,54 +3283,10 @@ var StorageUtils = /** @class */ (function () {
     return StorageUtils;
 }());
 
-var NodeUtils = /** @class */ (function () {
-    function NodeUtils() {
-    }
-    // https://stackoverflow.com/questions/3955229/remove-all-child-elements-of-a-dom-node-in-javascript
-    NodeUtils.removeAllChildNode = function (node) {
-        while (node === null || node === void 0 ? void 0 : node.firstChild) {
-            node.firstChild.remove();
-        }
-    };
-    NodeUtils.appendChild = function (parentNode, childNode) {
-        return parentNode.appendChild(childNode);
-    };
-    NodeUtils.replaceNode = function (targetNode, newNode) {
-        var _a;
-        // console.log('repalceNode', targetNode, newNode, targetNode.parentNode)
-        return (_a = targetNode.parentNode) === null || _a === void 0 ? void 0 : _a.replaceChild(newNode, targetNode);
-    };
-    NodeUtils.addNode = function (targetNode, newNode) {
-        var _a;
-        return (_a = targetNode.parentNode) === null || _a === void 0 ? void 0 : _a.insertBefore(newNode, targetNode.nextSibling);
-    };
-    return NodeUtils;
-}());
-
-var ClipBoardUtils = /** @class */ (function () {
-    function ClipBoardUtils() {
-    }
-    ClipBoardUtils.readText = function (clipboard) {
-        if (clipboard === void 0) { clipboard = navigator.clipboard; }
-        return clipboard.readText();
-    };
-    ClipBoardUtils.read = function (clipboard) {
-        if (clipboard === void 0) { clipboard = navigator.clipboard; }
-        return clipboard.read();
-    };
-    ClipBoardUtils.writeText = function (data, clipboard) {
-        if (clipboard === void 0) { clipboard = navigator.clipboard; }
-        return clipboard.writeText(data);
-    };
-    ClipBoardUtils.write = function (data, clipboard) {
-        if (clipboard === void 0) { clipboard = navigator.clipboard; }
-        return clipboard.write(data);
-    };
-    return ClipBoardUtils;
-}());
-
 exports.AllCheckedValidatorArray = AllCheckedValidatorArray;
 exports.AllUnCheckedValidatorArray = AllUnCheckedValidatorArray;
+exports.Appender = Appender;
+exports.AppenderContainer = AppenderContainer;
 exports.CheckedValidator = CheckedValidator;
 exports.ClipBoardUtils = ClipBoardUtils;
 exports.CountEqualsCheckedValidatorArray = CountEqualsCheckedValidatorArray;
@@ -3044,6 +3308,7 @@ exports.EmptyValidator = EmptyValidator;
 exports.EventManager = EventManager;
 exports.ExcludeCheckedValidatorArray = ExcludeCheckedValidatorArray;
 exports.FormValidator = FormValidator;
+exports.HashRouter = HashRouter;
 exports.IncludeCheckedValidatorArray = IncludeCheckedValidatorArray;
 exports.LocationUtils = LocationUtils;
 exports.MultipleValidator = MultipleValidator;
@@ -3052,6 +3317,7 @@ exports.NonPassValidator = NonPassValidator;
 exports.NotEmptyValidator = NotEmptyValidator;
 exports.NotRegExpTestValidator = NotRegExpTestValidator;
 exports.PassValidator = PassValidator;
+exports.PathRouter = PathRouter;
 exports.RandomUtils = RandomUtils;
 exports.Range = Range;
 exports.RangeIterator = RangeIterator;
@@ -3060,6 +3326,7 @@ exports.RawSet = RawSet;
 exports.RegExpTestValidator = RegExpTestValidator;
 exports.RenderManager = RenderManager;
 exports.RequiredValidator = RequiredValidator;
+exports.Router = Router;
 exports.ScriptUtils = ScriptUtils;
 exports.Shield = Shield;
 exports.StorageUtils = StorageUtils;

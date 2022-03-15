@@ -7,7 +7,7 @@ DOM-RENDER
 
 # 🚀 Quick start 
 ```html
-<script src="https://visualkhh.github.io/dom-render/cdn/dom-render@1.0.69.js"></script>
+<script src="https://visualkhh.github.io/dom-render/cdn/dom-render@1.0.73.js"></script>
 ```
 ```html
 <!DOCTYPE html>
@@ -18,7 +18,7 @@ DOM-RENDER
 </head>
 <body id="app">
 ${this.name}$
-<script src="https://visualkhh.github.io/dom-render/cdn/dom-render@1.0.69.js"></script>
+<script src="https://visualkhh.github.io/dom-render/cdn/dom-render@1.0.73.js"></script>
 <script>
   let data = {
     name: 'my name is dom-render'
@@ -318,6 +318,66 @@ validator
 - ValidValidatorArray
 - ValueEqualsValidator
 - ValueNotEqualsValidator
+</details>
+
+
+
+## Route
+<details>
+  <summary>Route<strong>🔻(click)</strong></summary>
+
+- [examples](./examples/router)
+
+* config routerType: 'hash' | 'path'  (default: 'hash')
+```typescript
+// Config
+const config: Config = {
+  window
+};
+config.targetElements = [
+  RawSet.createComponentTargetElement('page-main', (e, o, r) => new Main(), MainTemplate, undefined, config),
+  RawSet.createComponentTargetElement('page-second', (e, o, r) => new Second(), SecondTemplate, undefined, config),
+  RawSet.createComponentTargetElement('page-detail', (e, o, r) => new Detail(), DetailTemplate, undefined, config)
+];
+config.routerType = 'hash';
+const data = DomRender.run(new Data(), document.querySelector('#app')!, config);
+```
+```html
+<header>
+    <button dr-event-click="$router.go('/')">main</button>
+    <button dr-event-click="$router.go('/second', {secondata: 555})">second</button>
+    <button dr-event-click="$router.go('/detail/25?name=zzz')">detail</button>
+  </div>
+</header>
+<main>
+  <page-main dr-if="$router.test('/')"></page-main>
+  <page-second dr-if="$router.test('/second')"></page-second>
+  <page-detail url='/detail/{id:[0-9]+}' dr-if="$router.test($attribute.url)" dr-on-create="$router.getRouteData($attribute.url)"></page-detail>
+</main>
+```
+
+```typescript
+import {RouteData} from 'dom-render/routers/Router';
+import {OnCreateRender} from 'dom-render/lifecycle/OnCreateRender';
+
+export class Detail implements OnCreateRender {
+    name = 'Detail';
+
+    onCreateRender(routeData: RouteData) {
+        console.log('routeData->', routeData);
+    }
+}
+```
+```typescript
+// RouteData type
+type RouteData = {
+  path: string;
+  url: string;
+  data?: any;
+  searchParams: URLSearchParams;
+  pathData?: any;
+}
+```
 </details>
 
 

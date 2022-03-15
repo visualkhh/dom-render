@@ -1,5 +1,6 @@
 import {ConstructorType} from './types/Types';
 import { CreatorMetaData, RawSet, Render } from './RawSet';
+import {Router} from './routers/Router';
 
 export type TargetElement = {
     name: string;
@@ -17,7 +18,7 @@ export type TargetAttr = {
     complete?: (target: Element, attrValue: string, obj: any, rawSet: RawSet) => void;
 };
 
-export interface Config {
+export type Config = {
     window: Window;
     targetElements?: TargetElement[];
     targetAttrs?: TargetAttr[];
@@ -27,5 +28,7 @@ export interface Config {
     proxyExcludeOnBeforeReturnSets?: string[];
     proxyExcludeOnBeforeReturnGets?: string[];
     scripts?: { [n: string]: any };
+    routerType?: 'hash' | 'path';
+    router?: Router;
     applyEvents?: { attrName: string, callBack: (elements: Element, attrValue: string, obj: any) => void }[];
 }

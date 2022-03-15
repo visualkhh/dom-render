@@ -37,13 +37,14 @@ export class EventManager {
     public static readonly FAG_VARNAME = '$fag';
     public static readonly RAWSET_VARNAME = '$rawset';
     public static readonly RANGE_VARNAME = '$range';
+    public static readonly ROUTER_VARNAME = '$router';
     public static readonly ELEMENT_VARNAME = '$element';
     public static readonly TARGET_VARNAME = '$target';
     public static readonly EVENT_VARNAME = '$event';
     public static readonly COMPONENT_VARNAME = '$component';
     public static readonly INNERHTML_VARNAME = '$innerHTML';
     public static readonly ATTRIBUTE_VARNAME = '$attribute';
-    public static readonly VARNAMES = [EventManager.SCRIPTS_VARNAME, EventManager.FAG_VARNAME, EventManager.RAWSET_VARNAME, EventManager.RANGE_VARNAME, EventManager.ELEMENT_VARNAME, EventManager.TARGET_VARNAME, EventManager.EVENT_VARNAME, EventManager.COMPONENT_VARNAME, EventManager.INNERHTML_VARNAME, EventManager.ATTRIBUTE_VARNAME];
+    public static readonly VARNAMES = [EventManager.SCRIPTS_VARNAME, EventManager.FAG_VARNAME, EventManager.RAWSET_VARNAME, EventManager.RANGE_VARNAME, EventManager.ROUTER_VARNAME, EventManager.ELEMENT_VARNAME, EventManager.TARGET_VARNAME, EventManager.EVENT_VARNAME, EventManager.COMPONENT_VARNAME, EventManager.INNERHTML_VARNAME, EventManager.ATTRIBUTE_VARNAME];
 
     public static readonly WINDOW_EVENT_POPSTATE = 'popstate';
     public static readonly WINDOW_EVENT_RESIZE = 'resize';
@@ -53,6 +54,8 @@ export class EventManager {
         const ${EventManager.VALUE_VARNAME} = this.__render.value;
         const ${EventManager.SCRIPTS_VARNAME} = this.__render.scripts;
         const ${EventManager.RANGE_VARNAME} = this.__render.range;
+        const ${EventManager.ROUTER_VARNAME} = this.__render.router;
+        const ${EventManager.ATTRIBUTE_VARNAME} = this.__render.attribute;
         const ${EventManager.ELEMENT_VARNAME} = this.__render.element;
         const ${EventManager.TARGET_VARNAME} = this.__render.target;
         const ${EventManager.EVENT_VARNAME} = this.__render.event;
@@ -364,17 +367,20 @@ export class EventManager {
     // eslint-disable-next-line no-undef
     public addDrEvents(obj: any, eventName: string, elements: Set<Element> | Set<ChildNode>, config?: Config) {
         const attr = EventManager.attrPrefix + 'event-' + eventName
-        this.procAttr<HTMLInputElement>(elements, attr, (it, attribute) => {
+        this.procAttr<HTMLElement>(elements, attr, (it, attribute) => {
             const script = attribute;
             it.addEventListener(eventName, (event) => {
                 let filter = true;
                 const filterScript = it.getAttribute(`${attr}:filter`);
+                const attribute = DomUtils.getAttributeToObject(it);
                 const thisTarget = Object.assign(obj, {
                     __render: Object.freeze({
                         event,
                         element: it,
                         target: event.target,
                         range: Range.range,
+                        attribute: attribute,
+                        router: config?.router,
                         scripts: EventManager.setBindProperty(config?.scripts, obj)
                     })
                 });
@@ -384,7 +390,7 @@ export class EventManager {
                 if (filter) {
                     ScriptUtils.eval(`${this.bindScript} ${script} `, thisTarget)
                 }
-            })
+            });
         })
     }
 

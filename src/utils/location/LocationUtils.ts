@@ -4,7 +4,11 @@ export class LocationUtils {
     }
 
     static hashPath(window: Window): string {
-        return '/' + window.location.hash.replace('#', '').split('?')[0]
+        return window.location.hash.replace('#', '').split('?')[0]
+    }
+
+    static hashSearch(window: Window): string {
+        return window.location.hash.replace('#', '').split('?')[1]
     }
 
     static hashQueryParams(window: Window): Map<string, string> {
@@ -39,6 +43,7 @@ export class LocationUtils {
         })
         return params;
     }
+
     private static queryStringToObject(s: string): { [key:string]: string } {
         const params = {} as { [key:string]: string };
         const vars = s.split('&') || [];
