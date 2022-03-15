@@ -11,8 +11,13 @@ export type RouteData = {
     pathData?: any;
 }
 export abstract class Router {
+    private attachCallbacks = new Set<(routeData: RouteData) => void>();
     constructor(public rootObj: any, public window: Window) {
         this.go(this.getUrl());
+    }
+
+    addAttachCallback(callback: (routeData: RouteData) => void) {
+        this.attachCallbacks.add(callback);
     }
 
     attach(): void {
@@ -21,6 +26,9 @@ export abstract class Router {
             const key = `___${EventManager.ROUTER_VARNAME}`;
             proxy.render(key);
         }
+        this.attachCallbacks.forEach(it => {
+            it(this.getRouteData());
+        });
     }
 
     testRegexp(regexp: string): boolean {
