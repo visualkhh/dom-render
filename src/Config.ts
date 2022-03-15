@@ -28,7 +28,7 @@ export type Config = {
     proxyExcludeOnBeforeReturnSets?: string[];
     proxyExcludeOnBeforeReturnGets?: string[];
     scripts?: { [n: string]: any };
-    routerType?: 'hash' | 'path';
+    routerType?: 'hash' | 'path' | 'none';
     router?: Router;
     applyEvents?: { attrName: string, callBack: (elements: Element, attrValue: string, obj: any) => void }[];
 }
