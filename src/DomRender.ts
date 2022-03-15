@@ -1,11 +1,9 @@
 import {DomRenderProxy} from './DomRenderProxy';
 import {Config} from './Config';
-import {Router} from './routers/Router';
 import {PathRouter} from './routers/PathRouter';
 import {HashRouter} from './routers/HashRouter';
 import {ConstructorType} from './types/Types';
 import {RawSet} from './RawSet';
-import {ScriptUtils} from '../dist/utils/script/ScriptUtils';
 
 export class DomRender {
     public static run<T extends object>(obj: T, target?: Node, config?: Config): T {
