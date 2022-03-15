@@ -328,7 +328,7 @@ validator
 
 - [examples](./examples/router)
 
-* config routerType: 'hash' | 'path'  (default: 'hash')
+* config routerType: 'hash' | 'path' | 'none'  (default: 'none')
 ```typescript
 // Config
 const config: Config = {

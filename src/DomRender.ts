@@ -17,7 +17,7 @@ export class DomRender {
         if (!config) {
             config = {window} as Config;
         }
-        config.routerType = config.routerType || 'hash';
+        config.routerType = config.routerType || 'none';
         const domRender = new DomRenderProxy(obj, target, config);
         const dest = new Proxy(obj, domRender)
         robj = dest;
