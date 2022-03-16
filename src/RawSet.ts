@@ -8,6 +8,7 @@ import {Validator} from './validators/Validator';
 import {ValidatorArray} from './validators/ValidatorArray';
 import {DomRenderFinalProxy} from './types/Types';
 import {DomUtils} from './utils/dom/DomUtils';
+import {ComponentSet} from './components/ComponentSet';
 
 type Attrs = {
     dr: string | null
@@ -285,7 +286,12 @@ export class RawSet {
                 else if (drAttr.drThis) {
                     const r = ScriptUtils.evalReturn(drAttr.drThis, obj);
                     if (r) {
-                        fag.append(RawSet.drThisCreate(element, drAttr.drThis, drAttr.drVarOption ?? '', drAttr.drStripOption, obj, config))
+                        if (r instanceof ComponentSet) {
+                            console.log('-->', r)
+                            fag.append(RawSet.drThisCreate(element, `${drAttr.drThis}.obj`, drAttr.drVarOption ?? '', drAttr.drStripOption, obj, config, r))
+                        } else {
+                            fag.append(RawSet.drThisCreate(element, drAttr.drThis, drAttr.drVarOption ?? '', drAttr.drStripOption, obj, config))
+                        }
                         const rr = RawSet.checkPointCreates(fag, config)
                         element.parentNode?.replaceChild(fag, element);
                         raws.push(...rr);
@@ -995,9 +1001,12 @@ export class RawSet {
         });
     }
 
-    public static drThisCreate(element: Element, drThis: string, drVarOption: string, drStripOption: boolean | string | null, obj: any, config: Config) {
+    public static drThisCreate(element: Element, drThis: string, drVarOption: string, drStripOption: boolean | string | null, obj: any, config: Config, set?: ComponentSet) {
         const fag = config.window.document.createDocumentFragment();
         const n = element.cloneNode(true) as Element;
+        if (set) {
+            n.innerHTML = set.html;
+        }
         n.querySelectorAll(eventManager.attrNames.map(it => `[${it}]`).join(',')).forEach(it => {
             it.setAttribute(EventManager.ownerVariablePathAttrName, 'this');
         })
@@ -1055,7 +1064,7 @@ export class RawSet {
                 const domrenderComponents = obj.__domrender_components;
                 const componentKey = '_' + RandomUtils.getRandomString(20);
                 const attribute = DomUtils.getAttributeToObject(element);
-                const renderScript = 'var $component = this.__render.component; var $element = this.__render.element; var $router = this.__render.router; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute; var $creatorMetaData = this.__render.creatorMetaData';
+                const renderScript = 'var $component = this.__render.component; var $element = this.__render.element; var $router = this.__render.router; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute; var $creatorMetaData = this.__render.creatorMetaData;';
                 let render = Object.freeze({
                     element: element,
                     innerHTML: element.innerHTML,
@@ -1066,7 +1075,7 @@ export class RawSet {
                     scripts: EventManager.setBindProperty(config.scripts ?? {}, obj)
                     // eslint-disable-next-line no-use-before-define
                 } as Render);
-                const constructor = element.getAttribute('dr-constructor');
+                const constructor = element.getAttribute(`${EventManager.attrPrefix}constructor`);
                 let constructorParam = [];
 
                 if (constructor) {
@@ -1094,7 +1103,7 @@ export class RawSet {
                     ...render
                 }
 
-                const onCreate = element.getAttribute('dr-on-create')
+                const onCreate = element.getAttribute(`${EventManager.attrPrefix}on-create`)
                 this.__render = render;
 
                 let createParam = [i];

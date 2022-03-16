@@ -6,12 +6,23 @@ import {Profile} from './components/profile/profile';
 import ProfileTemplate from './components/profile/profile.html';
 import {Home} from './components/home/home';
 import HomeTemplate from './components/home/home.html';
+import {ComponentSet} from 'dom-render/components/ComponentSet';
+import {RandomUtils} from 'dom-render/utils/random/RandomUtils';
 
 class Data {
     toggle = true;
     name = 'my name is dom-render';
     link = 'https://naver.com';
     age = 55;
+    dynamicComponent: ComponentSet;
+    constructor() {
+        this.dynamicComponent = new ComponentSet(
+            {
+                name: 'dynamic component',
+                age: '55',
+            },
+            '<h1 class="gold">aa ${this.name}$</h1><div><button dr-event-click="this.name = Date.now();">changeName</button></div>', ['.gold {color: gold}, .aqua { color: aqua}']);
+    }
 }
 
 const config = {

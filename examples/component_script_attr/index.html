@@ -27,18 +27,20 @@ ${this.name}$
 <j1>component constructor, on-create, dr-on-component-init</j1>
 <home dr-constructor="[this.name, this.age, 'home welcom']" dr-on-create="{type: 'onCreate', data: 'datadata'}" dr-on-component-init="$component.onInit('data')"></home>
 
+<h1>dynamic component</h1>
+<div dr-this="this.dynamicComponent">
 
-
-<h1>scripts</h1>
-<div>
-    ${$scripts.concat('hello', 'tail')}$
 </div>
+<!--<h1>scripts</h1>-->
+<!--<div>-->
+<!--    ${$scripts.concat('hello', 'tail')}$-->
+<!--</div>-->
 
-<h1>attr</h1>
-<button link="this.link">
-link attribute
-</button>
-<h1>attrCallBack</h1>
-<input id="callback" type="text" wow>
+<!--<h1>attr</h1>-->
+<!--<button link="this.link">-->
+<!--link attribute-->
+<!--</button>-->
+<!--<h1>attrCallBack</h1>-->
+<!--<input id="callback" type="text" wow>-->
 </body>
 </html>
