@@ -1097,13 +1097,16 @@ export class RawSet {
                 const onCreate = element.getAttribute('dr-on-create')
                 this.__render = render;
 
-                let createParam;
+                let createParam = [i];
                 if (onCreate) {
                     const script = `${renderScript} return ${onCreate} `;
                     createParam = ScriptUtils.eval(script, obj);
+                    if (!Array.isArray(createParam)) {
+                        createParam = [createParam];
+                    }
                 }
 
-                instance?.onCreateRender?.(createParam);
+                instance?.onCreateRender?.(...createParam);
                 let applayTemplate = element.innerHTML;
                 let innerHTMLThisRandom;
                 if (applayTemplate) {
