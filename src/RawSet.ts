@@ -693,8 +693,6 @@ export class RawSet {
         for (const it of onAttrInitCallBack) {
             const r = config?.onAttrInit?.(it.attrName, it.attrValue, obj, this);
         }
-
-        console.log('----------------->', obj, onElementInitCallBack);
         // component destroy
         if (obj.__domrender_components) {
             Object.entries(obj.__domrender_components).forEach(([key, value]) => {
