@@ -8,6 +8,8 @@ import {Home} from './components/home/home';
 import HomeTemplate from './components/home/home.html';
 import {ComponentSet} from 'dom-render/components/ComponentSet';
 import {RandomUtils} from 'dom-render/utils/random/RandomUtils';
+import {DynamicComponent} from './components/dynamic/DynamicComponent';
+import {DynamicComponent2} from './components/dynamic/DynamicComponent2';
 
 class Data {
     toggle = true;
@@ -17,11 +19,14 @@ class Data {
     dynamicComponent: ComponentSet;
     constructor() {
         this.dynamicComponent = new ComponentSet(
-            {
-                name: 'dynamic component',
-                age: '55',
-            },
-            '<h1 class="gold">aa ${this.name}$</h1><div><button dr-event-click="this.name = Date.now();">changeName</button></div>', ['.gold {color: gold}, .aqua { color: aqua}']);
+            new DynamicComponent(),
+            '<h1 class="gold">aa ${this.name}$</h1><div><button dr-event-click="this.changeName()">changeName</button></div>', ['.gold {color: gold} .aqua { color: aqua}']);
+    }
+
+    changeDynamicComponent() {
+        this.dynamicComponent = new ComponentSet(
+            new DynamicComponent2(),
+            '<h1 class="aqua">aa ${this.name}$</h1><div><button dr-event-click="this.changeName()">changeName</button></div>', ['.gold {color: gold} .aqua { color: aqua}']);
     }
 }
 
