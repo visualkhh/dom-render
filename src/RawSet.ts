@@ -1055,7 +1055,7 @@ export class RawSet {
                 const domrenderComponents = obj.__domrender_components;
                 const componentKey = '_' + RandomUtils.getRandomString(20);
                 const attribute = DomUtils.getAttributeToObject(element);
-                const renderScript = 'var $component = this.__render.component; var $element = this.__render.element; var $router = this.__render.router; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;';
+                const renderScript = 'var $component = this.__render.component; var $element = this.__render.element; var $router = this.__render.router; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute; var $creatorMetaData = this.__render.creatorMetaData';
                 let render = Object.freeze({
                     element: element,
                     innerHTML: element.innerHTML,
@@ -1068,6 +1068,7 @@ export class RawSet {
                 } as Render);
                 const constructor = element.getAttribute('dr-constructor');
                 let constructorParam = [];
+
                 if (constructor) {
                     const script = `${renderScript} return ${constructor} `;
                     let param = ScriptUtils.eval(script, obj) ?? [];
@@ -1078,8 +1079,18 @@ export class RawSet {
                 }
                 domrenderComponents[componentKey] = objFactory(element, obj, rawSet, constructorParam);
                 const instance = domrenderComponents[componentKey];
+                const i = instance.__domrender_component_new = (instance.__domrender_component_new ?? new Proxy({}, new DomRenderFinalProxy())) as CreatorMetaData;
+                i.thisVariableName = rawSet.point.thisVariableName;
+                i.thisFullVariableName = `this.__domrender_components.${componentKey}`;
+                i.componentKey = componentKey;
+                i.rawSet = rawSet;
+                i.innerHTML = element.innerHTML;
+                i.rootCreator = new Proxy(obj, new DomRenderFinalProxy());
+                i.creator = new Proxy(rawSet.point.thisVariableName ? ScriptUtils.evalReturn(rawSet.point.thisVariableName, obj) : obj, new DomRenderFinalProxy());
+                this.__creatorMetaData = i;
                 render = {
                     component: instance,
+                    creatorMetaData: i,
                     ...render
                 }
 
@@ -1091,17 +1102,8 @@ export class RawSet {
                     const script = `${renderScript} return ${onCreate} `;
                     createParam = ScriptUtils.eval(script, obj);
                 }
-                instance?.onCreateRender?.(createParam);
 
-                const i = instance.__domrender_component_new = (instance.__domrender_component_new ?? new Proxy({}, new DomRenderFinalProxy())) as CreatorMetaData;
-                i.thisVariableName = rawSet.point.thisVariableName;
-                i.thisFullVariableName = `this.__domrender_components.${componentKey}`;
-                i.componentKey = componentKey;
-                i.rawSet = rawSet;
-                i.innerHTML = element.innerHTML;
-                i.rootCreator = new Proxy(obj, new DomRenderFinalProxy());
-                i.creator = new Proxy(rawSet.point.thisVariableName ? ScriptUtils.evalReturn(rawSet.point.thisVariableName, obj) : obj, new DomRenderFinalProxy());
-                this.__creatorMetaData = i;
+                instance?.onCreateRender?.(createParam);
                 let applayTemplate = element.innerHTML;
                 let innerHTMLThisRandom;
                 if (applayTemplate) {
@@ -1148,12 +1150,25 @@ export class RawSet {
     }
 }
 
+
+export type CreatorMetaData = {
+    thisVariableName?: string | null;
+    thisFullVariableName?: string | null;
+    componentKey?: string | null;
+    rawSet: RawSet;
+    innerHTML: string;
+    rootCreator: any;
+    creator: any;
+    // render?: Render;
+}
+
 export type Render = {
     rawset?: RawSet;
     scripts?: { [n: string]: any };
     bindScript?: string;
     element?: any;
     attribute?: any;
+    creatorMetaData?: CreatorMetaData;
     router?: any;
     range?: any;
     value?: any;
@@ -1168,15 +1183,4 @@ export type Render = {
     // rawset
     // componentKey
     // scripts
-}
-
-export type CreatorMetaData = {
-    thisVariableName?: string | null;
-    thisFullVariableName?: string | null;
-    componentKey?: string | null;
-    rawSet: RawSet;
-    innerHTML: string;
-    rootCreator: any;
-    creator: any;
-    // render?: Render;
 }
