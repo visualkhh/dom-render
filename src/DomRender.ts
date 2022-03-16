@@ -74,5 +74,3 @@ export class DomRender {
         };
     }
 }
-
-// export default DomRender;

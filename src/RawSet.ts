@@ -617,12 +617,13 @@ export class RawSet {
                         // console.log('target-->',name, documentFragment)
                         if (documentFragment) {
                             const detectAction = element.getAttribute(RawSet.DR_DETECT_NAME);
-                            if (detectAction && (documentFragment as any).render) {
+                            const render = (documentFragment as any).render;
+                            if (detectAction && render) {
                                 this.detect = {
                                     action: () => {
                                         const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${detectAction} `;
                                         ScriptUtils.eval(script, Object.assign(obj, {
-                                            __render: (documentFragment as any).render
+                                            __render: render
                                         }))
                                     }
                                 };
@@ -691,6 +692,20 @@ export class RawSet {
         }
         for (const it of onAttrInitCallBack) {
             const r = config?.onAttrInit?.(it.attrName, it.attrValue, obj, this);
+        }
+
+        console.log('----------------->', obj, onElementInitCallBack);
+        // component destroy
+        if (obj.__domrender_components) {
+            Object.entries(obj.__domrender_components).forEach(([key, value]) => {
+                const domrenderComponentNew = (value as any).__domrender_component_new as CreatorMetaData;
+                const rawSet: RawSet | undefined = domrenderComponentNew?.rawSet;
+                if (rawSet && !rawSet.isConnected) {
+                    obj.__domrender_components[key]?.onDestroyRender?.(domrenderComponentNew);
+                    delete obj.__domrender_components[key];
+                }
+                // console.log('destroy', key, value);
+            })
         }
         return raws;
     }
@@ -1077,15 +1092,13 @@ export class RawSet {
                 if (onCreate) {
                     const script = `${renderScript} return ${onCreate} `;
                     createParam = ScriptUtils.eval(script, obj);
-                    if (createParam) {
-                        instance?.onCreateRender?.(createParam);
-                    }
                 }
-
+                instance?.onCreateRender?.(createParam);
 
                 const i = instance.__domrender_component_new = (instance.__domrender_component_new ?? new Proxy({}, new DomRenderFinalProxy())) as CreatorMetaData;
                 i.thisVariableName = rawSet.point.thisVariableName;
                 i.thisFullVariableName = `this.__domrender_components.${componentKey}`;
+                i.componentKey = componentKey;
                 i.rawSet = rawSet;
                 i.innerHTML = element.innerHTML;
                 i.rootCreator = new Proxy(obj, new DomRenderFinalProxy());
@@ -1162,6 +1175,7 @@ export type Render = {
 export type CreatorMetaData = {
     thisVariableName?: string | null;
     thisFullVariableName?: string | null;
+    componentKey?: string | null;
     rawSet: RawSet;
     innerHTML: string;
     rootCreator: any;

@@ -52,3 +52,7 @@ DomRender.addAttributeCallBack(config, 'wow', (e, a, o) => {
 })
 
 const data = DomRender.run(new Data(), document.querySelector('#app')!, config);
+
+// setInterval(() => {
+//     console.log(data)
+// }, 5000)

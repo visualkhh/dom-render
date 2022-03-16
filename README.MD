@@ -452,8 +452,12 @@ Code base
 
 
 ## LifeCycle
+* OnCreateRender
+  * onCreateRender(): created call
 * OnInitRender
   * onInitRender(): init render call
+* OnDestroyRender
+  * onDestroyRender(): component Destroy call
 
 ## Script
 ```typescript
