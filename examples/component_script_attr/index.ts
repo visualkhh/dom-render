@@ -18,16 +18,21 @@ class Data implements OnProxyDomRender {
     age = 55;
     rcvData: any;
     dynamicComponent: ComponentSet;
+    dynamicComponent1 = new ComponentSet(
+        new DynamicComponent(),
+        '<h1 class="gold">aa ${this.name}$</h1><div><button dr-event-click="this.changeName()">changeName</button></div>', ['.gold {color: gold} .aqua { color: aqua}']
+    );
+    dynamicComponent2 = new ComponentSet(
+        new DynamicComponent2(),
+        '<h1 class="aqua">aa ${this.name}$</h1><div><button dr-event-click="this.changeName()">changeName</button></div>', ['.gold {color: gold} .aqua { color: aqua}']
+    );
+
     constructor() {
-        this.dynamicComponent = new ComponentSet(
-            new DynamicComponent(),
-            '<h1 class="gold">aa ${this.name}$</h1><div><button dr-event-click="this.changeName()">changeName</button></div>', ['.gold {color: gold} .aqua { color: aqua}']);
+        this.dynamicComponent = this.dynamicComponent1;
     }
 
     changeDynamicComponent() {
-        this.dynamicComponent = new ComponentSet(
-            new DynamicComponent2(),
-            '<h1 class="aqua">aa ${this.name}$</h1><div><button dr-event-click="this.changeName()">changeName</button></div>', ['.gold {color: gold} .aqua { color: aqua}']);
+        this.dynamicComponent = this.dynamicComponent.obj instanceof DynamicComponent ? this.dynamicComponent2 : this.dynamicComponent1;
     }
 
     onProxyDomRender({messenger}: Config): void {

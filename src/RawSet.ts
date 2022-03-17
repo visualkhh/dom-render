@@ -288,6 +288,11 @@ export class RawSet {
                     const r = ScriptUtils.evalReturn(drAttr.drThis, obj);
                     if (r) {
                         if (r instanceof ComponentSet) {
+                            if (this.data) {
+                                (this.data as ComponentSet).obj?.onDestroyRender?.();
+                            }
+                            // console.log('dr-this ->  component', this.data);
+                            this.data = r;
                             fag.append(RawSet.drThisCreate(element, `${drAttr.drThis}.obj`, drAttr.drVarOption ?? '', drAttr.drStripOption, obj, config, r))
                             onThisComponentSetCallBack.push(r);
                         } else {

@@ -385,14 +385,14 @@ type RouteData = {
   <summary>publish<strong>🔻(click)</strong></summary>
 
 ```typescript
-export class Home implements OnCreateRender, OnProxyDomRender {
+export class Home implements OnProxyDomRender {
     private channel?: Channel;
     
     sendIndexMessage() {
       this.channel?.publish('index', {
-        name: this.name,
-        age: this.age,
-        title: this.title
+        name: 'name',
+        age: 'age',
+        title: 'title'
       });
     }
     

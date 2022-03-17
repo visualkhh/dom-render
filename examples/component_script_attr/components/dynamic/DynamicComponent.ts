@@ -4,8 +4,9 @@ import {OnInitRender} from 'dom-render/lifecycle/OnInitRender';
 import {CreatorMetaData, Render} from 'dom-render/RawSet';
 import {OnProxyDomRender} from 'dom-render/lifecycle/OnProxyDomRender';
 import {Config} from 'dom-render/Config';
+import {OnDestroyRender} from 'dom-render/lifecycle/OnDestroyRender';
 
-export class DynamicComponent implements OnCreateRender, OnInitRender, OnProxyDomRender {
+export class DynamicComponent implements OnCreateRender, OnInitRender, OnProxyDomRender, OnDestroyRender {
     name = 'dynamic component';
     age = '55';
     changeName() {
@@ -22,5 +23,9 @@ export class DynamicComponent implements OnCreateRender, OnInitRender, OnProxyDo
 
     onProxyDomRender(config: Config): void {
         console.log('DynamicComponent onProxyDomRender', config);
+    }
+
+    onDestroyRender(): void {
+        console.log('onDestroyRender', 'DynamicComponent');
     }
 }
