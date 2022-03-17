@@ -23,6 +23,18 @@ export class Channel {
     subscribe(subscribeCallback: (from: string, data: any) => any) {
         this.subscribeCallback = subscribeCallback;
     };
+
+    unsubscribe() {
+        this.subscribeCallback = undefined;
+        const channels = this.messenger.getChannels(this.key);
+        if (channels) {
+            // find this channel and remove it
+            const index = channels.indexOf(this);
+            if (index >= 0) {
+                channels.splice(index, 1);
+            }
+        }
+    };
 }
 
 export abstract class Messenger {
