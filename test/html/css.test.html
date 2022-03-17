@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<style id="first">
+    #first ~ *:not(#first ~ style[domstyle] ~ *) {
+        font-size: 30px;
+        color: blue;
+    }
+</style>
+<div>aaa</div>
+<div>bb</div>
+<span>sssbb</span>
+
+<style id="second" domstyle>
+    #second ~ *:not(#second ~ style[domstyle] ~ *)  {
+        color: red;
+    }
+</style>
+<div>aaa</div>
+<div>bb</div>
+
+<style id="third" domstyle>
+    #third ~ *:not(#third ~ style[domstyle] ~ *)  {
+        color: blueviolet;
+    }
+</style>
+<div>aaa</div>
+<div>bb</div>
+</body>
+</html>

@@ -6,6 +6,7 @@ import {Profile} from './components/profile/profile';
 import ProfileTemplate from './components/profile/profile.html';
 import {Home} from './components/home/home';
 import HomeTemplate from './components/home/home.html';
+import HomeStyle from './components/home/home.css';
 import {ComponentSet} from 'dom-render/components/ComponentSet';
 import {DynamicComponent} from './components/dynamic/DynamicComponent';
 import {DynamicComponent2} from './components/dynamic/DynamicComponent2';
@@ -54,7 +55,7 @@ const scripts = {
 config.scripts = scripts;
 DomRender
     .addComponent(config, {type: Profile}, {template: ProfileTemplate})
-    .add({type: Home}, {template: HomeTemplate});
+    .add({type: Home}, {template: HomeTemplate, styles: [HomeStyle]});
 
 DomRender.addAttribute(config, 'link',
     (element: Element, attrValue: string, obj: any, rawSet: RawSet) => {

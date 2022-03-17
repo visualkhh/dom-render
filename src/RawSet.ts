@@ -1014,7 +1014,8 @@ export class RawSet {
         const fag = config.window.document.createDocumentFragment();
         const n = element.cloneNode(true) as Element;
         if (set) {
-            n.innerHTML = set.html;
+            const id = RandomUtils.getRandomString(20);
+            n.innerHTML = RawSet.styleTransformLocal(set.styles ?? [], id) + (set.template ?? '');
             // dr-on-create onCreateRender
             const onCreate = element.getAttribute(`${EventManager.attrPrefix}on-create`)
             const renderScript = '';
@@ -1165,7 +1166,8 @@ export class RawSet {
                         __render: render
                     }))
                 }
-                const innerHTML = (styles?.map(it => `<style>${it}</style>`) ?? []).join(' ') + (applayTemplate ?? '');
+
+                const innerHTML = RawSet.styleTransformLocal(styles, componentKey) + (applayTemplate ?? '');
                 element.innerHTML = innerHTML;
                 // console.log('------>', element.innerHTML, obj)
                 let data = RawSet.drThisCreate(element, `this.__domrender_components.${componentKey}`, '', true, obj, config);
@@ -1190,8 +1192,30 @@ export class RawSet {
         const reg = /(?:[$#]\{(?:(([$#]\{)??[^$#]?[^{]*?)\}[$#]))/g;
         return StringUtils.regexExec(reg, data);
     }
-}
 
+    public static styleTransformLocal(styleBody: string | string[], id: string, styleTagWrap = true) {
+        // <style id="first">
+        //     #first ~ *:not(#first ~ style[domstyle] ~ *) {
+        //     font-size: 30px;
+        //     color: blue;
+        // }
+        // </style>
+        if (Array.isArray(styleBody)) {
+            styleBody = styleBody.join('\n');
+        }
+        styleBody = styleBody.replace(/([^}]+){/gm, function(a, b) {
+            if (typeof b === 'string') {
+                b = b.trim();
+            }
+            return `#${id} ~ ${b}:not(#${id} ~ style[domstyle] ~ *) {`;
+        });
+        if (styleTagWrap) {
+            styleBody = `<style id='${id}' domstyle>${styleBody}</style>`
+        }
+
+        return styleBody;
+    }
+}
 
 export type CreatorMetaData = {
     thisVariableName?: string | null;
