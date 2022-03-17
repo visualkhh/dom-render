@@ -2,8 +2,9 @@ import {DomRenderProxy} from './DomRenderProxy';
 import {Config} from './Config';
 import {PathRouter} from './routers/PathRouter';
 import {HashRouter} from './routers/HashRouter';
-import {ConstructorType} from './types/Types';
+import {ConstructorType, DomRenderFinalProxy} from './types/Types';
 import {RawSet} from './RawSet';
+import {DefaultMessenger} from './messenger/DefaultMessenger';
 
 export class DomRender {
     public static run<T extends object>(obj: T, target?: Node, config?: Config): T {
@@ -19,6 +20,7 @@ export class DomRender {
             config = {window} as Config;
         }
         config.routerType = config.routerType || 'none';
+        config.messenger = DomRenderFinalProxy.final(config.messenger ?? new DefaultMessenger());
         const domRender = new DomRenderProxy(obj, target, config);
         const dest = new Proxy(obj, domRender)
         robj = dest;

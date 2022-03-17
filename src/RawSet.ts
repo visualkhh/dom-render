@@ -123,6 +123,7 @@ export class RawSet {
         const raws: RawSet[] = [];
         const onAttrInitCallBack: { attrName: string, attrValue: string, obj: any }[] = [];
         const onElementInitCallBack: { name: string, obj: any, targetElement: TargetElement, creatorMetaData: CreatorMetaData }[] = [];
+        const onThisComponentSetCallBack: ComponentSet[] = [];
         const drAttrs: Attrs[] = [];
 
         for (const cNode of Array.from(genNode.childNodes.values())) {
@@ -287,8 +288,8 @@ export class RawSet {
                     const r = ScriptUtils.evalReturn(drAttr.drThis, obj);
                     if (r) {
                         if (r instanceof ComponentSet) {
-                            console.log('-->', r)
                             fag.append(RawSet.drThisCreate(element, `${drAttr.drThis}.obj`, drAttr.drVarOption ?? '', drAttr.drStripOption, obj, config, r))
+                            onThisComponentSetCallBack.push(r);
                         } else {
                             fag.append(RawSet.drThisCreate(element, drAttr.drThis, drAttr.drVarOption ?? '', drAttr.drStripOption, obj, config))
                         }
@@ -692,6 +693,9 @@ export class RawSet {
                 ));
             }
         })
+        for (const it of onThisComponentSetCallBack) {
+            it.obj.onInitRender?.();
+        }
         for (const it of onElementInitCallBack) {
             it.targetElement?.__render?.component?.onInitRender?.({render: it.targetElement?.__render, creatorMetaData: it.targetElement?.__creatorMetaData});
             const r = config?.onElementInit?.(it.name, obj, this, it.targetElement);
@@ -1006,6 +1010,25 @@ export class RawSet {
         const n = element.cloneNode(true) as Element;
         if (set) {
             n.innerHTML = set.html;
+            // dr-on-create onCreateRender
+            const onCreate = element.getAttribute(`${EventManager.attrPrefix}on-create`)
+            const renderScript = '';
+            let createParam = [];
+            if (onCreate) {
+                const script = `${renderScript} return ${onCreate} `;
+                createParam = ScriptUtils.eval(script, obj);
+                if (!Array.isArray(createParam)) {
+                    createParam = [createParam];
+                }
+            }
+            set.obj?.onCreateRender?.(...createParam);
+
+            // dr-on-component-init
+            const oninit = element.getAttribute(`${EventManager.attrPrefix}on-component-init`); // dr-on-component-init
+            if (oninit) {
+                const script = `${renderScript}  ${oninit} `;
+                ScriptUtils.eval(script, obj);
+            }
         }
         n.querySelectorAll(eventManager.attrNames.map(it => `[${it}]`).join(',')).forEach(it => {
             it.setAttribute(EventManager.ownerVariablePathAttrName, 'this');
@@ -1078,9 +1101,10 @@ export class RawSet {
                 const constructor = element.getAttribute(`${EventManager.attrPrefix}constructor`);
                 let constructorParam = [];
 
+                // dr-constructor
                 if (constructor) {
                     const script = `${renderScript} return ${constructor} `;
-                    let param = ScriptUtils.eval(script, obj) ?? [];
+                    let param = ScriptUtils.eval(script, Object.assign(obj, { __render: render })) ?? [];
                     if (!Array.isArray(param)) {
                         param = [param];
                     }
@@ -1103,18 +1127,18 @@ export class RawSet {
                     ...render
                 }
 
+                // dr-on-create onCreateRender
                 const onCreate = element.getAttribute(`${EventManager.attrPrefix}on-create`)
                 this.__render = render;
 
                 let createParam = [i];
                 if (onCreate) {
                     const script = `${renderScript} return ${onCreate} `;
-                    createParam = ScriptUtils.eval(script, obj);
+                    createParam = ScriptUtils.eval(script, Object.assign(obj, { __render: render }));
                     if (!Array.isArray(createParam)) {
                         createParam = [createParam];
                     }
                 }
-
                 instance?.onCreateRender?.(...createParam);
                 let applayTemplate = element.innerHTML;
                 let innerHTMLThisRandom;
@@ -1128,6 +1152,7 @@ export class RawSet {
                 }
                 applayTemplate = template.replace(/#innerHTML#/g, applayTemplate);
 
+                // dr-on-component-init
                 const oninit = element.getAttribute(`${EventManager.attrPrefix}on-component-init`); // dr-on-component-init
                 if (oninit) {
                     const script = `${renderScript}  ${oninit} `;

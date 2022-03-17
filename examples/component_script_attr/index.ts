@@ -7,15 +7,16 @@ import ProfileTemplate from './components/profile/profile.html';
 import {Home} from './components/home/home';
 import HomeTemplate from './components/home/home.html';
 import {ComponentSet} from 'dom-render/components/ComponentSet';
-import {RandomUtils} from 'dom-render/utils/random/RandomUtils';
 import {DynamicComponent} from './components/dynamic/DynamicComponent';
 import {DynamicComponent2} from './components/dynamic/DynamicComponent2';
+import {OnProxyDomRender} from 'dom-render/lifecycle/OnProxyDomRender';
 
-class Data {
+class Data implements OnProxyDomRender {
     toggle = true;
     name = 'my name is dom-render';
     link = 'https://naver.com';
     age = 55;
+    rcvData: any;
     dynamicComponent: ComponentSet;
     constructor() {
         this.dynamicComponent = new ComponentSet(
@@ -27,6 +28,13 @@ class Data {
         this.dynamicComponent = new ComponentSet(
             new DynamicComponent2(),
             '<h1 class="aqua">aa ${this.name}$</h1><div><button dr-event-click="this.changeName()">changeName</button></div>', ['.gold {color: gold} .aqua { color: aqua}']);
+    }
+
+    onProxyDomRender({messenger}: Config): void {
+        messenger?.createChannel('index').subscribe((f, d) => {
+            this.rcvData = d;
+        });
+        // console.log('onProxyDomRender', messenger);
     }
 }
 

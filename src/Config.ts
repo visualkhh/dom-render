@@ -1,6 +1,7 @@
 import {ConstructorType} from './types/Types';
 import { CreatorMetaData, RawSet, Render } from './RawSet';
 import {Router} from './routers/Router';
+import {Messenger} from './messenger/Messenger';
 
 export type TargetElement = {
     name: string;
@@ -30,5 +31,6 @@ export type Config = {
     scripts?: { [n: string]: any };
     routerType?: 'hash' | 'path' | 'none';
     router?: Router;
+    messenger?: Messenger;
     applyEvents?: { attrName: string, callBack: (elements: Element, attrValue: string, obj: any) => void }[];
 }

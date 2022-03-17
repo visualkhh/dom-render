@@ -30,6 +30,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
 
     public run(objProxy: T) {
         this._domRender_proxy = objProxy;
+        (objProxy as any)?.onProxyDomRender?.(this.config);
         const obj = (objProxy as any)._DomRender_origin;
         if (obj) {
             Object.keys(obj).forEach(it => {

@@ -379,7 +379,42 @@ type RouteData = {
 ```
 </details>
 
+## Messenger (Data transmission) 
+* publish, subscribe
+<details>
+  <summary>publish<strong>🔻(click)</strong></summary>
 
+```typescript
+export class Home implements OnCreateRender, OnProxyDomRender {
+    private channel?: Channel;
+    
+    sendIndexMessage() {
+      this.channel?.publish('index', {
+        name: this.name,
+        age: this.age,
+        title: this.title
+      });
+    }
+    
+    onProxyDomRender({messenger}: Config): void {
+        this.channel = messenger?.createChannel('home');
+    }
+}
+```
+</details>
+<details>
+  <summary>subscribe<strong>🔻(click)</strong></summary>
+
+```typescript
+class Index implements OnProxyDomRender {
+    onProxyDomRender({messenger}: Config): void {
+        messenger?.createChannel('index').subscribe((f, d) => {
+            console.log('rcvData', d);
+        });
+    }
+}
+````
+</details>
 
 ## Class
 <details>
