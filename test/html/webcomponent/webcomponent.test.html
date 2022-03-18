@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        div { color: red}
+    </style>
+</head>
+<body>
+<search-result name-attribute="zzzzz"></search-result>
+<script>
+    // https://meetup.toast.com/posts/120
+    // https://academind.com/tutorials/web-components-introduction
+    const template = document.createElement('template');
+    template.innerHTML = `
+  <style>
+    div {
+      margin-top: 20px;
+      /*color: green;*/
+    }
+  </style>
+  <div>
+    <p>The Google search result of your name is <a target="_blank" rel="noopener">here</a></p>
+  </div>
+`;
+
+    class SearchResult extends HTMLElement {
+        constructor() {
+            super();
+
+            this.replaceWith(template.content.cloneNode(true));
+            // this.appendChild(template.content.cloneNode(true))
+
+            // this.attachShadow({mode: 'open'});
+            // this.shadowRoot.appendChild(template.content.cloneNode(true));
+
+            // this.shadowRoot.querySelector('a').href = '';
+        }
+
+        static get observedAttributes() {
+            return ['name-attribute'];
+        }
+        connectedCallback() {
+            console.log('-->', 'connectedCallback')
+        }
+        disconnectedCallback() {
+            console.log('-->', 'disconnectedCallback')
+        }
+        attributeChangedCallback(name, oldValue, newValue) {
+            console.log('--->', this, this.isConnected)
+            console.log('-->', 'attributeChangedCallback', name, oldValue, newValue)
+            if (name == 'name-attribute') {
+                // this.shadowRoot.querySelector(
+                //     'a'
+                // ).href = `https://www.google.com/search?q=${newValue}`;
+                this.querySelector(
+                    'a'
+                ).href = `https://www.google.com/search?q=${newValue}`;
+            }
+        }
+    }
+
+    window.customElements.define('search-result', SearchResult);
+</script>
+</body>
+</html>

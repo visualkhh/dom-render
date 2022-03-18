@@ -1,11 +1,4 @@
 export class Appender {
-    values?: any[];
-
-    constructor(public index: number) {
-    }
-}
-
-export class AppenderContainer {
     // childs: Array<Appender> = [new Appender(0)];
     // eslint-disable-next-line no-undef
     [key: number]: any[] | undefined;

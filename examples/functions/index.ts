@@ -1,7 +1,7 @@
 import {DomRender} from 'dom-render';
 import {FormValidator} from 'dom-render/validators/FormValidator';
 import {NotEmptyValidator} from 'dom-render/validators/NotEmptyValidator';
-import {AppenderContainer} from 'dom-render/operators/Appender';
+import {Appender} from 'dom-render/operators/Appender';
 import {RandomUtils} from 'dom-render/utils/random/RandomUtils';
 
 class PageForm extends FormValidator {
@@ -15,7 +15,7 @@ class User {
 }
 
 class Data {
-    appender = new AppenderContainer();
+    appender = new Appender();
     drIf = true;
     users = [new User('John', 25), new User('Jane', 30), new User('Jack', 35)];
     name = 'dom-render';

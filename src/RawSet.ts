@@ -9,8 +9,22 @@ import {ValidatorArray} from './validators/ValidatorArray';
 import {DomRenderFinalProxy} from './types/Types';
 import {DomUtils} from './utils/dom/DomUtils';
 import {ComponentSet} from './components/ComponentSet';
+import {DrPre} from './operators/DrPre';
+import {Dr} from './operators/Dr';
+import {DrIf} from './operators/DrIf';
+import {ExecuteState} from './operators/OperatorRender';
+import {DrThis} from './operators/DrThis';
+import {DrForm} from './operators/DrForm';
+import {DrInnerText} from './operators/DrInnerText';
+import {DrInnerHTML} from './operators/DrInnerHTML';
+import {DrFor} from './operators/DrFor';
+import {DrForOf} from './operators/DrForOf';
+import {DrAppender} from './operators/DrAppender';
+import {DrRepeat} from './operators/DrRepeat';
+import {DrTargetElement} from './operators/DrTargetElement';
+import {DrTargetAttr} from './operators/DrTargetAttr';
 
-type Attrs = {
+export type Attrs = {
     dr: string | null
     drIf: string | null
     drAppender: string | null
@@ -29,6 +43,31 @@ type Attrs = {
     drBeforeOption: string | null
     drCompleteOption: string | null
     drStripOption: string | null
+}
+export type CreatorMetaData = {
+    thisVariableName?: string | null;
+    thisFullVariableName?: string | null;
+    componentKey?: string | null;
+    rawSet: RawSet;
+    innerHTML: string;
+    rootCreator: any;
+    creator: any;
+    // render?: Render;
+}
+export type AttrInitCallBack = { attrName: string, attrValue: string, obj: any };
+export type ElementInitCallBack = { name: string, obj: any, targetElement: TargetElement, creatorMetaData: CreatorMetaData };
+
+export type Render = {
+    rawset?: RawSet;
+    scripts?: { [n: string]: any };
+    bindScript?: string;
+    element?: any;
+    attribute?: any;
+    creatorMetaData?: CreatorMetaData;
+    router?: any;
+    range?: any;
+    value?: any;
+    [n: string]: any;
 }
 
 export class RawSet {
@@ -121,9 +160,9 @@ export class RawSet {
     public render(obj: any, config: Config): RawSet[] {
         const genNode = config.window.document.importNode(this.fragment, true);
         const raws: RawSet[] = [];
-        const onAttrInitCallBack: { attrName: string, attrValue: string, obj: any }[] = [];
-        const onElementInitCallBack: { name: string, obj: any, targetElement: TargetElement, creatorMetaData: CreatorMetaData }[] = [];
-        const onThisComponentSetCallBack: ComponentSet[] = [];
+        const onAttrInitCallBacks: AttrInitCallBack[] = [];
+        const onElementInitCallBacks: ElementInitCallBack[] = [];
+        const onThisComponentSetCallBacks: ComponentSet[] = [];
         const drAttrs: Attrs[] = [];
 
         for (const cNode of Array.from(genNode.childNodes.values())) {
@@ -190,489 +229,28 @@ export class RawSet {
                 } as Attrs;
                 drAttrs.push(drAttr);
 
-                if (drAttr.drPre != null) {
-                    break;
-                }
-                if (drAttr.dr !== null && drAttr.dr.length >= 0) {
-                    const itRandom = RawSet.drItOtherEncoding(element);
-                    const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
-                    const newTemp = config.window.document.createElement('temp');
-                    ScriptUtils.eval(`
-                        ${__render.bindScript}
-                        const n = $element.cloneNode(true);
-                        var destIt = ${drAttr.drItOption};
-                        if (destIt !== undefined) {
-                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
-                            // console.log('----', n.innerHTML);
-                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
-                            // console.log('----', n.innerHTML);
-                        }
-                        if (this.__render.drStripOption === 'true') {
-                            Array.from(n.childNodes).forEach(it => this.__fag.append(it));
-                        } else {
-                            this.__render.fag.append(n);
-                        }`, Object.assign(obj, {
-                        __render: Object.freeze({
-                            fag: newTemp,
-                            drStripOption: drAttr.drStripOption,
-                            ...__render
-                        } as Render)
-                    }));
-                    RawSet.drVarDecoding(newTemp, vars);
-                    RawSet.drItOtherDecoding(newTemp, itRandom);
-                    const tempalte = config.window.document.createElement('template');
-                    tempalte.innerHTML = newTemp.innerHTML;
-                    fag.append(tempalte.content)
-                    const rr = RawSet.checkPointCreates(fag, config)
-                    element.parentNode?.replaceChild(fag, element);
-                    raws.push(...rr)
-                }
-                else if (drAttr.drIf) {
-                    const itRandom = RawSet.drItOtherEncoding(element);
-                    const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
-                    const newTemp = config.window.document.createElement('temp');
-                    // Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drIf' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v)); <-- 이부분은 다른 attr에도 적용을 할지말지 생각해야됨  엘리먼트 존재유무에 따라서 적용을 할지말지 결정해야됨
-                    const keepgoing = ScriptUtils.eval(`
-                    ${__render.bindScript}
-                    ${drAttr.drBeforeOption ?? ''}
-                    if ($rawset.data === (${drAttr.drIf})) {
-                        return false;
-                    } 
-                    $rawset.data = ${drAttr.drIf} 
-                    if($rawset.data) {
-                        const n = $element.cloneNode(true);
-                        Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drIf' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));
-                        var destIt = ${drAttr.drItOption};
-                        if (destIt !== undefined) {
-                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt)))
-                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt);
-                        }
-                        if (this.__render.drStripOption === 'true') {
-                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
-                        } else {
-                            this.__render.fag.append(n);
-                        }
-                    }
-                    ${drAttr.drAfterOption ?? ''};
-                    return true;
-                    `, Object.assign(obj,
-                        {
-                            __render: Object.freeze({
-                                fag: newTemp,
-                                drAttr: drAttr,
-                                drAttrsOriginName: RawSet.drAttrsOriginName,
-                                drStripOption: drAttr.drStripOption,
-                                ...__render
-                            } as Render)
-                        }
-                    ));
-                    // console.log('keepgoing', keepgoing);
-                    if (keepgoing === false) {
+                const operators = [
+                    new DrPre(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new Dr(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrIf(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrThis(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrForm(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrInnerText(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrInnerHTML(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrFor(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrForOf(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrAppender(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrRepeat(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrTargetElement(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrTargetAttr(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks})
+                ]
+
+                for (const operator of operators) {
+                    const state = operator.execRender();
+                    if (state === ExecuteState.EXECUTE) {
+                        break;
+                    } else if (state === ExecuteState.STOP) {
                         return raws;
-                    }
-                    RawSet.drVarDecoding(newTemp, vars);
-                    RawSet.drItOtherDecoding(newTemp, itRandom);
-                    const bypass = (newTemp.innerHTML ?? '').trim().length <= 0;
-                    const tempalte = config.window.document.createElement('template');
-                    tempalte.innerHTML = newTemp.innerHTML;
-                    // console.log(tempalte.innerHTML)
-                    fag.append(tempalte.content)
-                    const rr = RawSet.checkPointCreates(fag, config)
-                    element.parentNode?.replaceChild(fag, element);
-                    raws.push(...rr);
-                    if (bypass) {
-                        continue;
-                    }
-                }
-                else if (drAttr.drThis) {
-                    const r = ScriptUtils.evalReturn(drAttr.drThis, obj);
-                    if (r) {
-                        if (r instanceof ComponentSet) {
-                            if (this.data) {
-                                (this.data as ComponentSet).obj?.onDestroyRender?.();
-                            }
-                            // console.log('dr-this ->  component', this.data);
-                            this.data = r;
-                            fag.append(RawSet.drThisCreate(element, `${drAttr.drThis}.obj`, drAttr.drVarOption ?? '', drAttr.drStripOption, obj, config, r))
-                            onThisComponentSetCallBack.push(r);
-                        } else {
-                            fag.append(RawSet.drThisCreate(element, drAttr.drThis, drAttr.drVarOption ?? '', drAttr.drStripOption, obj, config))
-                        }
-                        const rr = RawSet.checkPointCreates(fag, config)
-                        element.parentNode?.replaceChild(fag, element);
-                        raws.push(...rr);
-                    } else {
-                        cNode.remove();
-                    }
-                }
-                else if (drAttr.drForm) {
-                    RawSet.drFormOtherMoveAttr(element, 'name', 'temp-name', config);
-                    const data = ScriptUtils.evalReturn(`${drAttr.drForm}`, obj);
-
-                    const childs = Array.from(element.querySelectorAll('[name]'));
-
-                    const fromName = ScriptUtils.evalReturn(element.getAttribute('dr-form:name') ?? '', obj);
-                    const thisName = fromName ?? element.getAttribute('name');
-                    // console.log('dr-form:name', thisName, element.getAttribute('dr-form:name'), obj, element);
-                    // // 자기자신이 Input 대상일때
-                    if (childs.length <= 0 && thisName) {
-                        childs.push(element);
-                    } else {
-                        if (data instanceof Validator) {
-                            data.setTarget(element);
-                        }
-                    }
-                    childs.forEach(it => {
-                        const eventName = it.getAttribute('dr-form:event') ?? 'change'
-                        const validatorName = it.getAttribute('dr-form:validator');
-                        const attrEventName = EventManager.attrPrefix + 'event-' + eventName;
-                        let varpath = ScriptUtils.evalReturn(element.getAttribute('dr-form:name') ?? '', obj) ?? it.getAttribute('name');
-                        if (varpath != null) {
-                            if (validatorName) {
-                                ScriptUtils.eval(`
-                                    ${__render.bindScript}
-                                    const validator = typeof ${validatorName} ==='function' ?  new  ${validatorName}() : ${validatorName};
-                                    ${drAttr.drForm}['${varpath}'] = validator;
-                                `,
-                                Object.assign(obj, {
-                                    __render: Object.freeze({
-                                        drStripOption: drAttr.drStripOption,
-                                        ...__render
-                                    } as Render)
-                                }
-                                ));
-                            }
-                            varpath = `${drAttr.drForm}['${varpath}']`;
-                            const data = ScriptUtils.evalReturn(`${varpath}`, obj);
-                            if (data instanceof ValidatorArray) {
-                                it.setAttribute(attrEventName, `${varpath}.setArrayValue($target, $target.value, $event); ${it.getAttribute(attrEventName) ?? ''};`);
-                                data.addValidator((it as any).value, it);
-                            } else if (data instanceof Validator) {
-                                // varpath += (varpath ? '.value' : 'value');
-                                // varpath = drAttr.drForm + '.' + varpath;
-                                // it.setAttribute(attrEventName, `${varpath} = $target.value; ${target}=$target; ${event}=$event;`);
-                                it.setAttribute(attrEventName, `${varpath}.set($target.value, $target, $event); ${it.getAttribute(attrEventName) ?? ''};`);
-                                data.setTarget(it);
-                                data.value = (it as any).value;
-                            } else {
-                                it.setAttribute(attrEventName, `${varpath} = $target.value;`);
-                            }
-                        }
-                    })
-                    RawSet.drFormOtherMoveAttr(element, 'temp-name', 'name', config);
-                    raws.push(...RawSet.checkPointCreates(element, config));
-                }
-                else if (drAttr.drInnerText) {
-                    const newTemp = config.window.document.createElement('temp');
-                    ScriptUtils.eval(` 
-                        ${__render.bindScript}
-                        const n = $element.cloneNode(true);  
-                        ${drAttr.drBeforeOption ?? ''}
-                        n.innerText = ${drAttr.drInnerText};
-                        if (this.__render.drStripOption === 'true') {
-                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
-                        } else {
-                            this.__render.fag.append(n);
-                        }
-                        ${drAttr.drAfterOption ?? ''}
-                    `, Object.assign(obj, {
-                        __render: Object.freeze({
-                            drStripOption: drAttr.drStripOption,
-                            fag: newTemp,
-                            ...__render
-                        } as Render)
-                    }));
-                    const tempalte = config.window.document.createElement('template');
-                    tempalte.innerHTML = newTemp.innerHTML;
-                    fag.append(tempalte.content);
-                    const rr = RawSet.checkPointCreates(fag, config);
-                    element.parentNode?.replaceChild(fag, element);
-                    raws.push(...rr);
-                }
-                else if (drAttr.drInnerHTML) {
-                    const newTemp = config.window.document.createElement('temp');
-                    ScriptUtils.eval(`
-                        ${__render.bindScript}
-                        const n = $element.cloneNode(true);
-                        ${drAttr.drBeforeOption ?? ''}
-                        n.innerHTML = ${drAttr.drInnerHTML};
-                        if (this.__render.drStripOption === 'true') {
-                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
-                        } else {
-                            this.__render.fag.append(n);
-                        }
-                        ${drAttr.drAfterOption ?? ''}
-                    `, Object.assign(obj, {
-                        __render: Object.freeze({
-                            drStripOption: drAttr.drStripOption,
-                            fag: newTemp,
-                            ...__render
-                            // eslint-disable-next-line no-use-before-define
-                        } as Render)
-                    }));
-                    const tempalte = config.window.document.createElement('template');
-                    tempalte.innerHTML = newTemp.innerHTML;
-                    fag.append(tempalte.content);
-                    const rr = RawSet.checkPointCreates(fag, config);
-                    element.parentNode?.replaceChild(fag, element);
-                    raws.push(...rr);
-                }
-                else if (drAttr.drFor) {
-                    const itRandom = RawSet.drItOtherEncoding(element);
-                    const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
-                    const newTemp = config.window.document.createElement('temp');
-                    ScriptUtils.eval(`
-                    ${__render.bindScript}
-                    ${drAttr.drBeforeOption ?? ''}
-                    for(${drAttr.drFor}) {
-                        const n = this.__render.element.cloneNode(true);
-                        var destIt = ${drAttr.drItOption};
-                        if (destIt !== undefined) {
-                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForIt\\#/g, destIt).replace(/\\#nearForIndex\\#/g, destIt))) 
-                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt).replace(/\\#index\\#/g, destIt);
-                        }
-                        if (this.__render.drStripOption === 'true') {
-                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
-                        } else {
-                            this.__render.fag.append(n);
-                        }
-                    }
-                    ${drAttr.drAfterOption ?? ''}
-                    `, Object.assign(obj, {
-                        __render: Object.freeze({
-                            fag: newTemp,
-                            drStripOption: drAttr.drStripOption,
-                            ...__render
-                        })
-                    }));
-                    RawSet.drVarDecoding(newTemp, vars);
-                    RawSet.drItOtherDecoding(newTemp, itRandom);
-                    const tempalte = config.window.document.createElement('template');
-                    tempalte.innerHTML = newTemp.innerHTML;
-                    fag.append(tempalte.content)
-                    const rr = RawSet.checkPointCreates(fag, config)
-                    element.parentNode?.replaceChild(fag, element);
-                    raws.push(...rr)
-                }
-                else if (drAttr.drForOf) {
-                    const itRandom = RawSet.drItOtherEncoding(element);
-                    const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
-                    const newTemp = config.window.document.createElement('temp');
-                    ScriptUtils.eval(`
-                    ${__render.bindScript}
-                    ${drAttr.drBeforeOption ?? ''}
-                    var i = 0; 
-                    const forOf = ${drAttr.drForOf};
-                    const forOfStr = \`${drAttr.drForOf}\`.trim();
-                    if (forOf) {
-                        for(const it of forOf) {
-                            var destIt = it;
-                            if (/\\[(.*,?)\\],/g.test(forOfStr)) {
-                                if (typeof it === 'string') {
-                                    destIt = it;
-                                } else {
-                                    destIt = forOfStr.substring(1, forOfStr.length-1).split(',')[i];
-                                }
-                            } else if (forOf.isRange) {
-                                    destIt = it;
-                            }  else {
-                                destIt = forOfStr + '[' + i +']'
-                            }
-                            const n = this.__render.element.cloneNode(true);
-                            Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drForOf' && k !== 'drNextOption' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));
-                            n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIt\\#/g, destIt).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIndex\\#/g, i)))
-                            n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt).replace(/\\#index\\#/g, i);
-                            if (this.__render.drStripOption === 'true') {
-                                Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
-                            } else {
-                                this.__render.fag.append(n);
-                            }
-                            i++;
-                        }
-                        
-                        if('${drAttr.drNextOption}' !== 'null') {
-                            const n = this.__render.element.cloneNode(true);
-                            Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drForOf' && k !== 'drNextOption' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));
-                            const [name, idx] = '${drAttr.drNextOption}'.split(',');
-                            n.setAttribute('dr-for-of', name + '[' + idx + ']');
-                            n.setAttribute('dr-next', name + ',' +  (Number(idx) + 1));
-                            this.__render.fag.append(n);
-                        }
-                    }
-                    ${drAttr.drAfterOption ?? ''}
-                    `, Object.assign(obj, {
-                        __render: Object.freeze({
-                            drStripOption: drAttr.drStripOption,
-                            drAttr: drAttr,
-                            drAttrsOriginName: RawSet.drAttrsOriginName,
-                            fag: newTemp,
-                            ...__render
-                            // eslint-disable-next-line no-use-before-define
-                        } as Render)
-                    }));
-                    RawSet.drVarDecoding(newTemp, vars);
-                    RawSet.drItOtherDecoding(newTemp, itRandom);
-                    const tempalte = config.window.document.createElement('template');
-                    tempalte.innerHTML = newTemp.innerHTML;
-                    fag.append(tempalte.content)
-                    const rr = RawSet.checkPointCreates(fag, config);
-                    element.parentNode?.replaceChild(fag, element);
-                    // const rrr = rr.flatMap(it => it.render(obj, config));// .flat();
-                    raws.push(...rr)
-                }
-                else if (drAttr.drAppender) {
-                    const itRandom = RawSet.drItOtherEncoding(element);
-                    const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
-                    const newTemp = config.window.document.createElement('temp');
-                    ScriptUtils.eval(`
-                    try{
-                    ${__render.bindScript}
-                    ${drAttr.drBeforeOption ?? ''}
-                        const ifWrap = document.createElement('div');
-                        ifWrap.setAttribute('dr-strip', 'true');
-                        ifWrap.setAttribute('dr-if', '${drAttr.drAppender} && ${drAttr.drAppender}.length > 0');
-                        
-                        // console.log('----', ${drAttr.drAppender}.length);
-                        
-                        const n = this.__render.element.cloneNode(true);
-                        Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drAppender' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));
-                        n.setAttribute('dr-for-of', '${drAttr.drAppender}[' + (${drAttr.drAppender}.length-1) + ']');
-                        n.setAttribute('dr-next', '${drAttr.drAppender},' + ${drAttr.drAppender}.length);
-                        ifWrap.append(n);
-                        
-                        // n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIt\\#/g, destIt).replace(/\\#it\\#/g, destIt).replace(/\\#nearForOfIndex\\#/g, i)))
-                        // n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt).replace(/\\#index\\#/g, i);
-                        // if (this.__render.drStripOption === 'true') {
-                        // Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
-                        // } else {
-                        // this.__render.fag.append(n);
-                        // }
-                        this.__render.fag.append(ifWrap);
-                    ${drAttr.drAfterOption ?? ''}
-                    }catch(e){}
-                    `, Object.assign(obj, {
-                        __render: Object.freeze({
-                            drStripOption: drAttr.drStripOption,
-                            drAttr: drAttr,
-                            drAttrsOriginName: RawSet.drAttrsOriginName,
-                            fag: newTemp,
-                            ...__render
-                            // eslint-disable-next-line no-use-before-define
-                        } as Render)
-                    }));
-                    RawSet.drVarDecoding(newTemp, vars);
-                    RawSet.drItOtherDecoding(newTemp, itRandom);
-                    const tempalte = config.window.document.createElement('template');
-                    tempalte.innerHTML = newTemp.innerHTML;
-                    fag.append(tempalte.content)
-                    const rr = RawSet.checkPointCreates(fag, config);
-                    element.parentNode?.replaceChild(fag, element);
-                    // const rrr = rr.flatMap(it => it.render(obj, config));// .flat();
-                    raws.push(...rr)
-                }
-                else if (drAttr.drRepeat) {
-                    const itRandom = RawSet.drItOtherEncoding(element);
-                    const vars = RawSet.drVarEncoding(element, drAttr.drVarOption ?? '');
-                    const newTemp = config.window.document.createElement('temp');
-                    ScriptUtils.eval(`
-                    ${__render.bindScript}
-                    ${drAttr.drBeforeOption ?? ''}
-                    var i = 0; 
-                    const repeat = ${drAttr.drRepeat};
-                    const repeatStr = \`${drAttr.drRepeat}\`;
-                    let range = repeat;
-                    if (typeof repeat === 'number') {
-                        range = ${EventManager.RANGE_VARNAME}(repeat);
-                    } 
-                    for(const it of range) {
-                        var destIt = it;
-                        if (range.isRange) {
-                            destIt = it;
-                        }  else {
-                            destIt = repeatStr + '[' + i +']'
-                        }
-                        const n = this.__render.element.cloneNode(true);
-                        n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it).replace(/\\#it\\#/g, destIt).replace(/\\#nearRangeIt\\#/g, destIt).replace(/\\#nearRangeIndex\\#/g, destIt)))
-                        n.innerHTML = n.innerHTML.replace(/\\#it\\#/g, destIt).replace(/\\#index\\#/g, destIt);
-                        
-                        if (this.__render.drStripOption === 'true') {
-                            Array.from(n.childNodes).forEach(it => this.__render.fag.append(it));
-                        } else {
-                            this.__render.fag.append(n);
-                        }
-                        i++;
-                    }
-                    ${drAttr.drAfterOption ?? ''}
-                    `, Object.assign(obj, {
-                        __render: Object.freeze({
-                            fag: newTemp,
-                            drStripOption: drAttr.drStripOption,
-                            ...__render
-                        })
-                    }));
-                    RawSet.drVarDecoding(newTemp, vars);
-                    RawSet.drItOtherDecoding(newTemp, itRandom);
-                    const tempalte = config.window.document.createElement('template');
-                    tempalte.innerHTML = newTemp.innerHTML;
-                    fag.append(tempalte.content)
-                    const rr = RawSet.checkPointCreates(fag, config)
-                    element.parentNode?.replaceChild(fag, element);
-                    raws.push(...rr)
-                }
-                else {
-                    // config detecting
-                    // console.log('config targetElement-->', config?.targetElements)
-                    // const targetElement = config?.targetElements?.find(it => (!drAttr.drIf && !drAttr.drForOf && !drAttr.drFor && !drAttr.drRepeat) && it.name.toLowerCase() === element.tagName.toLowerCase());
-                    const targetElement = config?.targetElements?.find(it => it.name.toLowerCase() === element.tagName.toLowerCase());
-                    if (targetElement) {
-                        const documentFragment = targetElement.callBack(element, obj, this);
-                        // console.log('target-->',name, documentFragment)
-                        if (documentFragment) {
-                            const detectAction = element.getAttribute(RawSet.DR_DETECT_NAME);
-                            const render = (documentFragment as any).render;
-                            if (detectAction && render) {
-                                this.detect = {
-                                    action: () => {
-                                        const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${detectAction} `;
-                                        ScriptUtils.eval(script, Object.assign(obj, {
-                                            __render: render
-                                        }))
-                                    }
-                                };
-                            }
-                            // fag.append(documentFragment)
-                            const rr = RawSet.checkPointCreates(documentFragment, config)
-                            element.parentNode?.replaceChild(documentFragment, element);
-                            raws.push(...rr);
-                            onElementInitCallBack.push({
-                                name: targetElement.name.toLowerCase(),
-                                obj,
-                                targetElement,
-                                creatorMetaData: targetElement.__creatorMetaData as CreatorMetaData
-                            });
-                            targetElement?.complete?.(element, obj, this);
-                        }
-                    }
-                    const attributeNames = this.getAttributeNames(element);
-                    // const targetAttr = config?.targetAttrs?.find(it => (!drAttr.drForOf && !drAttr.drFor && !drAttr.drRepeat) && attributeNames.includes(it.name));
-                    const targetAttr = config?.targetAttrs?.find(it => attributeNames.includes(it.name));
-                    if (targetAttr) {
-                        const attrName = targetAttr.name;
-                        const attrValue = this.getAttributeAndDelete(element, attrName)
-                        if (attrValue && attrName && (!drAttr.drForOf && !drAttr.drFor && !drAttr.drRepeat)) {
-                            const documentFragment = targetAttr.callBack(element, attrValue, obj, this);
-                            if (documentFragment) {
-                                const rr = RawSet.checkPointCreates(documentFragment, config)
-                                element.parentNode?.replaceChild(documentFragment, element);
-                                raws.push(...rr);
-                                onAttrInitCallBack.push({
-                                    attrName,
-                                    attrValue,
-                                    obj
-                                });
-                                targetAttr?.complete?.(element, attrValue, obj, this);
-                            }
-                        }
                     }
                 }
             }
@@ -698,15 +276,15 @@ export class RawSet {
                 ));
             }
         })
-        for (const it of onThisComponentSetCallBack) {
+        for (const it of onThisComponentSetCallBacks) {
             it.obj.onInitRender?.();
         }
-        for (const it of onElementInitCallBack) {
+        for (const it of onElementInitCallBacks) {
             it.targetElement?.__render?.component?.onInitRender?.({render: it.targetElement?.__render, creatorMetaData: it.targetElement?.__creatorMetaData});
-            const r = config?.onElementInit?.(it.name, obj, this, it.targetElement);
+            config?.onElementInit?.(it.name, obj, this, it.targetElement);
         }
-        for (const it of onAttrInitCallBack) {
-            const r = config?.onAttrInit?.(it.attrName, it.attrValue, obj, this);
+        for (const it of onAttrInitCallBacks) {
+            config?.onAttrInit?.(it.attrName, it.attrValue, obj, this);
         }
         // component destroy
         if (obj.__domrender_components) {
@@ -725,10 +303,6 @@ export class RawSet {
 
     public applyEvent(obj: any, fragment = this.fragment, config?: Config) {
         eventManager.applyEvent(obj, eventManager.findAttrElements(fragment, config), config)
-    }
-
-    public getAttributeNames(element: Element) {
-        return element.getAttributeNames();
     }
 
     public getAttribute(element: Element, attr: string) {
@@ -885,47 +459,15 @@ export class RawSet {
         });
     }
 
-    // public static drDVarEncoding(element: Element, drVarOption: string) {
-    //     const vars = (drVarOption?.split(',') ?? []).map(it => {
-    //         const s = it.trim().split('=');
-    //         return {
-    //             name: s[0],
-    //             value: s[1],
-    //             regex: RegExp('(?<!(dr-|\\.))var\\.' + s[0] + '(?=.?)', 'g'),
-    //             random: RandomUtils.uuid()
-    //         }
-    //     })
-    //     element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
-    //         vars.filter(vit => vit.value && vit.name).forEach(vit => {
-    //             it.innerHTML = it.innerHTML.replace(vit.regex, vit.random);
-    //         })
-    //     });
-    //     vars.filter(vit => vit.value && vit.name).forEach(vit => {
-    //         element.innerHTML = element.innerHTML.replace(vit.regex, vit.value);
-    //     })
-    //     return vars;
-    // }
-    //
-    // public static drDVarDecoding(element: Element, vars: { name: string, value: string, regex: RegExp, random: string }[]) {
-    //     element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
-    //         vars.filter(vit => vit.value && vit.name).forEach(vit => {
-    //             it.innerHTML = it.innerHTML.replace(RegExp(vit.random, 'g'), vit.value);
-    //         })
-    //     });
-    // }
-
     public static drThisEncoding(element: Element, drThis: string): string {
         const thisRandom = RandomUtils.uuid()
         // const thisRegex = /(?<!(dr-|\.))this(?=.?)/g;
         // const thisRegex = /[^(dr\-)]this(?=.?)/g;
         // const thisRegex = /[^(dr\-)]this\./g;
         // safari 때문에 전위 검색 regex가 안됨 아 짜증나서 이걸로함.
-
         // element.querySelectorAll(`[${RawSet.DR_PRE_NAME}]`).forEach(it => {
         //     let message = it.innerHTML;
         // })
-
-        // console.log('-----?', `[${RawSet.DR_THIS_NAME}], :not([${RawSet.DR_PRE_NAME}])`)
         element.querySelectorAll(`[${RawSet.DR_PRE_NAME}]`).forEach(it => {
             it.innerHTML = it.innerHTML.replace(/this/g, thisRandom);
         })
@@ -1215,38 +757,4 @@ export class RawSet {
 
         return styleBody;
     }
-}
-
-export type CreatorMetaData = {
-    thisVariableName?: string | null;
-    thisFullVariableName?: string | null;
-    componentKey?: string | null;
-    rawSet: RawSet;
-    innerHTML: string;
-    rootCreator: any;
-    creator: any;
-    // render?: Render;
-}
-
-export type Render = {
-    rawset?: RawSet;
-    scripts?: { [n: string]: any };
-    bindScript?: string;
-    element?: any;
-    attribute?: any;
-    creatorMetaData?: CreatorMetaData;
-    router?: any;
-    range?: any;
-    value?: any;
-    [n: string]: any
-
-    // component?: any;
-    // componentKey?: string;
-    // component
-    // element
-    // innerHTML
-    // attribute
-    // rawset
-    // componentKey
-    // scripts
 }
