@@ -151,10 +151,10 @@ export abstract class Messenger {
     }
 
     getChannels(key: string | object | ConstructorType<any>): Channel[] {
-        if (typeof key === 'function') {
-            key = key.name;
-        } else {
+        if (typeof key === 'object') {
             key = key.constructor.name;
+        } else if (typeof key === 'function') {
+            key = key.name;
         }
         return Array.from(this.channels.values()).filter(it => it.key === key);
     }
