@@ -64,7 +64,8 @@ export class Channel {
             // const fromDataSet = {channel: this, data: sendData};
             try {
                 it.subscribers.forEach(its => {
-                    rtns.push({channel: it, data: its.publish(data, {channel: this, action})});
+                    const rdata = its.publish(data, {channel: this, action});
+                    rtns.push({channel: it, data: rdata});
                 });
             } catch (e) {
                 if (e instanceof FilterSkipException) {
@@ -88,7 +89,7 @@ export class Channel {
         const subscriber = new ChannelSubscriber(this);
         const rs = this.subscribe((data: any, meta: ChannelMetaData) => {
             if (filterF(data, meta)) {
-                subscriber.publish(data, meta);
+                return subscriber.publish(data, meta);
             } else {
                 throw new FilterSkipException();
             }
