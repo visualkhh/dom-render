@@ -12,7 +12,7 @@ import {DynamicComponent} from './components/dynamic/DynamicComponent';
 import {DynamicComponent2} from './components/dynamic/DynamicComponent2';
 import {OnProxyDomRender} from 'dom-render/lifecycle/OnProxyDomRender';
 
-class Data implements OnProxyDomRender {
+export class Index implements OnProxyDomRender {
     toggle = true;
     name = 'my name is dom-render';
     link = 'https://naver.com';
@@ -37,9 +37,14 @@ class Data implements OnProxyDomRender {
     }
 
     onProxyDomRender({messenger}: Config): void {
-        messenger?.createChannel('index').subscribe((f, d) => {
-            this.rcvData = d;
+        messenger?.createChannel(this).subscribeFilter((f) => (f.data?.data.age ?? 0) > 22, (f) => {
+            this.rcvData = f.data;
+            return {data: 'good', action: 'actionGood'}
         });
+        // messenger?.createChannel(this).subscribe((f) => {
+        //     this.rcvData = f.data;
+        //     return {data: 'good', action: 'actionGood'}
+        // });
         // console.log('onProxyDomRender', messenger);
     }
 }
@@ -81,7 +86,7 @@ DomRender.addAttributeCallBack(config, 'wow', (e, a, o) => {
     })
 })
 
-const data = DomRender.run(new Data(), document.querySelector('#app')!, config);
+const data = DomRender.run(new Index(), document.querySelector('#app')!, config);
 
 // setInterval(() => {
 //     console.log(data)

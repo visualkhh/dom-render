@@ -387,17 +387,20 @@ type RouteData = {
 ```typescript
 export class Home implements OnProxyDomRender {
     private channel?: Channel;
-    
-    sendIndexMessage() {
-      this.channel?.publish('index', {
-        name: 'name',
-        age: 'age',
-        title: 'title'
-      });
-    }
+
+  sendIndexMessage() {
+    const rtn = this.channel?.publish(Index, {
+      data: {
+        name: this.name,
+        age: this.age,
+        title: this.title
+      }
+    });
+    console.log('sendIndexMessage return value: ', rtn);
+  }
     
     onProxyDomRender({messenger}: Config): void {
-        this.channel = messenger?.createChannel('home');
+        this.channel = messenger?.createChannel(Home);
     }
 }
 ```
@@ -408,9 +411,14 @@ export class Home implements OnProxyDomRender {
 ```typescript
 class Index implements OnProxyDomRender {
     onProxyDomRender({messenger}: Config): void {
-        messenger?.createChannel('index').subscribe((f, d) => {
-            console.log('rcvData', d);
-        });
+      messenger?.createChannel(this).subscribeFilter((f) => (f.data?.data.age ?? 0) > 22, (f) => {
+        this.rcvData = f.data;
+        return {data: 'good', action: 'actionGood'}
+      });
+      // messenger?.createChannel(this).subscribe((f) => {
+      //     this.rcvData = f.data;
+      //     return {data: 'good', action: 'actionGood'}
+      // });
     }
 }
 ````

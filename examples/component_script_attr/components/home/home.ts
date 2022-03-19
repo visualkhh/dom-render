@@ -2,9 +2,11 @@ import {OnCreateRender} from 'dom-render/lifecycle/OnCreateRender';
 import {OnProxyDomRender} from 'dom-render/lifecycle/OnProxyDomRender';
 import {Config} from 'dom-render/Config';
 import {Channel, Messenger} from 'dom-render/messenger/Messenger';
+import {Index} from '../../index';
 
 export class Home implements OnCreateRender, OnProxyDomRender {
     private channel?: Channel;
+
     constructor(public name: string, public age: number, public title: string) {
     }
 
@@ -17,14 +19,17 @@ export class Home implements OnCreateRender, OnProxyDomRender {
     }
 
     sendIndexMessage() {
-        this.channel?.publish('index', {
-            name: this.name,
-            age: this.age,
-            title: this.title
+        const rtn = this.channel?.publish(Index, {
+            data: {
+                name: this.name,
+                age: this.age,
+                title: this.title
+            }
         });
+        console.log('sendIndexMessage return value: ', rtn);
     }
 
     onProxyDomRender({messenger}: Config): void {
-        this.channel = messenger?.createChannel('home');
+        this.channel = messenger?.createChannel(Home);
     }
 }
