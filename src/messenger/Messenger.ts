@@ -10,7 +10,7 @@ export type ChannelDataSet = {
 }
 export class Channel {
     private subscribeCallback?: (from: ChannelDataSet) => any;
-
+    private filterFnc = (from: ChannelDataSet) => true;
     constructor(private messenger: Messenger, public obj: object, public key: string) {
     }
 
@@ -19,7 +19,13 @@ export class Channel {
         const sendData = Object.freeze({...data});
         this.messenger.getChannels(key)?.forEach(it => {
             const fromDataSet = {channel: this, data: sendData};
-            try { rtns.push({channel: it, data: it.subscribeCallback?.(fromDataSet)}); } catch (e) { console.error(e); }
+            try {
+                if (it.filterFnc(fromDataSet)) {
+                    rtns.push({channel: it, data: it.subscribeCallback?.(fromDataSet)});
+                }
+            } catch (e) {
+                console.error(e);
+            }
         });
         return rtns;
     }
@@ -32,19 +38,30 @@ export class Channel {
         return rtns.flat();
     }
 
-    subscribeFilter(filterF: (from: ChannelDataSet) => boolean, subscribeCallback: (from: ChannelDataSet) => ChannelData | void | undefined) {
-        this.subscribeCallback = (from: ChannelDataSet) => {
-            if (filterF(from)) {
-                const rtn = subscribeCallback(from);
-                if (rtn) {
-                    return rtn;
-                }
+    // subscribeFilter(filterF: (from: ChannelDataSet) => boolean, subscribeCallback: (from: ChannelDataSet) => ChannelData | void | undefined) {
+    //     this.subscribeCallback = (from: ChannelDataSet) => {
+    //         if (filterF(from)) {
+    //             const rtn = subscribeCallback(from);
+    //             if (rtn) {
+    //                 return rtn;
+    //             }
+    //         }
+    //     };
+    // }
+    filter(filterF: (from: ChannelDataSet) => boolean) {
+        const oldFilter = this.filterFnc;
+        this.filterFnc = (f: ChannelDataSet) => {
+            if (filterF(f)) {
+                return oldFilter(f);
             }
-        };
+            return false;
+        }
+        return this;
     }
 
     subscribe(subscribeCallback: (from: ChannelDataSet) => ChannelData | void | undefined) {
         this.subscribeCallback = subscribeCallback;
+        return this;
     };
 
     unsubscribe() {

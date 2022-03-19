@@ -37,7 +37,7 @@ export class Index implements OnProxyDomRender {
     }
 
     onProxyDomRender({messenger}: Config): void {
-        messenger?.createChannel(this).subscribeFilter((f) => (f.data?.data.age ?? 0) > 22, (f) => {
+        messenger?.createChannel(this).filter((f) => (f.data?.data.age ?? 0) > 5).subscribe((f) => {
             this.rcvData = f.data;
             return {data: 'good', action: 'actionGood'}
         });
