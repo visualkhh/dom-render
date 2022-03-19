@@ -1,12 +1,9 @@
 import {ConstructorType, DomRenderFinalProxy} from '../types/Types';
 
-// export type ChannelData = {
-//     data?: any;
-//     action?: string;
-// }
-class FilterSkipException {
-    constructor() {
-    }
+enum CallBackType {
+    FILTER,
+    MAP,
+    SUBSCRIBE
 }
 
 export type ChannelData = {
@@ -17,60 +14,75 @@ export type ChannelMetaData = {
     channel: Channel;
     action?: string;
 }
-
-export class ChannelSubscriber {
-    public parentSubscriber?: ChannelSubscriber;
-
-    constructor(
-        public channel: Channel,
-        public callback?: (data: any, metaData: ChannelMetaData) => any | undefined
-    ) {
-    }
-
-    publish(data: any, metaData: ChannelMetaData) {
-        if (this.callback) {
-            return this.callback(data, metaData);
-        }
-    }
-
-    subscribe(callback: (data: any, metaData: ChannelMetaData) => any | undefined) {
-        this.callback = callback;
+export class ChannelSubscription {
+    constructor(public channel: Channel, public subscriber: ChannelSubscriber) {
     }
 
     unsubscribe() {
-        this.callback = undefined;
-        this.channel.unsubscribe(this);
-        this.parentSubscriber?.unsubscribe();
+        this.subscriber.unsubscribe();
+    }
+}
+export class ChannelSubscriber {
+    public parentSubscriber?: ChannelSubscriber;
+    public callbacks: ({type: CallBackType, callback: (data: any, metaData: ChannelMetaData) => any | undefined})[] = [];
+    constructor(public channel: Channel) {
     }
 
-    deleteChannel() {
+    exeCallback(data: any, metaData: ChannelMetaData) {
+        for (const callback of this.callbacks) {
+            if (callback.type === CallBackType.FILTER && !callback.callback(data, metaData)) {
+                break;
+            } else if (callback.type === CallBackType.MAP) {
+                data = callback.callback(data, metaData);
+            } else if (callback.type === CallBackType.SUBSCRIBE) {
+                data = callback.callback(data, metaData);
+                break;
+            }
+        }
+        return data;
+    }
+
+    // chaining point
+    filter<D = any>(callback: (data: D, meta: ChannelMetaData) => any) {
+        this.callbacks.push({type: CallBackType.FILTER, callback});
+        return this;
+    }
+
+    map<D = any, R = any>(callback: (data: D, meta: ChannelMetaData) => R) {
+        this.callbacks.push({type: CallBackType.MAP, callback});
+        return this;
+    }
+
+    subscribe(callback: (data: any, metaData: ChannelMetaData) => any | undefined) {
+        this.callbacks.push({type: CallBackType.SUBSCRIBE, callback});
+        this.channel.subscribers.add(this);
+        return new ChannelSubscription(this.channel, this);
+    }
+
+    unsubscribe() {
+        this.channel.subscribers.delete(this);
+    }
+
+    deleteSubscriber() {
         this.unsubscribe();
-        this.channel.deleteChannel();
+        this.channel.subscribers.delete(this);
     }
 }
 
 export class Channel {
-    // private subscribeCallback?: (data: any, meta: ChannelMetaData) => any | void | undefined;
-    // private filterFnc = (from: ChannelDataSet) => true;
-    private subscribers = new Set<ChannelSubscriber>();
-
+    public subscribers = new Set<ChannelSubscriber>();
     constructor(private messenger: Messenger, public obj: object, public key: string) {
     }
 
     publish(key: string | object | ConstructorType<any>, data: any, action?: string) {
         const rtns: ChannelData[] = [];
-        // const sendData = data; // Object.freeze({...data});
         this.messenger.getChannels(key)?.forEach(it => {
-            // const fromDataSet = {channel: this, data: sendData};
             try {
                 it.subscribers.forEach(its => {
-                    const rdata = its.publish(data, {channel: this, action});
+                    const rdata = its.exeCallback(data, {channel: this, action});
                     rtns.push({channel: it, data: rdata});
                 });
             } catch (e) {
-                if (e instanceof FilterSkipException) {
-                    return;
-                }
                 console.error(e);
             }
         });
@@ -85,46 +97,22 @@ export class Channel {
         return rtns.flat();
     }
 
-    filter(filterF: (data: any, meta: ChannelMetaData) => boolean) {
+    // string point
+    filter<D = any>(filterF: (data: D, meta: ChannelMetaData) => boolean) {
         const subscriber = new ChannelSubscriber(this);
-        const rs = this.subscribe((data: any, meta: ChannelMetaData) => {
-            if (filterF(data, meta)) {
-                return subscriber.publish(data, meta);
-            } else {
-                throw new FilterSkipException();
-            }
-        });
-        subscriber.parentSubscriber = rs;
+        subscriber.filter(filterF);
         return subscriber;
-        // filterF()
-        // const oldFilter = this.filterFnc;
-        // this.filterFnc = (f: ChannelDataSet) => {
-        //     if (filterF(f)) {
-        //         return oldFilter(f);
-        //     }
-        //     return false;
-        // }
-        // return this;
+    }
+
+    map<D = any, R = any>(filterF: (data: D, meta: ChannelMetaData) => R) {
+        const subscriber = new ChannelSubscriber(this);
+        subscriber.map(filterF);
+        return subscriber;
     }
 
     subscribe(subscribeCallback: (data: any, meta: ChannelMetaData) => any | void | undefined) {
-        const subscriber = new ChannelSubscriber(this, subscribeCallback);
-        this.subscribers.add(subscriber);
-        // this.subscribeCallback = subscribeCallback;
-        return subscriber;
-    };
-
-    unsubscribe(cs: ChannelSubscriber) {
-        this.subscribers.delete(cs);
-        //     this.subscribeCallback = undefined;
-        //     const channels = this.messenger.getChannels(this.key);
-        //     if (channels) {
-        //         // find this channel and remove it
-        //         const index = channels.indexOf(this);
-        //         if (index >= 0) {
-        //             channels.splice(index, 1);
-        //         }
-        //     }
+        const subscriber = new ChannelSubscriber(this);
+        return subscriber.subscribe(subscribeCallback);
     };
 
     deleteChannel() {

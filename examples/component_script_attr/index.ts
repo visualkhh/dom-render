@@ -37,10 +37,24 @@ export class Index implements OnProxyDomRender {
     }
 
     onProxyDomRender({messenger}: Config): void {
-        messenger?.createChannel(this).filter((data) => (data.age ?? 0) > 5).subscribe((data) => {
-            this.rcvData = data;
-            return {data: 'good', action: 'actionGood'}
-        });
+        messenger?.createChannel(this)
+            .filter((data) => {
+                console.log('filter-->')
+                return (data.age ?? 0) > 5;
+            })
+            .map((data) => {
+                console.log('-------', data);
+                return data.age;
+            })
+            .subscribe((data) => {
+                console.log('-----ss--', data);
+                this.rcvData = data;
+                return {data: 'good', action: 'actionGood'}
+            });
+        // messenger?.createChannel(this).filter((data) => (data.age ?? 0) > 5).subscribe((data) => {
+        //     this.rcvData = data;
+        //     return {data: 'good', action: 'actionGood'}
+        // });
         // messenger?.createChannel(this).subscribe((data) => {
         //     this.rcvData = data;
         //     return {data: 'good', action: 'actionGood'}
