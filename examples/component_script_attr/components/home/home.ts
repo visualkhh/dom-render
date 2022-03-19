@@ -20,13 +20,12 @@ export class Home implements OnCreateRender, OnProxyDomRender {
 
     sendIndexMessage() {
         const rtn = this.channel?.publish(Index, {
-            data: {
-                name: this.name,
-                age: this.age,
-                title: this.title
-            }
+            name: this.name,
+            age: this.age,
+            title: this.title
         });
         console.log('sendIndexMessage return value: ', rtn);
+        // console.log('channel-->', this.channel);
     }
 
     onProxyDomRender({messenger}: Config): void {
