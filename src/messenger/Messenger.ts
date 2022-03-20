@@ -14,6 +14,7 @@ export type ChannelMetaData = {
     channel: Channel;
     action?: string;
 }
+
 export class ChannelSubscription {
     constructor(public channel: Channel, public subscriber: ChannelSubscriber) {
     }
@@ -22,9 +23,11 @@ export class ChannelSubscription {
         this.subscriber.unsubscribe();
     }
 }
+
 export class ChannelSubscriber {
     public parentSubscriber?: ChannelSubscriber;
-    public callbacks: ({type: CallBackType, callback: (data: any, metaData: ChannelMetaData) => any | undefined})[] = [];
+    public callbacks: ({ type: CallBackType, callback: (data: any, metaData: ChannelMetaData) => any | undefined })[] = [];
+
     constructor(public channel: Channel) {
     }
 
@@ -71,6 +74,7 @@ export class ChannelSubscriber {
 
 export class Channel {
     public subscribers = new Set<ChannelSubscriber>();
+
     constructor(private messenger: Messenger, public obj: object, public key: string) {
     }
 
@@ -123,7 +127,7 @@ export class Channel {
 export abstract class Messenger {
     private channels = new Set<Channel>();
 
-    createChannel(obj: object, key = obj.constructor.name): Channel {
+    createChannel(obj: any, key = obj.constructor.name): Channel {
         const channel = DomRenderFinalProxy.final(new Channel(this, obj, key));
         this.channels.add(channel);
         // this.channels.get(key) ? this.channels.get(key)!.push(channel) : this.channels.set(key, [channel]);
@@ -132,6 +136,17 @@ export abstract class Messenger {
 
     deleteChannel(channel: Channel) {
         this.channels.delete(channel);
+    }
+
+    deleteChannelFromObj(obj: any) {
+        if (obj) {
+            this.channels.forEach(it => {
+                if (it.obj === obj) {
+                    console.log('dddddddddddd', obj)
+                    this.deleteChannel(it);
+                }
+            });
+        }
     }
 
     addChannel(channel: Channel) {

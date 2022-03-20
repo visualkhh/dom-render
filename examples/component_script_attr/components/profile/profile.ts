@@ -1,8 +1,11 @@
 import {OnCreateRender} from 'dom-render/lifecycle/OnCreateRender';
 import {OnDestroyRender} from 'dom-render/lifecycle/OnDestroyRender';
 import {CreatorMetaData} from 'dom-render/RawSet';
+import {OnProxyDomRender} from 'dom-render/lifecycle/OnProxyDomRender';
+import {Config} from 'dom-render/Config';
+import {Index} from '../../index';
 
-export class Profile implements OnCreateRender, OnDestroyRender {
+export class Profile implements OnCreateRender, OnDestroyRender, OnProxyDomRender {
     name?: string;
     age?: number;
     details = 'details information';
@@ -20,5 +23,9 @@ export class Profile implements OnCreateRender, OnDestroyRender {
 
     onDestroyRender(metaData: CreatorMetaData): void {
         console.log('destroy', metaData);
+    }
+
+    onProxyDomRender(config: Config): void {
+        config.messenger?.createChannel(this).publish(Index, {age: 999});
     }
 }

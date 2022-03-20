@@ -10,7 +10,7 @@ export class DrThis extends OperatorRender {
             if (r) {
                 if (r instanceof ComponentSet) {
                     if (this.rawSet.data) {
-                        (this.rawSet.data as ComponentSet).obj?.onDestroyRender?.();
+                        RawSet.destroy((this.rawSet.data as ComponentSet).obj, [], this.source.config);
                     }
                     // console.log('dr-this ->  component', this.data);
                     this.rawSet.data = r;

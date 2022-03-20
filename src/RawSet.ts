@@ -292,7 +292,7 @@ export class RawSet {
                 const domrenderComponentNew = (value as any).__domrender_component_new as CreatorMetaData;
                 const rawSet: RawSet | undefined = domrenderComponentNew?.rawSet;
                 if (rawSet && !rawSet.isConnected) {
-                    obj.__domrender_components[key]?.onDestroyRender?.(domrenderComponentNew);
+                    RawSet.destroy(obj.__domrender_components[key], [domrenderComponentNew], config)
                     delete obj.__domrender_components[key];
                 }
                 // console.log('destroy', key, value);
@@ -756,5 +756,15 @@ export class RawSet {
         }
 
         return styleBody;
+    }
+
+    public static destroy(obj: any | undefined, parameter: any[], config: Config): void {
+        if (config.messenger && obj) {
+            console.log('destroy---------', obj, parameter)
+            config.messenger.deleteChannelFromObj(obj);
+        }
+        if (obj) {
+            obj.onDestroyRender?.(...parameter);
+        }
     }
 }
