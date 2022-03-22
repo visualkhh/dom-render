@@ -1,4 +1,5 @@
 import {ConstructorType, DomRenderFinalProxy} from '../types/Types';
+import {Config} from '../Config';
 
 enum CallBackType {
     FILTER,
@@ -11,7 +12,7 @@ export type ChannelData = {
     data?: (any | undefined);
 }
 export type ChannelMetaData = {
-    channel: Channel;
+    channel?: Channel;
     action?: string;
 }
 
@@ -124,8 +125,56 @@ export class Channel {
     };
 }
 
+type MessengerEventDetail = {
+    key: string | object | ConstructorType<any>;
+    data?: any;
+    action?: string;
+    result?: (c: ChannelData[]) => void;
+}
+
+type MessengerSubscribeEventDetail = {
+    obj: any;
+    key?: string | object | ConstructorType<any>;
+    init: (channel: Channel, subscription: ChannelSubscription) => void;
+    subscribe: (data: any, meta: ChannelMetaData) => void;
+}
+
 export abstract class Messenger {
     private channels = new Set<Channel>();
+    static readonly EVENT_PUBLISH_KEY = 'domRenderMessenger_publish';
+    static readonly EVENT_SUBSCRIBE_KEY = 'domRenderMessenger_subscribe';
+    constructor(private config: Config) {
+        this.config.window.addEventListener(Messenger.EVENT_PUBLISH_KEY, (e: Event) => {
+            const detail = ((e as CustomEvent).detail as MessengerEventDetail);
+            console.log('--->', detail)
+            const rtns: ChannelData[] = [];
+            this.getChannels(detail.key)?.forEach(it => {
+                try {
+                    it.subscribers.forEach(its => {
+                        const rdata = its.exeCallback(detail.data, {action: detail.action});
+                        rtns.push({channel: it, data: rdata});
+                    });
+                } catch (e) {
+                    console.error(e);
+                }
+            });
+            detail.result?.(rtns);
+        });
+        this.config.window.addEventListener(Messenger.EVENT_SUBSCRIBE_KEY, (e: Event) => {
+            const detail = ((e as CustomEvent).detail as MessengerSubscribeEventDetail);
+            console.log('--->', detail)
+            const channel = this.createChannel(detail.obj, detail.key);
+            detail.init(channel, channel.subscribe(detail.subscribe));
+        });
+    }
+
+    public static publish(window: Window, detail: MessengerEventDetail) {
+        window.dispatchEvent(new CustomEvent(Messenger.EVENT_PUBLISH_KEY, {detail}));
+    }
+
+    public static subscribe(window: Window, detail: MessengerSubscribeEventDetail) {
+        window.dispatchEvent(new CustomEvent(Messenger.EVENT_SUBSCRIBE_KEY, {detail}));
+    }
 
     createChannel(obj: any, key = obj.constructor.name): Channel {
         const channel = DomRenderFinalProxy.final(new Channel(this, obj, key)) as Channel;

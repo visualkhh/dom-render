@@ -20,7 +20,7 @@ export class DomRender {
             config = {window} as Config;
         }
         config.routerType = config.routerType || 'none';
-        config.messenger = DomRenderFinalProxy.final(config.messenger ?? new DefaultMessenger());
+        config.messenger = DomRenderFinalProxy.final(config.messenger ?? new DefaultMessenger(config));
         const domRender = new DomRenderProxy(obj, target, config);
         const dest = new Proxy(obj, domRender)
         robj = dest;

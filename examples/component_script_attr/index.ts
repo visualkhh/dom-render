@@ -37,6 +37,17 @@ export class Index implements OnProxyDomRender {
         this.dynamicComponent = this.dynamicComponent.obj instanceof DynamicComponent ? this.dynamicComponent2 : this.dynamicComponent1;
     }
 
+    eventMessenger() {
+        Messenger.publish(window,
+            {
+                key: Index, data: {name: 'index'}, action: 'type1',
+                result: (c) => {
+                    console.log('----', c);
+                }
+            }
+        );
+    }
+
     onProxyDomRender({messenger}: Config): void {
         messenger?.createChannel(this)
             .filter((data: any, meta: ChannelMetaData) => {
@@ -53,6 +64,19 @@ export class Index implements OnProxyDomRender {
                 return {
                     data: 'good',
                     action: 'actionGood'
+                }
+            });
+
+        Messenger.subscribe(window,
+            {
+                obj: this,
+                init: (c, s) => {
+                    console.log('--ccccc--', c);
+                    s.unsubscribe();
+                    c.deleteChannel();
+                },
+                subscribe: (data: any, meta: ChannelMetaData) => {
+                    console.log('---data-', data, meta);
                 }
             });
         // messenger?.createChannel(this).filter((data) => (data.age ?? 0) > 5).subscribe((data) => {
