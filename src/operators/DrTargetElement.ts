@@ -6,8 +6,7 @@ export class DrTargetElement extends OperatorRender {
     execRender(): ExecuteState {
         const targetElement = this.source.config?.targetElements?.find(it => it.name.toLowerCase() === this.elementSource.element.tagName.toLowerCase());
         if (targetElement) {
-            const documentFragment = targetElement.callBack(this.elementSource.element, this.source.obj, this.rawSet);
-            // console.log('target-->',name, documentFragment)
+            const documentFragment = targetElement.callBack(this.elementSource.element, this.source.obj, this.rawSet, this.elementSource.attrs);
             if (documentFragment) {
                 const detectAction = this.elementSource.element.getAttribute(RawSet.DR_DETECT_NAME);
                 const render = (documentFragment as any).render;

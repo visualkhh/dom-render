@@ -11,6 +11,7 @@ import {ComponentSet} from 'dom-render/components/ComponentSet';
 import {DynamicComponent} from './components/dynamic/DynamicComponent';
 import {DynamicComponent2} from './components/dynamic/DynamicComponent2';
 import {OnProxyDomRender} from 'dom-render/lifecycle/OnProxyDomRender';
+import {ChannelMetaData, Messenger} from 'dom-render/messenger/Messenger';
 
 export class Index implements OnProxyDomRender {
     toggle = true;
@@ -38,18 +39,21 @@ export class Index implements OnProxyDomRender {
 
     onProxyDomRender({messenger}: Config): void {
         messenger?.createChannel(this)
-            .filter((data) => {
-                console.log('filter-->')
+            .filter((data: any, meta: ChannelMetaData) => {
+                console.log('filter-->');
                 return (data.age ?? 0) > 5;
             })
-            .map((data) => {
+            .map((data: any, meta: ChannelMetaData) => {
                 console.log('-------', data);
                 return data.age;
             })
-            .subscribe((data) => {
+            .subscribe((data: any, meta: ChannelMetaData) => {
                 console.log('-----ss--', data);
                 this.rcvData = data;
-                return {data: 'good', action: 'actionGood'}
+                return {
+                    data: 'good',
+                    action: 'actionGood'
+                }
             });
         // messenger?.createChannel(this).filter((data) => (data.age ?? 0) > 5).subscribe((data) => {
         //     this.rcvData = data;
@@ -74,7 +78,10 @@ const scripts = {
 config.scripts = scripts;
 DomRender
     .addComponent(config, {type: Profile}, {template: ProfileTemplate})
-    .add({type: Home}, {template: HomeTemplate, styles: [HomeStyle]});
+    .add({type: Home}, {
+        template: HomeTemplate,
+        styles: [HomeStyle]
+    });
 
 DomRender.addAttribute(config, 'link',
     (element: Element, attrValue: string, obj: any, rawSet: RawSet) => {
@@ -102,6 +109,9 @@ DomRender.addAttributeCallBack(config, 'wow', (e, a, o) => {
 
 const data = DomRender.run(new Index(), document.querySelector('#app')!, config);
 
+setTimeout(() => {
+    console.log(data)
+}, 5000)
 // setInterval(() => {
 //     console.log(data)
 // }, 5000)

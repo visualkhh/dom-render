@@ -10,9 +10,9 @@ export class DrThis extends OperatorRender {
             if (r) {
                 if (r instanceof ComponentSet) {
                     if (this.rawSet.data) {
-                        RawSet.destroy((this.rawSet.data as ComponentSet).obj, [], this.source.config);
+                        const destroyOptions = this.elementSource.attrs.drDestroyOption?.split(',') ?? [];
+                        RawSet.destroy((this.rawSet.data as ComponentSet).obj, [], this.source.config, destroyOptions);
                     }
-                    // console.log('dr-this ->  component', this.data);
                     this.rawSet.data = r;
                     this.returnContainer.fag.append(RawSet.drThisCreate(this.elementSource.element, `${this.elementSource.attrs.drThis}.obj`, this.elementSource.attrs.drVarOption ?? '', this.elementSource.attrs.drStripOption, this.source.obj, this.source.config, r))
                     this.afterCallBack.onThisComponentSetCallBacks.push(r);

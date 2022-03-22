@@ -24,7 +24,7 @@ export class ChannelSubscription {
     }
 }
 
-export class ChannelSubscriber {
+export class ChannelSubscriber<SD = any> {
     public parentSubscriber?: ChannelSubscriber;
     public callbacks: ({ type: CallBackType, callback: (data: any, metaData: ChannelMetaData) => any | undefined })[] = [];
 
@@ -46,17 +46,17 @@ export class ChannelSubscriber {
     }
 
     // chaining point
-    filter<D = any>(callback: (data: D, meta: ChannelMetaData) => any) {
+    filter<D = SD>(callback: (data: D, meta: ChannelMetaData) => boolean): ChannelSubscriber<SD> {
         this.callbacks.push({type: CallBackType.FILTER, callback});
         return this;
     }
 
-    map<D = any, R = any>(callback: (data: D, meta: ChannelMetaData) => R) {
+    map<D = SD, R = any>(callback: (data: D, meta: ChannelMetaData) => R): ChannelSubscriber<R> {
         this.callbacks.push({type: CallBackType.MAP, callback});
-        return this;
+        return this as unknown as ChannelSubscriber<R>;
     }
 
-    subscribe(callback: (data: any, metaData: ChannelMetaData) => any | undefined) {
+    subscribe(callback: (data: SD, metaData: ChannelMetaData) => any | undefined) {
         this.callbacks.push({type: CallBackType.SUBSCRIBE, callback});
         this.channel.subscribers.add(this);
         return new ChannelSubscription(this.channel, this);
@@ -103,19 +103,19 @@ export class Channel {
 
     // string point
     filter<D = any>(filterF: (data: D, meta: ChannelMetaData) => boolean) {
-        const subscriber = new ChannelSubscriber(this);
+        const subscriber = new ChannelSubscriber<D>(this);
         subscriber.filter(filterF);
         return subscriber;
     }
 
-    map<D = any, R = any>(filterF: (data: D, meta: ChannelMetaData) => R) {
-        const subscriber = new ChannelSubscriber(this);
+    map<D = any, R = any>(filterF: (data: D, meta: ChannelMetaData) => R): ChannelSubscriber<R> {
+        const subscriber = new ChannelSubscriber<R>(this);
         subscriber.map(filterF);
         return subscriber;
     }
 
-    subscribe(subscribeCallback: (data: any, meta: ChannelMetaData) => any | void | undefined) {
-        const subscriber = new ChannelSubscriber(this);
+    subscribe<D = any>(subscribeCallback: (data: D, meta: ChannelMetaData) => any | void | undefined) {
+        const subscriber = new ChannelSubscriber<D>(this);
         return subscriber.subscribe(subscribeCallback);
     };
 
@@ -128,7 +128,7 @@ export abstract class Messenger {
     private channels = new Set<Channel>();
 
     createChannel(obj: any, key = obj.constructor.name): Channel {
-        const channel = DomRenderFinalProxy.final(new Channel(this, obj, key));
+        const channel = DomRenderFinalProxy.final(new Channel(this, obj, key)) as Channel;
         this.channels.add(channel);
         // this.channels.get(key) ? this.channels.get(key)!.push(channel) : this.channels.set(key, [channel]);
         return channel;

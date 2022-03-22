@@ -23,26 +23,30 @@ import {DrAppender} from './operators/DrAppender';
 import {DrRepeat} from './operators/DrRepeat';
 import {DrTargetElement} from './operators/DrTargetElement';
 import {DrTargetAttr} from './operators/DrTargetAttr';
-
+export enum DestroyOptionType {
+    NO_DESTROY = 'NO_DESTROY',
+    NO_MESSENGER_DESTROY = 'NO_MESSENGER_DESTROY'
+}
 export type Attrs = {
-    dr: string | null
-    drIf: string | null
-    drAppender: string | null
-    drFor: string | null
-    drForOf: string | null
-    drRepeat: string | null
-    drThis: string | null
-    drForm: string | null
-    drPre: string | null
-    drInnerHTML: string | null
-    drInnerText: string | null
-    drItOption: string | null
-    drVarOption: string | null
-    drAfterOption: string | null
-    drNextOption: string | null
-    drBeforeOption: string | null
-    drCompleteOption: string | null
-    drStripOption: string | null
+    dr: string | null;
+    drIf: string | null;
+    drAppender: string | null;
+    drFor: string | null;
+    drForOf: string | null;
+    drRepeat: string | null;
+    drThis: string | null;
+    drForm: string | null;
+    drPre: string | null;
+    drInnerHTML: string | null;
+    drInnerText: string | null;
+    drItOption: string | null;
+    drVarOption: string | null;
+    drAfterOption: string | null;
+    drNextOption: string | null;
+    drBeforeOption: string | null;
+    drCompleteOption: string | null;
+    drStripOption: string | null;
+    drDestroyOption: string | null;
 }
 export type CreatorMetaData = {
     thisVariableName?: string | null;
@@ -50,7 +54,9 @@ export type CreatorMetaData = {
     componentKey?: string | null;
     rawSet: RawSet;
     innerHTML: string;
+    drAttrs?: Attrs;
     rootCreator: any;
+    attribute: any;
     creator: any;
     // render?: Render;
 }
@@ -93,6 +99,7 @@ export class RawSet {
     public static readonly DR_BEFORE_OPTIONNAME = 'dr-before';
     public static readonly DR_COMPLETE_OPTIONNAME = 'dr-complete';
     public static readonly DR_STRIP_OPTIONNAME = 'dr-strip';
+    public static readonly DR_DESTROY_OPTIONNAME = 'dr-destroy';
 
     public static readonly drAttrsOriginName: Attrs = {
         dr: RawSet.DR,
@@ -112,7 +119,8 @@ export class RawSet {
         drNextOption: RawSet.DR_NEXT_OPTIONNAME,
         drBeforeOption: RawSet.DR_BEFORE_OPTIONNAME,
         drCompleteOption: RawSet.DR_COMPLETE_OPTIONNAME,
-        drStripOption: RawSet.DR_STRIP_OPTIONNAME
+        drStripOption: RawSet.DR_STRIP_OPTIONNAME,
+        drDestroyOption: RawSet.DR_DESTROY_OPTIONNAME
     };
 
     public static readonly DR_TAGS = [];
@@ -225,10 +233,10 @@ export class RawSet {
                     drAfterOption: this.getAttributeAndDelete(element, RawSet.DR_AFTER_OPTIONNAME),
                     drBeforeOption: this.getAttributeAndDelete(element, RawSet.DR_BEFORE_OPTIONNAME),
                     drCompleteOption: this.getAttributeAndDelete(element, RawSet.DR_COMPLETE_OPTIONNAME),
-                    drStripOption: this.getAttributeAndDelete(element, RawSet.DR_STRIP_OPTIONNAME)
+                    drStripOption: this.getAttributeAndDelete(element, RawSet.DR_STRIP_OPTIONNAME),
+                    drDestroyOption: this.getAttributeAndDelete(element, RawSet.DR_DESTROY_OPTIONNAME)
                 } as Attrs;
                 drAttrs.push(drAttr);
-
                 const operators = [
                     new DrPre(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new Dr(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
@@ -291,11 +299,12 @@ export class RawSet {
             Object.entries(obj.__domrender_components).forEach(([key, value]) => {
                 const domrenderComponentNew = (value as any).__domrender_component_new as CreatorMetaData;
                 const rawSet: RawSet | undefined = domrenderComponentNew?.rawSet;
+                const drAttrs: Attrs | undefined = domrenderComponentNew?.drAttrs;
                 if (rawSet && !rawSet.isConnected) {
-                    RawSet.destroy(obj.__domrender_components[key], [domrenderComponentNew], config)
+                    const destroyOptions = drAttrs?.drDestroyOption?.split(',') ?? [];
+                    RawSet.destroy(obj.__domrender_components[key], [domrenderComponentNew], config, destroyOptions)
                     delete obj.__domrender_components[key];
                 }
-                // console.log('destroy', key, value);
             })
         }
         return raws;
@@ -627,7 +636,7 @@ export class RawSet {
             name,
             styles,
             template,
-            callBack(element: Element, obj: any, rawSet: RawSet): DocumentFragment {
+            callBack(element: Element, obj: any, rawSet: RawSet, attrs?: Attrs): DocumentFragment {
                 // console.log('callback------->')
                 if (!obj.__domrender_components) {
                     obj.__domrender_components = {};
@@ -658,6 +667,7 @@ export class RawSet {
                     }
                     constructorParam = param;
                 }
+                console.log('------22', attrs);
                 domrenderComponents[componentKey] = objFactory(element, obj, rawSet, constructorParam);
                 const instance = domrenderComponents[componentKey];
                 const i = instance.__domrender_component_new = (instance.__domrender_component_new ?? new Proxy({}, new DomRenderFinalProxy())) as CreatorMetaData;
@@ -665,6 +675,8 @@ export class RawSet {
                 i.thisFullVariableName = `this.__domrender_components.${componentKey}`;
                 i.componentKey = componentKey;
                 i.rawSet = rawSet;
+                i.attribute = attribute;
+                i.drAttrs = attrs;
                 i.innerHTML = element.innerHTML;
                 i.rootCreator = new Proxy(obj, new DomRenderFinalProxy());
                 i.creator = new Proxy(rawSet.point.thisVariableName ? ScriptUtils.evalReturn(rawSet.point.thisVariableName, obj) : obj, new DomRenderFinalProxy());
@@ -758,13 +770,16 @@ export class RawSet {
         return styleBody;
     }
 
-    public static destroy(obj: any | undefined, parameter: any[], config: Config): void {
-        if (config.messenger && obj) {
-            console.log('destroy---------', obj, parameter)
-            config.messenger.deleteChannelFromObj(obj);
-        }
-        if (obj) {
-            obj.onDestroyRender?.(...parameter);
+    public static destroy(obj: any | undefined, parameter: any[], config: Config, destroyOptions: (DestroyOptionType | string)[] = []): void {
+        if (!destroyOptions.some(it => it === DestroyOptionType.NO_DESTROY)) {
+            if (!destroyOptions.some(it => it === DestroyOptionType.NO_MESSENGER_DESTROY)) {
+                if (config.messenger && obj) {
+                    config.messenger.deleteChannelFromObj(obj);
+                }
+            }
+            if (obj) {
+                obj.onDestroyRender?.(...parameter);
+            }
         }
     }
 }

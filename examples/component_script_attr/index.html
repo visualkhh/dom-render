@@ -16,7 +16,7 @@ ${this.name}$
     </profile>
 </profile>
 <h3>component data link and detect</h3>
-<Profile dr-if="this.toggle" dr-detect="$component.age = this.age" dr-on-component-init="$component.name='papa'; $component.age=58;">
+<Profile dr-if="this.toggle" dr-detect="$component.age = this.age" dr-on-component-init="$component.name='papa'; $component.age=58;" dr-destroy="NO_DESTROY">
     <b>${this.name}$</b>
 </Profile>
 

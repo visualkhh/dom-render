@@ -22,7 +22,7 @@ export class Profile implements OnCreateRender, OnDestroyRender, OnProxyDomRende
     }
 
     onDestroyRender(metaData: CreatorMetaData): void {
-        console.log('destroy', metaData);
+        console.log('destroy--------------------', metaData);
     }
 
     onProxyDomRender(config: Config): void {

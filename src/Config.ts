@@ -1,5 +1,5 @@
 import {ConstructorType} from './types/Types';
-import { CreatorMetaData, RawSet, Render } from './RawSet';
+import {Attrs, CreatorMetaData, RawSet, Render} from './RawSet';
 import {Router} from './routers/Router';
 import {Messenger} from './messenger/Messenger';
 
@@ -7,7 +7,7 @@ export type TargetElement = {
     name: string;
     template?: string;
     styles?: string[];
-    callBack: (target: Element, obj: any, rawSet: RawSet) => DocumentFragment;
+    callBack: (target: Element, obj: any, rawSet: RawSet, attrs?: Attrs) => DocumentFragment;
     complete?: (target: Element, obj: any, rawSet: RawSet) => void;
     __render?: Render;
     __creatorMetaData?: CreatorMetaData;
