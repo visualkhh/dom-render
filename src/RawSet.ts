@@ -568,7 +568,7 @@ export class RawSet {
         const n = element.cloneNode(true) as Element;
         if (set) {
             const id = RandomUtils.getRandomString(20);
-            n.innerHTML = RawSet.styleTransformLocal(set.styles ?? [], id) + (set.template ?? '');
+            n.innerHTML = RawSet.styleTransformLocal(set.styles ?? [], id, true, set.styleLocale) + (set.template ?? '');
             // dr-on-create onCreateRender
             const onCreate = element.getAttribute(`${EventManager.attrPrefix}on-create`)
             const renderScript = '';
@@ -632,6 +632,7 @@ export class RawSet {
         objFactory: (element: Element, obj: any, rawSet: RawSet, counstructorParam: any[]) => any,
         template: string = '',
         styles: string[] = [],
+        styleLocale: boolean,
         config: Config
     ): TargetElement {
         const targetElement: TargetElement = {
@@ -723,7 +724,7 @@ export class RawSet {
                     }))
                 }
 
-                const innerHTML = RawSet.styleTransformLocal(styles, componentKey) + (applayTemplate ?? '');
+                const innerHTML = RawSet.styleTransformLocal(styles, componentKey, true, styleLocale) + (applayTemplate ?? '');
                 element.innerHTML = innerHTML;
                 // console.log('------>', element.innerHTML, obj)
                 let data = RawSet.drThisCreate(element, `this.__domrender_components.${componentKey}`, '', true, obj, config);
@@ -749,7 +750,7 @@ export class RawSet {
         return StringUtils.regexExec(reg, data);
     }
 
-    public static styleTransformLocal(styleBody: string | string[], id: string, styleTagWrap = true) {
+    public static styleTransformLocal(styleBody: string | string[], id: string, styleTagWrap = true, locale = false) {
         // <style id="first">
         //     #first ~ *:not(#first ~ style[domstyle] ~ *) {
         //     font-size: 30px;
@@ -759,12 +760,14 @@ export class RawSet {
         if (Array.isArray(styleBody)) {
             styleBody = styleBody.join('\n');
         }
-        styleBody = styleBody.replace(/([^}]+){/gm, function(a, b) {
-            if (typeof b === 'string') {
-                b = b.trim();
-            }
-            return `#${id} ~ ${b}:not(#${id} ~ style[domstyle] ~ *) {`;
-        });
+        if (locale) {
+            styleBody = styleBody.replace(/([^}]+){/gm, function(a, b) {
+                if (typeof b === 'string') {
+                    b = b.trim();
+                }
+                return `#${id} ~ ${b}:not(#${id} ~ style[domstyle] ~ *) {`;
+            });
+        }
         if (styleTagWrap) {
             styleBody = `<style id='${id}' domstyle>${styleBody}</style>`
         }

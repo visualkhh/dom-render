@@ -34,10 +34,10 @@ export class DomRender {
         return robj;
     }
 
-    public static addComponent(config: Config, {type, tagName = type.name}: {type: ConstructorType<any>, tagName?: string}, {template, styles = []}: {template: string, styles?: string[]}) {
+    public static addComponent(config: Config, {type, tagName = type.name}: {type: ConstructorType<any>, tagName?: string}, {template, styles = [], styleLocale = false}: {template: string, styles?: string[], styleLocale?: boolean}) {
         const component = RawSet.createComponentTargetElement(tagName, (e, o, r2, counstructorParam) => {
             return new type(...counstructorParam);
-        }, template, styles, config);
+        }, template, styles, styleLocale, config);
         config.targetElements = config.targetElements ?? [];
         config.targetElements.push(component);
         return {

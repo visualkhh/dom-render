@@ -1,5 +1,5 @@
 export class ComponentSet {
-    constructor(public obj: any, public template?: string, public styles?: string[]) {
+    constructor(public obj: any, public template?: string, public styles?: string[], public styleLocale = false) {
     }
 
     // get html() {
