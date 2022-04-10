@@ -288,7 +288,7 @@ export class RawSet {
             it.obj.onInitRender?.();
         }
         for (const it of onElementInitCallBacks) {
-            it.targetElement?.__render?.component?.onInitRender?.({render: it.targetElement?.__render, creatorMetaData: it.targetElement?.__creatorMetaData});
+            it.targetElement?.__render?.component?.onInitRender?.(Object.freeze({render: it.targetElement?.__render, creatorMetaData: it.targetElement?.__creatorMetaData}));
             config?.onElementInit?.(it.name, obj, this, it.targetElement);
         }
         for (const it of onAttrInitCallBacks) {
