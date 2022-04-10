@@ -765,7 +765,7 @@ export class RawSet {
                 if (typeof b === 'string') {
                     b = b.trim();
                 }
-                return `#${id} ~ ${b}:not(#${id} ~ style[domstyle] ~ *) {`;
+                return `#${id} ~ ${b}:not(#${id} ~ style[domstyle] ~ *), #${id} * ${b} {`;
             });
         }
         if (styleTagWrap) {
