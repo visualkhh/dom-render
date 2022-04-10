@@ -133,8 +133,14 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             this._domRender_ref.forEach((it, key) => {
                 if ('_DomRender_isProxy' in key) {
                     it.forEach(sit => {
-                        const items = (key as any)._DomRender_proxy?.root(paths.concat(sit), value, lastDoneExecute);
-                        fullPaths.push(items.join(','));
+                        try {
+                            const items = (key as any)._DomRender_proxy?.root(paths.concat(sit), value, lastDoneExecute);
+                            fullPaths.push(items.join(','));
+                        } catch (e) {
+                            // 오브젝트들 없어졌을수도있다 Destroy시점에서 오류나는경우가 있다. 따라서 참조 하는부분 없어져야한다.
+                            // console.error(e)
+                            // it.delete(sit);
+                        }
                     })
                 }
             })
@@ -145,7 +151,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                 const iterable = this._rawSets.get(fullPathStr);
                 // array check
                 const front = strings.slice(0, strings.length - 1).map(it => isNaN(Number(it)) ? '.' + it : `[${it}]`).join('');
-                const last = strings[strings.length - 1]
+                const last = strings[strings.length - 1];
                 const data = ScriptUtils.evalReturn('this' + front, this._domRender_proxy);
                 if (last === 'length' && Array.isArray(data)) {
                     const aIterable = this._rawSets.get(front.slice(1));

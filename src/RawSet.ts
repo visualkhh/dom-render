@@ -301,6 +301,8 @@ export class RawSet {
                 const rawSet: RawSet | undefined = domrenderComponentNew?.rawSet;
                 const drAttrs: Attrs | undefined = domrenderComponentNew?.drAttrs;
                 if (rawSet && !rawSet.isConnected) {
+                    let domrenderComponent = obj.__domrender_components[key];
+                    console.log('component destroy--->', key, rawSet, rawSet.isConnected, domrenderComponent.name, domrenderComponent);
                     const destroyOptions = drAttrs?.drDestroyOption?.split(',') ?? [];
                     RawSet.destroy(obj.__domrender_components[key], [domrenderComponentNew], config, destroyOptions)
                     delete obj.__domrender_components[key];
@@ -667,7 +669,7 @@ export class RawSet {
                     }
                     constructorParam = param;
                 }
-                console.log('------22', attrs);
+                // console.log('------22', attrs);
                 domrenderComponents[componentKey] = objFactory(element, obj, rawSet, constructorParam);
                 const instance = domrenderComponents[componentKey];
                 const i = instance.__domrender_component_new = (instance.__domrender_component_new ?? new Proxy({}, new DomRenderFinalProxy())) as CreatorMetaData;
