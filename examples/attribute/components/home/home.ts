@@ -2,6 +2,7 @@ import {OnCreateRender} from 'dom-render/lifecycle/OnCreateRender';
 
 export class Home implements OnCreateRender {
     homeName = 'homeName';
+    private homeColor = '#000';
     constructor() {
     }
 
@@ -14,6 +15,11 @@ export class Home implements OnCreateRender {
     }
 
     checkName() {
-        console.log(this.homeName);
+        console.log(this.homeName, this.homeColor);
+    }
+
+    changeParam(name: string, color: string) {
+        this.homeName = name;
+        this.homeColor = color;
     }
 }

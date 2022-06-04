@@ -11,7 +11,7 @@
 </div>
 <input type="text" value="${this.name}$" style="${'color: '+this.color}$">
 <home value="${this.name}$" >
-    ${#component#.homeName = this.name}$
+    ${#component#.changeParam(this.name, this.color) ?? ''}$
 <!--<input type="text" value="${this.name}$" style="${'color: '+this.color}$">-->
     <button dr-event-click="#component#.checkName();">home checkName</button>
 </home>
