@@ -21,7 +21,6 @@ import {DrAppender} from './operators/DrAppender';
 import {DrRepeat} from './operators/DrRepeat';
 import {DrTargetElement} from './operators/DrTargetElement';
 import {DrTargetAttr} from './operators/DrTargetAttr';
-import {AttrExpresion} from './operators/AttrExpresion';
 
 export enum DestroyOptionType {
     NO_DESTROY = 'NO_DESTROY',
