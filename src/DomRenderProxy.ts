@@ -64,6 +64,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         const innerHTML = (target as any).innerHTML ?? '';
         this._targets.add(target);
         const rawSets = RawSet.checkPointCreates(target, this.config);
+        // console.log('-------rawSet', rawSets)
         eventManager.applyEvent(this._domRender_proxy, eventManager.findAttrElements(target as Element, this.config), this.config);
         rawSets.forEach(it => {
             const variables = it.getUsingTriggerVariables(this.config);
@@ -159,6 +160,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                         this.render(Array.from(aIterable));
                     }
                 } else if (iterable) {
+                    // console.log('----->', iterable)
                     this.render(Array.from(iterable));
                 }
                 this._targets.forEach(it => {

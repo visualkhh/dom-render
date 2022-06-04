@@ -51,7 +51,7 @@ export class ScriptUtils {
         return Function(`"use strict"; ${script} `).bind(thisTarget)();
     }
 
-    public static loadElement(name: string, attribute: {[key:string]: string}, document: Document) {
+    public static loadElement(name: string, attribute: { [key: string]: string }, document: Document) {
         return new Promise((resolve, reject) => {
             const tag = document.createElement(name)
             tag.onload = resolve
@@ -63,7 +63,7 @@ export class ScriptUtils {
         });
     }
 
-    public static loadStyleSheet(href: string, attribute: {[key:string]: string} = {}, document: Document) {
+    public static loadStyleSheet(href: string, attribute: { [key: string]: string } = {}, document: Document) {
         // const tag = document.createElement('link');
         // tag.type = 'text/css';
         // tag.setAttribute('rel', 'stylesheet');
@@ -78,7 +78,7 @@ export class ScriptUtils {
         return ScriptUtils.loadElement('link', attribute, document);
     }
 
-    public static loadScript(src: string, attribute: {[key:string]: string} = {}, document: Document) {
+    public static loadScript(src: string, attribute: { [key: string]: string } = {}, document: Document) {
         attribute.type = 'text/javascript';
         attribute.src = src;
         return ScriptUtils.loadElement('script', attribute, document);

@@ -15,9 +15,6 @@ export class DrAppender extends OperatorRender {
                         const ifWrap = document.createElement('div');
                         ifWrap.setAttribute('dr-strip', 'true');
                         ifWrap.setAttribute('dr-if', '${this.elementSource.attrs.drAppender} && ${this.elementSource.attrs.drAppender}.length > 0');
-                        
-                        // console.log('----', ${this.elementSource.attrs.drAppender}.length);
-                        
                         const n = this.__render.element.cloneNode(true);
                         Object.entries(this.__render.drAttr).filter(([k,v]) => k !== 'drAppender' && v).forEach(([k, v]) => n.setAttribute(this.__render.drAttrsOriginName[k], v));
                         n.setAttribute('dr-for-of', '${this.elementSource.attrs.drAppender}[' + (${this.elementSource.attrs.drAppender}.length-1) + ']');

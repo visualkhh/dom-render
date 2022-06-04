@@ -54,6 +54,32 @@ ${this.name}$  <!-- outout: <i>my name is dom-render</i> -->
 
 # dom-render attributes
 
+
+## attribute change, bind
+<details>
+  <summary>attribute<strong>🔻(click)</strong></summary>
+
+### attribute
+```html
+<body id="app">
+  <input type="text" value="${this.name}$" style="${'color: '+this.color}$">
+  <button dr-event-click="this.changeData();">change</button>
+</body>
+```
+```typescript
+class Data {
+    name = 'my name is dom-render';
+    color = '#ff0000';
+
+    changeData() {
+        this.name = RandomUtils.getRandomString(10);
+        this.color = RandomUtils.getRandomColor();
+    }
+}
+const data = DomRender.run(new Data(), document.querySelector('#app')!);
+```
+</details>
+
 ## control, print Statement
 <details>
   <summary>dr-if<strong>🔻(click)</strong></summary>
@@ -72,6 +98,10 @@ ${this.name}$  <!-- outout: <i>my name is dom-render</i> -->
 </body>
 ```
 </details>
+
+
+
+
 
 <details>
   <summary>dr-for, dr-for-of<strong>🔻(click)</strong></summary>

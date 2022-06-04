@@ -4,8 +4,6 @@ import {ScriptUtils} from './utils/script/ScriptUtils';
 import {EventManager, eventManager} from './events/EventManager';
 import {Config, TargetAttr, TargetElement} from './Config';
 import {Range} from './iterators/Range';
-import {Validator} from './validators/Validator';
-import {ValidatorArray} from './validators/ValidatorArray';
 import {DomRenderFinalProxy} from './types/Types';
 import {DomUtils} from './utils/dom/DomUtils';
 import {ComponentSet} from './components/ComponentSet';
@@ -23,10 +21,13 @@ import {DrAppender} from './operators/DrAppender';
 import {DrRepeat} from './operators/DrRepeat';
 import {DrTargetElement} from './operators/DrTargetElement';
 import {DrTargetAttr} from './operators/DrTargetAttr';
+import {AttrExpresion} from './operators/AttrExpresion';
+
 export enum DestroyOptionType {
     NO_DESTROY = 'NO_DESTROY',
     NO_MESSENGER_DESTROY = 'NO_MESSENGER_DESTROY'
 }
+
 export type Attrs = {
     dr: string | null;
     drIf: string | null;
@@ -130,23 +131,35 @@ export class RawSet {
     constructor(
         public uuid: string,
         public point: { start: Comment, end: Comment, thisVariableName?: string | null },
-        public fragment: DocumentFragment, public detect?:{action: Function}, public data: any = {}) {
+        public fragment: DocumentFragment, public detect?: { action: Function }, public data: any = {}) {
     }
 
     get isConnected() {
         return this.point.start.isConnected && this.point.end.isConnected;
     }
 
+    // 중요
     getUsingTriggerVariables(config?: Config): Set<string> {
         const usingTriggerVariables = new Set<string>();
         this.fragment.childNodes.forEach((cNode, key) => {
             let script = '';
             if (cNode.nodeType === Node.TEXT_NODE) {
                 script = `\`${(cNode as Text).textContent ?? ''}\``;
+                // console.log('???????', script)
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
                 const targetAttrNames = (config?.targetAttrs?.map(it => it.name) ?? []).concat(RawSet.DR_ATTRIBUTES)
-                script = targetAttrNames.map(it => (element.getAttribute(it))).filter(it => it).join(';');
+                script = targetAttrNames.map(it => {
+                    // console.log('-?', element.getAttribute(it))
+                    return element.getAttribute(it);
+                }).filter(it => it).join(';');
+                // console.log('----!!!!!-->', targetAttrNames)
+                const otherAttrs = element.getAttributeNames()
+                    .filter(it => !targetAttrNames.includes(it.toLowerCase()) && RawSet.isExporesion(element.getAttribute(it)))
+                    .map(it => {
+                        return `\`${element.getAttribute(it) ?? ''}\``;
+                    }).join(';');
+                script += ';' + otherAttrs
             }
             if (script) {
                 // script = script.replace('}$','}');
@@ -200,7 +213,7 @@ export class RawSet {
             if (cNode.nodeType === Node.TEXT_NODE && cNode.textContent) {
                 const textContent = cNode.textContent;
                 const runText = RawSet.exporesionGrouops(textContent)[0][1];
-                // console.log('--->', textContent,runText, runText[0][1])
+                // console.log('--->', RawSet.exporesionGrouops(textContent), textContent,runText, runText[0][1])
                 let n: Node;
                 if (textContent?.startsWith('#')) {
                     const r = ScriptUtils.eval(`${__render.bindScript} return ${runText}`, Object.assign(obj, {__render}));
@@ -214,7 +227,7 @@ export class RawSet {
                 cNode.parentNode?.replaceChild(n, cNode)
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
-
+                // console.log('target-->', element)
                 const drAttr = {
                     dr: this.getAttributeAndDelete(element, RawSet.DR),
                     drIf: this.getAttributeAndDelete(element, RawSet.DR_IF_NAME),
@@ -242,6 +255,7 @@ export class RawSet {
                     new Dr(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new DrIf(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new DrThis(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new AttrExpresion(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new DrForm(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new DrInnerText(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new DrInnerHTML(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
@@ -301,8 +315,8 @@ export class RawSet {
                 const rawSet: RawSet | undefined = domrenderComponentNew?.rawSet;
                 const drAttrs: Attrs | undefined = domrenderComponentNew?.drAttrs;
                 if (rawSet && !rawSet.isConnected) {
-                    let domrenderComponent = obj.__domrender_components[key];
-                    console.log('component destroy--->', key, rawSet, rawSet.isConnected, domrenderComponent.name, domrenderComponent);
+                    // const domrenderComponent = obj.__domrender_components[key];
+                    // console.log('component destroy--->', key, rawSet, rawSet.isConnected, domrenderComponent.name, domrenderComponent);
                     const destroyOptions = drAttrs?.drDestroyOption?.split(',') ?? [];
                     RawSet.destroy(obj.__domrender_components[key], [domrenderComponentNew], config, destroyOptions)
                     delete obj.__domrender_components[key];
@@ -375,9 +389,15 @@ export class RawSet {
                     // return /[$#]\{.*?\}/g.test(StringUtils.deleteEnter((node as Text).data ?? '')) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                 } else if (node.nodeType === Node.ELEMENT_NODE) {
                     const element = node as Element;
+                    // console.log('------>', element);
                     const isElement = (config.targetElements?.map(it => it.name.toLowerCase()) ?? []).includes(element.tagName.toLowerCase());
                     const targetAttrNames = (config.targetAttrs?.map(it => it.name) ?? []).concat(RawSet.DR_ATTRIBUTES);
-                    const isAttr = element.getAttributeNames().filter(it => targetAttrNames.includes(it.toLowerCase())).length > 0;
+                    const isAttr = element.getAttributeNames().filter(it => {
+                        const attrExpresion = RawSet.isExporesion(element.getAttribute(it));
+                        // console.log(element.getAttribute(it), attrExpresion);
+                        const isTargetAttr = targetAttrNames.includes(it.toLowerCase());
+                        return isTargetAttr || attrExpresion;
+                    }).length > 0;
                     return (isAttr || isElement) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                 }
                 return NodeFilter.FILTER_REJECT;
@@ -664,7 +684,7 @@ export class RawSet {
                 // dr-constructor
                 if (constructor) {
                     const script = `${renderScript} return ${constructor} `;
-                    let param = ScriptUtils.eval(script, Object.assign(obj, { __render: render })) ?? [];
+                    let param = ScriptUtils.eval(script, Object.assign(obj, {__render: render})) ?? [];
                     if (!Array.isArray(param)) {
                         param = [param];
                     }
@@ -697,7 +717,7 @@ export class RawSet {
                 let createParam = [i];
                 if (onCreate) {
                     const script = `${renderScript} return ${onCreate} `;
-                    createParam = ScriptUtils.eval(script, Object.assign(obj, { __render: render }));
+                    createParam = ScriptUtils.eval(script, Object.assign(obj, {__render: render}));
                     if (!Array.isArray(createParam)) {
                         createParam = [createParam];
                     }
@@ -744,10 +764,15 @@ export class RawSet {
         return targetElement;
     }
 
-    public static exporesionGrouops(data: string) {
+    public static isExporesion(data: string | null) {
+        const reg = /(?:[$#]\{(?:(([$#]\{)??[^$#]?[^{]*?)\}[$#]))/g;
+        return reg.test(data ?? '');
+    }
+
+    public static exporesionGrouops(data: string | null) {
         // const reg = /(?:[$#]\{(?:(([$#]\{)??[^$#]*?)\}[$#]))/g;
         const reg = /(?:[$#]\{(?:(([$#]\{)??[^$#]?[^{]*?)\}[$#]))/g;
-        return StringUtils.regexExec(reg, data);
+        return StringUtils.regexExec(reg, data ?? '');
     }
 
     public static styleTransformLocal(styleBody: string | string[], id: string, styleTagWrap = true, locale = false) {
@@ -761,7 +786,7 @@ export class RawSet {
             styleBody = styleBody.join('\n');
         }
         if (locale) {
-            styleBody = styleBody.replace(/([^}]+){/gm, function(a, b) {
+            styleBody = styleBody.replace(/([^}]+){/gm, function (a, b) {
                 if (typeof b === 'string') {
                     b = b.trim();
                 }

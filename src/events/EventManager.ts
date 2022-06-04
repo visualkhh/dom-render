@@ -235,7 +235,7 @@ export class EventManager {
 
     // eslint-disable-next-line no-undef
     public changeVar(obj: any, elements: Set<Element> | Set<ChildNode>, varName?: string, config?: Config) {
-        // console.log('-changeVar-->', obj, elements, varName)
+        // console.log('-changeVar-->', obj, elements, varName);
         // value-link event
         this.procAttr<HTMLInputElement>(elements, EventManager.valueLinkAttrName, (it, attribute) => {
             const ownerVariablePathName = it.getAttribute(EventManager.ownerVariablePathAttrName);
