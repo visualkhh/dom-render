@@ -6,7 +6,15 @@
 </head>
 <script src="bundle.js" defer="defer"></script>
 <body id="app">
+<div  value="${this.name}$" addr="${this.addr}$" wow="`aa`" style="${'color: '+this.color}$">
+ 1111111111   ${new Date().toString()}$111111
+</div>
 <input type="text" value="${this.name}$" style="${'color: '+this.color}$">
+<home value="${this.name}$" >
+    ${#component#.homeName = this.name}$
+<!--<input type="text" value="${this.name}$" style="${'color: '+this.color}$">-->
+    <button dr-event-click="#component#.checkName();">home checkName</button>
+</home>
 <button dr-event-click="this.changeData();">change</button>
 </body>
 </html>

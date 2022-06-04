@@ -44,3 +44,8 @@ slot
   - https://alexband.tistory.com/53
 - custom tag
   - https://github.com/mdn/web-components-examples/blob/master/popup-info-box-web-component/index.html
+
+
+querySelector
+ - https://developer.mozilla.org/en-US/docs/Web/API/Element/querySelectorAll
+ - 

@@ -1,5 +1,5 @@
 import { CreatorMetaData, RawSet, Render } from './RawSet';
-import { eventManager } from './events/EventManager';
+import {EventManager, eventManager} from './events/EventManager';
 import { Config } from './Config';
 import { ScriptUtils } from './utils/script/ScriptUtils';
 import { DomRenderFinalProxy, Shield } from './types/Types';
@@ -54,17 +54,17 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public initRender(target: Node) {
-        const onCreate = (target as any).getAttribute?.('dr-on-create');
+        const onCreate = (target as any).getAttribute?.(`${EventManager.attrPrefix}on-create`);
         let createParam = undefined;
         if (onCreate) {
             createParam = ScriptUtils.evalReturn(onCreate, this._domRender_proxy);
         }
         (this._domRender_proxy as any)?.onCreateRender?.(createParam);
-
         const innerHTML = (target as any).innerHTML ?? '';
         this._targets.add(target);
         const rawSets = RawSet.checkPointCreates(target, this.config);
         // console.log('-------rawSet', rawSets)
+        // 중요 초기에 한번 튕겨줘야함.
         eventManager.applyEvent(this._domRender_proxy, eventManager.findAttrElements(target as Element, this.config), this.config);
         rawSets.forEach(it => {
             const variables = it.getUsingTriggerVariables(this.config);
@@ -164,8 +164,11 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                     this.render(Array.from(iterable));
                 }
                 this._targets.forEach(it => {
+                    // console.log('target------->,', it)
+                    // return;
                     if (it.nodeType === Node.DOCUMENT_FRAGMENT_NODE || it.nodeType === Node.ELEMENT_NODE) {
                         const targets = eventManager.findAttrElements((it as DocumentFragment | Element), this.config);
+                        // console.log('------>', targets);
                         eventManager.changeVar(this._domRender_proxy, targets, `this.${fullPathStr}`, this.config)
                     }
                 })

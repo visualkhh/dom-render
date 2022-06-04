@@ -154,12 +154,12 @@ export class RawSet {
                     return element.getAttribute(it);
                 }).filter(it => it).join(';');
                 // console.log('----!!!!!-->', targetAttrNames)
-                const otherAttrs = element.getAttributeNames()
-                    .filter(it => !targetAttrNames.includes(it.toLowerCase()) && RawSet.isExporesion(element.getAttribute(it)))
-                    .map(it => {
-                        return `\`${element.getAttribute(it) ?? ''}\``;
-                    }).join(';');
-                script += ';' + otherAttrs
+                // const otherAttrs = element.getAttributeNames()
+                //     .filter(it => !targetAttrNames.includes(it.toLowerCase()) && RawSet.isExporesion(element.getAttribute(it)))
+                //     .map(it => {
+                //         return `\`${element.getAttribute(it) ?? ''}\``;
+                //     }).join(';');
+                // script += ';' + otherAttrs
             }
             if (script) {
                 // script = script.replace('}$','}');
@@ -255,7 +255,6 @@ export class RawSet {
                     new Dr(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new DrIf(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new DrThis(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
-                    new AttrExpresion(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new DrForm(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new DrInnerText(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new DrInnerHTML(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
@@ -372,6 +371,7 @@ export class RawSet {
         this.point.start.parentNode?.insertBefore(genNode, this.point.start.nextSibling);
     }
 
+    // 중요
     public static checkPointCreates(element: Node, config: Config): RawSet[] {
         const thisVariableName = (element as any).__domrender_this_variable_name;
         // console.log('checkPointCreates thisVariableName', thisVariableName);
@@ -392,12 +392,21 @@ export class RawSet {
                     // console.log('------>', element);
                     const isElement = (config.targetElements?.map(it => it.name.toLowerCase()) ?? []).includes(element.tagName.toLowerCase());
                     const targetAttrNames = (config.targetAttrs?.map(it => it.name) ?? []).concat(RawSet.DR_ATTRIBUTES);
+                    const normalAttrs = new Map<string, string>();
                     const isAttr = element.getAttributeNames().filter(it => {
-                        const attrExpresion = RawSet.isExporesion(element.getAttribute(it));
+                        const value = element.getAttribute(it);
+                        if (value && RawSet.isExporesion(value)) {
+                            normalAttrs.set(it, RawSet.exporesionGrouops(value)[0][1]);
+                        }
                         // console.log(element.getAttribute(it), attrExpresion);
                         const isTargetAttr = targetAttrNames.includes(it.toLowerCase());
-                        return isTargetAttr || attrExpresion;
+                        return isTargetAttr;
                     }).length > 0;
+                    // 기본 attribute를 처리하기위해
+                    if (normalAttrs.size) {
+                        element.setAttribute(EventManager.normalAttrMapAttrName, JSON.stringify(Array.from(normalAttrs.entries())));
+                    }
+
                     return (isAttr || isElement) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
                 }
                 return NodeFilter.FILTER_REJECT;

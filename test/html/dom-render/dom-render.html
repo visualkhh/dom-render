@@ -4,26 +4,19 @@
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
-<script src="https://visualkhh.github.io/dom-render/cdn/dom-render@1.0.69.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.76/dist/bundle.js"></script>
 <!--<script src="bundle.js"></script>-->
 <body id="app">
-<form dr-form="this.form" dr-event-submit="this.submit(); $event.preventDefault();">
-    name: <input name="name">
-    age: <input name="age">
-    <button type="submit">submit</button>
-</form>
+<input type="text" value="${this.name}$" style="${'color: '+this.color}$">
+<button dr-event-click="this.changeData();">change</button>
 <script>
-    const form = new FormValidator();
-    form.name = new NotEmptyValidator();
-    form.age = new NotEmptyValidator();
     let data = {
-        form,
-        submit() {
-            if (this.form.valid()){
-                console.log('valid');
-            } else {
-                console.log('inValid');
-            }
+        name: 'my name is dom-render',
+        color: '#ff0000',
+
+        changeData() {
+            this.name = RandomUtils.getRandomString(10);
+            this.color = RandomUtils.getRandomColor();
         }
     };
     data = DomRender.run(data , document.querySelector('#app'));

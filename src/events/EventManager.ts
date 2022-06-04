@@ -18,12 +18,14 @@ export class EventManager {
     public static readonly valueAttrName = EventManager.attrPrefix + 'value';
     public static readonly valueLinkAttrName = EventManager.attrPrefix + 'value-link';
     public static readonly attrAttrName = EventManager.attrPrefix + 'attr';
+    public static readonly normalAttrMapAttrName = EventManager.attrPrefix + 'normal-attr-map';
     public static readonly styleAttrName = EventManager.attrPrefix + 'style';
     public static readonly classAttrName = EventManager.attrPrefix + 'class';
     public readonly attrNames = [
         EventManager.valueAttrName,
         EventManager.valueLinkAttrName,
         EventManager.attrAttrName,
+        EventManager.normalAttrMapAttrName,
         EventManager.styleAttrName,
         EventManager.classAttrName,
         EventManager.attrPrefix + 'window-event-' + EventManager.WINDOW_EVENT_POPSTATE,
@@ -132,6 +134,19 @@ export class EventManager {
                     it.value = data;
                 }
             }
+        })
+
+        // normal-attr-map
+        this.procAttr(childNodes, EventManager.normalAttrMapAttrName, (it, attribute) => {
+            const map = new Map<string, string>(JSON.parse(attribute));
+            map.forEach((v, k) => {
+                const data = ScriptUtils.eval(`const $element = this.element;  return ${v} `, Object.assign(obj, {
+                    __render: Object.freeze({
+                        element: it
+                    })
+                }))
+                it.setAttribute(k, data);
+            });
         })
 
         // window event
@@ -307,6 +322,7 @@ export class EventManager {
                 }
             }
         })
+
         // style
         this.procAttr(elements, EventManager.styleAttrName, (it, attribute) => {
             let script = attribute;
@@ -332,6 +348,7 @@ export class EventManager {
                 }
             }
         })
+
         // class
         this.procAttr(elements, EventManager.classAttrName, (it, attribute) => {
             let script = attribute;
@@ -361,6 +378,24 @@ export class EventManager {
                     }
                 }
             }
+        })
+
+        // normal-attr-map
+        this.procAttr(elements, EventManager.normalAttrMapAttrName, (it, attribute) => {
+            const map = new Map<string, string>(JSON.parse(attribute));
+            map.forEach((v, k) => {
+                // console.log('--->', v, k)
+                const isUsing = this.isUsingThisVar(v, varName)
+                // console.log('---isUsing-->', varName, k, v, isUsing);
+                if (isUsing) {
+                    const data = ScriptUtils.eval(`const $element = this.element;  return ${v} `, Object.assign(obj, {
+                        __render: Object.freeze({
+                            element: it
+                        })
+                    }))
+                    it.setAttribute(k, data);
+                }
+            });
         })
     }
 
