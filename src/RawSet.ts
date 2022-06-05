@@ -63,6 +63,12 @@ export type CreatorMetaData = {
 export type AttrInitCallBack = { attrName: string, attrValue: string, obj: any };
 export type ElementInitCallBack = { name: string, obj: any, targetElement: TargetElement, creatorMetaData: CreatorMetaData };
 
+export enum RawSetType {
+    TEXT = 'TEXT',
+    TARGET_ELEMENT = 'TARGET_ELEMENT',
+    TARGET_ATTR = 'TARGET_ATTR',
+    UNKOWN = 'UNKOWN',
+}
 export type Render = {
     rawset?: RawSet;
     scripts?: { [n: string]: any };
@@ -129,7 +135,8 @@ export class RawSet {
 
     constructor(
         public uuid: string,
-        public point: { start: Comment, end: Comment, thisVariableName?: string | null },
+        public type: RawSetType,
+        public point: { start: Comment, node: Node, end: Comment, thisVariableName?: string | null },
         public fragment: DocumentFragment, public detect?: { action: Function }, public data: any = {}) {
     }
 
@@ -412,7 +419,7 @@ export class RawSet {
             }
         });
         const pars: RawSet[] = [];
-        let currentNode;
+        let currentNode: Node | null;
         // eslint-disable-next-line no-cond-assign
         while (currentNode = nodeIterator.nextNode()) {
             if (currentNode.nodeType === Node.TEXT_NODE) {
@@ -430,7 +437,8 @@ export class RawSet {
                     }
                 });
                 let lasterIndex = 0;
-                map.forEach(it => {
+                for (let i = 0; i < map.length; i++) {
+                    const it = map[i];
                     const regexArr = it.regexArr;
                     const preparedText = regexArr.input.substring(lasterIndex, regexArr.index);
                     const start = config.window.document.createComment(`start text ${it.uuid}`);
@@ -439,30 +447,35 @@ export class RawSet {
                     template.content.append(document.createTextNode(preparedText)); // 사이사이값.
                     template.content.append(start);
                     template.content.append(end);
-
                     // content
                     const fragment = config.window.document.createDocumentFragment();
                     fragment.append(config.window.document.createTextNode(it.content))
-                    pars.push(new RawSet(it.uuid, {
+                    pars.push(new RawSet(it.uuid, RawSetType.TEXT, {
                         start,
+                        node: currentNode,
                         end,
                         thisVariableName
                     }, fragment));
                     lasterIndex = regexArr.index + it.content.length;
-                })
+                }
                 template.content.append(config.window.document.createTextNode(text.substring(lasterIndex, text.length)));
                 currentNode?.parentNode?.replaceChild(template.content, currentNode);
-            } else {
-                const uuid = RandomUtils.uuid()
+            } else if (currentNode.nodeType === Node.ELEMENT_NODE) {
+                const uuid = RandomUtils.uuid();
+                const element = currentNode as Element;
                 const fragment = config.window.document.createDocumentFragment();
                 const start = config.window.document.createComment(`start ${uuid}`)
                 const end = config.window.document.createComment(`end ${uuid}`)
                 // console.log('start--', uuid)
+                const isElement = (config.targetElements?.map(it => it.name.toLowerCase()) ?? []).includes(element.tagName.toLowerCase());
+                const targetAttrNames = (config.targetAttrs?.map(it => it.name) ?? []).concat(RawSet.DR_ATTRIBUTES);
+                const isAttr = element.getAttributeNames().filter(it => targetAttrNames.includes(it.toLowerCase())).length > 0;
                 currentNode?.parentNode?.insertBefore(start, currentNode);
                 currentNode?.parentNode?.insertBefore(end, currentNode.nextSibling);
                 fragment.append(currentNode);
-                pars.push(new RawSet(uuid, {
+                pars.push(new RawSet(uuid, isElement ? RawSetType.TARGET_ELEMENT : (isAttr ? RawSetType.TARGET_ATTR : RawSetType.UNKOWN), {
                     start,
+                    node: currentNode,
                     end,
                     thisVariableName
                 }, fragment))

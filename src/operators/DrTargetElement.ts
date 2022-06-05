@@ -11,6 +11,7 @@ export class DrTargetElement extends OperatorRender {
                 const detectAction = this.elementSource.element.getAttribute(RawSet.DR_DETECT_NAME);
                 const render = (documentFragment as any).render;
                 if (detectAction && render) {
+                    this.rawSet.data = render.component;
                     this.rawSet.detect = {
                         action: () => {
                             const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${detectAction} `;
