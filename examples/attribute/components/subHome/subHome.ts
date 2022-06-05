@@ -1,9 +1,9 @@
 import {OnCreateRender} from 'dom-render/lifecycle/OnCreateRender';
 import {OnChangeAttrRender} from 'dom-render/lifecycle/OnChangeAttrRender';
 
-export class Home implements OnCreateRender, OnChangeAttrRender  {
-    homeName = 'homeName';
-    private homeColor = '#000';
+export class SubHome implements OnCreateRender, OnChangeAttrRender {
+    subHomeName = 'SubHome';
+    private subHomeColor = '#000';
     constructor() {
     }
 
@@ -16,18 +16,18 @@ export class Home implements OnCreateRender, OnChangeAttrRender  {
     }
 
     checkName() {
-        console.log(this.homeName, this.homeColor);
+        console.log(this.subHomeName, this.subHomeColor);
     }
 
     changeParam(name: string, color: string) {
-        this.homeName = name;
-        this.homeColor = color;
+        this.subHomeName = name;
+        this.subHomeColor = color;
     }
 
     onChangeAttrRender(name: string, newVal: any): void {
-        console.log(' onChangeAttrRender->', name, newVal);
+        console.log(' onChangeAttrRender-subHome>', name, newVal);
         if (name === 'value') {
-            this.homeName = newVal;
+            this.subHomeName = newVal;
         }
     }
-}
+} 

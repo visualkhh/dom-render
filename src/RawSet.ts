@@ -137,7 +137,8 @@ export class RawSet {
         public uuid: string,
         public type: RawSetType,
         public point: { start: Comment, node: Node, end: Comment, thisVariableName?: string | null },
-        public fragment: DocumentFragment, public detect?: { action: Function }, public data: any = {}) {
+        public fragment: DocumentFragment, public detect?: { action: Function }, public data?: any) {
+        // console.log('rawset constructor->', (this.point.node as Element).getAttributeNames());
     }
 
     get isConnected() {
@@ -154,11 +155,18 @@ export class RawSet {
                 // console.log('???????', script)
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
-                const targetAttrNames = (config?.targetAttrs?.map(it => it.name) ?? []).concat(RawSet.DR_ATTRIBUTES)
-                script = targetAttrNames.map(it => {
-                    // console.log('-?', element.getAttribute(it))
-                    return element.getAttribute(it);
-                }).filter(it => it).join(';');
+                const targetAttrNames = (config?.targetAttrs?.map(it => it.name) ?? []).concat(RawSet.DR_ATTRIBUTES); // .concat(EventManager.normalAttrMapAttrName);
+                const targetScripts = targetAttrNames.map(it => element.getAttribute(it)).filter(it => it);
+                const targetAttrMap = element.getAttribute(EventManager.normalAttrMapAttrName);
+                if (targetAttrMap) {
+                    // console.log('----->', targetAttr);
+                    new Map<string, string>(JSON.parse(targetAttrMap)).forEach((v, k) => {
+                        targetScripts.push(v);
+                    });
+                }
+                script = targetScripts.join(';');
+
+                // attribute쪽 체크하는거 추가
                 // console.log('----!!!!!-->', targetAttrNames)
                 // const otherAttrs = element.getAttributeNames()
                 //     .filter(it => !targetAttrNames.includes(it.toLowerCase()) && RawSet.isExporesion(element.getAttribute(it)))
@@ -184,6 +192,7 @@ export class RawSet {
         return usingTriggerVariables;
     }
 
+    // 중요 render
     public render(obj: any, config: Config): RawSet[] {
         const genNode = config.window.document.importNode(this.fragment, true);
         const raws: RawSet[] = [];
@@ -377,7 +386,7 @@ export class RawSet {
         this.point.start.parentNode?.insertBefore(genNode, this.point.start.nextSibling);
     }
 
-    // 중요
+    // 중요 important
     public static checkPointCreates(element: Node, config: Config): RawSet[] {
         const thisVariableName = (element as any).__domrender_this_variable_name;
         // console.log('checkPointCreates thisVariableName', thisVariableName);
@@ -675,7 +684,7 @@ export class RawSet {
             styles,
             template,
             callBack(element: Element, obj: any, rawSet: RawSet, attrs?: Attrs): DocumentFragment {
-                // console.log('callback------->')
+                // console.log('callback------->', element)
                 if (!obj.__domrender_components) {
                     obj.__domrender_components = {};
                 }
@@ -684,6 +693,7 @@ export class RawSet {
                 const attribute = DomUtils.getAttributeToObject(element);
                 const renderScript = 'var $component = this.__render.component; var $element = this.__render.element; var $router = this.__render.router; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute; var $creatorMetaData = this.__render.creatorMetaData;';
                 let render = Object.freeze({
+                    renderScript,
                     element: element,
                     innerHTML: element.innerHTML,
                     attribute: attribute,
@@ -723,6 +733,17 @@ export class RawSet {
                     component: instance,
                     creatorMetaData: i,
                     ...render
+                }
+
+                // 중요 dr-normal-attr-map
+                const normalAttrMap = element.getAttribute(EventManager.normalAttrMapAttrName);
+                if (instance.onChangeAttrRender && normalAttrMap) {
+                    new Map<string, string>(JSON.parse(normalAttrMap)).forEach((value, key) => {
+                        const script = `${renderScript} return ${value} `;
+                        const cval = ScriptUtils.eval(script, Object.assign(obj, {__render: render}));
+                        // element.setAttribute(key, cval);
+                        instance.onChangeAttrRender(key, cval);
+                    });
                 }
 
                 // dr-on-create onCreateRender

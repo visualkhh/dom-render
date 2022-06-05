@@ -99,6 +99,7 @@ export class EventManager {
     //     return obj;
     // }
 
+    // 중요 이벤트에 대상이될 Elements를 찾는다.
     public findAttrElements(fragment: DocumentFragment | Element, config?: Config): Set<Element> {
         // const datas: {name: string, value: string | null, element: Element}[] = [];
         const elements = new Set<Element>();
@@ -111,6 +112,7 @@ export class EventManager {
         return elements;
     }
 
+    // 중요 처음 이벤트 처리
     // eslint-disable-next-line no-undef
     public applyEvent(obj: any, childNodes: Set<ChildNode> | Set<Element>, config?: Config) {
         // console.log('eventManager applyEvent==>', obj, childNodes, config)
@@ -284,7 +286,7 @@ export class EventManager {
             if (script) {
                 script = 'return ' + script;
             }
-            if (this.isUsingThisVar(script, varName) || varName === undefined) {
+            if (EventManager.isUsingThisVar(script, varName) || varName === undefined) {
                 const data = ScriptUtils.eval(`const $element = this.__render.element; ${script} `, Object.assign(obj, {
                     __render: Object.freeze({
                         element: it
@@ -330,7 +332,7 @@ export class EventManager {
             if (script) {
                 script = 'return ' + script;
             }
-            if (this.isUsingThisVar(script, varName) || varName === undefined) {
+            if (EventManager.isUsingThisVar(script, varName) || varName === undefined) {
                 const data = ScriptUtils.eval(`const $element = this.__render.element;  ${script} `, Object.assign(obj, {
                     __render: Object.freeze({
                         element: it
@@ -356,7 +358,7 @@ export class EventManager {
             if (script) {
                 script = 'return ' + script;
             }
-            if (this.isUsingThisVar(script, varName) || varName === undefined) {
+            if (EventManager.isUsingThisVar(script, varName) || varName === undefined) {
                 const data = ScriptUtils.eval(`const $element = this.element;  ${script} `, Object.assign(obj, {
                     __render: Object.freeze({
                         element: it
@@ -381,13 +383,13 @@ export class EventManager {
             }
         })
 
-        // normal-attr-map
+        // 중요 변수값 바꼈을때 이벤트 타겟 찾는것 normal-attr-map
         this.procAttr(elements, EventManager.normalAttrMapAttrName, (it, attribute) => {
             const map = new Map<string, string>(JSON.parse(attribute));
             map.forEach((v, k) => {
                 // console.log('--->', v, k)
-                const isUsing = this.isUsingThisVar(v, varName)
-                // console.log('---isUsing-->', varName, k, v, isUsing);
+                const isUsing = EventManager.isUsingThisVar(v, varName)
+                // console.log('---isUsing--> varName:', varName, 'k:', k, 'v:', v, 'isUsing:', isUsing);
                 if (isUsing) {
                     const data = ScriptUtils.eval(`const $element = this.element;  return ${v} `, Object.assign(obj, {
                         __render: Object.freeze({
@@ -502,7 +504,7 @@ export class EventManager {
         })
     }
 
-    public isUsingThisVar(raws: string | null | undefined, varName: string | null | undefined): boolean {
+    public static isUsingThisVar(raws: string | null | undefined, varName: string | null | undefined): boolean {
         // console.log('isUsingV', raws)
         // console.log('isUsingV', raws, varName, ScriptUtils.getVariablePaths(raws ?? ''))
         if (varName && raws) {

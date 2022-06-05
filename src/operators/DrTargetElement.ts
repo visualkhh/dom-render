@@ -8,10 +8,36 @@ export class DrTargetElement extends OperatorRender {
         if (targetElement) {
             const documentFragment = targetElement.callBack(this.elementSource.element, this.source.obj, this.rawSet, this.elementSource.attrs);
             if (documentFragment) {
+                // const targetAttrMap = this.elementSource.element.getAttribute(EventManager.normalAttrMapAttrName);
                 const detectAction = this.elementSource.element.getAttribute(RawSet.DR_DETECT_NAME);
                 const render = (documentFragment as any).render;
+                // console.log('-------drTargetElement->', render, targetAttrMap);
+                this.rawSet.fragment = documentFragment;
+                this.rawSet.data = render.component;
+                // const targetAttrs = this.elementSource.element.getAttributeNames()
+                //     .filter(it => RawSet.isExporesion(this.elementSource.element.getAttribute(it)))
+                //     .map(it => ({name: it, expresion: RawSet.exporesionGrouops(this.elementSource.element.getAttribute(it))[0][1]}))
+                //     .filter(it => it.name.length > 0 && it.expresion.length > 0)
+                //     .map(it => {
+                //         return `n.setAttribute('${it.name}', ${it.expresion})`;
+                //     });
+                // if (targetAttrMap) {
+                //     ScriptUtils.eval(`
+                //                 ${this.render.bindScript}
+                //                 //const n = $element.cloneNode(true);
+                //                 const n = $element;
+                //                 ${targetAttrMap.join(';')};
+                //                 // this.__render.fag.append(n);
+                //             `, Object.assign(this.source.obj, {
+                //         __render: Object.freeze({
+                //             fag: newTemp,
+                //             targetAttrs: targetAttrMap,
+                //             ...this.render
+                //         } as Render)
+                //     }));
+                // }
+
                 if (detectAction && render) {
-                    this.rawSet.data = render.component;
                     this.rawSet.detect = {
                         action: () => {
                             const script = `var $component = this.__render.component; var $element = this.__render.element; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute;  ${detectAction} `;

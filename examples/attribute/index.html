@@ -9,11 +9,19 @@
 <div  value="${this.name}$" addr="${this.addr}$" wow="`aa`" style="${'color: '+this.color}$">
  1111111111   ${new Date().toString()}$111111
 </div>
-<input type="text" value="${this.name}$" style="${'color: '+this.color}$">
-<home value="${this.name}$" >
-    ${#component#.changeParam(this.name, this.color) ?? ''}$
 <!--<input type="text" value="${this.name}$" style="${'color: '+this.color}$">-->
-    <button dr-event-click="#component#.checkName();">home checkName</button>
+<!--<home value="${this.name}$" >-->
+<!--    ${#component#.changeParam(this.name, this.color) ?? ''}$-->
+<!--    <button dr-event-click="#component#.checkName();">home checkName</button>-->
+<!--</home>-->
+<!--<div dr-inner-html="this.name"> </div>-->
+<!--<home value="${this.name}$" dr-detect="console.log('home detect');"></home>-->
+<home value="${this.name}$" wow="${this.color}$">
+    ${#component#.homeName}$
+    <home value="${#component#.homeName}$" wow="${#component#.homeColor}$">
+        ${#component#.homeName}$
+    </home>
+<!--    <subHome value="${#component#.homeName}$" wow="${#component#.homeColor}$"></subHome>-->
 </home>
 <button dr-event-click="this.changeData();">change</button>
 </body>
