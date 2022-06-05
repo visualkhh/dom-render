@@ -55,7 +55,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
 
     public initRender(target: Node) {
         const onCreate = (target as any).getAttribute?.(`${EventManager.attrPrefix}on-create`);
-        let createParam = undefined;
+        let createParam;
         if (onCreate) {
             createParam = ScriptUtils.evalReturn(onCreate, this._domRender_proxy);
         }

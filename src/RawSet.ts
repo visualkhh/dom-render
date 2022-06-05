@@ -379,7 +379,7 @@ export class RawSet {
                 if (node.nodeType === Node.TEXT_NODE) {
                     // console.log('????????', node.parentElement, node.parentElement?.getAttribute('dr-pre'));
                     // console.log('???????/',node.textContent, node.parentElement?.getAttribute('dr-pre'))
-                    // 나중에
+                    // TODO: 나중에
                     // const between = StringUtils.betweenRegexpStr('[$#]\\{', '\\}', StringUtils.deleteEnter((node as Text).data ?? ''))
                     const between = RawSet.exporesionGrouops(StringUtils.deleteEnter((node as Text).data ?? ''))
                     // console.log('bbbb', between)
@@ -420,15 +420,9 @@ export class RawSet {
                 const template = config.window.document.createElement('template');
                 // const a = StringUtils.regexExec(/\$\{.*?\}/g, text);
                 // const a = StringUtils.regexExec(/[$#]\{.*?\}/g, text);
-                // const a = StringUtils.betweenRegexpStr('[$#]\\{', '\\}', text); // <--나중에..
-                const a = RawSet.exporesionGrouops(text); // <--나중에..
-                const map = a.map(it => {
-                    return {
-                        uuid: RandomUtils.uuid(),
-                        content: it[0],
-                        regexArr: it
-                    }
-                });
+                // const a = StringUtils.betweenRegexpStr('[$#]\\{', '\\}', text); // <--TODO: 나중에..
+                const groups = RawSet.exporesionGrouops(text);
+                const map = groups.map(it => ({uuid: RandomUtils.uuid(), content: it[0], regexArr: it}));
                 let lasterIndex = 0;
                 map.forEach(it => {
                     const regexArr = it.regexArr;
