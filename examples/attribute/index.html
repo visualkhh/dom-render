@@ -18,8 +18,10 @@
 <!--<home value="${this.name}$" dr-detect="console.log('home detect');"></home>-->
 <home value="${this.name}$" wow="${this.color}$">
     ${#component#.homeName}$
-    <home value="${#component#.homeName}$" wow="${#component#.homeColor}$">
-        ${#component#.homeName}$
+<!--    ${#component#.homeName}$-->
+    <home value="${#component#.homeName}$" wow="${#component#.homeColor}$" dr-component-name="sub_component" dr-component-inner-html-name="innerHTML">
+        ${#sub_component#.homeName}$
+        ddd
     </home>
 <!--    <subHome value="${#component#.homeName}$" wow="${#component#.homeColor}$"></subHome>-->
 </home>

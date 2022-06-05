@@ -1,5 +1,6 @@
 import {OnCreateRender} from 'dom-render/lifecycle/OnCreateRender';
 import {OnChangeAttrRender} from 'dom-render/lifecycle/OnChangeAttrRender';
+import {RandomUtils} from 'dom-render/utils/random/RandomUtils';
 
 export class Home implements OnCreateRender, OnChangeAttrRender  {
     homeName = 'homeName';
@@ -27,7 +28,7 @@ export class Home implements OnCreateRender, OnChangeAttrRender  {
     onChangeAttrRender(name: string, newVal: any): void {
         console.log(' onChangeAttrRender->', name, newVal);
         if (name === 'value') {
-            this.homeName = newVal;
+            this.homeName = newVal + '-' + RandomUtils.getRandomColor();
         }
     }
 }

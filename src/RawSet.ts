@@ -761,15 +761,18 @@ export class RawSet {
                 instance?.onCreateRender?.(...createParam);
                 let applayTemplate = element.innerHTML;
                 let innerHTMLThisRandom;
+                const componentName = element.getAttribute(`${EventManager.attrPrefix}component-name`) ?? 'component';
+                const innerHTMLName = element.getAttribute(`${EventManager.attrPrefix}component-inner-html-name`) ?? 'innerHTML';
                 if (applayTemplate) {
                     // if (rawSet.point.thisVariableName) {
                     // 넘어온 innerHTML에 this가 있으면 해당안되게 우선 치환.
                     innerHTMLThisRandom = RandomUtils.uuid();
                     applayTemplate = applayTemplate.replace(/this\./g, innerHTMLThisRandom);
                     // }
-                    applayTemplate = applayTemplate.replace(/#component#/g, 'this');
+                    applayTemplate = applayTemplate.replace(RegExp(`#${componentName}#`, 'g'), 'this');
                 }
-                applayTemplate = template.replace(/#innerHTML#/g, applayTemplate);
+                applayTemplate = template.replace(RegExp(`#${innerHTMLName}#`, 'g'), applayTemplate);
+
 
                 // dr-on-component-init
                 const oninit = element.getAttribute(`${EventManager.attrPrefix}on-component-init`); // dr-on-component-init

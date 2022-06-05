@@ -1,5 +1,6 @@
 import {OnCreateRender} from 'dom-render/lifecycle/OnCreateRender';
 import {OnChangeAttrRender} from 'dom-render/lifecycle/OnChangeAttrRender';
+import {RandomUtils} from 'dom-render/utils/random/RandomUtils';
 
 export class SubHome implements OnCreateRender, OnChangeAttrRender {
     subHomeName = 'SubHome';
@@ -27,7 +28,7 @@ export class SubHome implements OnCreateRender, OnChangeAttrRender {
     onChangeAttrRender(name: string, newVal: any): void {
         console.log(' onChangeAttrRender-subHome>', name, newVal);
         if (name === 'value') {
-            this.subHomeName = newVal;
+            this.subHomeName = newVal + ' --- ' + RandomUtils.getRandomColor();
         }
     }
 } 

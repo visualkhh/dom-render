@@ -7,7 +7,7 @@ DOM-RENDER
 
 # 🚀 Quick start 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.77/dist/bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.78/dist/bundle.js"></script>
 ```
 ```html
 <!DOCTYPE html>
@@ -624,6 +624,13 @@ const data = DomRender.run(new Data(), document.querySelector('#app')!, config);
 using component
 ```html
 <my-element dr-on-component-init="$component.say();"></my-element>
+
+<home value="${this.name}$" wow="${this.color}$">
+  ${#component#.homeName}$
+  <home value="${#component#.homeName}$" wow="${#component#.homeColor}$" dr-component-name="sub_component" dr-component-inner-html-name="innerHTML">
+    ${#sub_component#.homeName}$
+  </home>
+</home>
 ```
 - attribute
   - dr-on-component-init: component created init call script
@@ -631,6 +638,10 @@ using component
     - $element: element instance
     - $attribute: element attribute object
     - $innerHTML: element innerHTML string
+  - #component#: component instance
+  - #innerHTML#: element innerHTML
+  - dr-component-name: renaming component variable name (default: component)
+  - dr-inner-html-name: renaming innerHTML variable name (default: innerHTML)
 ---
 
 # License
