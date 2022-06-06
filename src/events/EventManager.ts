@@ -145,7 +145,8 @@ export class EventManager {
             map.forEach((v, k) => {
                 const data = ScriptUtils.eval(`const $element = this.element;  return ${v} `, Object.assign(obj, {
                     __render: Object.freeze({
-                        element: it
+                        element: it,
+                        attribute: DomUtils.getAttributeToObject(it)
                     })
                 }))
                 it.setAttribute(k, data);
@@ -157,27 +158,6 @@ export class EventManager {
             this.procAttr<HTMLInputElement>(childNodes, EventManager.attrPrefix + 'window-event-' + it, (it, attribute) => {
                 (it as any).obj = obj;
             })
-        })
-
-        // on-init event
-        this.procAttr<HTMLInputElement>(childNodes, EventManager.onInitAttrName, (it, attribute) => {
-            let script = attribute;
-            if (script) {
-                script = 'return ' + script;
-            }
-            if (script) {
-                ScriptUtils.eval(`${this.bindScript}; ${script} `, Object.assign(obj, {
-                    __render: Object.freeze({
-                        element: it
-                    })
-                }))
-                // console.log('onInit--->', obj, varName, it)
-                // if (typeof this.getValue(obj, varName) === 'function') {
-                //     this.getValue(obj, varName)(it);
-                // } else {
-                //     this.setValue(obj, varName, it);
-                // }
-            }
         })
 
         // value-link event
@@ -228,6 +208,7 @@ export class EventManager {
                             __render: Object.freeze({
                                 event,
                                 element: it,
+                                attribute: DomUtils.getAttributeToObject(it),
                                 target: event.target,
                                 range: Range.range,
                                 scripts: EventManager.setBindProperty(config?.scripts, obj)
@@ -240,6 +221,28 @@ export class EventManager {
                         this.setValue(obj, varName, value)
                     }
                 })
+            }
+        })
+
+        // on-init event
+        this.procAttr<HTMLInputElement>(childNodes, EventManager.onInitAttrName, (it, attribute) => {
+            let script = attribute;
+            if (script) {
+                script = 'return ' + script;
+            }
+            if (script) {
+                ScriptUtils.eval(`${this.bindScript}; ${script} `, Object.assign(obj, {
+                    __render: Object.freeze({
+                        element: it,
+                        attribute: DomUtils.getAttributeToObject(it)
+                    })
+                }))
+                // console.log('onInit--->', obj, varName, it)
+                // if (typeof this.getValue(obj, varName) === 'function') {
+                //     this.getValue(obj, varName)(it);
+                // } else {
+                //     this.setValue(obj, varName, it);
+                // }
             }
         })
 
@@ -289,7 +292,8 @@ export class EventManager {
             if (EventManager.isUsingThisVar(script, varName) || varName === undefined) {
                 const data = ScriptUtils.eval(`const $element = this.__render.element; ${script} `, Object.assign(obj, {
                     __render: Object.freeze({
-                        element: it
+                        element: it,
+                        attribute: DomUtils.getAttributeToObject(it)
                     })
                 }))
                 if (typeof data === 'string') {
@@ -335,7 +339,8 @@ export class EventManager {
             if (EventManager.isUsingThisVar(script, varName) || varName === undefined) {
                 const data = ScriptUtils.eval(`const $element = this.__render.element;  ${script} `, Object.assign(obj, {
                     __render: Object.freeze({
-                        element: it
+                        element: it,
+                        attribute: DomUtils.getAttributeToObject(it)
                     })
                 }))
                 if (typeof data === 'string') {
@@ -361,7 +366,8 @@ export class EventManager {
             if (EventManager.isUsingThisVar(script, varName) || varName === undefined) {
                 const data = ScriptUtils.eval(`const $element = this.element;  ${script} `, Object.assign(obj, {
                     __render: Object.freeze({
-                        element: it
+                        element: it,
+                        attribute: DomUtils.getAttributeToObject(it)
                     })
                 }))
 
@@ -393,7 +399,8 @@ export class EventManager {
                 if (isUsing) {
                     const data = ScriptUtils.eval(`const $element = this.element;  return ${v} `, Object.assign(obj, {
                         __render: Object.freeze({
-                            element: it
+                            element: it,
+                            attribute: DomUtils.getAttributeToObject(it)
                         })
                     }))
                     it.setAttribute(k, data);
@@ -410,14 +417,13 @@ export class EventManager {
             it.addEventListener(eventName, (event) => {
                 let filter = true;
                 const filterScript = it.getAttribute(`${attr}:filter`);
-                const attribute = DomUtils.getAttributeToObject(it);
                 const thisTarget = Object.assign(obj, {
                     __render: Object.freeze({
                         event,
                         element: it,
                         target: event.target,
                         range: Range.range,
-                        attribute: attribute,
+                        attribute: DomUtils.getAttributeToObject(it),
                         router: config?.router,
                         scripts: EventManager.setBindProperty(config?.scripts, obj)
                     })
@@ -449,6 +455,7 @@ export class EventManager {
                             __render: Object.freeze({
                                 event,
                                 element: it,
+                                attribute: DomUtils.getAttributeToObject(it),
                                 target: event.target,
                                 range: Range.range,
                                 scripts: EventManager.setBindProperty(config?.scripts, obj),

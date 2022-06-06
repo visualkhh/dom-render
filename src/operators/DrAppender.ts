@@ -46,7 +46,7 @@ export class DrAppender extends OperatorRender {
             const tempalte = this.source.config.window.document.createElement('template');
             tempalte.innerHTML = newTemp.innerHTML;
             this.returnContainer.fag.append(tempalte.content)
-            const rr = RawSet.checkPointCreates(this.returnContainer.fag, this.source.config);
+            const rr = RawSet.checkPointCreates(this.returnContainer.fag, this.source.obj, this.source.config);
             this.elementSource.element.parentNode?.replaceChild(this.returnContainer.fag, this.elementSource.element);
             // const rrr = rr.flatMap(it => it.render(obj, config));// .flat();
             this.returnContainer.raws.push(...rr)

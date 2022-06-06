@@ -62,7 +62,7 @@ export class DrForm extends OperatorRender {
                 }
             })
             RawSet.drFormOtherMoveAttr(this.elementSource.element, 'temp-name', 'name', this.source.config);
-            this.returnContainer.raws.push(...RawSet.checkPointCreates(this.elementSource.element, this.source.config));
+            this.returnContainer.raws.push(...RawSet.checkPointCreates(this.elementSource.element, this.source.obj, this.source.config));
             return ExecuteState.EXECUTE;
         }
         return ExecuteState.NO_EXECUTE;

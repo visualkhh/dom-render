@@ -12,7 +12,7 @@ export class DrTargetAttr extends OperatorRender {
             if (attrValue && attrName && (!this.elementSource.attrs.drForOf && !this.elementSource.attrs.drFor && !this.elementSource.attrs.drRepeat)) {
                 const documentFragment = targetAttr.callBack(this.elementSource.element, attrValue, this.source.obj, this.rawSet);
                 if (documentFragment) {
-                    const rr = RawSet.checkPointCreates(documentFragment, this.source.config)
+                    const rr = RawSet.checkPointCreates(documentFragment, this.source.obj, this.source.config)
                     this.elementSource.element.parentNode?.replaceChild(documentFragment, this.elementSource.element);
                     this.returnContainer.raws.push(...rr);
                     this.afterCallBack.onAttrInitCallBacks.push({

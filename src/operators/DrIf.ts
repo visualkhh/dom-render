@@ -54,7 +54,7 @@ export class DrIf extends OperatorRender {
             tempalte.innerHTML = newTemp.innerHTML;
             // console.log(tempalte.innerHTML)
             this.returnContainer.fag.append(tempalte.content)
-            const rr = RawSet.checkPointCreates(this.returnContainer.fag, this.source.config)
+            const rr = RawSet.checkPointCreates(this.returnContainer.fag, this.source.obj, this.source.config)
             this.elementSource.element.parentNode?.replaceChild(this.returnContainer.fag, this.elementSource.element);
             this.returnContainer.raws.push(...rr);
             // if (bypass) {

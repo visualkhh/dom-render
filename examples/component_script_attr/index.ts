@@ -91,45 +91,47 @@ export class Index implements OnProxyDomRender {
     }
 }
 
-const config = {
-    window
-} as Config;
-const scripts = {
-    concat: function (data: string, str: string) {
-        return data + str;
-    }
-}
-config.scripts = scripts;
-DomRender
-    .addComponent(config, {type: Profile}, {template: ProfileTemplate})
-    .add({type: Home}, {
-        template: HomeTemplate,
-        styles: [HomeStyle]
-    });
-
-DomRender.addAttribute(config, 'link',
-    (element: Element, attrValue: string, obj: any, rawSet: RawSet) => {
-        return obj;
-    },
-    (element: Element, attrValue: string, obj: any, rawSet: RawSet) => {
-        const fag = window.document.createDocumentFragment();
-        if (attrValue) {
-            const n = element.cloneNode(true) as Element;
-            attrValue = ScriptUtils.eval(`return ${attrValue}`, obj)
-            n.addEventListener('click', () => {
-                location.href = attrValue;
-            });
-            fag.append(n);
+const config: Config = {
+    window,
+    scripts: {
+        concat: function (data: string, str: string) {
+            return data + str;
         }
-        return fag;
     }
-);
-
-DomRender.addAttributeCallBack(config, 'wow', (e, a, o) => {
-    e.addEventListener('click', (event) => {
-        alert((event.target as any).value);
-    })
-})
+};
+config.targetElements = [
+    DomRender.createComponent({type: Profile, template: ProfileTemplate}, config),
+    DomRender.createComponent({type: Home, template: HomeTemplate, styles: HomeStyle}, config)
+]
+config.targetAttrs = [
+    DomRender.createAttribute('link',
+        (element: Element, attrValue: string, obj: any, rawSet: RawSet) => {
+            return obj;
+        },
+        (element: Element, attrValue: string, obj: any, rawSet: RawSet) => {
+            const fag = window.document.createDocumentFragment();
+            if (attrValue) {
+                const n = element.cloneNode(true) as Element;
+                attrValue = ScriptUtils.eval(`return ${attrValue}`, obj)
+                n.addEventListener('click', () => {
+                    location.href = attrValue;
+                });
+                fag.append(n);
+            }
+            return fag;
+        }
+    )
+]
+config.applyEvents = [
+    {
+        attrName: 'wow',
+        callBack: (e, a, o) => {
+            e.addEventListener('click', (event) => {
+                alert((event.target as any).value);
+            })
+        }
+    }
+]
 
 const data = DomRender.run(new Index(), document.querySelector('#app')!, config);
 

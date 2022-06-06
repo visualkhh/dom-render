@@ -48,7 +48,7 @@ export class DrTargetElement extends OperatorRender {
                     };
                 }
                 // fag.append(documentFragment)
-                const rr = RawSet.checkPointCreates(documentFragment, this.source.config)
+                const rr = RawSet.checkPointCreates(documentFragment, this.source.obj, this.source.config)
                 this.elementSource.element.parentNode?.replaceChild(documentFragment, this.elementSource.element);
                 this.returnContainer.raws.push(...rr);
                 this.afterCallBack.onElementInitCallBacks.push({

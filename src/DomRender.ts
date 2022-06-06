@@ -34,44 +34,19 @@ export class DomRender {
         return robj;
     }
 
-    public static addComponent(config: Config, {type, tagName = type.name}: {type: ConstructorType<any>, tagName?: string}, {template, styles = [], styleLocale = false}: {template: string, styles?: string[], styleLocale?: boolean}) {
-        const component = RawSet.createComponentTargetElement(tagName, (e, o, r2, counstructorParam) => {
-            return new type(...counstructorParam);
-        }, template, styles, styleLocale, config);
-        config.targetElements = config.targetElements ?? [];
-        config.targetElements.push(component);
-        return {
-            add: (source: {type: ConstructorType<any>, tagName?: string}, front: {template: string, styles?: string[]}) => {
-                return DomRender.addComponent(config, source, front);
-            }
-        };
+    public static createComponent(param: {type: ConstructorType<any>, tagName?: string, template?: string, styles?: string[] | string}, config: Config) {
+        const component = RawSet.createComponentTargetElement(param.tagName ?? param.type.name, (e, o, r2, counstructorParam) => {
+            return new param.type(...counstructorParam);
+        }, param.template ?? '', Array.isArray(param.styles) ? param.styles : (param.styles ? [param.styles] : undefined), false, config);
+        return component;
     }
 
-    public static addAttribute(config: Config, attrName: string, getThisObj: (element: Element, attrValue: string, obj: any, rawSet: RawSet) => any, factory: (element: Element, attrValue: string, obj: any, rawSet: RawSet) => DocumentFragment) {
+    public static createAttribute(attrName: string, getThisObj: (element: Element, attrValue: string, obj: any, rawSet: RawSet) => any, factory: (element: Element, attrValue: string, obj: any, rawSet: RawSet) => DocumentFragment) {
         const targetAttribute = RawSet.createComponentTargetAttribute(
             attrName,
             getThisObj,
             factory
         )
-        config.targetAttrs = config.targetAttrs ?? [];
-        config.targetAttrs.push(targetAttribute);
-        return {
-            add: (attrName: string, getThisObj: (element: Element, attrValue: string, obj: any, rawSet: RawSet) => any, factory: (element: Element, attrValue: string, obj: any, rawSet: RawSet) => DocumentFragment) => {
-                return DomRender.addAttribute(config, attrName, getThisObj, factory);
-            }
-        };
-    }
-
-    public static addAttributeCallBack(config: Config, attrName: string, callBack: (elements: Element, attrValue: string, obj: any) => void) {
-        config.applyEvents = config.applyEvents ?? [];
-        config.applyEvents.push({
-            attrName,
-            callBack
-        })
-        return {
-            add: (attrName: string, callBack: (elements: Element, attrValue: string, obj: any) => void) => {
-                return DomRender.addAttributeCallBack(config, attrName, callBack);
-            }
-        };
+        return targetAttribute;
     }
 }

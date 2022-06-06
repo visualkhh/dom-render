@@ -19,7 +19,7 @@ export class DrThis extends OperatorRender {
                 } else {
                     this.returnContainer.fag.append(RawSet.drThisCreate(this.elementSource.element, this.elementSource.attrs.drThis, this.elementSource.attrs.drVarOption ?? '', this.elementSource.attrs.drStripOption, this.source.obj, this.source.config))
                 }
-                const rr = RawSet.checkPointCreates(this.returnContainer.fag, this.source.config)
+                const rr = RawSet.checkPointCreates(this.returnContainer.fag, this.source.obj, this.source.config)
                 this.elementSource.element.parentNode?.replaceChild(this.returnContainer.fag, this.elementSource.element);
                 this.returnContainer.raws.push(...rr);
             } else {

@@ -7,8 +7,6 @@ import {Second} from './pages/second/second';
 import SecondTemplate from './pages/second/second.html';
 import {Detail} from './pages/detail/detail';
 import DetailTemplate from './pages/detail/detail.html';
-import {Sub} from './pages/second/sub/sub';
-import SubTemplate from './pages/second/sub/sub.html';
 
 class Data implements OnCreateRender {
     constructor() {
@@ -28,9 +26,10 @@ class Data implements OnCreateRender {
 const config: Config = {
     window
 };
-DomRender.addComponent(config, {type: Main, tagName: 'page-main'}, {template: MainTemplate})
-    .add({type: Second, tagName: 'page-second'}, {template: SecondTemplate})
-    .add({type: Detail, tagName: 'page-detail'}, {template: DetailTemplate})
-    .add({type: Sub, tagName: 'page-sub'}, {template: SubTemplate});
+config.targetElements = [
+    DomRender.createComponent({type: Main, tagName: 'page-main', template: MainTemplate}, config),
+    DomRender.createComponent({type: Second, tagName: 'page-second', template: SecondTemplate}, config),
+    DomRender.createComponent({type: Detail, tagName: 'page-detail', template: DetailTemplate}, config)
+]
 config.routerType = 'hash';
 const data = DomRender.run(new Data(), document.querySelector('#app')!, config);

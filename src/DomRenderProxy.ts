@@ -63,7 +63,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         (this._domRender_proxy as any)?.onCreateRender?.(createParam);
         const innerHTML = (target as any).innerHTML ?? '';
         this._targets.add(target);
-        const rawSets = RawSet.checkPointCreates(target, this.config);
+        const rawSets = RawSet.checkPointCreates(target, this._domRender_proxy, this.config);
         // console.log('initRender -------rawSet', rawSets)
         // 중요 초기에 한번 튕겨줘야함.
         eventManager.applyEvent(this._domRender_proxy, eventManager.findAttrElements(target as Element, this.config), this.config);

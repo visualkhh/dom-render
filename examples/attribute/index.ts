@@ -16,9 +16,9 @@ class Data {
     }
 }
 
-const config = {
-    window
-} as Config;
-DomRender.addComponent(config, {type: Home}, {template: HomeTemplate})
-    .add({type: SubHome}, {template: SubHomeTemplate});
+const config: Config = {window}
+config.targetElements = [
+    DomRender.createComponent({type: Home, template: HomeTemplate}, config),
+    DomRender.createComponent({type: SubHome, template: SubHomeTemplate}, config)
+];
 const data = DomRender.run(new Data(), document.querySelector('#app')!, config);

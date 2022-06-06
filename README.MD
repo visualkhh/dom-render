@@ -364,11 +364,12 @@ validator
 const config: Config = {
   window
 };
-DomRender.addComponent(config, {type: Main, tagName: 'page-main'}, {template: MainTemplate})
-        .add({type: Second, tagName: 'page-second'}, {template: SecondTemplate})
-        .add({type: Detail, tagName: 'page-detail'}, {template: DetailTemplate});
-config.routerType = 'hash';
-config.routerType = 'hash';
+config.targetElements = [
+  DomRender.createComponent({type: Main, tagName: 'page-main', template: MainTemplate}, config),
+  DomRender.createComponent({type: Second, tagName: 'page-second', template: SecondTemplate}, config),
+  DomRender.createComponent({type: Detail, tagName: 'page-detail', template: DetailTemplate}, config)
+]
+config.routerType = 'hash'; // 'hash' | 'path' | 'none';
 const data = DomRender.run(new Data(), document.querySelector('#app')!, config);
 ```
 ```html
@@ -592,33 +593,41 @@ link attribute
 </body>
 ```
 ```typescript
-DomRender
-        .addComponent(config, {type: Profile}, {template: ProfileTemplate})
-        .add({type: Home}, {template: HomeTemplate});
+config.targetElements = [
+  DomRender.createComponent({type: Profile, template: ProfileTemplate}, config),
+  DomRender.createComponent({type: Home, template: HomeTemplate, styles: HomeStyle}, config)
+]
 
-DomRender.addAttribute(config, 'link',
-        (element: Element, attrValue: string, obj: any, rawSet: RawSet) => {
-          return obj;
-        },
-        (element: Element, attrValue: string, obj: any, rawSet: RawSet) => {
-          const fag = window.document.createDocumentFragment();
-          if (attrValue) {
-            const n = element.cloneNode(true) as Element;
-            attrValue = ScriptUtils.eval(`return ${attrValue}`, obj)
-            n.addEventListener('click', () => {
-              location.href = attrValue;
-            });
-            fag.append(n);
+config.targetAttrs = [
+  DomRender.createAttribute('link',
+          (element: Element, attrValue: string, obj: any, rawSet: RawSet) => {
+            return obj;
+          },
+          (element: Element, attrValue: string, obj: any, rawSet: RawSet) => {
+            const fag = window.document.createDocumentFragment();
+            if (attrValue) {
+              const n = element.cloneNode(true) as Element;
+              attrValue = ScriptUtils.eval(`return ${attrValue}`, obj)
+              n.addEventListener('click', () => {
+                location.href = attrValue;
+              });
+              fag.append(n);
+            }
+            return fag;
           }
-          return fag;
-        }
-);
+  )
+]
 
-DomRender.addAttributeCallBack(config, 'wow', (e, a, o) => {
-  e.addEventListener('click', (event) => {
-    alert((event.target as any).value);
-  })
-})
+config.applyEvents = [
+  {
+    attrName: 'wow',
+    callBack: (e, a, o) => {
+      e.addEventListener('click', (event) => {
+        alert((event.target as any).value);
+      })
+    }
+  }
+]
 const data = DomRender.run(new Data(), document.querySelector('#app')!, config);
 ```
 using component

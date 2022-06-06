@@ -387,7 +387,7 @@ export class RawSet {
     }
 
     // 중요 important
-    public static checkPointCreates(element: Node, config: Config): RawSet[] {
+    public static checkPointCreates(element: Node, obj: any, config: Config): RawSet[] {
         const thisVariableName = (element as any).__domrender_this_variable_name;
         // console.log('checkPointCreates thisVariableName', thisVariableName);
         const nodeIterator = config.window.document.createNodeIterator(element, NodeFilter.SHOW_ALL, {
