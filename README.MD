@@ -7,7 +7,7 @@ DOM-RENDER
 
 # 🚀 Quick start 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.78/dist/bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.81/dist/bundle.js"></script>
 ```
 ```html
 <!DOCTYPE html>
@@ -116,6 +116,45 @@ const data = DomRender.run(new Data(), document.querySelector('#app')!);
     #it# = ${var.superIt * #it#}$
   </scope>
 </div>
+```
+</details>
+
+<details>
+  <summary>dr-appender<strong>🔻(click)</strong></summary>
+
+```html
+<h3>appender</h3>
+<ul>
+  <li dr-appender="this.appender">
+    ${#it#}$
+  </li>
+</ul>
+<button dr-event-click="this.append()">appending</button>
+<button dr-event-click="this.modifyAppender(0)">idx 0 modify</button>
+<button dr-event-click="this.clearAppend()">appender clear</button>
+```
+
+```typescript
+class Data {
+    appender = new Appender();
+
+    constructor() {
+        this.appender.push('init' + RandomUtils.uuid(), 'init' + RandomUtils.uuid());
+    }
+
+    append() {
+        this.appender.push(RandomUtils.uuid(), RandomUtils.uuid());
+    }
+
+    clearAppend() {
+        this.appender.clear()
+    }
+
+    modifyAppender(idx: number) {
+        this.appender[idx][0] = RandomUtils.uuid();
+    }
+}
+
 ```
 </details>
 
@@ -463,6 +502,17 @@ for (let data of new Range(100,55, 10)) {
   console.log(data);
 }
 const rangeArray = new Range(100,55, 10).toArray();
+```
+</details>
+<details>
+  <summary>Appender<strong>🔻(click)</strong></summary>
+
+```javascript
+const appender = new Appender<number>([1, 2]);
+appender.push(3, 4)
+for (const data of appender) {
+    console.log('----appender item--->', data);
+}
 ```
 </details>
 

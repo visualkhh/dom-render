@@ -6,6 +6,14 @@
 </head>
 <script src="bundle.js" defer="defer"></script>
 <body id="app">
-${this.name}$
+<h1>
+    ${this.name}$
+</h1>
+<ul>
+    <li dr-for-of="this.friends">
+    ${#it#.name}$
+    </li>
+</ul>
+
 </body>
 </html>

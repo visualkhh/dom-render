@@ -1,15 +1,41 @@
-export class Appender {
-    // childs: Array<Appender> = [new Appender(0)];
+export class Appender<T = any> implements Iterable<T> {
     // eslint-disable-next-line no-undef
-    [key: number]: any[] | undefined;
-    length = 0;
-    // [keys: string]: any;
+    [key: number]: T[] | undefined;
 
-    constructor() {
+    length = 0;
+
+    constructor(defaultDatas?: T[]) {
+        if (defaultDatas) {
+            this.push(...defaultDatas);
+        }
         // (this.childs as any).isAppender = true;
     }
 
-    push(...items: any[]): void {
+    [Symbol.iterator](): Iterator<T> {
+        const items = this.getAll();
+        let idx = 0;
+        return {
+            next(value?: any): IteratorResult<T, any> {
+                let r: IteratorResult<T> = {value: undefined, done: true};
+                if (items.length > idx) {
+                    r = {value: items[idx], done: false};
+                }
+                idx++;
+                return r;
+            }
+        }
+    }
+
+    getAll(): T[] {
+        return this.getAlls().flat();
+    }
+
+    getAlls(): T[][] {
+        const map = Array.from({length: this.length}).filter((it, idx) => this[idx]).map((it, idx) => this[idx]);
+        return map as T[][];
+    }
+
+    push(...items: T[]): void {
         // console.log('----2>', this.length)
         (items as any).index = this.length;
         this[this.length++] = items;
@@ -26,26 +52,4 @@ export class Appender {
         }
         this.length = 0;
     }
-
-    // get currentAppender(): Appender {
-    //     return this.childs[this.childs.length - 2];
-    // }
-    //
-    // get lastAppender(): Appender {
-    //     return this.childs[this.childs.length - 1];
-    // }
-
-    // get length() {
-    //     return 1;
-    //     // return this.childs.length;
-    // }
-    //
-    // get currentIndex() {
-    //     return 1;
-    //     // return this.childs.length - 2;
-    // }
-
-    // get lastIndex() {
-    //     return this.childs.length - 1;
-    // }
 }

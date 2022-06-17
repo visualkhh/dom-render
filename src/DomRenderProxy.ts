@@ -174,6 +174,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             })
         } else {
             const strings = paths.reverse();
+            // array같은경우도 키값으로 접근하기때문에 특정 인덱스를 찾아서 그부분만 바꿔줄수 있다.
             const fullPathStr = strings.map(it => isNaN(Number(it)) ? '.' + it : `[${it}]`).join('').slice(1);
             if (lastDoneExecute) {
                 const iterable = this._rawSets.get(fullPathStr);

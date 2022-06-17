@@ -2,7 +2,17 @@ import {DomRender} from 'dom-render';
 import {FormValidator} from 'dom-render/validators/FormValidator';
 import {NotEmptyValidator} from 'dom-render/validators/NotEmptyValidator';
 import {Appender} from 'dom-render/operators/Appender';
+import {Range} from 'dom-render/iterators/Range';
 import {RandomUtils} from 'dom-render/utils/random/RandomUtils';
+//
+// const appender = new Appender<number>([1, 2]);
+// appender.push(3, 4)
+// console.log('------->', appender, appender.length);
+//
+// // console.log(appender[Symbol.iterator]);
+// for (const number of appender) {
+//     console.log('----2222--->', number);
+// }
 
 class PageForm extends FormValidator {
     name = new NotEmptyValidator();

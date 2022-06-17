@@ -12,7 +12,8 @@
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-//    "declaration": true,
+    "downlevelIteration": true,
+    //    "declaration": true,
 //    "baseUrl": "src",
     "lib": [
       "dom",
