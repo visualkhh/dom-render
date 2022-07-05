@@ -13,12 +13,17 @@
     /*#_wWwDJLiAKOMqplKbejzh-start ~ *:not(#_wWwDJLiAKOMqplKbejzh-start ~ #_wWwDJLiAKOMqplKbejzh-end ~ *) {*/
     /*div ~ #_wWwDJLiAKOMqplKbejzh-start ~ *:not(#_wWwDJLiAKOMqplKbejzh-start ~ #_wWwDJLiAKOMqplKbejzh-end ~ *) {*/
     /*div ~ #_wWwDJLiAKOMqplKbejzh-start ~ *:not(#_wWwDJLiAKOMqplKbejzh-start ~ #_wWwDJLiAKOMqplKbejzh-end ~ *) {*/
-    #_wWwDJLiAKOMqplKbejzh-start ~ div:not(#_wWwDJLiAKOMqplKbejzh-start ~ #_wWwDJLiAKOMqplKbejzh-end ~ *) {
-        background-color: blue;
-        color: rebeccapurple;
-        animation-duration: 3s;
-        animation-name: slidein;
-        color: red;
+    /*#_wWwDJLiAKOMqplKbejzh-start ~ div:not(#_wWwDJLiAKOMqplKbejzh-start ~ #_wWwDJLiAKOMqplKbejzh-end ~ *) {*/
+    /*    background-color: blue;*/
+    /*    color: rebeccapurple;*/
+    /*    animation-duration: 3s;*/
+    /*    animation-name: slidein;*/
+    /*    color: red;*/
+    /*}*/
+
+    /*:is(#_wWwDJLiAKOMqplKbejzh-start ~ *:not(#_wWwDJLiAKOMqplKbejzh-start ~ #_wWwDJLiAKOMqplKbejzh-end ~ *)) .wow {*/
+    :is(#_wWwDJLiAKOMqplKbejzh-start ~ *:not(#_wWwDJLiAKOMqplKbejzh-start ~ #_wWwDJLiAKOMqplKbejzh-end ~ *))  {
+        background-color: gold;
     }
     @keyframes slidein {
         from {
@@ -43,7 +48,7 @@
 <hr>
 <meta id="_wWwDJLiAKOMqplKbejzh-start"/>
 <div>zzzzz<div>cc</div>zz</div>
-<div class="wow">zzzzzzz</div>
+<div class="wow">zzzz<span class="wow">ggwo</span>z<span>ss</span>zz</div>
 <span>ss</span>
 <meta id="_wWwDJLiAKOMqplKbejzh-end"/>
 <hr>

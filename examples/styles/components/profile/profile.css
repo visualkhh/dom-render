@@ -4,6 +4,9 @@ div {
     animation-name: slidein;
     color: red;
 }
+span {
+    background-color: aquamarine;
+}
 .wow {
     color: blue;
 }
@@ -19,6 +22,12 @@ div {
         width: 100%;
     }
 }
+li {
+    background-color: #217ac0;
+}
+/*:root li {*/
+/*    background-color: #217ac0;*/
+/*}*/
 
 :root span {
     font-size: 55px;

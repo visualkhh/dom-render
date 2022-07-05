@@ -330,12 +330,18 @@ export class RawSet {
                         // rule.selectorText = `${start} ~ *:not(${start} ~ ${end} ~ ${rule.selectorText})`;
                         // console.log('-----', rule, rule.selectorText)
                         if (!rule.selectorText.startsWith(':root')) {
-                            rule.selectorText = `${start} ~ ${rule.selectorText}:not(${start} ~ ${end} ~ *)`;
-                            // if (rule.selectorText.startsWith('.')) {
+                            // rule.selectorText = `${start} ~ ${rule.selectorText}:not(${start} ~ ${end} ~ *)`;
+                            // rule.selectorText = `${start} ~ ${rule.selectorText}:not(${start} ~ ${end} ~ *)`;
+                            const selectorText = `:is(${start} ~ *:not(${start} ~ ${end} ~ *))`;
+                            if (rule.selectorText.startsWith('.')) {
+                                rule.selectorText = `${selectorText}${rule.selectorText}, ${selectorText} ${rule.selectorText}`;
                             //     rule.selectorText = `${start} ~ *:not(${start} ~ ${end} ~ *)${rule.selectorText}`;
-                            // } else {
+                            } else {
+                                const divText = `${start} ~ ${rule.selectorText}:not(${start} ~ ${end} ~ *)`;
+                                rule.selectorText = `${selectorText} ${rule.selectorText}, ${divText}`;
+                                // rule.selectorText = `${selectorText} ${rule.selectorText}`;
                             //     rule.selectorText = `${rule.selectorText} ~ ${start} ~ *:not(${start} ~ ${end} ~ *)`;
-                            // }
+                            }
                         }
                         // console.log(rule.selectorText);
                     });
