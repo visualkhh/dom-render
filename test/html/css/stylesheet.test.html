@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<style id="first">
+    /*#first ~ *:not(#first ~ style[domstyle] ~ *)*/
+    /*#_wWwDJLiAKOMqplKbejzh-start ~ :not(#_wWwDJLiAKOMqplKbejzh-start ~ #_wWwDJLiAKOMqplKbejzh-end ~ div)  {*/
+    /*#_wWwDJLiAKOMqplKbejzh-start ~ :not(#_wWwDJLiAKOMqplKbejzh-start ~ #_wWwDJLiAKOMqplKbejzh-end)  {*/
+    /*#_wWwDJLiAKOMqplKbejzh-start ~ *:not(#_wWwDJLiAKOMqplKbejzh-start ~ #_wWwDJLiAKOMqplKbejzh-end ~ *).wow {*/
+    /*#_wWwDJLiAKOMqplKbejzh-start ~ *:not(#_wWwDJLiAKOMqplKbejzh-start ~ #_wWwDJLiAKOMqplKbejzh-end ~ *) {*/
+    /*div ~ #_wWwDJLiAKOMqplKbejzh-start ~ *:not(#_wWwDJLiAKOMqplKbejzh-start ~ #_wWwDJLiAKOMqplKbejzh-end ~ *) {*/
+    /*div ~ #_wWwDJLiAKOMqplKbejzh-start ~ *:not(#_wWwDJLiAKOMqplKbejzh-start ~ #_wWwDJLiAKOMqplKbejzh-end ~ *) {*/
+    #_wWwDJLiAKOMqplKbejzh-start ~ div:not(#_wWwDJLiAKOMqplKbejzh-start ~ #_wWwDJLiAKOMqplKbejzh-end ~ *) {
+        background-color: blue;
+        color: rebeccapurple;
+        animation-duration: 3s;
+        animation-name: slidein;
+        color: red;
+    }
+    @keyframes slidein {
+        from {
+            margin-left: 100%;
+            width: 300%
+        }
+
+        to {
+            margin-left: 0%;
+            width: 100%;
+        }
+    }
+/*:root span {*/
+/*  background-color: red;*/
+/*}*/
+    /*#_wWwDJLiAKOMqplKbejzh1-start ~ :not(#_wWwDJLiAKOMqplKbejzh1-start ~ #_wWwDJLiAKOMqplKbejzh1-end ~ div)  {*/
+    /*    background-color: purple;*/
+    /*}*/
+</style>
+
+<div>1</div>
+<hr>
+<meta id="_wWwDJLiAKOMqplKbejzh-start"/>
+<div>zzzzz<div>cc</div>zz</div>
+<div class="wow">zzzzzzz</div>
+<span>ss</span>
+<meta id="_wWwDJLiAKOMqplKbejzh-end"/>
+<hr>
+<div>2</div>
+<div>2<div>zzzzzzz</div></div>
+<div>2</div>
+<span>spadd</span>
+<!--<meta id="_wWwDJLiAKOMqplKbejzh1-start"/>-->
+<!--<div>zzzzz111zz</div>-->
+<!--<span>spadd</span>-->
+<!--<meta id="_wWwDJLiAKOMqplKbejzh1-end"/>-->
+<!--<div>222222</div>-->
+<script>
+    // Array.from(window.document.styleSheets).forEach(it => {
+    //     Array.from(it.cssRules).forEach(it => {
+    //         console.log(it);
+    //         if (it.selectorText === 'wow') {
+    //             it.selectorText = '.zzs';
+    //         }
+    //         console.log(it);
+    //     })
+    // })
+    // console.log(Array.from(window.document.styleSheets))
+</script>
+</body>
+</html>

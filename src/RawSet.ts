@@ -192,7 +192,7 @@ export class RawSet {
         return usingTriggerVariables;
     }
 
-    // 중요 render
+    // 중요 render 처리 부분
     public render(obj: any, config: Config): RawSet[] {
         const genNode = config.window.document.importNode(this.fragment, true);
         const raws: RawSet[] = [];
@@ -316,6 +316,33 @@ export class RawSet {
             it.obj.onInitRender?.();
         }
         for (const it of onElementInitCallBacks) {
+            // 중요 style isolation 나중에 :scope로 대체 가능할듯.
+            Array.from(window.document.styleSheets).filter(it => it.ownerNode && it.ownerNode instanceof Element && it.ownerNode.getAttribute('id') && !it.ownerNode.getAttribute('completed')).forEach(it => {
+                const styleElement = (it.ownerNode as Element);
+                const id = styleElement.getAttribute('id')?.split('-')[0];
+                if (id) {
+                    // console.log('------->', id)
+                    const start = `#${id}-start`;
+                    const end = `#${id}-end`;
+                    Array.from(it.cssRules).filter(it => it.constructor.name === 'CSSStyleRule').forEach((it) => {
+                        const rule = it as CSSStyleRule;
+                        // rule.selectorText = `${start} ~ *:not(${start} ~ ${end} ~ *) ${rule.selectorText}`;
+                        // rule.selectorText = `${start} ~ *:not(${start} ~ ${end} ~ ${rule.selectorText})`;
+                        // console.log('-----', rule, rule.selectorText)
+                        if (!rule.selectorText.startsWith(':root')) {
+                            rule.selectorText = `${start} ~ ${rule.selectorText}:not(${start} ~ ${end} ~ *)`;
+                            // if (rule.selectorText.startsWith('.')) {
+                            //     rule.selectorText = `${start} ~ *:not(${start} ~ ${end} ~ *)${rule.selectorText}`;
+                            // } else {
+                            //     rule.selectorText = `${rule.selectorText} ~ ${start} ~ *:not(${start} ~ ${end} ~ *)`;
+                            // }
+                        }
+                        // console.log(rule.selectorText);
+                    });
+                }
+                (it.ownerNode as Element).setAttribute('completed', 'true');
+            })
+
             it.targetElement?.__render?.component?.onInitRender?.(Object.freeze({render: it.targetElement?.__render, creatorMetaData: it.targetElement?.__creatorMetaData}));
             config?.onElementInit?.(it.name, obj, this, it.targetElement);
         }
@@ -612,7 +639,10 @@ export class RawSet {
         const n = element.cloneNode(true) as Element;
         if (set) {
             const id = RandomUtils.getRandomString(20);
-            n.innerHTML = RawSet.styleTransformLocal(set.styles ?? [], id, true, set.styleLocale) + (set.template ?? '');
+            const style = RawSet.styleTransformLocal(set.styles ?? [], id, true, set.styleLocale);
+            const metaStart = RawSet.metaStart(id);
+            const metaEnd = RawSet.metaEnd(id);
+            n.innerHTML = metaStart + style + (set.template ?? '') + metaEnd;
             // dr-on-create onCreateRender
             const onCreate = element.getAttribute(`${EventManager.attrPrefix}on-create`)
             const renderScript = '';
@@ -783,8 +813,10 @@ export class RawSet {
                     }))
                 }
 
-                const innerHTML = RawSet.styleTransformLocal(styles, componentKey, true, styleLocale) + (applayTemplate ?? '');
-                element.innerHTML = innerHTML;
+                const style = RawSet.styleTransformLocal(styles, componentKey, true, styleLocale);
+                const metaStart = RawSet.metaStart(componentKey);
+                const metaEnd = RawSet.metaEnd(componentKey);
+                element.innerHTML = metaStart + style + (applayTemplate ?? '') + metaEnd;
                 // console.log('------>', element.innerHTML, obj)
                 let data = RawSet.drThisCreate(element, `this.__domrender_components.${componentKey}`, '', true, obj, config);
 
@@ -814,6 +846,7 @@ export class RawSet {
         return StringUtils.regexExec(reg, data ?? '');
     }
 
+    // 중요 스타일 적용 부분
     public static styleTransformLocal(styleBody: string | string[], id: string, styleTagWrap = true, locale = false) {
         // <style id="first">
         //     #first ~ *:not(#first ~ style[domstyle] ~ *) {
@@ -833,10 +866,18 @@ export class RawSet {
             });
         }
         if (styleTagWrap) {
-            styleBody = `<style id='${id}' domstyle>${styleBody}</style>`
+            styleBody = `<style id='${id}-style' domstyle>${styleBody}</style>`
         }
 
         return styleBody;
+    }
+
+    public static metaStart(id: string) {
+        return `<meta id='${id}-start' />`;
+    }
+
+    public static metaEnd(id: string) {
+        return `<meta id='${id}-end' />`;
     }
 
     public static destroy(obj: any | undefined, parameter: any[], config: Config, destroyOptions: (DestroyOptionType | string)[] = []): void {

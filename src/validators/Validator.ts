@@ -103,7 +103,7 @@ export abstract class Validator<T = any, E = Element> {
             try {
                 target.value = this._value;
             } catch (e) {
-                console.log('set value function is blocked ')
+                console.error('set value function is blocked ')
             }
         }
         if (this.getAutoValidAction()) {

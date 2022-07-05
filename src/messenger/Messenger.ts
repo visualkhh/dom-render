@@ -146,7 +146,7 @@ export abstract class Messenger {
     constructor(private config: Config) {
         this.config.window.addEventListener(Messenger.EVENT_PUBLISH_KEY, (e: Event) => {
             const detail = ((e as CustomEvent).detail as MessengerEventDetail);
-            console.log('--->', detail)
+            // console.log('--->', detail)
             const rtns: ChannelData[] = [];
             this.getChannels(detail.key)?.forEach(it => {
                 try {
@@ -162,7 +162,7 @@ export abstract class Messenger {
         });
         this.config.window.addEventListener(Messenger.EVENT_SUBSCRIBE_KEY, (e: Event) => {
             const detail = ((e as CustomEvent).detail as MessengerSubscribeEventDetail);
-            console.log('--->', detail)
+            // console.log('--->', detail)
             const channel = this.createChannel(detail.obj, detail.key);
             detail.init(channel, channel.subscribe(detail.subscribe));
         });
@@ -191,7 +191,7 @@ export abstract class Messenger {
         if (obj) {
             this.channels.forEach(it => {
                 if (it.obj === obj) {
-                    console.log('dddddddddddd', obj)
+                    // console.log('dddddddddddd', obj)
                     this.deleteChannel(it);
                 }
             });

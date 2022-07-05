@@ -57,6 +57,7 @@ export class DrTargetElement extends OperatorRender {
                     targetElement,
                     creatorMetaData: targetElement.__creatorMetaData as CreatorMetaData
                 });
+                // console.log(document.body.innerHTML);
                 targetElement?.complete?.(this.elementSource.element, this.source.obj, this.rawSet);
             }
             return ExecuteState.EXECUTE;

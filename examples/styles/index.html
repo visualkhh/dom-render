@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>examples</title>
+</head>
+<script src="bundle.js" defer="defer"></script>
+<body id="app">
+<h1>
+    ${this.name}$
+</h1>
+<ul>
+    <li dr-for-of="this.friends">
+        ${#it#.name}$
+    </li>
+    <hr>
+</ul>
+<user dr-if="this.sw"></user>
+<profile></profile>
+sssss
+<span>zwowow</span>
+<span class="wow">wow</span>
+<span><button dr-event-click="this.toggle()">toggle</button></span>
+</body>
+</html>

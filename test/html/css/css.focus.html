@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<style>
+    /*.a {*/
+    /*    background-color: red;*/
+    /*}*/
+    /*.b {*/
+    /*    background-color: blue;*/
+    /*}*/
+    /*.item {*/
+    /*    color: pink;*/
+    /*}*/
+    /*.a {*/
+    /*    div {*/
+    /*        color: red;*/
+    /*    }*/
+    /*}*/
+    /*@scope (.a) {*/
+    /*    div {*/
+    /*        display: block;*/
+    /*        color: red;*/
+    /*        width: 100%;*/
+    /*    }*/
+    /*}*/
+    #wow:focus {
+        color: red;
+    }
+</style>
+<a id="wowbtn" href="#wow">ww</a>
+<a href="#you">yy</a>
+<div style="height: 2000px;">zz</div>
+<button id="wow" style="height: 2000px" href="#" value="zzzzzzz">wow</button>
+<div id="you" style="height: 2000px">you</div>
+<script>
+    document.querySelector('#wowbtn').addEventListener('focus', () => {
+        console.log('-1----')
+    })
+    document.querySelector('#wow').addEventListener('focus', () => {
+        console.log('--2---')
+    })
+
+</script>
+</body>
+</html>

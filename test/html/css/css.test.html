@@ -6,9 +6,23 @@
 </head>
 <body>
 <style id="first">
+    wow {
+
+    }
     #first ~ *:not(#first ~ style[domstyle] ~ *) {
         font-size: 30px;
         color: blue;
+    }
+    @keyframes slidein {
+        from {
+            margin-left: 100%;
+            width: 300%
+        }
+
+        to {
+            margin-left: 0%;
+            width: 100%;
+        }
     }
 </style>
 <div>aaa</div>

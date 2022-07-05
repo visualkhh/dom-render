@@ -1,6 +1,6 @@
 {
   "name": "dom-render",
-  "version": "1.0.81",
+  "version": "1.0.82",
   "main": "DomRender.js",
   "license": "MIT",
   "description": "dom-render",
