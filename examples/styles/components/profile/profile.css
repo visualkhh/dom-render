@@ -10,6 +10,11 @@ span {
 .wow {
     color: blue;
 }
+@media (min-width: 300px) {
+    .wow {
+        color : red;
+    }
+}
 
 @keyframes slidein {
     from {

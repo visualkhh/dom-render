@@ -4,11 +4,15 @@
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
-<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.76/dist/bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.83/dist/bundle.js"></script>
 <!--<script src="bundle.js"></script>-->
 <body id="app">
 <input type="text" value="${this.name}$" style="${'color: '+this.color}$">
 <button dr-event-click="this.changeData();">change</button>
+<hr>
+<user></user>
+<hr>
+<div>good</div>
 <script>
     let data = {
         name: 'my name is dom-render',
@@ -19,7 +23,15 @@
             this.color = RandomUtils.getRandomColor();
         }
     };
-    data = DomRender.run(data , document.querySelector('#app'));
+
+    class User {
+
+    }
+    const config = {window};
+    config.targetElements = [
+        DomRender.createComponent({type: User, template: `<span>user<div>ss</div></span>`, styles: `div {color: red}`}, config)
+    ]
+    data = DomRender.run(data , document.querySelector('#app'), config);
 </script>
 </body>
 </html>

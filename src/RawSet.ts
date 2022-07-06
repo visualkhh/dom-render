@@ -322,28 +322,8 @@ export class RawSet {
                 const id = styleElement.getAttribute('id')?.split('-')[0];
                 if (id) {
                     // console.log('------->', id)
-                    const start = `#${id}-start`;
-                    const end = `#${id}-end`;
-                    Array.from(it.cssRules).filter(it => it.constructor.name === 'CSSStyleRule').forEach((it) => {
-                        const rule = it as CSSStyleRule;
-                        // rule.selectorText = `${start} ~ *:not(${start} ~ ${end} ~ *) ${rule.selectorText}`;
-                        // rule.selectorText = `${start} ~ *:not(${start} ~ ${end} ~ ${rule.selectorText})`;
-                        // console.log('-----', rule, rule.selectorText)
-                        if (!rule.selectorText.startsWith(':root')) {
-                            // rule.selectorText = `${start} ~ ${rule.selectorText}:not(${start} ~ ${end} ~ *)`;
-                            // rule.selectorText = `${start} ~ ${rule.selectorText}:not(${start} ~ ${end} ~ *)`;
-                            const selectorText = `:is(${start} ~ *:not(${start} ~ ${end} ~ *))`;
-                            if (rule.selectorText.startsWith('.')) {
-                                rule.selectorText = `${selectorText}${rule.selectorText}, ${selectorText} ${rule.selectorText}`;
-                            //     rule.selectorText = `${start} ~ *:not(${start} ~ ${end} ~ *)${rule.selectorText}`;
-                            } else {
-                                const divText = `${start} ~ ${rule.selectorText}:not(${start} ~ ${end} ~ *)`;
-                                rule.selectorText = `${selectorText} ${rule.selectorText}, ${divText}`;
-                                // rule.selectorText = `${selectorText} ${rule.selectorText}`;
-                            //     rule.selectorText = `${rule.selectorText} ~ ${start} ~ *:not(${start} ~ ${end} ~ *)`;
-                            }
-                        }
-                        // console.log(rule.selectorText);
+                    Array.from(it.cssRules).forEach((it) => {
+                        this.generateCSS(id, it);
                     });
                 }
                 (it.ownerNode as Element).setAttribute('completed', 'true');
@@ -371,6 +351,38 @@ export class RawSet {
             })
         }
         return raws;
+    }
+
+    public generateCSS(id: string, cssRule: CSSRule) {
+
+        const start = `#${id}-start`;
+        const end = `#${id}-end`;
+        if (cssRule.constructor.name === 'CSSStyleRule') {
+            const rule = cssRule as CSSStyleRule;
+            // rule.selectorText = `${start} ~ *:not(${start} ~ ${end} ~ *) ${rule.selectorText}`;
+            // rule.selectorText = `${start} ~ *:not(${start} ~ ${end} ~ ${rule.selectorText})`;
+            // console.log('-----', rule, rule.selectorText)
+            if (!rule.selectorText.startsWith(':root')) {
+                // rule.selectorText = `${start} ~ ${rule.selectorText}:not(${start} ~ ${end} ~ *)`;
+                // rule.selectorText = `${start} ~ ${rule.selectorText}:not(${start} ~ ${end} ~ *)`;
+                const selectorText = `:is(${start} ~ *:not(${start} ~ ${end} ~ *))`;
+                if (rule.selectorText.startsWith('.')) {
+                    rule.selectorText = `${selectorText}${rule.selectorText}, ${selectorText} ${rule.selectorText}`;
+                    //     rule.selectorText = `${start} ~ *:not(${start} ~ ${end} ~ *)${rule.selectorText}`;
+                } else {
+                    const divText = `${start} ~ ${rule.selectorText}:not(${start} ~ ${end} ~ *)`;
+                    rule.selectorText = `${selectorText} ${rule.selectorText}, ${divText}`;
+                    // rule.selectorText = `${selectorText} ${rule.selectorText}`;
+                    //     rule.selectorText = `${rule.selectorText} ~ ${start} ~ *:not(${start} ~ ${end} ~ *)`;
+                }
+            }
+            // console.log(rule.selectorText);
+        } else if (cssRule.constructor.name === 'CSSMediaRule') {
+            const rule = cssRule as CSSMediaRule;
+            Array.from(rule.cssRules).forEach((it) => {
+                this.generateCSS(id, it);
+            })
+        }
     }
 
     public applyEvent(obj: any, fragment = this.fragment, config?: Config) {

@@ -7,7 +7,7 @@ DOM-RENDER
 
 # 🚀 Quick start 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.83/dist/bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.84/dist/bundle.js"></script>
 ```
 ```html
 <!DOCTYPE html>
@@ -18,7 +18,7 @@ DOM-RENDER
 </head>
 <body id="app">
 ${this.name}$
-<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.83/dist/bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.84/dist/bundle.js"></script>
 <script>
   let data = {
     name: 'my name is dom-render'

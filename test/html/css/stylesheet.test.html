@@ -25,6 +25,22 @@
     :is(#_wWwDJLiAKOMqplKbejzh-start ~ *:not(#_wWwDJLiAKOMqplKbejzh-start ~ #_wWwDJLiAKOMqplKbejzh-end ~ *))  {
         background-color: gold;
     }
+    @media (min-width: 350px) {
+        .wow {
+            background-color: aqua;
+        }
+        .div {
+            font-size: 50px;
+        }
+    }
+    @media (min-width: 350px) {
+        @media (min-width: 350px) {
+            @media (min-width: 350px) {
+
+            }
+        }
+    }
+
     @keyframes slidein {
         from {
             margin-left: 100%;
@@ -62,15 +78,15 @@
 <!--<meta id="_wWwDJLiAKOMqplKbejzh1-end"/>-->
 <!--<div>222222</div>-->
 <script>
-    // Array.from(window.document.styleSheets).forEach(it => {
-    //     Array.from(it.cssRules).forEach(it => {
-    //         console.log(it);
+    Array.from(window.document.styleSheets).forEach(it => {
+        Array.from(it.cssRules).forEach(it => {
+            console.log(it);
     //         if (it.selectorText === 'wow') {
     //             it.selectorText = '.zzs';
     //         }
     //         console.log(it);
-    //     })
-    // })
+        })
+    })
     // console.log(Array.from(window.document.styleSheets))
 </script>
 </body>
