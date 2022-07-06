@@ -226,20 +226,27 @@ export class RawSet {
 
             const fag = config.window.document.createDocumentFragment();
             if (cNode.nodeType === Node.TEXT_NODE && cNode.textContent) {
+                // console.log('text-->', this, obj, config)
+                // console.log('text-->', Array.from(this.fragment.childNodes))
                 const textContent = cNode.textContent;
                 const runText = RawSet.exporesionGrouops(textContent)[0][1];
                 // console.log('--->', RawSet.exporesionGrouops(textContent), textContent,runText, runText[0][1])
-                let n: Node;
+                let newNode: Node;
                 if (textContent?.startsWith('#')) {
                     const r = ScriptUtils.eval(`${__render.bindScript} return ${runText}`, Object.assign(obj, {__render}));
                     const template = config.window.document.createElement('template') as HTMLTemplateElement;
                     template.innerHTML = r;
-                    n = template.content;
+                    newNode = template.content;
                 } else {
                     const r = ScriptUtils.eval(`${__render.bindScript}  return ${runText}`, Object.assign(obj, {__render}));
-                    n = config.window.document.createTextNode(r);
+                    newNode = config.window.document.createTextNode(r);
                 }
-                cNode.parentNode?.replaceChild(n, cNode)
+                cNode.parentNode?.replaceChild(newNode, cNode);
+                // console.log('-------', this.point.start.parentNode.nodeName)
+                // 중요 style value change 됐을때 다시 처리해야되기떄문에: 마지막에 completed 없는 attr 가지고 판단 하니깐
+                if (this.point.start.parentNode && this.point.start.parentNode.nodeName.toUpperCase() === 'STYLE') {
+                    (this.point.start.parentNode as Element).removeAttribute('completed');
+                }
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
                 // console.log('target-->', element)
@@ -293,7 +300,7 @@ export class RawSet {
         }
 
         this.applyEvent(obj, genNode, config);
-        this.replaceBody(genNode);
+        this.replaceBody(genNode); // 중요 여기서 마지막에 연션된 값을 그려준다.
         drAttrs.forEach(it => {
             if (it.drCompleteOption) {
                 // genNode.childNodes
@@ -312,23 +319,24 @@ export class RawSet {
                 ));
             }
         })
+
+        // 중요 style isolation 나중에 :scope로 대체 가능할듯.
+        Array.from(window.document.styleSheets).filter(it => it.ownerNode && it.ownerNode instanceof Element && it.ownerNode.getAttribute('id') && !it.ownerNode.getAttribute('completed')).forEach(it => {
+            const styleElement = (it.ownerNode as Element);
+            const id = styleElement.getAttribute('id')?.split('-')[0];
+            if (id) {
+                // console.log('------->', id)
+                Array.from(it.cssRules).forEach((it) => {
+                    this.generateCSS(id, it);
+                });
+            }
+            (it.ownerNode as Element).setAttribute('completed', 'true');
+        })
+
         for (const it of onThisComponentSetCallBacks) {
             it.obj.onInitRender?.();
         }
         for (const it of onElementInitCallBacks) {
-            // 중요 style isolation 나중에 :scope로 대체 가능할듯.
-            Array.from(window.document.styleSheets).filter(it => it.ownerNode && it.ownerNode instanceof Element && it.ownerNode.getAttribute('id') && !it.ownerNode.getAttribute('completed')).forEach(it => {
-                const styleElement = (it.ownerNode as Element);
-                const id = styleElement.getAttribute('id')?.split('-')[0];
-                if (id) {
-                    // console.log('------->', id)
-                    Array.from(it.cssRules).forEach((it) => {
-                        this.generateCSS(id, it);
-                    });
-                }
-                (it.ownerNode as Element).setAttribute('completed', 'true');
-            })
-
             it.targetElement?.__render?.component?.onInitRender?.(Object.freeze({render: it.targetElement?.__render, creatorMetaData: it.targetElement?.__creatorMetaData}));
             config?.onElementInit?.(it.name, obj, this, it.targetElement);
         }
@@ -354,7 +362,6 @@ export class RawSet {
     }
 
     public generateCSS(id: string, cssRule: CSSRule) {
-
         const start = `#${id}-start`;
         const end = `#${id}-end`;
         if (cssRule.constructor.name === 'CSSStyleRule') {
@@ -428,16 +435,18 @@ export class RawSet {
 
     public replaceBody(genNode: Node) {
         this.childAllRemove();
-        this.point.start.parentNode?.insertBefore(genNode, this.point.start.nextSibling);
+        this.point.start.parentNode?.insertBefore(genNode, this.point.start.nextSibling); // 중요 start checkpoint 다음인 end checkpoint 앞에 넣는다. 즉 중간 껴넣기 (나중에 meta tag로 변경을 해도될듯하긴한데..)
     }
 
     // 중요 important
     public static checkPointCreates(element: Node, obj: any, config: Config): RawSet[] {
+        // console.log('start==========')
         const thisVariableName = (element as any).__domrender_this_variable_name;
         // console.log('checkPointCreates thisVariableName', thisVariableName);
         const nodeIterator = config.window.document.createNodeIterator(element, NodeFilter.SHOW_ALL, {
             acceptNode(node) {
                 if (node.nodeType === Node.TEXT_NODE) {
+                    // console.log('text--->', node.textContent)
                     // console.log('????????', node.parentElement, node.parentElement?.getAttribute('dr-pre'));
                     // console.log('???????/',node.textContent, node.parentElement?.getAttribute('dr-pre'))
                     // TODO: 나중에
@@ -492,10 +501,11 @@ export class RawSet {
                     const start = config.window.document.createComment(`start text ${it.uuid}`);
                     const end = config.window.document.createComment(`end text ${it.uuid}`);
                     // layout setting
-                    template.content.append(document.createTextNode(preparedText)); // 사이사이값.
-                    template.content.append(start);
-                    template.content.append(end);
-                    // content
+                    template.content.append(document.createTextNode(preparedText)); // 앞 부분 넣고
+                    template.content.append(start); // add start checkpoint
+                    template.content.append(end); // add end checkpoint
+
+                    // content 안쪽 RawSet render 할때 start 와 end 사이에 fragment 연산해서 들어간다.
                     const fragment = config.window.document.createDocumentFragment();
                     fragment.append(config.window.document.createTextNode(it.content))
                     pars.push(new RawSet(it.uuid, RawSetType.TEXT, {
@@ -507,7 +517,7 @@ export class RawSet {
                     lasterIndex = regexArr.index + it.content.length;
                 }
                 template.content.append(config.window.document.createTextNode(text.substring(lasterIndex, text.length)));
-                currentNode?.parentNode?.replaceChild(template.content, currentNode);
+                currentNode?.parentNode?.replaceChild(template.content, currentNode); // <-- 여기서 text를 fragment로 replace했기때문에 추적 변경이 가능하다.
             } else if (currentNode.nodeType === Node.ELEMENT_NODE) {
                 const uuid = RandomUtils.uuid();
                 const element = currentNode as Element;
@@ -655,6 +665,7 @@ export class RawSet {
     public static drThisCreate(element: Element, drThis: string, drVarOption: string, drStripOption: boolean | string | null, obj: any, config: Config, set?: ComponentSet) {
         const fag = config.window.document.createDocumentFragment();
         const n = element.cloneNode(true) as Element;
+        // console.log('--------',n, n.innerHTML)
         if (set) {
             const id = RandomUtils.getRandomString(20);
             const style = RawSet.styleTransformLocal(set.styles ?? [], id, true, set.styleLocale);
@@ -689,6 +700,7 @@ export class RawSet {
         this.drVarDecoding(n, vars)
         this.drThisDecoding(n, thisRandom);
         if (drStripOption && (drStripOption === true || drStripOption === 'true')) {
+            // console.log('------childNodes', Array.from(n.childNodes))
             Array.from(n.childNodes).forEach(it => fag.append(it));
         } else {
             fag.append(n)

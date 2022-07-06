@@ -129,7 +129,9 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                     });
                     // ------------------->
                 } else {
+                    // console.log('---rawSets->', it)
                     const rawSets = it.render(this._domRender_proxy, this.config);
+                    // console.log('---rawSets->', rawSets)
                     // 대상 attribute 있으면
                     // const targetAttrs = (it.point.node as Element).getAttribute(EventManager.normalAttrMapAttrName);
                     // if (it?.data.onChangeAttrRender && it.type === RawSetType.TARGET_ELEMENT && targetAttrs) {
