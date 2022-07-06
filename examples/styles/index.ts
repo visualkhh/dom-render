@@ -22,5 +22,6 @@ config.targetElements = [
 ]
 const data = DomRender.run(new Data(), document.querySelector('#app')!, config);
 setTimeout(() => {
+    console.log('-->', data)
     data.friends[1].name = Date.now().toString()
 }, 10000)

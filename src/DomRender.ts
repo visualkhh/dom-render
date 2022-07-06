@@ -37,7 +37,7 @@ export class DomRender {
     public static createComponent(param: {type: ConstructorType<any>, tagName?: string, template?: string, styles?: string[] | string}, config: Config) {
         const component = RawSet.createComponentTargetElement(param.tagName ?? param.type.name, (e, o, r2, counstructorParam) => {
             return new param.type(...counstructorParam);
-        }, param.template ?? '', Array.isArray(param.styles) ? param.styles : (param.styles ? [param.styles] : undefined), false, config);
+        }, param.template ?? '', Array.isArray(param.styles) ? param.styles : (param.styles ? [param.styles] : undefined), config);
         return component;
     }
 

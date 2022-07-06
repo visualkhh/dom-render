@@ -14,10 +14,10 @@ export class DrThis extends OperatorRender {
                         RawSet.destroy((this.rawSet.data as ComponentSet).obj, [], this.source.config, destroyOptions);
                     }
                     this.rawSet.data = r;
-                    this.returnContainer.fag.append(RawSet.drThisCreate(this.elementSource.element, `${this.elementSource.attrs.drThis}.obj`, this.elementSource.attrs.drVarOption ?? '', this.elementSource.attrs.drStripOption, this.source.obj, this.source.config, r))
+                    this.returnContainer.fag.append(RawSet.drThisCreate(this.rawSet, this.elementSource.element, `${this.elementSource.attrs.drThis}.obj`, this.elementSource.attrs.drVarOption ?? '', this.elementSource.attrs.drStripOption, this.source.obj, this.source.config, r))
                     this.afterCallBack.onThisComponentSetCallBacks.push(r);
                 } else {
-                    this.returnContainer.fag.append(RawSet.drThisCreate(this.elementSource.element, this.elementSource.attrs.drThis, this.elementSource.attrs.drVarOption ?? '', this.elementSource.attrs.drStripOption, this.source.obj, this.source.config))
+                    this.returnContainer.fag.append(RawSet.drThisCreate(this.rawSet, this.elementSource.element, this.elementSource.attrs.drThis, this.elementSource.attrs.drVarOption ?? '', this.elementSource.attrs.drStripOption, this.source.obj, this.source.config))
                 }
                 const rr = RawSet.checkPointCreates(this.returnContainer.fag, this.source.obj, this.source.config)
                 this.elementSource.element.parentNode?.replaceChild(this.returnContainer.fag, this.elementSource.element);

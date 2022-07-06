@@ -65,6 +65,7 @@ export type ElementInitCallBack = { name: string, obj: any, targetElement: Targe
 
 export enum RawSetType {
     TEXT = 'TEXT',
+    STYLE_TEXT = 'STYLE_TEXT',
     TARGET_ELEMENT = 'TARGET_ELEMENT',
     TARGET_ATTR = 'TARGET_ATTR',
     UNKOWN = 'UNKOWN',
@@ -136,7 +137,7 @@ export class RawSet {
     constructor(
         public uuid: string,
         public type: RawSetType,
-        public point: { start: Comment, node: Node, end: Comment, thisVariableName?: string | null },
+        public point: { start: Comment | Text | HTMLMetaElement, node: Node, end: Comment | Text | HTMLMetaElement, thisVariableName?: string | null, parent?: Node | null },
         public fragment: DocumentFragment, public detect?: { action: Function }, public data?: any) {
         // console.log('rawset constructor->', (this.point.node as Element).getAttributeNames());
     }
@@ -244,8 +245,8 @@ export class RawSet {
                 cNode.parentNode?.replaceChild(newNode, cNode);
                 // console.log('-------', this.point.start.parentNode.nodeName)
                 // 중요 style value change 됐을때 다시 처리해야되기떄문에: 마지막에 completed 없는 attr 가지고 판단 하니깐
-                if (this.point.start.parentNode && this.point.start.parentNode.nodeName.toUpperCase() === 'STYLE') {
-                    (this.point.start.parentNode as Element).removeAttribute('completed');
+                if (this.type === RawSetType.STYLE_TEXT && this.point.parent) {
+                    (this.point.parent as Element).removeAttribute('completed');
                 }
             } else if (cNode.nodeType === Node.ELEMENT_NODE) {
                 const element = cNode as Element;
@@ -492,14 +493,28 @@ export class RawSet {
                 // const a = StringUtils.regexExec(/[$#]\{.*?\}/g, text);
                 // const a = StringUtils.betweenRegexpStr('[$#]\\{', '\\}', text); // <--TODO: 나중에..
                 const groups = RawSet.exporesionGrouops(text);
-                const map = groups.map(it => ({uuid: RandomUtils.uuid(), content: it[0], regexArr: it}));
+                const map = groups.map(it => ({uuid: RandomUtils.getRandomString(40), content: it[0], regexArr: it}));
                 let lasterIndex = 0;
                 for (let i = 0; i < map.length; i++) {
                     const it = map[i];
                     const regexArr = it.regexArr;
                     const preparedText = regexArr.input.substring(lasterIndex, regexArr.index);
-                    const start = config.window.document.createComment(`start text ${it.uuid}`);
-                    const end = config.window.document.createComment(`end text ${it.uuid}`);
+                    // const start = config.window.document.createElement('meta');
+                    // start.setAttribute('id', `${it.uuid}-start`);
+                    // const end = config.window.document.createElement('meta');
+                    // end.setAttribute('id', `${it.uuid}-end`);
+                    let start: Text | Comment;
+                    let end: Text | Comment;
+                    let type: RawSetType;
+                    if (currentNode.parentNode && currentNode.parentNode.nodeName.toUpperCase() === 'STYLE') {
+                        type = RawSetType.STYLE_TEXT;
+                        start = config.window.document.createTextNode(`/*start text ${it.uuid}*/`);
+                        end = config.window.document.createTextNode(`/*end text ${it.uuid}*/`);
+                    } else {
+                        type = RawSetType.TEXT;
+                        start = config.window.document.createComment(`start text ${it.uuid}`);
+                        end = config.window.document.createComment(`end text ${it.uuid}`);
+                    }
                     // layout setting
                     template.content.append(document.createTextNode(preparedText)); // 앞 부분 넣고
                     template.content.append(start); // add start checkpoint
@@ -508,10 +523,11 @@ export class RawSet {
                     // content 안쪽 RawSet render 할때 start 와 end 사이에 fragment 연산해서 들어간다.
                     const fragment = config.window.document.createDocumentFragment();
                     fragment.append(config.window.document.createTextNode(it.content))
-                    pars.push(new RawSet(it.uuid, RawSetType.TEXT, {
+                    pars.push(new RawSet(it.uuid, type, {
                         start,
                         node: currentNode,
                         end,
+                        parent: currentNode.parentNode,
                         thisVariableName
                     }, fragment));
                     lasterIndex = regexArr.index + it.content.length;
@@ -519,22 +535,25 @@ export class RawSet {
                 template.content.append(config.window.document.createTextNode(text.substring(lasterIndex, text.length)));
                 currentNode?.parentNode?.replaceChild(template.content, currentNode); // <-- 여기서 text를 fragment로 replace했기때문에 추적 변경이 가능하다.
             } else if (currentNode.nodeType === Node.ELEMENT_NODE) {
-                const uuid = RandomUtils.uuid();
+                const uuid = RandomUtils.getRandomString(40);
                 const element = currentNode as Element;
                 const fragment = config.window.document.createDocumentFragment();
-                const start = config.window.document.createComment(`start ${uuid}`)
-                const end = config.window.document.createComment(`end ${uuid}`)
-                // console.log('start--', uuid)
+                const start: HTMLMetaElement = config.window.document.createElement('meta');
+                const end: HTMLMetaElement = config.window.document.createElement('meta');
+                start.setAttribute('id', `${uuid}-start`);
+                end.setAttribute('id', `${uuid}-end`);
+                const type: RawSetType = RawSetType.TARGET_ELEMENT;
                 const isElement = (config.targetElements?.map(it => it.name.toLowerCase()) ?? []).includes(element.tagName.toLowerCase());
                 const targetAttrNames = (config.targetAttrs?.map(it => it.name) ?? []).concat(RawSet.DR_ATTRIBUTES);
                 const isAttr = element.getAttributeNames().filter(it => targetAttrNames.includes(it.toLowerCase())).length > 0;
                 currentNode?.parentNode?.insertBefore(start, currentNode);
                 currentNode?.parentNode?.insertBefore(end, currentNode.nextSibling);
                 fragment.append(currentNode);
-                pars.push(new RawSet(uuid, isElement ? RawSetType.TARGET_ELEMENT : (isAttr ? RawSetType.TARGET_ATTR : RawSetType.UNKOWN), {
+                pars.push(new RawSet(uuid, isElement ? type : (isAttr ? RawSetType.TARGET_ATTR : RawSetType.UNKOWN), {
                     start,
                     node: currentNode,
                     end,
+                    parent: currentNode.parentNode,
                     thisVariableName
                 }, fragment))
             }
@@ -662,16 +681,17 @@ export class RawSet {
         });
     }
 
-    public static drThisCreate(element: Element, drThis: string, drVarOption: string, drStripOption: boolean | string | null, obj: any, config: Config, set?: ComponentSet) {
+    public static drThisCreate(rawSet: RawSet, element: Element, drThis: string, drVarOption: string, drStripOption: boolean | string | null, obj: any, config: Config, set?: ComponentSet) {
         const fag = config.window.document.createDocumentFragment();
         const n = element.cloneNode(true) as Element;
         // console.log('--------',n, n.innerHTML)
         if (set) {
-            const id = RandomUtils.getRandomString(20);
-            const style = RawSet.styleTransformLocal(set.styles ?? [], id, true, set.styleLocale);
-            const metaStart = RawSet.metaStart(id);
-            const metaEnd = RawSet.metaEnd(id);
-            n.innerHTML = metaStart + style + (set.template ?? '') + metaEnd;
+            // const id = RandomUtils.getRandomString(20);
+            const style = RawSet.styleTransformLocal(set.styles ?? [], rawSet.uuid, true);
+            n.innerHTML = style + (set.template ?? '');
+            // const metaStart = RawSet.metaStart(id);
+            // const metaEnd = RawSet.metaEnd(id);
+            // n.innerHTML = metaStart + style + (set.template ?? '') + metaEnd;
             // dr-on-create onCreateRender
             const onCreate = element.getAttribute(`${EventManager.attrPrefix}on-create`)
             const renderScript = '';
@@ -736,7 +756,6 @@ export class RawSet {
         objFactory: (element: Element, obj: any, rawSet: RawSet, counstructorParam: any[]) => any,
         template: string = '',
         styles: string[] = [],
-        styleLocale: boolean,
         config: Config
     ): TargetElement {
         const targetElement: TargetElement = {
@@ -749,7 +768,8 @@ export class RawSet {
                     obj.__domrender_components = {};
                 }
                 const domrenderComponents = obj.__domrender_components;
-                const componentKey = '_' + RandomUtils.getRandomString(20);
+                // const componentKey = '_' + RandomUtils.getRandomString(20);
+                const componentKey = rawSet.uuid;
                 const attribute = DomUtils.getAttributeToObject(element);
                 const renderScript = 'var $component = this.__render.component; var $element = this.__render.element; var $router = this.__render.router; var $innerHTML = this.__render.innerHTML; var $attribute = this.__render.attribute; var $creatorMetaData = this.__render.creatorMetaData;';
                 let render = Object.freeze({
@@ -843,12 +863,13 @@ export class RawSet {
                     }))
                 }
 
-                const style = RawSet.styleTransformLocal(styles, componentKey, true, styleLocale);
-                const metaStart = RawSet.metaStart(componentKey);
-                const metaEnd = RawSet.metaEnd(componentKey);
-                element.innerHTML = metaStart + style + (applayTemplate ?? '') + metaEnd;
+                const style = RawSet.styleTransformLocal(styles, componentKey, true);
+                element.innerHTML = style + (applayTemplate ?? '');
+                // const metaStart = RawSet.metaStart(componentKey);
+                // const metaEnd = RawSet.metaEnd(componentKey);
+                // element.innerHTML = metaStart + style + (applayTemplate ?? '') + metaEnd;
                 // console.log('------>', element.innerHTML, obj)
-                let data = RawSet.drThisCreate(element, `this.__domrender_components.${componentKey}`, '', true, obj, config);
+                let data = RawSet.drThisCreate(rawSet, element, `this.__domrender_components.${componentKey}`, '', true, obj, config);
 
                 // 넘어온 innerHTML에 this가 있는걸 다시 복호화해서 제대로 작동하도록한다.
                 if (innerHTMLThisRandom) {
@@ -877,7 +898,7 @@ export class RawSet {
     }
 
     // 중요 스타일 적용 부분
-    public static styleTransformLocal(styleBody: string | string[], id: string, styleTagWrap = true, locale = false) {
+    public static styleTransformLocal(styleBody: string | string[], id: string, styleTagWrap = true) {
         // <style id="first">
         //     #first ~ *:not(#first ~ style[domstyle] ~ *) {
         //     font-size: 30px;
@@ -887,14 +908,14 @@ export class RawSet {
         if (Array.isArray(styleBody)) {
             styleBody = styleBody.join('\n');
         }
-        if (locale) {
-            styleBody = styleBody.replace(/([^}]+){/gm, function (a, b) {
-                if (typeof b === 'string') {
-                    b = b.trim();
-                }
-                return `#${id} ~ ${b}:not(#${id} ~ style[domstyle] ~ *), #${id} ~ * ${b} {`;
-            });
-        }
+        // if (locale) {
+        //     styleBody = styleBody.replace(/([^}]+){/gm, function (a, b) {
+        //         if (typeof b === 'string') {
+        //             b = b.trim();
+        //         }
+        //         return `#${id} ~ ${b}:not(#${id} ~ style[domstyle] ~ *), #${id} ~ * ${b} {`;
+        //     });
+        // }
         if (styleTagWrap) {
             styleBody = `<style id='${id}-style' domstyle>${styleBody}</style>`
         }
@@ -902,13 +923,13 @@ export class RawSet {
         return styleBody;
     }
 
-    public static metaStart(id: string) {
-        return `<meta id='${id}-start' />`;
-    }
-
-    public static metaEnd(id: string) {
-        return `<meta id='${id}-end' />`;
-    }
+    // public static metaStart(id: string) {
+    //     return `<meta id='${id}-start' />`;
+    // }
+    //
+    // public static metaEnd(id: string) {
+    //     return `<meta id='${id}-end' />`;
+    // }
 
     public static destroy(obj: any | undefined, parameter: any[], config: Config, destroyOptions: (DestroyOptionType | string)[] = []): void {
         if (!destroyOptions.some(it => it === DestroyOptionType.NO_DESTROY)) {
