@@ -1,5 +1,5 @@
 import {ConstructorType, DomRenderFinalProxy} from '../types/Types';
-import {Config} from '../Config';
+import {Config} from '../configs/Config';
 
 enum CallBackType {
     FILTER,

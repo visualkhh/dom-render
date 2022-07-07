@@ -2,7 +2,7 @@ import {RandomUtils} from './utils/random/RandomUtils';
 import {StringUtils} from './utils/string/StringUtils';
 import {ScriptUtils} from './utils/script/ScriptUtils';
 import {EventManager, eventManager} from './events/EventManager';
-import {Config, TargetAttr, TargetElement} from './Config';
+import {Config} from './configs/Config';
 import {Range} from './iterators/Range';
 import {DomRenderFinalProxy} from './types/Types';
 import {DomUtils} from './utils/dom/DomUtils';
@@ -21,6 +21,8 @@ import {DrAppender} from './operators/DrAppender';
 import {DrRepeat} from './operators/DrRepeat';
 import {DrTargetElement} from './operators/DrTargetElement';
 import {DrTargetAttr} from './operators/DrTargetAttr';
+import {TargetElement} from './configs/TargetElement';
+import {TargetAttr} from './configs/TargetAttr';
 
 export enum DestroyOptionType {
     NO_DESTROY = 'NO_DESTROY',
@@ -755,14 +757,13 @@ export class RawSet {
     public static createComponentTargetElement(name: string,
         objFactory: (element: Element, obj: any, rawSet: RawSet, counstructorParam: any[]) => any,
         template: string = '',
-        styles: string[] = [],
-        config: Config
+        styles: string[] = []
     ): TargetElement {
         const targetElement: TargetElement = {
             name,
             styles,
             template,
-            callBack(element: Element, obj: any, rawSet: RawSet, attrs?: Attrs): DocumentFragment {
+            callBack(element: Element, obj: any, rawSet: RawSet, attrs: Attrs, config: Config): DocumentFragment {
                 // console.log('callback------->', element)
                 if (!obj.__domrender_components) {
                     obj.__domrender_components = {};
@@ -852,8 +853,6 @@ export class RawSet {
                     applayTemplate = applayTemplate.replace(RegExp(`#${componentName}#`, 'g'), 'this');
                 }
                 applayTemplate = template.replace(RegExp(`#${innerHTMLName}#`, 'g'), applayTemplate);
-
-
                 // dr-on-component-init
                 const oninit = element.getAttribute(`${EventManager.attrPrefix}on-component-init`); // dr-on-component-init
                 if (oninit) {

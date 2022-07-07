@@ -14,14 +14,13 @@ class Data {
         this.sw = !this.sw;
     }
 }
-
-const config: Config = {window};
-config.targetElements = [
-    DomRender.createComponent({type: Profile, template: ProfileTemplate, styles: ProfileStyle}, config),
-    DomRender.createComponent({type: User, template: UserTemplate, styles: UserStyle}, config)
-]
-const data = DomRender.run(new Data(), document.querySelector('#app')!, config);
+const data = DomRender.run(new Data(), document.querySelector('#app'), {
+    targetElements: [
+        DomRender.createComponent({type: Profile, template: ProfileTemplate, styles: ProfileStyle}),
+        DomRender.createComponent({type: User, template: UserTemplate, styles: UserStyle})
+    ]
+});
 setTimeout(() => {
-    console.log('-->', data)
+    console.log('-->', data);
     data.friends[1].name = Date.now().toString()
 }, 10000)

@@ -1,4 +1,4 @@
-import {Config} from '../Config';
+import {Config} from '../configs/Config';
 import {ScriptUtils} from '../utils/script/ScriptUtils';
 import {DomUtils} from '../utils/dom/DomUtils';
 import {Range} from '../iterators/Range';

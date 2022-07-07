@@ -1,6 +1,6 @@
 import {AttrInitCallBack, Attrs, ElementInitCallBack, RawSet, Render} from '../RawSet';
 import {ComponentSet} from '../components/ComponentSet';
-import {Config} from '../Config';
+import {Config} from '../configs/Config';
 export enum ExecuteState {
     EXECUTE,
     NO_EXECUTE,

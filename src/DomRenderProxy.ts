@@ -1,6 +1,6 @@
 import {CreatorMetaData, RawSet, RawSetType, Render} from './RawSet';
 import {EventManager, eventManager} from './events/EventManager';
-import {Config} from './Config';
+import {Config} from './configs/Config';
 import {ScriptUtils} from './utils/script/ScriptUtils';
 import {DomRenderFinalProxy, Shield} from './types/Types';
 
@@ -11,7 +11,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     public _domRender_proxy?: T;
     public _targets = new Set<Node>();
 
-    constructor(public _domRender_origin: T, target: Node | undefined, public config: Config) {
+    constructor(public _domRender_origin: T, target: Node | null | undefined, public config: Config) {
         if (target) {
             this._targets.add(target);
         }

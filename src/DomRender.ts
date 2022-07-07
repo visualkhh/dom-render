@@ -1,5 +1,5 @@
 import {DomRenderProxy} from './DomRenderProxy';
-import {Config} from './Config';
+import {Config} from './configs/Config';
 import {PathRouter} from './routers/PathRouter';
 import {HashRouter} from './routers/HashRouter';
 import {ConstructorType, DomRenderFinalProxy} from './types/Types';
@@ -7,7 +7,7 @@ import {RawSet} from './RawSet';
 import {DefaultMessenger} from './messenger/DefaultMessenger';
 
 export class DomRender {
-    public static run<T extends object>(obj: T, target?: Node, config?: Config): T {
+    public static run<T extends object>(obj: T, target?: Node | null, oConfig?: Omit<Config, 'window'>): T {
         let robj = obj;
         if ('_DomRender_isProxy' in obj) {
             if (target) {
@@ -16,8 +16,12 @@ export class DomRender {
             robj = obj;
             return robj;
         }
+        let config = oConfig as Config;
         if (!config) {
             config = {window} as Config;
+        }
+        if (config && !config.window) {
+            config.window = window;
         }
         config.routerType = config.routerType || 'none';
         config.messenger = DomRenderFinalProxy.final(config.messenger ?? new DefaultMessenger(config));
@@ -34,10 +38,11 @@ export class DomRender {
         return robj;
     }
 
-    public static createComponent(param: {type: ConstructorType<any>, tagName?: string, template?: string, styles?: string[] | string}, config: Config) {
-        const component = RawSet.createComponentTargetElement(param.tagName ?? param.type.name, (e, o, r2, counstructorParam) => {
-            return new param.type(...counstructorParam);
-        }, param.template ?? '', Array.isArray(param.styles) ? param.styles : (param.styles ? [param.styles] : undefined), config);
+    public static createComponent(param: {type: ConstructorType<any> | any, tagName?: string, template?: string, styles?: string[] | string}) {
+        // console.log('===>', typeof param.type, param.type.name, param.type.constructor.name)
+        const component = RawSet.createComponentTargetElement(param.tagName ?? (typeof param.type === 'function' ? param.type.name : param.type.constructor.name), (e, o, r2, counstructorParam) => {
+            return typeof param.type === 'function' ? new param.type(...counstructorParam) : param.type;
+        }, param.template ?? '', Array.isArray(param.styles) ? param.styles : (param.styles ? [param.styles] : undefined));
         return component;
     }
 

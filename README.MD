@@ -7,7 +7,7 @@ DOM-RENDER
 
 # 🚀 Quick start 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.85/dist/bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.86/dist/bundle.js"></script>
 ```
 ```html
 <!DOCTYPE html>
@@ -18,7 +18,7 @@ DOM-RENDER
 </head>
 <body id="app">
 ${this.name}$
-<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.85/dist/bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.86/dist/bundle.js"></script>
 <script>
   let data = {
     name: 'my name is dom-render'
@@ -404,9 +404,9 @@ const config: Config = {
   window
 };
 config.targetElements = [
-  DomRender.createComponent({type: Main, tagName: 'page-main', template: MainTemplate}, config),
-  DomRender.createComponent({type: Second, tagName: 'page-second', template: SecondTemplate}, config),
-  DomRender.createComponent({type: Detail, tagName: 'page-detail', template: DetailTemplate}, config)
+  DomRender.createComponent({type: Main, tagName: 'page-main', template: MainTemplate}),
+  DomRender.createComponent({type: Second, tagName: 'page-second', template: SecondTemplate}),
+  DomRender.createComponent({type: Detail, tagName: 'page-detail', template: DetailTemplate})
 ]
 config.routerType = 'hash'; // 'hash' | 'path' | 'none';
 const data = DomRender.run(new Data(), document.querySelector('#app')!, config);
@@ -644,8 +644,8 @@ link attribute
 ```
 ```typescript
 config.targetElements = [
-  DomRender.createComponent({type: Profile, template: ProfileTemplate}, config),
-  DomRender.createComponent({type: Home, template: HomeTemplate, styles: HomeStyle}, config)
+  DomRender.createComponent({type: Profile, template: ProfileTemplate}),
+  DomRender.createComponent({type: Home, template: HomeTemplate, styles: HomeStyle})
 ]
 
 config.targetAttrs = [
