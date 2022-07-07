@@ -1,5 +1,4 @@
 import {DomRender} from 'dom-render';
-import {Config} from 'dom-render/Config';
 import {User} from './components/user/user';
 import {Profile} from './components/profile/profile';
 import ProfileTemplate from './components/profile/profile.html'
