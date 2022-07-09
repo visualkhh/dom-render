@@ -1,11 +1,12 @@
 import {ExecuteState, OperatorRender} from './OperatorRender';
 import {RawSet} from '../RawSet';
+import {TargetAttr} from '../configs/TargetAttr';
 
 export class DrTargetAttr extends OperatorRender {
     execRender(): ExecuteState {
         const attributeNames = this.elementSource.element.getAttributeNames();
         // const targetAttr = config?.targetAttrs?.find(it => (!drAttr.drForOf && !drAttr.drFor && !drAttr.drRepeat) && attributeNames.includes(it.name));
-        const targetAttr = this.source.config?.targetAttrs?.find(it => attributeNames.includes(it.name));
+        const targetAttr: TargetAttr | undefined = this.source.config?.targetAttrs?.find(it => attributeNames.includes(it.name));
         if (targetAttr) {
             const attrName = targetAttr.name;
             const attrValue = this.rawSet.getAttributeAndDelete(this.elementSource.element, attrName)
