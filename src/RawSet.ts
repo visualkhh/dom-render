@@ -324,17 +324,9 @@ export class RawSet {
         })
 
         // 중요 style isolation 나중에 :scope로 대체 가능할듯.
-        Array.from(window.document.styleSheets).filter(it => it.ownerNode && it.ownerNode instanceof Element && it.ownerNode.getAttribute('id') && !it.ownerNode.getAttribute('completed')).forEach(it => {
-            const styleElement = (it.ownerNode as Element);
-            const id = styleElement.getAttribute('id')?.split('-')[0];
-            if (id) {
-                // console.log('------->', id)
-                Array.from(it.cssRules).forEach((it) => {
-                    this.generateCSS(id, it);
-                });
-            }
-            (it.ownerNode as Element).setAttribute('completed', 'true');
-        })
+        RawSet.generateStyleSheetsLocal();
+        // console.log('-22222-')
+        // alert(1);
 
         for (const it of onThisComponentSetCallBacks) {
             it.obj.onInitRender?.();
@@ -364,7 +356,23 @@ export class RawSet {
         return raws;
     }
 
-    public generateCSS(id: string, cssRule: CSSRule) {
+    public static generateStyleSheetsLocal() {
+        Array.from(window.document.styleSheets).filter(it => it.ownerNode && it.ownerNode instanceof Element && it.ownerNode.hasAttribute('domstyle') && it.ownerNode.getAttribute('id') && !it.ownerNode.getAttribute('completed')).forEach(it => {
+            const styleElement = (it.ownerNode as Element);
+            const split = styleElement.getAttribute('id')?.split('-');
+            split?.pop();
+            const id = split?.join('-');
+            if (id) {
+                // console.log('------->', id)
+                Array.from(it.cssRules).forEach((it) => {
+                    RawSet.generateCSS(id, it);
+                });
+            }
+            (it.ownerNode as Element).setAttribute('completed', 'true');
+        })
+    }
+
+    public static generateCSS(id: string, cssRule: CSSRule) {
         const start = `#${id}-start`;
         const end = `#${id}-end`;
         if (cssRule.constructor.name === 'CSSStyleRule') {
@@ -393,6 +401,18 @@ export class RawSet {
                 this.generateCSS(id, it);
             })
         }
+    }
+
+    // 중요 스타일 적용 부분
+    public static generateStyleTransform(styleBody: string | string[], id: string, styleTagWrap = true) {
+        if (Array.isArray(styleBody)) {
+            styleBody = styleBody.join('\n');
+        }
+        if (styleTagWrap) {
+            styleBody = `<style id='${id}-style' domstyle>${styleBody}</style>`
+        }
+
+        return styleBody;
     }
 
     public applyEvent(obj: any, fragment = this.fragment, config?: Config) {
@@ -505,30 +525,25 @@ export class RawSet {
                     // start.setAttribute('id', `${it.uuid}-start`);
                     // const end = config.window.document.createElement('meta');
                     // end.setAttribute('id', `${it.uuid}-end`);
-                    let start: Text | Comment;
-                    let end: Text | Comment;
                     let type: RawSetType;
                     if (currentNode.parentNode && currentNode.parentNode.nodeName.toUpperCase() === 'STYLE') {
                         type = RawSetType.STYLE_TEXT;
-                        start = config.window.document.createTextNode(`/*start text ${it.uuid}*/`);
-                        end = config.window.document.createTextNode(`/*end text ${it.uuid}*/`);
                     } else {
                         type = RawSetType.TEXT;
-                        start = config.window.document.createComment(`start text ${it.uuid}`);
-                        end = config.window.document.createComment(`end text ${it.uuid}`);
                     }
+                    const startEndPoint = RawSet.createStartEndPoint(it.uuid, type, config);
                     // layout setting
                     template.content.append(document.createTextNode(preparedText)); // 앞 부분 넣고
-                    template.content.append(start); // add start checkpoint
-                    template.content.append(end); // add end checkpoint
+                    template.content.append(startEndPoint.start); // add start checkpoint
+                    template.content.append(startEndPoint.end); // add end checkpoint
 
                     // content 안쪽 RawSet render 할때 start 와 end 사이에 fragment 연산해서 들어간다.
                     const fragment = config.window.document.createDocumentFragment();
                     fragment.append(config.window.document.createTextNode(it.content))
                     pars.push(new RawSet(it.uuid, type, {
-                        start,
+                        start: startEndPoint.start,
                         node: currentNode,
-                        end,
+                        end: startEndPoint.end,
                         parent: currentNode.parentNode,
                         thisVariableName
                     }, fragment));
@@ -540,21 +555,18 @@ export class RawSet {
                 const uuid = RandomUtils.getRandomString(40);
                 const element = currentNode as Element;
                 const fragment = config.window.document.createDocumentFragment();
-                const start: HTMLMetaElement = config.window.document.createElement('meta');
-                const end: HTMLMetaElement = config.window.document.createElement('meta');
-                start.setAttribute('id', `${uuid}-start`);
-                end.setAttribute('id', `${uuid}-end`);
                 const type: RawSetType = RawSetType.TARGET_ELEMENT;
+                const startEndPoint = RawSet.createStartEndPoint(uuid, type, config);
                 const isElement = (config.targetElements?.map(it => it.name.toLowerCase()) ?? []).includes(element.tagName.toLowerCase());
                 const targetAttrNames = (config.targetAttrs?.map(it => it.name) ?? []).concat(RawSet.DR_ATTRIBUTES);
                 const isAttr = element.getAttributeNames().filter(it => targetAttrNames.includes(it.toLowerCase())).length > 0;
-                currentNode?.parentNode?.insertBefore(start, currentNode);
-                currentNode?.parentNode?.insertBefore(end, currentNode.nextSibling);
+                currentNode?.parentNode?.insertBefore(startEndPoint.start, currentNode);
+                currentNode?.parentNode?.insertBefore(startEndPoint.end, currentNode.nextSibling);
                 fragment.append(currentNode);
                 pars.push(new RawSet(uuid, isElement ? type : (isAttr ? RawSetType.TARGET_ATTR : RawSetType.UNKOWN), {
-                    start,
+                    start: startEndPoint.start,
                     node: currentNode,
-                    end,
+                    end: startEndPoint.end,
                     parent: currentNode.parentNode,
                     thisVariableName
                 }, fragment))
@@ -562,6 +574,31 @@ export class RawSet {
         }
         // console.log('check-->', pars)
         return pars;
+    }
+
+    public static createStartEndPoint(id: string, type: RawSetType, config: Config) {
+
+        if (type === RawSetType.TARGET_ELEMENT) {
+            const start: HTMLMetaElement = config.window.document.createElement('meta');
+            const end: HTMLMetaElement = config.window.document.createElement('meta');
+            start.setAttribute('id', `${id}-start`);
+            end.setAttribute('id', `${id}-end`);
+            return {
+                start,
+                end,
+            }
+        }else if (type === RawSetType.STYLE_TEXT) {
+            return {
+                start: config.window.document.createTextNode(`/*start text ${id}*/`),
+                end: config.window.document.createTextNode(`/*end text ${id}*/`)
+            }
+        } else {  // text
+            return {
+                start: config.window.document.createComment(`start text ${id}`),
+                end: config.window.document.createComment(`end text ${id}`)
+            }
+        }
+
     }
 
     public childAllRemove() {
@@ -689,7 +726,7 @@ export class RawSet {
         // console.log('--------',n, n.innerHTML)
         if (set) {
             // const id = RandomUtils.getRandomString(20);
-            const style = RawSet.styleTransformLocal(set.styles ?? [], rawSet.uuid, true);
+            const style = RawSet.generateStyleTransform(set.styles ?? [], rawSet.uuid, true);
             n.innerHTML = style + (set.template ?? '');
             // const metaStart = RawSet.metaStart(id);
             // const metaEnd = RawSet.metaEnd(id);
@@ -862,7 +899,7 @@ export class RawSet {
                     }))
                 }
 
-                const style = RawSet.styleTransformLocal(styles, componentKey, true);
+                const style = RawSet.generateStyleTransform(styles, componentKey, true);
                 element.innerHTML = style + (applayTemplate ?? '');
                 // const metaStart = RawSet.metaStart(componentKey);
                 // const metaEnd = RawSet.metaEnd(componentKey);
@@ -894,32 +931,6 @@ export class RawSet {
         // const reg = /(?:[$#]\{(?:(([$#]\{)??[^$#]*?)\}[$#]))/g;
         const reg = /(?:[$#]\{(?:(([$#]\{)??[^$#]?[^{]*?)\}[$#]))/g;
         return StringUtils.regexExec(reg, data ?? '');
-    }
-
-    // 중요 스타일 적용 부분
-    public static styleTransformLocal(styleBody: string | string[], id: string, styleTagWrap = true) {
-        // <style id="first">
-        //     #first ~ *:not(#first ~ style[domstyle] ~ *) {
-        //     font-size: 30px;
-        //     color: blue;
-        // }
-        // </style>
-        if (Array.isArray(styleBody)) {
-            styleBody = styleBody.join('\n');
-        }
-        // if (locale) {
-        //     styleBody = styleBody.replace(/([^}]+){/gm, function (a, b) {
-        //         if (typeof b === 'string') {
-        //             b = b.trim();
-        //         }
-        //         return `#${id} ~ ${b}:not(#${id} ~ style[domstyle] ~ *), #${id} ~ * ${b} {`;
-        //     });
-        // }
-        if (styleTagWrap) {
-            styleBody = `<style id='${id}-style' domstyle>${styleBody}</style>`
-        }
-
-        return styleBody;
     }
 
     // public static metaStart(id: string) {
