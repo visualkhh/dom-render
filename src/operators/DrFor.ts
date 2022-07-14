@@ -1,6 +1,6 @@
 import {ExecuteState, OperatorRender} from './OperatorRender';
 import {ScriptUtils} from '../utils/script/ScriptUtils';
-import {RawSet} from '../RawSet';
+import {RawSet} from '../rawsets/RawSet';
 
 export class DrFor extends OperatorRender {
     execRender(): ExecuteState {

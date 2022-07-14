@@ -3,7 +3,7 @@ import {Config} from './configs/Config';
 import {PathRouter} from './routers/PathRouter';
 import {HashRouter} from './routers/HashRouter';
 import {ConstructorType, DomRenderFinalProxy} from './types/Types';
-import {RawSet} from './RawSet';
+import {RawSet} from './rawsets/RawSet';
 import {DefaultMessenger} from './messenger/DefaultMessenger';
 
 export class DomRender {

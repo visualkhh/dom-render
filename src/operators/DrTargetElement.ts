@@ -1,6 +1,7 @@
 import {ExecuteState, OperatorRender} from './OperatorRender';
 import {ScriptUtils} from '../utils/script/ScriptUtils';
-import {CreatorMetaData, RawSet} from '../RawSet';
+import {RawSet} from '../rawsets/RawSet';
+import {CreatorMetaData} from '../rawsets/CreatorMetaData';
 
 export class DrTargetElement extends OperatorRender {
     execRender(): ExecuteState {

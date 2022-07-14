@@ -1,9 +1,10 @@
 import {ExecuteState, OperatorRender} from './OperatorRender';
 import {ScriptUtils} from '../utils/script/ScriptUtils';
-import {RawSet, Render} from '../RawSet';
+import {RawSet} from '../rawsets/RawSet';
 import {Validator} from '../validators/Validator';
 import {EventManager} from '../events/EventManager';
 import {ValidatorArray} from '../validators/ValidatorArray';
+import {Render} from '../rawsets/Render';
 
 export class DrForm extends OperatorRender {
     execRender(): ExecuteState {

@@ -33,7 +33,7 @@
   "scripts": {
     "start": "rollup -c && sbf serve --path ./dist --port 4500",
     "serve": "sbf serve --path dist",
-    "serve:watch": "sbf serve --path dist --watch",
+    "serve:watch": "sbf serve --path dist --watch --host 0.0.0.0",
     "bundle": "rollup -c",
     "bundle:watch": "rollup -c -w"
   },

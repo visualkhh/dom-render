@@ -1,5 +1,5 @@
 import { StringUtils } from '../src/utils/string/StringUtils';
-import { RawSet } from '../src/RawSet';
+import { RawSet } from '../src/rawsets/RawSet';
 
 describe('Test', () => {
     test('regexp', async (done) => {

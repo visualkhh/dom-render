@@ -413,30 +413,58 @@ const data = DomRender.run(new Data(), document.querySelector('#app')!, config);
 ```
 ```html
 <header>
-    <button dr-event-click="$router.go('/')">main</button>
-    <button dr-event-click="$router.go('/second', {secondata: 555})">second</button>
-    <button dr-event-click="$router.go('/detail/25?name=zzz')">detail</button>
+  <h1>examples header</h1>
+  <h2>${this.name}$</h2>
+  <div>
+    <div><button dr-event-click="$router.go('/')">main</button></div>
+    <div>
+      <button dr-event-click="$router.go('/second', {secondata: 555})">second</button>
+      <button dr-event-click="$router.go('/second/5')">second/1</button>
+      <button dr-event-click="$router.go('/second/wow')">second/2</button>
+    </div>
+    <div><button dr-event-click="$router.go('/detail/25?name=zzz')">detail</button></div>
   </div>
 </header>
+<hr>
 <main>
   <page-main dr-if="$router.test('/')"></page-main>
-  <page-second dr-if="$router.test('/second')"></page-second>
-  <page-detail url='/detail/{id:[0-9]+}' dr-if="$router.test($attribute.url)" dr-on-create="$router.getRouteData($attribute.url)"></page-detail>
+  <page-second dr-if="$router.test('/second')">1</page-second>
+  <page-second dr-if="$router.testRegexp('/second/[0-9]?$')">2</page-second>
+  <page-second dr-if="$router.testRegexp('/second/wow$')">wow</page-second>
+  <page-detail url='/detail/{id:[0-9]+}' dr-if="$router.test($attribute.url)" dr-on-component-init="$component.routerData($router.getRouteData($attribute.url))" ></page-detail>
+  <div>
+    <button dr-event-click="this.plusCount()">${this.count}$ count  pluse++</button>
+  </div>
 </main>
+<hr>
+<footer>footer</footer>
 ```
+```typescript
+export class Second implements OnCreateRender {
+    name = 'Second'
 
+    onCreateRender(data: CreatorMetaData): void {
+        console.log('----->', data.router)
+    }
+}
+```
 ```typescript
 import {RouteData} from 'dom-render/routers/Router';
 import {OnCreateRender} from 'dom-render/lifecycle/OnCreateRender';
 
 export class Detail implements OnCreateRender {
-    name = 'Detail';
+  name = 'Detail';
 
-    onCreateRender(routeData: RouteData) {
-        console.log('routeData->', routeData);
-    }
+  onCreateRender(data: CreatorMetaData) {
+    console.log('routeData->', data);
+  }
+
+  routerData(routeData: RouteData) {
+    console.log('--------', routeData);
+  }
 }
 ```
+
 ```typescript
 // RouteData type
 type RouteData = {

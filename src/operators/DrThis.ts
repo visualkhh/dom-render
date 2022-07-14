@@ -1,6 +1,6 @@
 import {ExecuteState, OperatorRender} from './OperatorRender';
 import {ScriptUtils} from '../utils/script/ScriptUtils';
-import {RawSet} from '../RawSet';
+import {RawSet} from '../rawsets/RawSet';
 import {ComponentSet} from '../components/ComponentSet';
 
 export class DrThis extends OperatorRender {

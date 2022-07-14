@@ -1,5 +1,5 @@
 import {ConstructorType} from '../types/Types';
-import {RawSet} from '../RawSet';
+import {RawSet} from '../rawsets/RawSet';
 import {Router} from '../routers/Router';
 import {Messenger} from '../messenger/Messenger';
 import {TargetElement} from './TargetElement';

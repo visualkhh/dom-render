@@ -1,6 +1,7 @@
 import {ExecuteState, OperatorRender} from './OperatorRender';
 import {ScriptUtils} from '../utils/script/ScriptUtils';
-import {RawSet, Render} from '../RawSet';
+import {RawSet} from '../rawsets/RawSet';
+import {Render} from '../rawsets/Render';
 
 export class DrAppender extends OperatorRender {
     execRender(): ExecuteState {

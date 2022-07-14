@@ -1,5 +1,5 @@
 import {ExecuteState, OperatorRender} from './OperatorRender';
-import {RawSet} from '../RawSet';
+import {RawSet} from '../rawsets/RawSet';
 import {TargetAttr} from '../configs/TargetAttr';
 
 export class DrTargetAttr extends OperatorRender {

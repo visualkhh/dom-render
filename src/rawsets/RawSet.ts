@@ -1,89 +1,35 @@
-import {RandomUtils} from './utils/random/RandomUtils';
-import {StringUtils} from './utils/string/StringUtils';
-import {ScriptUtils} from './utils/script/ScriptUtils';
-import {EventManager, eventManager} from './events/EventManager';
-import {Config} from './configs/Config';
-import {Range} from './iterators/Range';
-import {DomRenderFinalProxy} from './types/Types';
-import {DomUtils} from './utils/dom/DomUtils';
-import {ComponentSet} from './components/ComponentSet';
-import {DrPre} from './operators/DrPre';
-import {Dr} from './operators/Dr';
-import {DrIf} from './operators/DrIf';
-import {ExecuteState} from './operators/OperatorRender';
-import {DrThis} from './operators/DrThis';
-import {DrForm} from './operators/DrForm';
-import {DrInnerText} from './operators/DrInnerText';
-import {DrInnerHTML} from './operators/DrInnerHTML';
-import {DrFor} from './operators/DrFor';
-import {DrForOf} from './operators/DrForOf';
-import {DrAppender} from './operators/DrAppender';
-import {DrRepeat} from './operators/DrRepeat';
-import {DrTargetElement} from './operators/DrTargetElement';
-import {DrTargetAttr} from './operators/DrTargetAttr';
-import {TargetElement} from './configs/TargetElement';
-import {TargetAttr} from './configs/TargetAttr';
-
-export enum DestroyOptionType {
-    NO_DESTROY = 'NO_DESTROY',
-    NO_MESSENGER_DESTROY = 'NO_MESSENGER_DESTROY'
-}
-
-export type Attrs = {
-    dr: string | null;
-    drIf: string | null;
-    drAppender: string | null;
-    drFor: string | null;
-    drForOf: string | null;
-    drRepeat: string | null;
-    drThis: string | null;
-    drForm: string | null;
-    drPre: string | null;
-    drInnerHTML: string | null;
-    drInnerText: string | null;
-    drItOption: string | null;
-    drVarOption: string | null;
-    drAfterOption: string | null;
-    drNextOption: string | null;
-    drBeforeOption: string | null;
-    drCompleteOption: string | null;
-    drStripOption: string | null;
-    drDestroyOption: string | null;
-}
-export type CreatorMetaData = {
-    thisVariableName?: string | null;
-    thisFullVariableName?: string | null;
-    componentKey?: string | null;
-    rawSet: RawSet;
-    innerHTML: string;
-    drAttrs?: Attrs;
-    rootCreator: any;
-    attribute: any;
-    creator: any;
-    // render?: Render;
-}
-export type AttrInitCallBack = { attrName: string, attrValue: string, obj: any };
-export type ElementInitCallBack = { name: string, obj: any, targetElement: TargetElement, creatorMetaData: CreatorMetaData };
-
-export enum RawSetType {
-    TEXT = 'TEXT',
-    STYLE_TEXT = 'STYLE_TEXT',
-    TARGET_ELEMENT = 'TARGET_ELEMENT',
-    TARGET_ATTR = 'TARGET_ATTR',
-    UNKOWN = 'UNKOWN',
-}
-export type Render = {
-    rawset?: RawSet;
-    scripts?: { [n: string]: any };
-    bindScript?: string;
-    element?: any;
-    attribute?: any;
-    creatorMetaData?: CreatorMetaData;
-    router?: any;
-    range?: any;
-    value?: any;
-    [n: string]: any;
-}
+import {RandomUtils} from '../utils/random/RandomUtils';
+import {StringUtils} from '../utils/string/StringUtils';
+import {ScriptUtils} from '../utils/script/ScriptUtils';
+import {EventManager, eventManager} from '../events/EventManager';
+import {Config} from '../configs/Config';
+import {Range} from '../iterators/Range';
+import {DomRenderFinalProxy} from '../types/Types';
+import {DomUtils} from '../utils/dom/DomUtils';
+import {ComponentSet} from '../components/ComponentSet';
+import {DrPre} from '../operators/DrPre';
+import {Dr} from '../operators/Dr';
+import {DrIf} from '../operators/DrIf';
+import {ExecuteState} from '../operators/OperatorRender';
+import {DrThis} from '../operators/DrThis';
+import {DrForm} from '../operators/DrForm';
+import {DrInnerText} from '../operators/DrInnerText';
+import {DrInnerHTML} from '../operators/DrInnerHTML';
+import {DrFor} from '../operators/DrFor';
+import {DrForOf} from '../operators/DrForOf';
+import {DrAppender} from '../operators/DrAppender';
+import {DrRepeat} from '../operators/DrRepeat';
+import {DrTargetElement} from '../operators/DrTargetElement';
+import {DrTargetAttr} from '../operators/DrTargetAttr';
+import {TargetElement} from '../configs/TargetElement';
+import {TargetAttr} from '../configs/TargetAttr';
+import {DestroyOptionType} from './DestroyOptionType';
+import {Attrs} from './Attrs';
+import {CreatorMetaData} from './CreatorMetaData';
+import {AttrInitCallBack} from './AttrInitCallBack';
+import {ElementInitCallBack} from './ElementInitCallBack';
+import {RawSetType} from './RawSetType';
+import {Render} from './Render';
 
 export class RawSet {
     public static readonly DR = 'dr';
@@ -307,19 +253,16 @@ export class RawSet {
         drAttrs.forEach(it => {
             if (it.drCompleteOption) {
                 // genNode.childNodes
+                const render = Object.freeze({
+                    rawset: this,
+                    fag: genNode,
+                    scripts: EventManager.setBindProperty(config?.scripts, obj)
+                } as Render);
                 ScriptUtils.eval(`
                 const ${EventManager.FAG_VARNAME} = this.__render.fag;
                 const ${EventManager.SCRIPTS_VARNAME} = this.__render.scripts;
                 const ${EventManager.RAWSET_VARNAME} = this.__render.rawset;
-                ${it.drCompleteOption}
-                `, Object.assign(obj, {
-                    __render: Object.freeze({
-                        rawset: this,
-                        fag: genNode,
-                        scripts: EventManager.setBindProperty(config?.scripts, obj)
-                    } as Render)
-                }
-                ));
+                ${it.drCompleteOption}`, Object.assign(obj, {__render: render}));
             }
         })
 
@@ -577,7 +520,6 @@ export class RawSet {
     }
 
     public static createStartEndPoint(id: string, type: RawSetType, config: Config) {
-
         if (type === RawSetType.TARGET_ELEMENT) {
             const start: HTMLMetaElement = config.window.document.createElement('meta');
             const end: HTMLMetaElement = config.window.document.createElement('meta');
@@ -585,20 +527,19 @@ export class RawSet {
             end.setAttribute('id', `${id}-end`);
             return {
                 start,
-                end,
+                end
             }
-        }else if (type === RawSetType.STYLE_TEXT) {
+        } else if (type === RawSetType.STYLE_TEXT) {
             return {
                 start: config.window.document.createTextNode(`/*start text ${id}*/`),
                 end: config.window.document.createTextNode(`/*end text ${id}*/`)
             }
-        } else {  // text
+        } else { // text
             return {
                 start: config.window.document.createComment(`start text ${id}`),
                 end: config.window.document.createComment(`end text ${id}`)
             }
         }
-
     }
 
     public childAllRemove() {
@@ -791,11 +732,7 @@ export class RawSet {
         return targetAttribute;
     }
 
-    public static createComponentTargetElement(name: string,
-        objFactory: (element: Element, obj: any, rawSet: RawSet, counstructorParam: any[]) => any,
-        template: string = '',
-        styles: string[] = []
-    ): TargetElement {
+    public static createComponentTargetElement(name: string, objFactory: (element: Element, obj: any, rawSet: RawSet, counstructorParam: any[]) => any, template: string = '', styles: string[] = []): TargetElement {
         const targetElement: TargetElement = {
             name,
             styles,
@@ -842,6 +779,8 @@ export class RawSet {
                 i.componentKey = componentKey;
                 i.rawSet = rawSet;
                 i.attribute = attribute;
+                i.router = config.router;
+                i.scripts = render.scripts;
                 i.drAttrs = attrs;
                 i.innerHTML = element.innerHTML;
                 i.rootCreator = new Proxy(obj, new DomRenderFinalProxy());

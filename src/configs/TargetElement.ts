@@ -1,5 +1,8 @@
-import {Attrs, CreatorMetaData, RawSet, Render} from '../RawSet';
+import {RawSet} from '../rawsets/RawSet';
 import {Config} from './Config';
+import {Attrs} from '../rawsets/Attrs';
+import {CreatorMetaData} from '../rawsets/CreatorMetaData';
+import {Render} from '../rawsets/Render';
 
 export type TargetElement = {
     name: string;

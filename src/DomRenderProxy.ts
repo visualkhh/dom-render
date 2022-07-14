@@ -1,8 +1,11 @@
-import {CreatorMetaData, RawSet, RawSetType, Render} from './RawSet';
+import {RawSet} from './rawsets/RawSet';
 import {EventManager, eventManager} from './events/EventManager';
 import {Config} from './configs/Config';
 import {ScriptUtils} from './utils/script/ScriptUtils';
 import {DomRenderFinalProxy, Shield} from './types/Types';
+import {CreatorMetaData} from './rawsets/CreatorMetaData';
+import {RawSetType} from './rawsets/RawSetType';
+import {Render} from './rawsets/Render';
 
 const excludeGetSetPropertys = ['onBeforeReturnGet', 'onBeforeReturnSet', '__domrender_components', '__render', '_DomRender_isFinal', '_domRender_ref', '_rawSets', '_domRender_proxy', '_targets', '_DomRender_origin', '_DomRender_ref', '_DomRender_proxy'];
 export class DomRenderProxy<T extends object> implements ProxyHandler<T> {

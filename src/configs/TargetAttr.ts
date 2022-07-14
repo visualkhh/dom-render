@@ -1,4 +1,4 @@
-import {RawSet} from '../RawSet';
+import {RawSet} from '../rawsets/RawSet';
 
 export type TargetAttr = {
     name: string;

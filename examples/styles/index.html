@@ -2,11 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>examples</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>style example</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        clifford: '#da373d',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 <script src="bundle.js" defer="defer"></script>
 <body id="app">
-<h1>
+<h1 class="text-3xl font-bold underline text-clifford p-1">
     ${this.name}$
 </h1>
 <ul>
@@ -17,14 +30,23 @@
 </ul>
 <hr>
 <user dr-if="this.sw"></user>
-
 <hr>
 <profile></profile>
 <hr>
-<pp></pp>
+<div id="c"></div>
 <!--sssss-->
 <span>zwowow</span>
 <!--<span class="wow">wow</span>-->
-<!--<span><button dr-event-click="this.toggle()">toggle</button></span>-->
+<span><button dr-event-click="this.toggle()">toggle</button></span>
+<a href="https://link.coupang.com/a/sJNjT" target="_blank" referrerpolicy="unsafe-url">
+<!--    asdasdsadas-->
+    <canvas id="canvas"></canvas>
+<!--    <img src="https://image1.coupangcdn.com/image/affiliate/banner/51467bdd3ca2b26c5d38a67357fc5716@2x.jpg" alt="웅진 빅토리아 청포도 스파클링 음료, 500ml, 20개" width="120" height="240">-->
+</a>
+<div>
+
+</div>
+<!--<hr>-->
+<!--<iframe src="https://coupa.ng/ccVOdF" width="120" height="240" frameborder="0" scrolling="no" referrerpolicy="unsafe-url"></iframe>-->
 </body>
 </html>

@@ -1,0 +1,7 @@
+export enum RawSetType {
+    TEXT = 'TEXT',
+    STYLE_TEXT = 'STYLE_TEXT',
+    TARGET_ELEMENT = 'TARGET_ELEMENT',
+    TARGET_ATTR = 'TARGET_ATTR',
+    UNKOWN = 'UNKOWN',
+}
