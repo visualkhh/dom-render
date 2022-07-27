@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>dom-render</title>
+    <script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.87/dist/bundle.js"></script>
+    <style>
+    </style>
+</head>
+<body id="app">
+<div>${this.name}$</div>
+<div>
+    <button dr-event-click="this.changeName('good'+Math.random()*10)">change name</button>
+</div>
+<h1>history</h1>
+<ul>
+    <li dr-for-of="this.names">
+        <profile dr-constructor="[#it#]"></profile>
+    </li>
+</ul>
+<script>
+    // 1
+    // setTimeout(() => {
+    //     document.querySelector("#wow").innerHTML='빵꾸똥꾸';
+    // }, 6000)
+    // class = data  < = > view  -> binding
+
+    class Profile {
+        constructor(name) {
+            this.name = name;
+        }
+    }
+
+    class Index  {
+        constructor() {
+            this.names = [];
+            this.name = 'my name is dom-render';
+            this.color = '#ff0000';
+        }
+
+        changeName(name) {
+            this.names.push(this.name);
+            this.name = name;
+        }
+    }
+
+
+
+    const index = DomRender.run(new Index(), document.querySelector('#app'), {
+        targetElements: [
+                DomRender.createComponent({
+                    type: Profile,
+                    template: '<div>${this.name}$</div>',
+                    styles: `div {border: 1px solid #000; color: red}`
+                })
+            ]
+    });
+
+
+    // data = DomRender.run(data, document.querySelector('#app'), {
+    //     targetElements: [
+    //         DomRender.createComponent({
+    //             type: User,
+    //             template: `<span>user<div>ss</div></span>`,
+    //             styles: `div {color: red}`
+    //         })
+    //     ]
+    // });
+</script>
+</body>
+</html>

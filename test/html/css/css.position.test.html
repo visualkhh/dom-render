@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Title</title>
+    <style>
+        .body {
+            height: 300vh;
+            background-color: #217ac0;
+        }
+        .banner-container {
+            display: flex;
+            align-items: flex-end;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #c3c3c399;
+            width: 100vw;
+            height: calc(var(--vh, 1vh) * 100);
+        }
+        .banner {
+            background-color: black;
+            color: red;
+        }
+        .banner input {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+<h1>goodjob</h1>
+<div class="body">
+    body
+</div>
+<div class="banner-container">
+    <div class="banner">
+        banner
+        <input id="in" type="text">
+    </div>
+</div>
+<script>
+    setScreenSize();
+    function setScreenSize() {
+        let vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+        const innerHTML = `${vh}`;
+        document.querySelector('.body').innerHTML = innerHTML;
+        // document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    document.querySelector('#in').addEventListener('focus', function () {
+        setScreenSize();
+    })
+    window.addEventListener('scroll', function() {
+        setScreenSize();
+    })
+    window.addEventListener('resize', function (){
+        setScreenSize();
+        // const innerHTML = `${window.innerWidth}*${window.innerHeight} ,${document.documentElement.clientWidth} * ${document.documentElement.clientHeight}`;
+        // document.querySelector('.body').innerHTML = innerHTML;
+    })
+</script>
+</body>
+</html>
