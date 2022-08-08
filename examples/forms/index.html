@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>examples</title>
+</head>
+<script src="bundle.js" defer="defer"></script>
+<body id="app">
+<h1>form</h1>
+<h3>form normal</h3>
+<form dr-form="this.form" dr-event-submit="this.submit($event);">
+    name: <input name="name">
+    age: <input name="age">
+    <button type="submit">submit</button>
+</form>
+<hr>
+<h3>form validation</h3>
+<form dr-form="this.formGroup" dr-event-submit="this.submitFormGroup($event);">
+    name: <input name="name">
+    age: <input name="age">
+    email: <input name="email">
+    check: <input name="agree" type="checkbox">
+    <button type="submit">submit</button>
+</form>
+</body>
+</html>

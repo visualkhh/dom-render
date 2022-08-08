@@ -1,8 +1,8 @@
 import {OnCreateRender} from 'dom-render/lifecycle/OnCreateRender';
 import {OnDestroyRender} from 'dom-render/lifecycle/OnDestroyRender';
-import {CreatorMetaData} from 'dom-render/RawSet';
+import {CreatorMetaData} from 'dom-render/rawsets/CreatorMetaData';
 import {OnProxyDomRender} from 'dom-render/lifecycle/OnProxyDomRender';
-import {Config} from 'dom-render/Config';
+import {Config} from 'dom-render/configs/Config';
 import {Index} from '../../index';
 
 export class Profile implements OnCreateRender, OnDestroyRender, OnProxyDomRender {

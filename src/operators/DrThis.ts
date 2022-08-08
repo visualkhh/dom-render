@@ -7,6 +7,8 @@ export class DrThis extends OperatorRender {
     execRender(): ExecuteState {
         if (this.elementSource.attrs.drThis) {
             const r = ScriptUtils.evalReturn(this.elementSource.attrs.drThis, this.source.obj);
+            // const isStrip = ScriptUtils.eval(`if (${this.elementSource.attrs.drStripOption ?? 'false'}) { return true; } else { return false; }`, this.source.obj);
+            // console.log('isStrip', isStrip)
             if (r) {
                 if (r instanceof ComponentSet) {
                     if (this.rawSet.data) {
@@ -14,7 +16,8 @@ export class DrThis extends OperatorRender {
                         RawSet.destroy((this.rawSet.data as ComponentSet).obj, [], this.source.config, destroyOptions);
                     }
                     this.rawSet.data = r;
-                    this.returnContainer.fag.append(RawSet.drThisCreate(this.rawSet, this.elementSource.element, `${this.elementSource.attrs.drThis}.obj`, this.elementSource.attrs.drVarOption ?? '', this.elementSource.attrs.drStripOption, this.source.obj, this.source.config, r))
+                    const componentBody = RawSet.drThisCreate(this.rawSet, this.elementSource.element, `${this.elementSource.attrs.drThis}.obj`, this.elementSource.attrs.drVarOption ?? '', this.elementSource.attrs.drStripOption, this.source.obj, this.source.config, r);
+                    this.returnContainer.fag.append(componentBody)
                     this.afterCallBack.onThisComponentSetCallBacks.push(r);
                 } else {
                     this.returnContainer.fag.append(RawSet.drThisCreate(this.rawSet, this.elementSource.element, this.elementSource.attrs.drThis, this.elementSource.attrs.drVarOption ?? '', this.elementSource.attrs.drStripOption, this.source.obj, this.source.config))

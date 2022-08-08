@@ -1,9 +1,10 @@
 import {RandomUtils} from 'dom-render/utils/random/RandomUtils';
 import {OnCreateRender} from 'dom-render/lifecycle/OnCreateRender';
 import {OnInitRender} from 'dom-render/lifecycle/OnInitRender';
-import {CreatorMetaData, Render} from 'dom-render/RawSet';
+import {CreatorMetaData} from 'dom-render/rawsets/CreatorMetaData';
+import {Render} from 'dom-render/rawsets/Render';
 import {OnProxyDomRender} from 'dom-render/lifecycle/OnProxyDomRender';
-import {Config} from 'dom-render/Config';
+import {Config} from 'dom-render/configs/Config';
 import {OnDestroyRender} from 'dom-render/lifecycle/OnDestroyRender';
 
 export class DynamicComponent implements OnCreateRender, OnInitRender, OnProxyDomRender, OnDestroyRender {

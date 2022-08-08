@@ -303,6 +303,8 @@ dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
 * event: change  
 * modify change: dr-form:event="input"
 
+- [examples](./examples/forms)
+
 ```html
 <body id="app">
 <form dr-form="this.form" dr-event-submit="this.submit(); $event.preventDefault();">

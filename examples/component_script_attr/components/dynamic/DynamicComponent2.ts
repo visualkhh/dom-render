@@ -1,5 +1,5 @@
 import {RandomUtils} from 'dom-render/utils/random/RandomUtils';
-import {Config} from 'dom-render/Config';
+import {Config} from 'dom-render/configs/Config';
 import {OnProxyDomRender} from 'dom-render/lifecycle/OnProxyDomRender';
 import {OnDestroyRender} from 'dom-render/lifecycle/OnDestroyRender';
 

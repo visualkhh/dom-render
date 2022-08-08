@@ -1,7 +1,7 @@
 import {OnCreateRender} from 'dom-render/lifecycle/OnCreateRender';
 import {OnProxyDomRender} from 'dom-render/lifecycle/OnProxyDomRender';
-import {Config} from 'dom-render/Config';
-import {Channel, Messenger} from 'dom-render/messenger/Messenger';
+import {Config} from 'dom-render/configs/Config';
+import {Channel} from 'dom-render/messenger/Messenger';
 import {Index} from '../../index';
 
 export class Home implements OnCreateRender, OnProxyDomRender {

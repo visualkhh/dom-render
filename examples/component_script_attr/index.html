@@ -29,7 +29,7 @@ ${this.name}$
 <home dr-constructor="[this.name, this.age, 'home welcom']" dr-on-create="{type: 'onCreate', data: 'datadata'}" dr-on-component-init="$component.onInit('data')"></home>
 
 <h1>dynamic component</h1>
-<div dr-this="this.dynamicComponent" dr-on-create="[1,this.age,this.name]">
+<div dr-this="this.dynamicComponent" dr-strip="true" dr-on-create="[1,this.age,this.name]">
 </div>
 <button dr-event-click="this.changeDynamicComponent()">change dynamicComponent</button>
 <h1>scripts</h1>

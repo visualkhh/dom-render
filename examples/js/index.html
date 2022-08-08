@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.86/dist/bundle.js"></script>
+<!--<script src="bundle.js"></script>-->
+<body id="app">
+<h1>${this.name}$</h1>
+<input type="text" value="${this.name}$" style="${'color: '+this.color}$">
+<button dr-event-click="this.changeData();">change</button>
+<script>
+    let data = {
+        name: 'my name is dom-render',
+        color: '#ff0000',
+        changeData() {
+            this.name = RandomUtils.getRandomString(10);
+            this.color = RandomUtils.getRandomColor();
+        }
+    };
+    data = DomRender.run(data, document.querySelector('#app'));
+</script>
+</body>
+</html>
