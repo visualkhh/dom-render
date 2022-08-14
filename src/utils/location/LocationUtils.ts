@@ -25,7 +25,12 @@ export class LocationUtils {
     }
 
     static hashQueryParamsObject(window: Window): { [key:string]: string } {
-        return this.queryStringToObject(window.location.hash.split('?').pop() ?? '');
+        const s = window.location.hash.split('?').pop() ?? '';
+        if (s.startsWith('#')) {
+            return {};
+        } else {
+            return this.queryStringToObject(s);
+        }
     }
 
     static pathQueryParams(window: Window): Map<string, string> {
