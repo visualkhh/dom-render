@@ -5,11 +5,11 @@
     <title>Title</title>
 </head>
 <script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.86/dist/bundle.js"></script>
-<!--<script src="bundle.js"></script>-->
 <body id="app">
-<h1>${this.name}$</h1>
-<input type="text" value="${this.name}$" style="${'color: '+this.color}$">
-<button dr-event-click="this.changeData();">change</button>
+    <h1>${this.name}$</h1>
+    <input type="text" value="${this.name}$" style="${'color: '+this.color}$">
+    <button dr-event-click="this.changeData();">change</button>
+
 <script>
     let data = {
         name: 'my name is dom-render',
