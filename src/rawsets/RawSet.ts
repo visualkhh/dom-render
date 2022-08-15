@@ -56,6 +56,13 @@ export class RawSet {
     public static readonly DR_STRIP_OPTIONNAME = 'dr-strip';
     public static readonly DR_DESTROY_OPTIONNAME = 'dr-destroy';
 
+    public static readonly DR_COMPONENT_NAME_OPTIONNAME = 'dr-component-name';
+    public static readonly DR_COMPONENT_INNER_HTML_NAME_OPTIONNAME = 'dr-component-inner-html-name';
+    public static readonly DR_ON_CREATE_ARGUMENTS_OPTIONNAME = 'dr-on-create-arguments';
+    public static readonly DR_ON_CREATED_CALLBACK_OPTIONNAME = 'dr-on-created-callback';
+    public static readonly DR_ON_INIT_ARGUMENTS_OPTIONNAME = 'dr-on-init-arguments';
+    public static readonly DR_ON_CONSTRUCTOR_ARGUMENTS_OPTIONNAME = 'dr-on-constructor-arguments';
+
     public static readonly drAttrsOriginName: Attrs = {
         dr: RawSet.DR,
         drIf: RawSet.DR_IF_NAME,
@@ -274,7 +281,7 @@ export class RawSet {
         }
         for (const it of onElementInitCallBacks) {
             if (it.targetElement?.__render?.element && it.targetElement?.__render?.component) {
-                const oninit = it.targetElement.__render.element.getAttribute(`${EventManager.attrPrefix}on-init`); // dr-on-component-init
+                const oninit = it.targetElement.__render.element.getAttribute(RawSet.DR_ON_INIT_ARGUMENTS_OPTIONNAME); // dr-on-component-init
                 let param = [];
                 if (oninit) {
                     const script = `${it.targetElement.__render.renderScript} return ${oninit} `;
@@ -685,7 +692,7 @@ export class RawSet {
             // const metaEnd = RawSet.metaEnd(id);
             // n.innerHTML = metaStart + style + (set.template ?? '') + metaEnd;
             // dr-on-create onCreateRender
-            const onCreate = element.getAttribute(`${EventManager.attrPrefix}on-create-arguments`)
+            const onCreate = element.getAttribute(RawSet.DR_ON_CREATE_ARGUMENTS_OPTIONNAME);
             const renderScript = '';
             let createParam = [];
             if (onCreate) {
@@ -699,7 +706,7 @@ export class RawSet {
 
             // dr-on-component-init
             // const oninit = element.getAttribute(`${EventManager.attrPrefix}on-component-init`); // dr-on-component-init
-            const oninit = element.getAttribute(`${EventManager.attrPrefix}on-created-callback`); // dr-on-component-init
+            const oninit = element.getAttribute(RawSet.DR_ON_CREATED_CALLBACK_OPTIONNAME); // dr-on-component-init
             if (oninit) {
                 const script = `${renderScript}  ${oninit} `;
                 ScriptUtils.eval(script, obj);
@@ -771,7 +778,7 @@ export class RawSet {
                     scripts: EventManager.setBindProperty(config.scripts ?? {}, obj)
                     // eslint-disable-next-line no-use-before-define
                 } as Render);
-                const constructor = element.getAttribute(`${EventManager.attrPrefix}constructor-arguments`);
+                const constructor = element.getAttribute(RawSet.DR_ON_CONSTRUCTOR_ARGUMENTS_OPTIONNAME);
                 let constructorParam = [];
 
                 // dr-constructor
@@ -817,7 +824,7 @@ export class RawSet {
                 }
 
                 // dr-on-create onCreateRender
-                const onCreate = element.getAttribute(`${EventManager.attrPrefix}on-create-arguments`);
+                const onCreate = element.getAttribute(RawSet.DR_ON_CREATE_ARGUMENTS_OPTIONNAME);
                 this.__render = render;
 
                 let createParam = [];
@@ -831,8 +838,8 @@ export class RawSet {
                 instance?.onCreateRender?.(...createParam);
                 let applayTemplate = element.innerHTML;
                 let innerHTMLThisRandom;
-                const componentName = element.getAttribute(`${EventManager.attrPrefix}component-name`) ?? 'component';
-                const innerHTMLName = element.getAttribute(`${EventManager.attrPrefix}component-inner-html-name`) ?? 'innerHTML';
+                const componentName = element.getAttribute(RawSet.DR_COMPONENT_NAME_OPTIONNAME) ?? 'component';
+                const innerHTMLName = element.getAttribute(RawSet.DR_COMPONENT_INNER_HTML_NAME_OPTIONNAME) ?? 'innerHTML';
                 if (applayTemplate) {
                     // if (rawSet.point.thisVariableName) {
                     // 넘어온 innerHTML에 this가 있으면 해당안되게 우선 치환.
@@ -844,7 +851,7 @@ export class RawSet {
                 applayTemplate = template.replace(RegExp(`#${innerHTMLName}#`, 'g'), applayTemplate);
                 // dr-on-component-init
                 // const oninit = element.getAttribute(`${EventManager.attrPrefix}on-component-init`); // dr-on-component-init
-                const oninit = element.getAttribute(`${EventManager.attrPrefix}on-created-callback`); // dr-on-component-init
+                const oninit = element.getAttribute(RawSet.DR_ON_CREATED_CALLBACK_OPTIONNAME); // dr-on-component-init
                 if (oninit) {
                     const script = `${renderScript}  ${oninit} `;
                     ScriptUtils.eval(script, Object.assign(obj, {

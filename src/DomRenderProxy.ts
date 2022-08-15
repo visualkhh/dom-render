@@ -58,7 +58,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public initRender(target: Node) {
-        const onCreate = (target as any).getAttribute?.(`${EventManager.attrPrefix}on-create-arguments`);
+        const onCreate = (target as any).getAttribute?.(RawSet.DR_ON_CREATE_ARGUMENTS_OPTIONNAME);
         let createParam: any[] = [];
         if (onCreate) {
             createParam = ScriptUtils.evalReturn(onCreate, this._domRender_proxy);
@@ -67,6 +67,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             }
         }
         (this._domRender_proxy as any)?.onCreateRender?.(...createParam);
+
         const innerHTML = (target as any).innerHTML ?? '';
         this._targets.add(target);
         const rawSets = RawSet.checkPointCreates(target, this._domRender_proxy, this.config);
@@ -84,13 +85,21 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             }
         })
         this.render(this.getRawSets());
-        const render = {target} as Render;
-        const creatorMetaData = {
-            creator: this._domRender_proxy,
-            rootCreator: this._domRender_proxy,
-            innerHTML
-        } as CreatorMetaData;
-        (this._domRender_proxy as any)?.onInitRender?.({render, creatorMetaData});
+        // const render = {target} as Render;
+        // const creatorMetaData = {
+        //     creator: this._domRender_proxy,
+        //     rootCreator: this._domRender_proxy,
+        //     innerHTML
+        // } as CreatorMetaData;
+        const onInit = (target as any).getAttribute?.(RawSet.DR_ON_INIT_ARGUMENTS_OPTIONNAME);
+        let initParam: any[] = [];
+        if (onCreate) {
+            initParam = ScriptUtils.evalReturn(onCreate, this._domRender_proxy);
+            if (!Array.isArray(initParam)) {
+                initParam = [initParam];
+            }
+        }
+        (this._domRender_proxy as any)?.onInitRender?.(...initParam);
     }
 
     public getRawSets() {
