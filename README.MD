@@ -649,6 +649,9 @@ ${this.name}$
 <Profile dr-if="this.toggle" dr-detect="$component.age = this.age" dr-on-create:callback="$component.name='papa'; $component.age=58;">
     <b>${this.name}$</b>
 </Profile>
+<Profile dr-if="this.toggle" dr-detect="$component.age = this.age" dr-on-constructor:arguments="[1,2]">
+    <b>${this.name}$</b>
+</Profile>
 
 <button dr-event-click="this.name = new Date().toString();">change name</button>
 <button dr-event-click="this.age = Date.now();">change age</button>
