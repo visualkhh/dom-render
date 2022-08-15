@@ -12,5 +12,5 @@ export type Render = {
     router?: Router;
     range?: any;
     value?: any;
-    [n: string]: any;
+    [n: string]: any; // component?: any; //component instance
 }

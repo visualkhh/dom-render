@@ -268,16 +268,28 @@ export class RawSet {
 
         // 중요 style isolation 나중에 :scope로 대체 가능할듯.
         RawSet.generateStyleSheetsLocal();
-        // console.log('-22222-')
-        // alert(1);
 
         for (const it of onThisComponentSetCallBacks) {
             it.obj?.onInitRender?.();
         }
         for (const it of onElementInitCallBacks) {
-            it.targetElement?.__render?.component?.onInitRender?.(Object.freeze({render: it.targetElement?.__render, creatorMetaData: it.targetElement?.__creatorMetaData}));
+            if (it.targetElement?.__render?.element && it.targetElement?.__render?.component) {
+                const oninit = it.targetElement.__render.element.getAttribute(`${EventManager.attrPrefix}on-init`); // dr-on-component-init
+                let param = [];
+                if (oninit) {
+                    const script = `${it.targetElement.__render.renderScript} return ${oninit} `;
+                    param = ScriptUtils.eval(script, Object.assign(obj, {
+                        __render: it.targetElement.__render
+                    }))
+                    if (!Array.isArray(param)) {
+                        param = [param];
+                    }
+                }
+                it.targetElement.__render.component.onInitRender?.(...param);
+            }
             config?.onElementInit?.(it.name, obj, this, it.targetElement);
         }
+        // TODO: 이부분도 위에 targetElement 처럼 해야될까?
         for (const it of onAttrInitCallBacks) {
             config?.onAttrInit?.(it.attrName, it.attrValue, obj, this);
         }
@@ -673,7 +685,7 @@ export class RawSet {
             // const metaEnd = RawSet.metaEnd(id);
             // n.innerHTML = metaStart + style + (set.template ?? '') + metaEnd;
             // dr-on-create onCreateRender
-            const onCreate = element.getAttribute(`${EventManager.attrPrefix}on-create`)
+            const onCreate = element.getAttribute(`${EventManager.attrPrefix}on-create-arguments`)
             const renderScript = '';
             let createParam = [];
             if (onCreate) {
@@ -686,7 +698,8 @@ export class RawSet {
             set.obj?.onCreateRender?.(...createParam);
 
             // dr-on-component-init
-            const oninit = element.getAttribute(`${EventManager.attrPrefix}on-component-init`); // dr-on-component-init
+            // const oninit = element.getAttribute(`${EventManager.attrPrefix}on-component-init`); // dr-on-component-init
+            const oninit = element.getAttribute(`${EventManager.attrPrefix}on-created-callback`); // dr-on-component-init
             if (oninit) {
                 const script = `${renderScript}  ${oninit} `;
                 ScriptUtils.eval(script, obj);
@@ -758,7 +771,7 @@ export class RawSet {
                     scripts: EventManager.setBindProperty(config.scripts ?? {}, obj)
                     // eslint-disable-next-line no-use-before-define
                 } as Render);
-                const constructor = element.getAttribute(`${EventManager.attrPrefix}constructor`);
+                const constructor = element.getAttribute(`${EventManager.attrPrefix}constructor-arguments`);
                 let constructorParam = [];
 
                 // dr-constructor
@@ -804,10 +817,10 @@ export class RawSet {
                 }
 
                 // dr-on-create onCreateRender
-                const onCreate = element.getAttribute(`${EventManager.attrPrefix}on-create`)
+                const onCreate = element.getAttribute(`${EventManager.attrPrefix}on-create-arguments`);
                 this.__render = render;
 
-                let createParam = [i];
+                let createParam = [];
                 if (onCreate) {
                     const script = `${renderScript} return ${onCreate} `;
                     createParam = ScriptUtils.eval(script, Object.assign(obj, {__render: render}));
@@ -830,7 +843,8 @@ export class RawSet {
                 }
                 applayTemplate = template.replace(RegExp(`#${innerHTMLName}#`, 'g'), applayTemplate);
                 // dr-on-component-init
-                const oninit = element.getAttribute(`${EventManager.attrPrefix}on-component-init`); // dr-on-component-init
+                // const oninit = element.getAttribute(`${EventManager.attrPrefix}on-component-init`); // dr-on-component-init
+                const oninit = element.getAttribute(`${EventManager.attrPrefix}on-created-callback`); // dr-on-component-init
                 if (oninit) {
                     const script = `${renderScript}  ${oninit} `;
                     ScriptUtils.eval(script, Object.assign(obj, {
