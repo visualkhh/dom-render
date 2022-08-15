@@ -272,7 +272,7 @@ export class RawSet {
         // alert(1);
 
         for (const it of onThisComponentSetCallBacks) {
-            it.obj.onInitRender?.();
+            it.obj?.onInitRender?.();
         }
         for (const it of onElementInitCallBacks) {
             it.targetElement?.__render?.component?.onInitRender?.(Object.freeze({render: it.targetElement?.__render, creatorMetaData: it.targetElement?.__creatorMetaData}));
