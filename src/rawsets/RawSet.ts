@@ -58,10 +58,10 @@ export class RawSet {
 
     public static readonly DR_COMPONENT_NAME_OPTIONNAME = 'dr-component-name';
     public static readonly DR_COMPONENT_INNER_HTML_NAME_OPTIONNAME = 'dr-component-inner-html-name';
-    public static readonly DR_ON_CREATE_ARGUMENTS_OPTIONNAME = 'dr-on-create-arguments';
-    public static readonly DR_ON_CREATED_CALLBACK_OPTIONNAME = 'dr-on-created-callback';
-    public static readonly DR_ON_INIT_ARGUMENTS_OPTIONNAME = 'dr-on-init-arguments';
-    public static readonly DR_ON_CONSTRUCTOR_ARGUMENTS_OPTIONNAME = 'dr-on-constructor-arguments';
+    public static readonly DR_ON_CREATE_ARGUMENTS_OPTIONNAME = 'dr-on-create:arguments';
+    public static readonly DR_ON_CREATED_CALLBACK_OPTIONNAME = 'dr-on-create:callback';
+    public static readonly DR_ON_INIT_ARGUMENTS_OPTIONNAME = 'dr-on-init:arguments';
+    public static readonly DR_ON_CONSTRUCTOR_ARGUMENTS_OPTIONNAME = 'dr-on-constructor:arguments';
 
     public static readonly drAttrsOriginName: Attrs = {
         dr: RawSet.DR,

@@ -433,7 +433,7 @@ const data = DomRender.run(new Data(), document.querySelector('#app')!, config);
   <page-second dr-if="$router.test('/second')">1</page-second>
   <page-second dr-if="$router.testRegexp('/second/[0-9]?$')">2</page-second>
   <page-second dr-if="$router.testRegexp('/second/wow$')">wow</page-second>
-  <page-detail url='/detail/{id:[0-9]+}' dr-if="$router.test($attribute.url)" dr-on-created-callback="$component.routerData($router.getRouteData($attribute.url))" ></page-detail>
+  <page-detail url='/detail/{id:[0-9]+}' dr-if="$router.test($attribute.url)" dr-on-create:callback="$component.routerData($router.getRouteData($attribute.url))" ></page-detail>
   <div>
     <button dr-event-click="this.plusCount()">${this.count}$ count  pluse++</button>
   </div>
@@ -638,15 +638,15 @@ const data = config.scripts.concat('head', 'tail')
 <body id="app">
 ${this.name}$
 <h1>component</h1>
-<profile dr-on-created-callback="$component.name='jhone'; $component.age=55;"><b>${#component#.details}$</b></profile>
-<profile dr-on-created-callback="$component.name='cal'; $component.age=56;"><b>detail-2</b></profile>
-<profile dr-on-created-callback="$component.name='rose'; $component.age=57;">
-    <profile dr-on-created-callback="$component.name='rose-sub'; $component.age=156;">
+<profile dr-on-create:callback="$component.name='jhone'; $component.age=55;"><b>${#component#.details}$</b></profile>
+<profile dr-on-create:callback="$component.name='cal'; $component.age=56;"><b>detail-2</b></profile>
+<profile dr-on-create:callback="$component.name='rose'; $component.age=57;">
+    <profile dr-on-create:callback="$component.name='rose-sub'; $component.age=156;">
         <b>${this.name}$</b>
     </profile>
 </profile>
 <h3>component data link and detect</h3>
-<Profile dr-if="this.toggle" dr-detect="$component.age = this.age" dr-on-created-callback="$component.name='papa'; $component.age=58;">
+<Profile dr-if="this.toggle" dr-detect="$component.age = this.age" dr-on-create:callback="$component.name='papa'; $component.age=58;">
     <b>${this.name}$</b>
 </Profile>
 
@@ -654,8 +654,8 @@ ${this.name}$
 <button dr-event-click="this.age = Date.now();">change age</button>
 <button dr-event-click="this.toggle = !this.toggle;">change toggle</button>
 
-<j1>component constructor, on-create, dr-on-created-callback</j1>
-<home dr-constructor="[this.name, this.age, 'home welcom']" dr-on-create-arguments="{type: 'onCreate', data: 'datadata'}" dr-on-created-callback="$component.onInit('data')"></home>
+<j1>component constructor, on-create, dr-on-create:callback</j1>
+<home dr-constructor="[this.name, this.age, 'home welcom']" dr-on-create-arguments="{type: 'onCreate', data: 'datadata'}" dr-on-create:callback="$component.onInit('data')"></home>
 
 
 
@@ -712,7 +712,7 @@ const data = DomRender.run(new Data(), document.querySelector('#app')!, config);
 ```
 using component
 ```html
-<my-element dr-on-created-callback="$component.say();"></my-element>
+<my-element dr-on-create:callback="$component.say();"></my-element>
 
 <home value="${this.name}$" wow="${this.color}$">
   ${#component#.homeName}$
@@ -722,8 +722,10 @@ using component
 </home>
 ```
 - attribute
-  - dr-on-created-callback: component created init call script
-  - dr-on-create-arguments: component created init arguments
+  - dr-on-create:callback: component created init callback script
+  - dr-on-create:arguments: component onCreatedRender arguments
+  - dr-on-init:arguments: component onInitRender arguments
+  - dr-on-constructor:arguments: component counstructor arguments
     - $component: component  instance
     - $element: element instance
     - $attribute: element attribute object
