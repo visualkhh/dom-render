@@ -61,7 +61,10 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
         const onCreate = (target as any).getAttribute?.(`${EventManager.attrPrefix}on-create-arguments`);
         let createParam: any[] = [];
         if (onCreate) {
-            createParam = [ScriptUtils.evalReturn(onCreate, this._domRender_proxy)];
+            createParam = ScriptUtils.evalReturn(onCreate, this._domRender_proxy);
+            if (!Array.isArray(createParam)) {
+                createParam = [createParam];
+            }
         }
         (this._domRender_proxy as any)?.onCreateRender?.(...createParam);
         const innerHTML = (target as any).innerHTML ?? '';
