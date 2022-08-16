@@ -14,7 +14,7 @@ export class DrForm extends OperatorRender {
 
             const childs = Array.from(this.elementSource.element.querySelectorAll('[name]'));
 
-            const fromName = ScriptUtils.evalReturn(this.elementSource.element.getAttribute('dr-form:name') ?? '', this.source.obj);
+            const fromName = ScriptUtils.evalReturn(this.elementSource.element.getAttribute(`${RawSet.DR_FORM_NAME}:name`) ?? '', this.source.obj);
             const thisName = fromName ?? this.elementSource.element.getAttribute('name');
             // console.log('dr-form:name', thisName, element.getAttribute('dr-form:name'), obj, element);
             // // 자기자신이 Input 대상일때
@@ -26,10 +26,10 @@ export class DrForm extends OperatorRender {
                 }
             }
             childs.forEach(it => {
-                const eventName = it.getAttribute('dr-form:event') ?? 'change'
-                const validatorName = it.getAttribute('dr-form:validator');
+                const eventName = it.getAttribute(`${RawSet.DR_FORM_NAME}:event`) ?? 'change'
+                const validatorName = it.getAttribute(`${RawSet.DR_FORM_NAME}:validator`);
                 const attrEventName = EventManager.attrPrefix + 'event-' + eventName;
-                let varpath = ScriptUtils.evalReturn(this.elementSource.element.getAttribute('dr-form:name') ?? '', this.source.obj) ?? it.getAttribute('name');
+                let varpath = ScriptUtils.evalReturn(this.elementSource.element.getAttribute(`${RawSet.DR_FORM_NAME}:name`) ?? '', this.source.obj) ?? it.getAttribute('name');
                 if (varpath != null) {
                     if (validatorName) {
                         ScriptUtils.eval(`

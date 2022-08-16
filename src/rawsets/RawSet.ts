@@ -45,8 +45,6 @@ export class RawSet {
     public static readonly DR_INNERTEXT_NAME = 'dr-inner-text';
     public static readonly DR_DETECT_NAME = 'dr-detect';
 
-    // public static readonly DR_DETECT_ACTION_NAME = 'dr-detect-action';
-
     public static readonly DR_IT_OPTIONNAME = 'dr-it';
     public static readonly DR_VAR_OPTIONNAME = 'dr-var';
     public static readonly DR_AFTER_OPTIONNAME = 'dr-after';
@@ -115,7 +113,6 @@ export class RawSet {
                 const targetScripts = targetAttrNames.map(it => element.getAttribute(it)).filter(it => it);
                 const targetAttrMap = element.getAttribute(EventManager.normalAttrMapAttrName);
                 if (targetAttrMap) {
-                    // console.log('----->', targetAttr);
                     new Map<string, string>(JSON.parse(targetAttrMap)).forEach((v, k) => {
                         targetScripts.push(v);
                     });
