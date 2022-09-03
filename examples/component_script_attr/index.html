@@ -8,15 +8,15 @@
 <body id="app">
 ${this.name}$
 <h1>component</h1>
-<profile dr-on-component-init="$component.name='jhone'; $component.age=55;"><b>${#component#.details}$</b></profile>
-<profile dr-on-component-init="$component.name='cal'; $component.age=56;"><b>detail-2</b></profile>
-<profile dr-on-component-init="$component.name='rose'; $component.age=57;">
-    <profile dr-on-component-init="$component.name='rose-sub'; $component.age=156;">
+<profile dr-on-create:callback="$component.name='jhone'; $component.age=55;"><b>${#component#.details}$</b></profile>
+<profile dr-on-create:callback="$component.name='cal'; $component.age=56;"><b>detail-2</b></profile>
+<profile dr-on-create:callback="$component.name='rose'; $component.age=57;">
+    <profile dr-on-create:callback="$component.name='rose-sub'; $component.age=156;">
         <b>${this.name}$</b>
     </profile>
 </profile>
 <h3>component data link and detect</h3>
-<Profile dr-if="this.toggle" dr-detect="$component.age = this.age" dr-on-component-init="$component.name='papa'; $component.age=58;" dr-destroy="NO_DESTROY">
+<Profile dr-if="this.toggle" dr-detect="$component.age = this.age" dr-on-create:callback="$component.name='papa'; $component.age=58;" dr-destroy="NO_DESTROY">
     <b>${this.name}$</b>
 </Profile>
 
@@ -25,8 +25,9 @@ ${this.name}$
 <button dr-event-click="this.toggle = !this.toggle;">change toggle</button>
 
 <div> receive Data  ${JSON.stringify(this.rcvData)}$</div>
-<j1>component constructor, on-create, dr-on-component-init, messenger</j1>
-<home dr-constructor="[this.name, this.age, 'home welcom']" dr-on-create="{type: 'onCreate', data: 'datadata'}" dr-on-component-init="$component.onInit('data')"></home>
+<h1>component constructor, on-create, dr-on-component-init, messenger</h1>
+
+<home  dr-for-of="$range(10, 20)" dr-on-constructor:arguments="[this.name, this.age+#it#, 'home welcom']" dr-on-create:arguments="{type: 'onCreate', data: 'datadata'}" dr-on-component-init="$component.onInit('data')"></home>
 
 <h1>dynamic component</h1>
 <div dr-this="this.dynamicComponent" dr-strip="true" dr-on-create="[1,this.age,this.name]">
