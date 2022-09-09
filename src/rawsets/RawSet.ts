@@ -10,7 +10,7 @@ import {ComponentSet} from '../components/ComponentSet';
 import {DrPre} from '../operators/DrPre';
 import {Dr} from '../operators/Dr';
 import {DrIf} from '../operators/DrIf';
-import {ExecuteState} from '../operators/OperatorRender';
+import {ExecuteState} from '../operators/OperatorExecuter';
 import {DrThis} from '../operators/DrThis';
 import {DrForm} from '../operators/DrForm';
 import {DrInnerText} from '../operators/DrInnerText';
@@ -85,7 +85,7 @@ export class RawSet {
 
     public static readonly DR_TAGS = [];
 
-    public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_APPENDER_NAME, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_FORM_NAME, RawSet.DR_PRE_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME, RawSet.DR_DETECT_NAME];
+    public static readonly DR_ATTRIBUTES = [RawSet.DR, RawSet.DR_APPENDER_NAME, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_FORM_NAME, RawSet.DR_PRE_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME, RawSet.DR_DETECT_NAME] as const;
 
     constructor(
         public uuid: string,
@@ -226,23 +226,23 @@ export class RawSet {
                 } as Attrs;
                 drAttrs.push(drAttr);
                 const operators = [
-                    new DrPre(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
-                    new Dr(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
-                    new DrIf(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
-                    new DrThis(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
-                    new DrForm(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
-                    new DrInnerText(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
-                    new DrInnerHTML(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
-                    new DrFor(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
-                    new DrForOf(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
-                    new DrAppender(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
-                    new DrRepeat(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrPre(this, __render, {raws, fag}, {element, attr: drAttr.drPre, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.drPre}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new Dr(this, __render, {raws, fag}, {element, attr: drAttr.dr, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.dr}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrIf(this, __render, {raws, fag}, {element, attr: drAttr.drIf, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.drIf}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrThis(this, __render, {raws, fag}, {element, attr: drAttr.drThis, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.drThis}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrForm(this, __render, {raws, fag}, {element, attr: drAttr.drForm, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.drForm}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrInnerText(this, __render, {raws, fag}, {element, attr: drAttr.drInnerText, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.drInnerText}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrInnerHTML(this, __render, {raws, fag}, {element, attr: drAttr.drInnerHTML, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.drInnerHTML}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrFor(this, __render, {raws, fag}, {element, attr: drAttr.drFor, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.drFor}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrForOf(this, __render, {raws, fag}, {element, attr: drAttr.drForOf, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.drForOf}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrAppender(this, __render, {raws, fag}, {element, attr: drAttr.drAppender, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.drAppender}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrRepeat(this, __render, {raws, fag}, {element, attr: drAttr.drRepeat, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.drRepeat}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new DrTargetElement(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new DrTargetAttr(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks})
                 ]
 
                 for (const operator of operators) {
-                    const state = operator.execRender();
+                    const state = operator.start();
                     if (state === ExecuteState.EXECUTE) {
                         break;
                     } else if (state === ExecuteState.STOP) {

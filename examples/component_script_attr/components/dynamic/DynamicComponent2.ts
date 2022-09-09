@@ -6,6 +6,7 @@ import {OnDestroyRender} from 'dom-render/lifecycle/OnDestroyRender';
 export class DynamicComponent2 implements OnProxyDomRender, OnDestroyRender {
     name = 'dynamic component222';
     age = '55222';
+    around = 'd2 Around'
     changeName() {
         this.name = RandomUtils.uuid();
     }

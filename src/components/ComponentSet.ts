@@ -1,5 +1,4 @@
 export class ComponentSet {
-    constructor(obj: any);
     constructor(public obj: any, public template?: string, public styles?: string[], public styleLocale = false) {
     }
 

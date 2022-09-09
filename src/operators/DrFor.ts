@@ -1,17 +1,23 @@
-import {ExecuteState, OperatorRender} from './OperatorRender';
+import { OperatorExecuterAttrRequire} from './OperatorExecuterAttrRequire';
 import {ScriptUtils} from '../utils/script/ScriptUtils';
 import {RawSet} from '../rawsets/RawSet';
+import {Render} from '../rawsets/Render';
+import {AfterCallBack, ElementSource, ExecuteState, ReturnContainer, Source} from './OperatorExecuter';
 
-export class DrFor extends OperatorRender {
-    execRender(): ExecuteState {
-        if (this.elementSource.attrs.drFor) {
-            const itRandom = RawSet.drItOtherEncoding(this.elementSource.element);
-            const vars = RawSet.drVarEncoding(this.elementSource.element, this.elementSource.attrs.drVarOption ?? '');
-            const newTemp = this.source.config.window.document.createElement('temp');
-            ScriptUtils.eval(`
+export class DrFor extends OperatorExecuterAttrRequire<string> {
+    constructor(rawSet: RawSet, render: Render, returnContainer: ReturnContainer, elementSource: ElementSource, source: Source, afterCallBack: AfterCallBack) {
+        source.operatorAround = undefined;
+        super(rawSet, render, returnContainer, elementSource, source, afterCallBack, false);
+    }
+
+    executeAttrRequire(attr: string): ExecuteState {
+        const itRandom = RawSet.drItOtherEncoding(this.elementSource.element);
+        const vars = RawSet.drVarEncoding(this.elementSource.element, this.elementSource.attrs.drVarOption ?? '');
+        const newTemp = this.source.config.window.document.createElement('temp');
+        ScriptUtils.eval(`
                     ${this.render.bindScript}
                     ${this.elementSource.attrs.drBeforeOption ?? ''}
-                    for(${this.elementSource.attrs.drFor}) {
+                    for(${attr}) {
                         const n = this.__render.element.cloneNode(true);
                         var destIt = ${this.elementSource.attrs.drItOption};
                         if (destIt !== undefined) {
@@ -26,22 +32,20 @@ export class DrFor extends OperatorRender {
                     }
                     ${this.elementSource.attrs.drAfterOption ?? ''}
                     `, Object.assign(this.source.obj, {
-                __render: Object.freeze({
-                    fag: newTemp,
-                    drStripOption: this.elementSource.attrs.drStripOption,
-                    ...this.render
-                })
-            }));
-            RawSet.drVarDecoding(newTemp, vars);
-            RawSet.drItOtherDecoding(newTemp, itRandom);
-            const tempalte = this.source.config.window.document.createElement('template');
-            tempalte.innerHTML = newTemp.innerHTML;
-            this.returnContainer.fag.append(tempalte.content)
-            const rr = RawSet.checkPointCreates(this.returnContainer.fag, this.source.obj, this.source.config)
-            this.elementSource.element.parentNode?.replaceChild(this.returnContainer.fag, this.elementSource.element);
-            this.returnContainer.raws.push(...rr)
-            return ExecuteState.EXECUTE;
-        }
-        return ExecuteState.NO_EXECUTE;
+            __render: Object.freeze({
+                fag: newTemp,
+                drStripOption: this.elementSource.attrs.drStripOption,
+                ...this.render
+            })
+        }));
+        RawSet.drVarDecoding(newTemp, vars);
+        RawSet.drItOtherDecoding(newTemp, itRandom);
+        const tempalte = this.source.config.window.document.createElement('template');
+        tempalte.innerHTML = newTemp.innerHTML;
+        this.returnContainer.fag.append(tempalte.content)
+        const rr = RawSet.checkPointCreates(this.returnContainer.fag, this.source.obj, this.source.config)
+        this.elementSource.element.parentNode?.replaceChild(this.returnContainer.fag, this.elementSource.element);
+        this.returnContainer.raws.push(...rr)
+        return ExecuteState.EXECUTE;
     }
 }

@@ -1,11 +1,16 @@
-import {ExecuteState, OperatorRender} from './OperatorRender';
 import {RawSet} from '../rawsets/RawSet';
 import {TargetAttr} from '../configs/TargetAttr';
+import {AfterCallBack, ElementSource, ExecuteState, OperatorExecuter, ReturnContainer, Source} from './OperatorExecuter';
+import {Render} from '../rawsets/Render';
 
-export class DrTargetAttr extends OperatorRender {
-    execRender(): ExecuteState {
+export class DrTargetAttr extends OperatorExecuter<void> {
+    constructor(rawSet: RawSet, render: Render, returnContainer: ReturnContainer, elementSource: ElementSource, source: Source, afterCallBack: AfterCallBack) {
+        source.operatorAround = undefined;
+        super(rawSet, render, returnContainer, elementSource, source, afterCallBack, false);
+    }
+
+    execute(): ExecuteState {
         const attributeNames = this.elementSource.element.getAttributeNames();
-        // const targetAttr = config?.targetAttrs?.find(it => (!drAttr.drForOf && !drAttr.drFor && !drAttr.drRepeat) && attributeNames.includes(it.name));
         const targetAttr: TargetAttr | undefined = this.source.config?.targetAttrs?.find(it => attributeNames.includes(it.name));
         if (targetAttr) {
             const attrName = targetAttr.name;

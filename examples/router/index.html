@@ -21,6 +21,7 @@
 </header>
 <hr>
 <main>
+    <page-main></page-main>
     <page-main dr-if="$router.test('/')"></page-main>
     <page-second dr-if="$router.test('/second')">1</page-second>
     <page-second dr-if="$router.testRegexp('/second/[0-9]?$')">2</page-second>
