@@ -7,7 +7,7 @@ DOM-RENDER
 
 # 🚀 Quick start 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.90/dist/bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.91/dist/bundle.js"></script>
 ```
 ```html
 <!DOCTYPE html>

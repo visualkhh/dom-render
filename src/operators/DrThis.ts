@@ -12,7 +12,7 @@ export class DrThis extends OperatorExecuterAttrRequire<string> {
                     RawSet.destroy((this.rawSet.data as ComponentSet).obj, [], this.source.config, destroyOptions);
                 }
                 this.rawSet.data = attr;
-                const componentBody = RawSet.drThisCreate(this.rawSet, this.elementSource.element, `${this.elementSource.attrs.drThis}.obj`, this.elementSource.attrs.drVarOption ?? '', this.elementSource.attrs.drStripOption, this.source.obj, this.source.config, attr);
+                const componentBody = RawSet.drThisCreate(this.rawSet, this.elementSource.element, `${this.elementSource.attrs.drThis}${attr.config.objPath ? ('.' + attr.config.objPath) : ''}`, this.elementSource.attrs.drVarOption ?? '', this.elementSource.attrs.drStripOption, this.source.obj, this.source.config, attr);
                 this.returnContainer.fag.append(componentBody)
                 this.afterCallBack.onThisComponentSetCallBacks.push(attr);
             } else {
