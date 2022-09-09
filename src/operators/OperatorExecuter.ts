@@ -47,7 +47,7 @@ export abstract class OperatorExecuter<T> {
 
         let r = attrValue;
         if (r && this.startingExecute) {
-            r = ScriptUtils.eval(` ${this.render.bindScript}; return ${attrValue}`, this.source.obj);
+            r = ScriptUtils.eval(` ${this.render.bindScript}; return ${attrValue}`, Object.assign(this.source.obj, {__render: this.render}));
         }
         if (this.source.operatorAround?.before) {
             r = this.source.operatorAround?.before(r, this.source.obj);
