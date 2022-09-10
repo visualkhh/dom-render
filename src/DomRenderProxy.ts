@@ -137,6 +137,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                             const render = (it.fragment as any).render as any;
                             // console.log('render-->', (it.fragment as any).render)
                             const script = `${render.renderScript} return ${v} `;
+                            // @ts-ignore
                             const cval = ScriptUtils.eval(script, Object.assign(this._domRender_proxy, {__render: render}));
                             it.data.onChangeAttrRender(k, cval);
                         }
