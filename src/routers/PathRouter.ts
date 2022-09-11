@@ -18,7 +18,7 @@ export class PathRouter extends Router {
     }
 
     set(path: string, data?: any, title: string = ''): void {
-        this.window.history.pushState(data, title, path);
+        super.pushState(data, title, path);
     }
 
     getUrl(): string {

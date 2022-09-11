@@ -20,7 +20,7 @@ export class HashRouter extends Router {
 
     set(path: string, data?: any, title: string = ''): void {
         path = '#' + path;
-        this.window.history.pushState(data, title, path);
+        super.pushState(data, title, path);
     }
 
     getUrl(): string {
