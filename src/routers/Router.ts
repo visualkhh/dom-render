@@ -70,6 +70,18 @@ export abstract class Router {
             this.set(path, urlExpressionOrData, dataOrTitle ?? '');
         }
         this.attach();
+        this.dispatchPopStateEvent();
+    }
+
+    pushState(data: any, title: string, path: string) {
+        this.window.history.pushState(data, title, path);
+    }
+    dispatchPopStateEvent() {
+        this.window.dispatchEvent(new Event('popstate'));
+    }
+
+    reload() {
+        this.window.dispatchEvent(new Event('popstate'));
     }
 
     abstract getSearchParams(): URLSearchParams;

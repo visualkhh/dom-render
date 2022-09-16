@@ -26,7 +26,7 @@ export type AfterCallBack = {
 }
 export type ReturnContainer = { raws: RawSet[], fag: DocumentFragment };
 
-export type ElementSource = { element: Element, attrs: Attrs, attr?: string | null };
+export type ElementSource = { element: Element, attrs: Attrs, attr?: string | null, attrName?: string | undefined };
 
 export type Source = { config: Config, operatorAround?: OperatorAround, obj: any};
 

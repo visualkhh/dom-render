@@ -410,6 +410,7 @@ export class EventManager {
 
     // eslint-disable-next-line no-undef
     public addDrEvents(obj: any, eventName: string, elements: Set<Element> | Set<ChildNode>, config?: Config) {
+        // console.log('-------?', config?.router)
         const attr = EventManager.attrPrefix + 'event-' + eventName
         this.procAttr<HTMLElement>(elements, attr, (it, attribute) => {
             const script = attribute;

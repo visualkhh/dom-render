@@ -46,6 +46,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                     // console.log('target-------->')
                     const filter = this.config.proxyExcludeTyps?.filter(it => target instanceof it) ?? []
                     if (filter.length === 0) {
+                        // console.log('--------', objProxy, target, it)
                         const proxyAfter = this.proxy(objProxy, target, it);
                         (obj as any)[it] = proxyAfter;
                     }
@@ -137,24 +138,14 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                             const render = (it.fragment as any).render as any;
                             // console.log('render-->', (it.fragment as any).render)
                             const script = `${render.renderScript} return ${v} `;
-                            const cval = ScriptUtils.eval(script, Object.assign(this._domRender_proxy, {__render: render}));
+                            const cval = ScriptUtils.eval(script, Object.assign(this._domRender_proxy ?? {}, {__render: render}));
                             it.data.onChangeAttrRender(k, cval);
                         }
                         // console.log('---?', v, fullPathStr, isUsing);
                     });
                     // ------------------->
                 } else {
-                    // console.log('---rawSets->', it)
                     const rawSets = it.render(this._domRender_proxy, this.config);
-                    // console.log('---rawSets->', rawSets)
-                    // 대상 attribute 있으면
-                    // const targetAttrs = (it.point.node as Element).getAttribute(EventManager.normalAttrMapAttrName);
-                    // if (it?.data.onChangeAttrRender && it.type === RawSetType.TARGET_ELEMENT && targetAttrs) {
-                    //     new Map<string, string>(JSON.parse(targetAttrs)).forEach((v, k) => {
-                    //         it?.data.onChangeAttrRender(k, null, v);
-                    //     });
-                    // }
-
                     // 그외 자식들 render
                     if (rawSets && rawSets.length > 0) {
                         this.render(rawSets);
@@ -162,7 +153,6 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                 }
             } else {
                 removeRawSets.push(it);
-                // this.removeRawSet(it)
             }
         });
 
