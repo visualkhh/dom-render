@@ -39,7 +39,7 @@ export abstract class OperatorExecuter<T = any> {
                 public startingExecute = true) {
     };
 
-    start(): ExecuteState {
+    async start(): Promise<ExecuteState> {
         let attrValue = this.elementSource.attr;
         if (this.source.operatorAround?.beforeAttr) {
             attrValue = this.source.operatorAround.beforeAttr(attrValue, this) ?? '';
@@ -53,11 +53,11 @@ export abstract class OperatorExecuter<T = any> {
             r = this.source.operatorAround?.before(r, this);
         }
 
-        const state = this.execute(r as unknown as T)
+        const state = await this.execute(r as unknown as T)
 
         this.source.operatorAround?.after?.(r, this);
         return state;
     };
-    
-    abstract execute(value: T): ExecuteState;
+
+    abstract execute(value: T): Promise<ExecuteState>;
 }

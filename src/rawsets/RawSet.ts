@@ -146,7 +146,7 @@ export class RawSet {
     }
 
     // 중요 render 처리 부분
-    public render(obj: any, config: Config): RawSet[] {
+    public async render(obj: any, config: Config): Promise<RawSet[]> {
         const genNode = config.window.document.importNode(this.fragment, true);
         const raws: RawSet[] = [];
         const onAttrInitCallBacks: AttrInitCallBack[] = [];
@@ -243,7 +243,7 @@ export class RawSet {
                 ]
 
                 for (const operator of operators) {
-                    const state = operator.start();
+                    const state = await operator.start();
                     if (state === ExecuteState.EXECUTE) {
                         break;
                     } else if (state === ExecuteState.STOP) {
@@ -678,17 +678,21 @@ export class RawSet {
         });
     }
 
-    public static drThisCreate(rawSet: RawSet, element: Element, drThis: string, drVarOption: string, drStripOption: boolean | string | null, obj: any, config: Config, set?: ComponentSet) {
+    public static async drThisCreate(rawSet: RawSet, element: Element, drThis: string, drVarOption: string, drStripOption: boolean | string | null, obj: any, config: Config, set?: ComponentSet): Promise<DocumentFragment> {
         const fag = config.window.document.createDocumentFragment();
         const n = element.cloneNode(true) as Element;
-        // console.log('--------',n, n.innerHTML)
         if (set) {
             // const id = RandomUtils.getRandomString(20);
+            const stylePromises: Promise<string>[] = [];
+            const templatePromise = (set.template && set.template.startsWith('lazy://') ? (await fetch(set.template.substring(6))).text() : Promise.resolve(set.template));
+            for (let i = 0; set.styles && i < (set.styles.length ?? 0); i++) {
+                const it = set.styles[i];
+                stylePromises.push(it.startsWith('lazy://') ? (await fetch(it.substring(6))).text() : Promise.resolve(it))
+            }
+            set.template = await templatePromise;
+            set.styles = await Promise.all(stylePromises);
             const style = RawSet.generateStyleTransform(set.styles ?? [], rawSet.uuid, true);
             n.innerHTML = style + (set.template ?? '');
-            // const metaStart = RawSet.metaStart(id);
-            // const metaEnd = RawSet.metaEnd(id);
-            // n.innerHTML = metaStart + style + (set.template ?? '') + metaEnd;
             // dr-on-create onCreateRender
             const onCreate = element.getAttribute(RawSet.DR_ON_CREATE_ARGUMENTS_OPTIONNAME);
             const renderScript = '';
@@ -756,7 +760,21 @@ export class RawSet {
             name,
             styles,
             template,
-            callBack(element: Element, obj: any, rawSet: RawSet, attrs: Attrs, config: Config): DocumentFragment {
+            async callBack(element: Element, obj: any, rawSet: RawSet, attrs: Attrs, config: Config): Promise<DocumentFragment> {
+                // console.log('targetsub--', this.styles)
+                const stylePromises: Promise<string>[] = [];
+                const templatePromise = (this.template && this.template.startsWith('lazy://') ? (await fetch(this.template.substring(6))).text() : Promise.resolve(this.template));
+                for (let i = 0; this.styles && i < this.styles.length; i++) {
+                    const it = this.styles[i];
+                    stylePromises.push(it.startsWith('lazy://') ? (await fetch(it.substring(6))).text() : Promise.resolve(it))
+                }
+                // const templateResponse = await templatePromise;
+                // const styleResponses = await Promise.all(stylePromises);
+                this.template = await templatePromise;
+                this.styles = await Promise.all(stylePromises);
+                // console.log('targetsub-22-', this.styles)
+                // console.log('targetsub-222-', this.template, this.styles)
+                // Promise.all(promises).then([])
                 // console.log('callback------->', element)
                 if (!obj.__domrender_components) {
                     obj.__domrender_components = {};
@@ -847,7 +865,8 @@ export class RawSet {
                     // }
                     applayTemplate = applayTemplate.replace(RegExp(`#${componentName}#`, 'g'), 'this');
                 }
-                applayTemplate = template.replace(RegExp(`#${innerHTMLName}#`, 'g'), applayTemplate);
+                // applayTemplate = template.replace(RegExp(`#${innerHTMLName}#`, 'g'), applayTemplate);
+                applayTemplate = (this.template ?? '').replace(RegExp(`#${innerHTMLName}#`, 'g'), applayTemplate);
                 // dr-on-component-init
                 // const oninit = element.getAttribute(`${EventManager.attrPrefix}on-component-init`); // dr-on-component-init
                 const oninit = element.getAttribute(RawSet.DR_ON_CREATED_CALLBACK_OPTIONNAME); // dr-on-component-init
@@ -858,13 +877,13 @@ export class RawSet {
                     }))
                 }
 
-                const style = RawSet.generateStyleTransform(styles, componentKey, true);
+                const style = RawSet.generateStyleTransform(this.styles, componentKey, true);
                 element.innerHTML = style + (applayTemplate ?? '');
                 // const metaStart = RawSet.metaStart(componentKey);
                 // const metaEnd = RawSet.metaEnd(componentKey);
                 // element.innerHTML = metaStart + style + (applayTemplate ?? '') + metaEnd;
                 // console.log('------>', element.innerHTML, obj)
-                let data = RawSet.drThisCreate(rawSet, element, `this.__domrender_components.${componentKey}`, '', true, obj, config);
+                let data = await RawSet.drThisCreate(rawSet, element, `this.__domrender_components.${componentKey}`, '', true, obj, config);
 
                 // 넘어온 innerHTML에 this가 있는걸 다시 복호화해서 제대로 작동하도록한다.
                 if (innerHTMLThisRandom) {
@@ -877,7 +896,7 @@ export class RawSet {
                 return data;
             }
             // complete
-        }
+        };
         return targetElement;
     }
 

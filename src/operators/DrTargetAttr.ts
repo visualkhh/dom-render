@@ -9,7 +9,7 @@ export class DrTargetAttr extends OperatorExecuter<void> {
         super(rawSet, render, returnContainer, elementSource, source, afterCallBack, false);
     }
 
-    execute(): ExecuteState {
+    async execute(): Promise<ExecuteState> {
         const attributeNames = this.elementSource.element.getAttributeNames();
         const targetAttr: TargetAttr | undefined = this.source.config?.targetAttrs?.find(it => attributeNames.includes(it.name));
         if (targetAttr) {

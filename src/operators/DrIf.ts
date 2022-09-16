@@ -10,7 +10,7 @@ export class DrIf extends OperatorExecuterAttrRequire<string> {
         super(rawSet, render, returnContainer, elementSource, source, afterCallBack, false);
     }
 
-    executeAttrRequire(attr: string): ExecuteState {
+    async executeAttrRequire(attr: string): Promise<ExecuteState> {
         const itRandom = RawSet.drItOtherEncoding(this.elementSource.element);
         const vars = RawSet.drVarEncoding(this.elementSource.element, this.elementSource.attrs.drVarOption ?? '');
         const newTemp = this.source.config.window.document.createElement('temp');

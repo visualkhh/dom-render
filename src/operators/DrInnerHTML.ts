@@ -9,7 +9,7 @@ export class DrInnerHTML extends OperatorExecuterAttrRequire<string> {
         super(rawSet, render, returnContainer, elementSource, source, afterCallBack, false);
     }
 
-    executeAttrRequire(attr: string): ExecuteState {
+    async executeAttrRequire(attr: string): Promise<ExecuteState> {
         const newTemp = this.source.config.window.document.createElement('temp');
         ScriptUtils.eval(`
                         ${this.render.bindScript}

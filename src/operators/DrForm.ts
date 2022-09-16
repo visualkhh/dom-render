@@ -12,7 +12,7 @@ export class DrForm extends OperatorExecuterAttrRequire<string> {
         super(rawSet, render, returnContainer, elementSource, source, afterCallBack, false);
     }
 
-    executeAttrRequire(attr: string): ExecuteState {
+    async executeAttrRequire(attr: string): Promise<ExecuteState> {
         RawSet.drFormOtherMoveAttr(this.elementSource.element, 'name', 'temp-name', this.source.config);
         const data = ScriptUtils.evalReturn(`${attr}`, this.source.obj);
 

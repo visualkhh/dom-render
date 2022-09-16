@@ -633,7 +633,7 @@ const data = config.scripts.concat('head', 'tail')
 ---
 # Component, Attribute, AttributeCallBack
 # 😃 examples
-- [examples](./examples/component_script_attr)
+- [examples](./examples/component_script_attr) lazy load (html, css)
 ```html
 <body id="app">
 ${this.name}$
@@ -677,7 +677,7 @@ link attribute
 ```
 ```typescript
 config.targetElements = [
-  DomRender.createComponent({type: Profile, template: ProfileTemplate}),
+  DomRender.createComponent({type: Profile, template: ProfileTemplate}),  // lazy loading format 'lazy://component/home.html'
   DomRender.createComponent({type: Home, template: HomeTemplate, styles: HomeStyle})
 ]
 
@@ -723,6 +723,18 @@ using component
     ${#sub_component#.homeName}$
   </home>
 </home>
+```
+lazy loading rollup config
+```javascript
+    copy({
+            targets: [
+                {
+                    src: ['**/*.html', '**/*.css', '!node_modules/**/*.html', '!node_modules/**/*.css'], dest: 'dist',
+                    rename: (name, extension, fullPath) => `${fullPath}`
+                },
+                { src: 'assets', dest: 'dist' }
+            ]
+        })
 ```
 - attribute
   - dr-on-create:callback: component created init callback script

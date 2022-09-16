@@ -112,7 +112,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     // 중요 important
-    public render(raws?: RawSet[] | string, fullPathStr?: string) {
+    public async render(raws?: RawSet[] | string, fullPathStr?: string) {
         if (typeof raws === 'string') {
             const iter = this._rawSets.get(raws);
             if (iter) {
@@ -122,9 +122,10 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             }
         }
         const removeRawSets: RawSet[] = [];
-        (raws ?? this.getRawSets()).forEach(it => {
+        const rawSets = raws ?? this.getRawSets();
+
+        for (const it of rawSets) {
             it.getUsingTriggerVariables(this.config).forEach(path => this.addRawSet(path, it))
-            // console.log('------->', it, it.isConnected);
             if (it.isConnected) {
                 // 중요 render될때 targetAttribute 체크 해야함.
                 const targetAttrMap = (it.point.node as Element)?.getAttribute?.(EventManager.normalAttrMapAttrName);
@@ -145,7 +146,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                     });
                     // ------------------->
                 } else {
-                    const rawSets = it.render(this._domRender_proxy, this.config);
+                    const rawSets = await it.render(this._domRender_proxy, this.config);
                     // 그외 자식들 render
                     if (rawSets && rawSets.length > 0) {
                         this.render(rawSets);
@@ -154,7 +155,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             } else {
                 removeRawSets.push(it);
             }
-        });
+        }
 
         if (removeRawSets.length > 0) {
             this.removeRawSet(...removeRawSets)

@@ -15,6 +15,11 @@ ${this.name}$
         <b>${this.name}$</b>
     </profile>
 </profile>
+<hr>
+<h3>toggle profile</h3>
+<profile dr-if="this.toggle_profile" dr-on-create:callback="$component.name='toggle'; $component.age=56;"><b>detail-2</b></profile>
+<button dr-event-click="this.toggleProfile()"> toggle profile </button>
+
 <h3>component data link and detect</h3>
 <Profile dr-if="this.toggle" dr-detect="$component.age = this.age" dr-on-create:callback="$component.name='papa'; $component.age=58;" dr-destroy="NO_DESTROY">
     <b>${this.name}$</b>

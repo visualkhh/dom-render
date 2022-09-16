@@ -24,7 +24,10 @@ export default {
         json(),
         copy({
             targets: [
-                { src: 'index.html', dest: 'dist' },
+                {
+                    src: ['**/*.html', '**/*.css', '!node_modules/**/*.html', '!node_modules/**/*.css'], dest: 'dist',
+                    rename: (name, extension, fullPath) => `${fullPath}`
+                },
                 { src: 'assets', dest: 'dist' }
             ]
         }),

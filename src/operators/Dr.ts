@@ -9,7 +9,7 @@ export class Dr extends OperatorExecuterAttrRequire<null> {
         super(rawSet, render, returnContainer, elementSource, source, afterCallBack);
     }
 
-    executeAttrRequire(data: null): ExecuteState {
+    async executeAttrRequire(data: null): Promise<ExecuteState> {
         const itRandom = RawSet.drItOtherEncoding(this.elementSource.element);
         const vars = RawSet.drVarEncoding(this.elementSource.element, this.elementSource.attrs.drVarOption ?? '');
         const newTemp = this.source.config.window.document.createElement('temp');

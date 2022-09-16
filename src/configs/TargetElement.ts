@@ -8,7 +8,7 @@ export type TargetElement = {
     name: string;
     template?: string;
     styles?: string[];
-    callBack: (target: Element, obj: any, rawSet: RawSet, attrs: Attrs, config: Config) => DocumentFragment;
+    callBack: (target: Element, obj: any, rawSet: RawSet, attrs: Attrs, config: Config) => Promise<DocumentFragment>;
     complete?: (target: Element, obj: any, rawSet: RawSet) => void;
     __render?: Render;
     __creatorMetaData?: CreatorMetaData;

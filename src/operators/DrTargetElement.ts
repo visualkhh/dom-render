@@ -10,10 +10,13 @@ export class DrTargetElement extends OperatorExecuter<void> {
         super(rawSet, render, returnContainer, elementSource, source, afterCallBack, false);
     }
 
-    execute(): ExecuteState {
+    async execute(): Promise<ExecuteState> {
         const targetElement = this.source.config?.targetElements?.find(it => it.name.toLowerCase() === this.elementSource.element.tagName.toLowerCase());
         if (targetElement) {
-            const documentFragment = targetElement.callBack(this.elementSource.element, this.source.obj, this.rawSet, this.elementSource.attrs, this.source.config);
+            // const data = await new Promise((resolve, reject) => {
+            //     setTimeout(() => resolve(0), 5000);
+            // })
+            const documentFragment = await targetElement.callBack(this.elementSource.element, this.source.obj, this.rawSet, this.elementSource.attrs, this.source.config);
             if (documentFragment) {
                 const detectAction = this.elementSource.element.getAttribute(RawSet.DR_DETECT_NAME);
                 const render = (documentFragment as any).render;

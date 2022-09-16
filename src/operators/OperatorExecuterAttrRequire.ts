@@ -12,12 +12,12 @@ export abstract class OperatorExecuterAttrRequire<T> extends OperatorExecuter<T>
         super(rawSet, render, returnContainer, elementSource, source, afterCallBack, startingExecute);
     };
 
-    execute(data: T): ExecuteState {
+    async execute(data: T): Promise<ExecuteState> {
         if (!this.elementSource.attr) {
             return ExecuteState.NO_EXECUTE;
         }
-        return this.executeAttrRequire(data);
+        return await this.executeAttrRequire(data);
     }
 
-    protected abstract executeAttrRequire(attr: T): ExecuteState;
+    protected abstract executeAttrRequire(attr: T): Promise<ExecuteState>;
 }

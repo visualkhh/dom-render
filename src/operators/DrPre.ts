@@ -8,7 +8,7 @@ export class DrPre extends OperatorExecuter<null> {
         super(rawSet, render, returnContainer, elementSource, source, afterCallBack);
     }
 
-    execute(value: null): ExecuteState {
+    async execute(value: null): Promise<ExecuteState> {
         return (value != null) ? ExecuteState.EXECUTE : ExecuteState.NO_EXECUTE;
     }
 }
