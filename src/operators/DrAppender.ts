@@ -11,7 +11,6 @@ export class DrAppender extends OperatorExecuterAttrRequire<string> {
     }
 
     executeAttrRequire(attr: string): ExecuteState {
-        console.log('appender-->', attr)
         const itRandom = RawSet.drItOtherEncoding(this.elementSource.element);
         const vars = RawSet.drVarEncoding(this.elementSource.element, this.elementSource.attrs.drVarOption ?? '');
         const newTemp = this.source.config.window.document.createElement('temp');

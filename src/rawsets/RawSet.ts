@@ -699,6 +699,7 @@ export class RawSet {
                     createParam = [createParam];
                 }
             }
+
             set.obj?.onCreateRender?.(...createParam);
 
             // dr-on-component-init

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>dom-render</title>
+    <script src="https://cdn.jsdelivr.net/npm/dom-render@1.0.87/dist/bundle.js"></script>
+</head>
+<body id="app">
+<div>${name}</div>
+<script>
+    // 1
+    // setTimeout(() => {
+    //     document.querySelector("#wow").innerHTML='빵꾸똥꾸';
+    // }, 6000)
+    // class = data  < = > view  -> binding
+
+    let data = {
+        name: 'my name is dom-render',
+        color: '#ff0000'
+    };
+
+    // data = DomRender.run(data, document.querySelector('#app'), {
+    //     targetElements: [
+    //         DomRender.createComponent({
+    //             type: User,
+    //             template: `<span>user<div>ss</div></span>`,
+    //             styles: `div {color: red}`
+    //         })
+    //     ]
+    // });
+</script>
+</body>
+</html>

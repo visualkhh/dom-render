@@ -58,6 +58,6 @@ export abstract class OperatorExecuter<T = any> {
         this.source.operatorAround?.after?.(r, this);
         return state;
     };
-
+    
     abstract execute(value: T): ExecuteState;
 }
