@@ -761,7 +761,6 @@ export class RawSet {
             styles,
             template,
             async callBack(element: Element, obj: any, rawSet: RawSet, attrs: Attrs, config: Config): Promise<DocumentFragment> {
-                // console.log('targetsub--', this.styles)
                 const stylePromises: Promise<string>[] = [];
                 const templatePromise = (this.template && this.template.startsWith('lazy://') ? (await fetch(this.template.substring(6))).text() : Promise.resolve(this.template));
                 for (let i = 0; this.styles && i < this.styles.length; i++) {

@@ -61,7 +61,7 @@ export default {
         // }),
         replace({
             preventAssignment: true,
-            "exports.": "window.",
+            'exports.': 'window.',
             delimiters: ['\n', '\n']
         }),
         // replace({
