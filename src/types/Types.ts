@@ -20,7 +20,7 @@ export class DomRenderFinalProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public static isFinal<T = any> (obj: T) {
-        return '_DomRender_isFinal' in obj;
+        return '_DomRender_isFinal' in (obj as any);
     }
 
     public static unFinal<T = any> (obj: T): T {
