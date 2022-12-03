@@ -5,6 +5,7 @@ import {HashRouter} from './routers/HashRouter';
 import {ConstructorType, DomRenderFinalProxy} from './types/Types';
 import {RawSet} from './rawsets/RawSet';
 import {DefaultMessenger} from './messenger/DefaultMessenger';
+import {eventManager} from './events/EventManager';
 
 export class DomRender {
     public static run<T extends object>(obj: T, target?: Node | null, oConfig?: Omit<Config, 'window'>): T {

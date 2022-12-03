@@ -61,7 +61,6 @@ export class EventManager {
         const ${EventManager.TARGET_VARNAME} = this.__render.target;
         const ${EventManager.EVENT_VARNAME} = this.__render.event;
     `
-
     constructor() {
         this.eventNames.forEach(it => {
             this.attrNames.push(EventManager.attrPrefix + 'event-' + it);
@@ -82,7 +81,8 @@ export class EventManager {
                                     element: it,
                                     event: event,
                                     range: Range.range,
-                                    scripts: EventManager.setBindProperty(config?.scripts, obj)
+                                    scripts: EventManager.setBindProperty(config?.scripts, obj),
+                                    // ...EventManager.eventVariables
                                 })
                             }))
                         }
@@ -174,43 +174,30 @@ export class EventManager {
                 if (typeof getValue === 'function' && getValue) {
                     let setValue = it.value;
                     if (mapScript) {
-                        setValue = ScriptUtils.eval(`${this.bindScript} return ${mapScript}`, Object.assign(bindObj, {__render: Object.freeze({element: it, target: bindObj, range: Range.range, value: setValue, scripts: EventManager.setBindProperty(config?.scripts, obj)})}));
+                        setValue = ScriptUtils.eval(`${this.getBindScript(config)} return ${mapScript}`, Object.assign(bindObj, {__render: Object.freeze({element: it, target: bindObj, range: Range.range, value: setValue, scripts: EventManager.setBindProperty(config?.scripts, obj), ...config?.eventVariables})}));
                     }
                     getValue(setValue)
                     // 여기서 value가 먼저냐 value-link가 먼저냐 선을 정해야되는거네...
                 } else if (getValue) {
                     let setValue = getValue;
                     if (mapScript) {
-                        setValue = ScriptUtils.eval(`${this.bindScript} return ${mapScript}`, Object.assign(bindObj, {__render: Object.freeze({element: it, target: bindObj, range: Range.range, value: setValue, scripts: EventManager.setBindProperty(config?.scripts, obj)})}));
+                        setValue = ScriptUtils.eval(`${this.getBindScript(config)} return ${mapScript}`, Object.assign(bindObj, {__render: Object.freeze({element: it, target: bindObj, range: Range.range, value: setValue, scripts: EventManager.setBindProperty(config?.scripts, obj), ...config?.eventVariables})}));
                     }
                     it.value = setValue;
-                    // this.setValue(obj, varName, setValue)
                 }
-                // } else if (getValue) { // 이구분이 있어야되나?? 없어도될것같은데..
-                //     let setValue = getValue;
-                //     if (inMapScript) {
-                //         setValue = ScriptUtils.eval(`${this.bindScript} return ${inMapScript}`, Object.assign(bindObj, {__render: Object.freeze({element: it, target: bindObj, range: Range.range, value: setValue,  scripts: EventManager.setBindProperty(config?.scripts, obj)})}));
-                //     }
-                //     this.setValue(obj, varName, setValue)
-                // } else {
-                //     let setValue = it.value;
-                //     if (mapScript) {
-                //         setValue = ScriptUtils.eval(`${this.bindScript} return ${mapScript}`, Object.assign(bindObj, {__render: Object.freeze({element: it, target: bindObj, range: Range.range, value: setValue,  scripts: EventManager.setBindProperty(config?.scripts, obj)})}));
-                //     }
-                //     this.setValue(obj, varName, setValue)
-                // }
 
                 it.addEventListener('input', (event) => {
                     let value = it.value;
                     if (mapScript) {
-                        value = ScriptUtils.eval(`${this.bindScript} return ${mapScript}`, Object.assign(bindObj, {
+                        value = ScriptUtils.eval(`${this.getBindScript(config)} return ${mapScript}`, Object.assign(bindObj, {
                             __render: Object.freeze({
                                 event,
                                 element: it,
                                 attribute: DomUtils.getAttributeToObject(it),
                                 target: event.target,
                                 range: Range.range,
-                                scripts: EventManager.setBindProperty(config?.scripts, obj)
+                                scripts: EventManager.setBindProperty(config?.scripts, obj),
+                                ...config?.eventVariables
                             })
                         }));
                     }
@@ -230,10 +217,11 @@ export class EventManager {
                 script = 'return ' + script;
             }
             if (script) {
-                ScriptUtils.eval(`${this.bindScript}; ${script} `, Object.assign(obj, {
+                ScriptUtils.eval(`${this.getBindScript(config)}; ${script} `, Object.assign(obj, {
                     __render: Object.freeze({
                         element: it,
-                        attribute: DomUtils.getAttributeToObject(it)
+                        attribute: DomUtils.getAttributeToObject(it),
+                        ...config?.eventVariables
                     })
                 }))
                 // console.log('onInit--->', obj, varName, it)
@@ -269,13 +257,13 @@ export class EventManager {
                 if (typeof getValue === 'function' && getValue) {
                     let setValue = it.value;
                     if (mapScript) {
-                        setValue = ScriptUtils.eval(`${this.bindScript} return ${mapScript}`, Object.assign(bindObj, {__render: Object.freeze({element: it, target: bindObj, range: Range.range, value: setValue, scripts: EventManager.setBindProperty(config?.scripts, obj)})}));
+                        setValue = ScriptUtils.eval(`${this.getBindScript(config)} return ${mapScript}`, Object.assign(bindObj, {__render: Object.freeze({element: it, target: bindObj, range: Range.range, value: setValue, scripts: EventManager.setBindProperty(config?.scripts, obj), ...config?.eventVariables})}));
                     }
                     getValue(setValue);
                 } else { //  if (getValue !== undefined && getValue !== null)
                     let setValue = getValue;
                     if (mapScript) {
-                        setValue = ScriptUtils.eval(`${this.bindScript} return ${mapScript}`, Object.assign(bindObj, {__render: Object.freeze({element: it, target: bindObj, range: Range.range, value: setValue, scripts: EventManager.setBindProperty(config?.scripts, obj)})}));
+                        setValue = ScriptUtils.eval(`${this.getBindScript(config)} return ${mapScript}`, Object.assign(bindObj, {__render: Object.freeze({element: it, target: bindObj, range: Range.range, value: setValue, scripts: EventManager.setBindProperty(config?.scripts, obj), ...config?.eventVariables})}));
                     }
                     it.value = setValue;
                 }
@@ -425,14 +413,15 @@ export class EventManager {
                         range: Range.range,
                         attribute: DomUtils.getAttributeToObject(it),
                         router: config?.router,
-                        scripts: EventManager.setBindProperty(config?.scripts, obj)
+                        scripts: EventManager.setBindProperty(config?.scripts, obj),
+                        ...config?.eventVariables
                     })
                 });
                 if (filterScript) {
-                    filter = ScriptUtils.eval(`${this.bindScript} return ${filterScript}`, thisTarget)
+                    filter = ScriptUtils.eval(`${this.getBindScript(config)} return ${filterScript}`, thisTarget)
                 }
                 if (filter) {
-                    ScriptUtils.eval(`${this.bindScript} ${script} `, thisTarget)
+                    ScriptUtils.eval(`${this.getBindScript(config)} ${script} `, thisTarget)
                 }
             });
         })
@@ -451,7 +440,7 @@ export class EventManager {
                 });
                 bind.split(',').forEach(eventName => {
                     it.addEventListener(eventName.trim(), (event) => {
-                        ScriptUtils.eval(`const $params = this.__render.params; ${this.bindScript}  ${script} `, Object.assign(obj, {
+                        ScriptUtils.eval(`const $params = this.__render.params; ${this.getBindScript(config)}  ${script} `, Object.assign(obj, {
                             __render: Object.freeze({
                                 event,
                                 element: it,
@@ -459,7 +448,8 @@ export class EventManager {
                                 target: event.target,
                                 range: Range.range,
                                 scripts: EventManager.setBindProperty(config?.scripts, obj),
-                                params
+                                params,
+                                ...config?.eventVariables
                             })
                         }))
                     })
@@ -541,6 +531,16 @@ export class EventManager {
         }
     }
 
+    getBindScript(config?: Config) {
+        if (config?.eventVariables) {
+            const bindScript = Object.entries(config.eventVariables).filter(([key, value]) => !this.bindScript.includes(`const ${key}`)).map(([key, value]) => {
+                return `const ${key} = this.__render.${key};`
+            }).join(';');
+            return this.bindScript + '' +bindScript;
+        } else {
+            return this.bindScript
+        }
+    }
     // public usingThisVar(raws: string): string[] {
     //     let regex = /include\(.*\)/gm;
     //     // raws = raws.replace(regex, '');

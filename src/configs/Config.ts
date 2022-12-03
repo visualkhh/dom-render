@@ -21,5 +21,6 @@ export type Config = {
     routerType?: 'hash' | 'path' | 'none';
     router?: Router;
     messenger?: Messenger;
+    eventVariables?: { [n: string]: any };
     applyEvents?: { attrName: string, callBack: (elements: Element, attrValue: string, obj: any) => void }[];
 }
