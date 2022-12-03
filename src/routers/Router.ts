@@ -76,6 +76,7 @@ export abstract class Router {
     pushState(data: any, title: string, path: string) {
         this.window.history.pushState(data, title, path);
     }
+
     dispatchPopStateEvent() {
         this.window.dispatchEvent(new Event('popstate'));
     }
