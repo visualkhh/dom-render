@@ -186,27 +186,29 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             const fullPathStr = strings.map(it => isNaN(Number(it)) ? '.' + it : `[${it}]`).join('').slice(1);
             if (lastDoneExecute) {
                 const iterable = this._rawSets.get(fullPathStr);
-                // console.log('----->', iterable);
                 // array check
                 const front = strings.slice(0, strings.length - 1).map(it => isNaN(Number(it)) ? '.' + it : `[${it}]`).join('');
                 const last = strings[strings.length - 1];
                 const data = ScriptUtils.evalReturn('this' + front, this._domRender_proxy);
-                if (last === 'length' && Array.isArray(data)) {
-                    const aIterable = this._rawSets.get(front.slice(1));
-                    if (aIterable) {
-                        this.render(Array.from(aIterable));
+                new Promise<void>(resolve => {
+                    if (last === 'length' && Array.isArray(data)) {
+                        const aIterable = this._rawSets.get(front.slice(1));
+                        if (aIterable) {
+                            return this.render(Array.from(aIterable));
+                        }
+                    } else if (iterable) {
+                        return this.render(Array.from(iterable), fullPathStr);
                     }
-                } else if (iterable) {
-                    this.render(Array.from(iterable), fullPathStr);
-                }
-                this._targets.forEach(it => {
-                    // console.log('target------->,', it)
-                    // return;
-                    if (it.nodeType === Node.DOCUMENT_FRAGMENT_NODE || it.nodeType === Node.ELEMENT_NODE) {
-                        const targets = eventManager.findAttrElements((it as DocumentFragment | Element), this.config);
-                        // console.log('------>', targets);
-                        eventManager.changeVar(this._domRender_proxy, targets, `this.${fullPathStr}`, this.config)
-                    }
+                }).then(it => {
+                    this._targets.forEach(it => {
+                        // console.log('target------->,', it)
+                        // return;
+                        if (it.nodeType === Node.DOCUMENT_FRAGMENT_NODE || it.nodeType === Node.ELEMENT_NODE) {
+                            const targets = eventManager.findAttrElements((it as DocumentFragment | Element), this.config);
+                            // console.log('------>', targets);
+                            eventManager.changeVar(this._domRender_proxy, targets, `this.${fullPathStr}`, this.config)
+                        }
+                    })
                 })
             }
             fullPaths.push(fullPathStr);
