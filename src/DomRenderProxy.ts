@@ -149,7 +149,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                     const rawSets = await it.render(this._domRender_proxy, this.config);
                     // 그외 자식들 render
                     if (rawSets && rawSets.length > 0) {
-                        this.render(rawSets);
+                        await this.render(rawSets);
                     }
                 }
             } else {
