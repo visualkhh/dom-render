@@ -3,9 +3,7 @@ import {EventManager, eventManager} from './events/EventManager';
 import {Config} from './configs/Config';
 import {ScriptUtils} from './utils/script/ScriptUtils';
 import {DomRenderFinalProxy, Shield} from './types/Types';
-import {CreatorMetaData} from './rawsets/CreatorMetaData';
 import {RawSetType} from './rawsets/RawSetType';
-import {Render} from './rawsets/Render';
 
 const excludeGetSetPropertys = ['onBeforeReturnGet', 'onBeforeReturnSet', '__domrender_components', '__render', '_DomRender_isFinal', '_domRender_ref', '_rawSets', '_domRender_proxy', '_targets', '_DomRender_origin', '_DomRender_ref', '_DomRender_proxy'];
 export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
@@ -85,22 +83,23 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                 })
             }
         })
-        this.render(this.getRawSets());
-        // const render = {target} as Render;
-        // const creatorMetaData = {
-        //     creator: this._domRender_proxy,
-        //     rootCreator: this._domRender_proxy,
-        //     innerHTML
-        // } as CreatorMetaData;
-        const onInit = (target as any).getAttribute?.(RawSet.DR_ON_INIT_ARGUMENTS_OPTIONNAME);
-        let initParam: any[] = [];
-        if (onCreate) {
-            initParam = ScriptUtils.evalReturn(onCreate, this._domRender_proxy);
-            if (!Array.isArray(initParam)) {
-                initParam = [initParam];
+        this.render(this.getRawSets()).then(it => {
+            // const render = {target} as Render;
+            // const creatorMetaData = {
+            //     creator: this._domRender_proxy,
+            //     rootCreator: this._domRender_proxy,
+            //     innerHTML
+            // } as CreatorMetaData;
+            const onInit = (target as any).getAttribute?.(RawSet.DR_ON_INIT_ARGUMENTS_OPTIONNAME);
+            let initParam: any[] = [];
+            if (onCreate) {
+                initParam = ScriptUtils.evalReturn(onCreate, this._domRender_proxy);
+                if (!Array.isArray(initParam)) {
+                    initParam = [initParam];
+                }
             }
-        }
-        (this._domRender_proxy as any)?.onInitRender?.(...initParam);
+            (this._domRender_proxy as any)?.onInitRender?.(...initParam);
+        });
     }
 
     public getRawSets() {
