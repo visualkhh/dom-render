@@ -36,7 +36,7 @@ export class Appender<T = any> implements Iterable<T> {
     }
 
     push(...items: T[]): void {
-        // console.log('----2>', this.length)
+        // console.log('----2>', items, this.length);
         (items as any).index = this.length;
         this[this.length++] = items;
         // console.log('---22->', this.length)
@@ -44,6 +44,15 @@ export class Appender<T = any> implements Iterable<T> {
         // appender.values = items;
         // this.childs.push(new Appender(appender.index + 1));
     }
+
+    // delete(idx: number): void {
+    //     // if (idx in this) {
+    //     //     console.log('---------dele',idx)
+    //     //     delete this[idx];
+    //     //     this.length = this.length - 1;
+    //     // }
+    //     this.length = this.length - 1;
+    // }
 
     clear(): void {
         // console.log('length', this.length);

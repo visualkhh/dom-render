@@ -4,6 +4,7 @@ export type Attrs = {
     drAppender: string | null;
     drFor: string | null;
     drForOf: string | null;
+    drDictionary: string | null;
     drRepeat: string | null;
     drThis: string | null;
     drForm: string | null;
@@ -18,4 +19,5 @@ export type Attrs = {
     drCompleteOption: string | null;
     drStripOption: string | null;
     drDestroyOption: string | null;
+    drDictionaryOption: string | null;
 }

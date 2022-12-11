@@ -4,6 +4,7 @@ import {Config} from './configs/Config';
 import {ScriptUtils} from './utils/script/ScriptUtils';
 import {DomRenderFinalProxy, Shield} from './types/Types';
 import {RawSetType} from './rawsets/RawSetType';
+import {DrDictionary} from './operators/DrDictionary';
 
 const excludeGetSetPropertys = ['onBeforeReturnGet', 'onBeforeReturnSet', '__domrender_components', '__render', '_DomRender_isFinal', '_domRender_ref', '_rawSets', '_domRender_proxy', '_targets', '_DomRender_origin', '_DomRender_ref', '_DomRender_proxy'];
 export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
@@ -180,18 +181,70 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                 }
             })
         } else {
+            // const firstPathStr = paths.slice(1).reverse().join('.');
             const strings = paths.reverse();
             // array같은경우도 키값으로 접근하기때문에 특정 인덱스를 찾아서 그부분만 바꿔줄수 있다.
             const fullPathStr = strings.map(it => isNaN(Number(it)) ? '.' + it : `[${it}]`).join('').slice(1);
+            // console.log('-------fullPathStr', fullPathStr, lastDoneExecute);
             if (lastDoneExecute) {
+                // const firstData = ScriptUtils.evalReturn('this.' + firstPathStr, this._domRender_proxy);
+                // console.log('-------', firstPathStr, firstData);
+                // if (firstData instanceof Dictionary) {
+                // }
+
                 const iterable = this._rawSets.get(fullPathStr);
                 // array check
                 const front = strings.slice(0, strings.length - 1).map(it => isNaN(Number(it)) ? '.' + it : `[${it}]`).join('');
                 const last = strings[strings.length - 1];
                 const data = ScriptUtils.evalReturn('this' + front, this._domRender_proxy);
+                // console.log('-------!!!!!', fullPathStr, iterable, data, front, last);
                 new Promise<void>(resolve => {
+                    const firstPathStr = front.slice(1);
+                    // console.log('-promise-------', firstPathStr, this)
+                    const firstTargets = this._rawSets.get(firstPathStr);
+                    const firstTargetDictionary: RawSet[] = [];
+                    firstTargets?.forEach(it => {
+                        // console.log('----forEach---', it);
+                        const type = (it.point.start as Element).getAttribute?.('type');
+                        if (type === 'dictionary') {
+                            firstTargetDictionary.push(it)
+                        }
+                    })
+                    if (firstTargetDictionary.length > 0) {
+                        // console.log('ddddddddddd', firstTargetDictionary);
+
+                        const rawSets: RawSet[] = [];
+                        let skip = false;
+                        firstTargetDictionary.forEach(it => {
+                            const keys = (it.point.start as Element).getAttribute('dictionary-keys')?.split(',') ?? [];
+                            if (!keys.includes(last)) {
+                                const raws = DrDictionary.append(this._domRender_proxy, fullPathStr, last, it, this.config);
+                                // console.log('----append---', raws);
+                                if (raws) {
+                                    rawSets.push(...raws);
+                                }
+                            } else {
+                                skip = true;
+                            }
+                        });
+                        if (skip === false || rawSets.length > 0) {
+                            return this.render(rawSets);
+                        }
+                        // console.log('rawSets-->#$$$$$$$$$$$', this._rawSets);
+                        // rawSets.forEach(it => this.addRawSet(fullPathStr, it));
+
+                        // DrDictionary.append(this._domRender_proxy, fullPathStr, it, this.config);
+                        // it.render(this._domRender_proxy, this.config);
+                    }
+                   /* if (data instanceof Dictionary) {
+                        const a = this._rawSets.get(firstPathStr);
+                        // a?.forEach(it => {
+                        //     if (it.type === RawSetType.TARGET_ATTR)
+                        // })
+                        console.log('dictionary-->', data, last, value, this._rawSets, a);
+                    } else */
                     if (last === 'length' && Array.isArray(data)) {
-                        const aIterable = this._rawSets.get(front.slice(1));
+                        const aIterable = this._rawSets.get(firstPathStr);
                         if (aIterable) {
                             return this.render(Array.from(aIterable));
                         }
@@ -199,8 +252,9 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                         return this.render(Array.from(iterable), fullPathStr);
                     }
                 }).then(it => {
+                    console.log('target1------->,', it)
                     this._targets.forEach(it => {
-                        // console.log('target------->,', it)
+                        console.log('target2------->,', it)
                         // return;
                         if (it.nodeType === Node.DOCUMENT_FRAGMENT_NODE || it.nodeType === Node.ELEMENT_NODE) {
                             const targets = eventManager.findAttrElements((it as DocumentFragment | Element), this.config);
@@ -216,6 +270,7 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
     }
 
     public set(target: T, p: string | symbol, value: any, receiver: T): boolean {
+        // console.log('set-->', p, value, target, receiver);
         if (typeof p === 'string' && p !== '__domrender_components' && excludeGetSetPropertys.includes(p)) {
             (target as any)[p] = value;
             return true;
@@ -275,6 +330,14 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
             }
             return it;
         }
+    }
+
+    deleteProperty(target: T, p: string | symbol): boolean {
+        delete (target as any)[p];
+        if (typeof p === 'string') {
+            this.root([p]);
+        }
+        return true;
     }
 
     has(target: T, p: string | symbol): boolean {

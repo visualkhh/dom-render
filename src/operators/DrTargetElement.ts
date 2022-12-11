@@ -19,6 +19,8 @@ export class DrTargetElement extends OperatorExecuter<void> {
             const documentFragment = await targetElement.callBack(this.elementSource.element, this.source.obj, this.rawSet, this.elementSource.attrs, this.source.config);
             if (documentFragment) {
                 const detectAction = this.elementSource.element.getAttribute(RawSet.DR_DETECT_NAME);
+                // const dictionaryKey = this.elementSource.element.getAttribute(RawSet.DR_DICTIONARY_OPTIONKEYNAME);
+                // console.log('dictionaryKey', dictionaryKey);
                 const render = (documentFragment as any).render;
                 this.rawSet.fragment = documentFragment;
                 this.rawSet.data = render.component;

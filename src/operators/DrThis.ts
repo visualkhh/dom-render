@@ -16,8 +16,10 @@ export class DrThis extends OperatorExecuterAttrRequire<string> {
                 this.returnContainer.fag.append(componentBody)
                 this.afterCallBack.onThisComponentSetCallBacks.push(attr);
             } else {
+                // console.log('dr-this!!!!!!!', this.rawSet, this.source.obj)
                 this.returnContainer.fag.append(await RawSet.drThisCreate(this.rawSet, this.elementSource.element, this.elementSource.attrs.drThis, this.elementSource.attrs.drVarOption ?? '', this.elementSource.attrs.drStripOption, this.source.obj, this.source.config))
             }
+            // console.log('!!!!!!!!!zzz', Array.from(this.returnContainer.fag.childNodes), this.elementSource.element);
             const rr = RawSet.checkPointCreates(this.returnContainer.fag, this.source.obj, this.source.config)
             this.elementSource.element.parentNode?.replaceChild(this.returnContainer.fag, this.elementSource.element);
             this.returnContainer.raws.push(...rr);
