@@ -222,6 +222,47 @@ window-event-popstate: <input type="text" dr-window-event-popstate="alert(this.n
 </details>
 
 
+## this
+<details>
+  <summary>dr-this<strong>🔻(click)</strong></summary>
+* dr-this
+  * object mapping
+
+```typescript
+class data {
+  dictionary = {
+      name: 'visualkhh'
+  }
+}
+```
+```html
+<div dr-this="this.dictionary">
+  ${this.name}$
+</div>
+```
+</details>
+
+<details>
+  <summary>dr-this-property<strong>🔻(click)</strong></summary>
+* dr-property
+  * property forEach in object
+  * dynamic add, delete  
+
+```typescript
+class data {
+  dictionary = {
+      name1: 'visualkhh1',
+      name2: 'visualkhh2',
+      name3: 'visualkhh3'
+  }
+}
+```
+```html
+<home dr-this-property="this.dictionary" dr-on-init:arguments="[2,#this#]">
+  ${this}$
+</home>
+```
+</details>
 
 ## value
 <details>

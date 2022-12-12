@@ -770,7 +770,9 @@ export class RawSet {
         n.querySelectorAll(eventManager.attrNames.map(it => `[${it}]`).join(',')).forEach(it => {
             it.setAttribute(EventManager.ownerVariablePathAttrName, 'this');
         });
-        // console.log('innerHTML-->', n.innerHTML)
+
+        // attribute
+        n.getAttributeNames().forEach(it => n.setAttribute(it, n.getAttribute(it)!.replace(/#this#/g, drThis)));
         const thisRandom = this.drThisEncoding(n, drThis)
         const vars = this.drVarEncoding(n, drVarOption)
         this.drVarDecoding(n, vars)

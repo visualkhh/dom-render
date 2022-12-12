@@ -4,6 +4,7 @@ import {NotEmptyValidator} from 'dom-render/validators/NotEmptyValidator';
 import {Appender} from 'dom-render/operators/Appender';
 import {RandomUtils} from 'dom-render/utils/random/RandomUtils';
 import {Config} from 'dom-render/configs/Config';
+import {OnInitRender} from 'dom-render/lifecycle/OnInitRender';
 //
 // const appender = new Appender<number>([1, 2]);
 // appender.push(3, 4)
@@ -92,7 +93,10 @@ class Data {
     }
 }
 
-export class Home {
+export class Home implements OnInitRender {
+    onInitRender(...param: any[]): void {
+        console.log('-----', param)
+    }
 
 }
 const config: Config = {
@@ -103,7 +107,7 @@ const config: Config = {
         }
     },
     targetElements: [
-        DomRender.createComponent({type: Home, template: '<h1>Home</h1>'})
+        DomRender.createComponent({type: Home, template: '<div><h1>Home</h1>#innerHTML#</div>'})
     ]
 }
 const data = DomRender.run(new Data(), document.querySelector('#app')!, config);

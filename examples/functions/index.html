@@ -6,11 +6,12 @@
 </head>
 <script src="bundle.js" defer="defer"></script>
 <body id="app">
-<!--<home dr-dictionary="this.dictionary"></home>-->
-<div dr-this-property="this.dictionary">
-    <b>asd${this}$dict</b>
+<home dr-this-property="this.dictionary" dr-on-init:arguments="[2,#this#]">
+    ${this}$
+</home>
+<!--<div dr-this-property="this.dictionary">-->
 <!--    <b>asd${this}$dict</b>-->
-</div>
+<!--</div>-->
 <!--<div dr-this="this.la">-->
 <!--    ${this.name}$ dic!!-->
 <!--</div>-->
