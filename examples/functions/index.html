@@ -6,8 +6,8 @@
 </head>
 <script src="bundle.js" defer="defer"></script>
 <body id="app">
-<home dr-dictionary="this.dictionary"></home>
-<div dr-dictionary="this.dictionary">
+<!--<home dr-dictionary="this.dictionary"></home>-->
+<div dr-this-property="this.dictionary">
     <b>asd${this}$dict</b>
 <!--    <b>asd${this}$dict</b>-->
 </div>
@@ -19,8 +19,9 @@
 <!--</div>-->
 <!--<div dr-this="this.dictionary.wow">${this}$ dic!! </div>-->
 <button dr-event-click="this.appendDictionary()">append Dictionary</button>
-<button dr-event-click="this.deleteDictionary('wow')">delete Dictionary</button>
-<button dr-event-click="this.changeDictionary('good')">change Dictionary</button>
+<button dr-event-click="this.appendDictionary('good')">append good</button>
+<button dr-event-click="this.deleteDictionary('good')">delete Dictionary</button>
+<button dr-event-click="this.changeDictionary('wow')">change Dictionary</button>
 <div id="container">
     <div>z</div>
 </div>

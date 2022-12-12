@@ -4,7 +4,8 @@ import {Config} from './configs/Config';
 import {ScriptUtils} from './utils/script/ScriptUtils';
 import {DomRenderFinalProxy, Shield} from './types/Types';
 import {RawSetType} from './rawsets/RawSetType';
-import {DrDictionary} from './operators/DrDictionary';
+import {DrThisProperty} from './operators/DrThisProperty';
+import {RawSetOperatorType} from './rawsets/RawSetOperatorType';
 
 const excludeGetSetPropertys = ['onBeforeReturnGet', 'onBeforeReturnSet', '__domrender_components', '__render', '_DomRender_isFinal', '_domRender_ref', '_rawSets', '_domRender_proxy', '_targets', '_DomRender_origin', '_DomRender_ref', '_DomRender_proxy'];
 export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
@@ -200,26 +201,32 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                 // console.log('-------!!!!!', fullPathStr, iterable, data, front, last);
                 new Promise<void>(resolve => {
                     const firstPathStr = front.slice(1);
+
+                    // check dictionary
                     // console.log('-promise-------', firstPathStr, this)
                     const firstTargets = this._rawSets.get(firstPathStr);
                     const firstTargetDictionary: RawSet[] = [];
                     firstTargets?.forEach(it => {
                         // console.log('----forEach---', it);
                         const type = (it.point.start as Element).getAttribute?.('type');
-                        if (type === 'dictionary') {
+                        if (type === RawSetOperatorType.DR_THIS_PROPERTY) {
                             firstTargetDictionary.push(it)
                         }
                     })
                     if (firstTargetDictionary.length > 0) {
                         // console.log('ddddddddddd', firstTargetDictionary);
-
                         const rawSets: RawSet[] = [];
                         let skip = false;
                         firstTargetDictionary.forEach(it => {
-                            const keys = (it.point.start as Element).getAttribute('dictionary-keys')?.split(',') ?? [];
+                            const startElement = it.point.start as Element;
+                            const keys = startElement.getAttribute(RawSet.DR_HAS_KEYS_OPTIONNAME)?.split(',') ?? [];
+                            if (value === undefined) {
+                                const rawSet = it.getHasRawSet(last)
+                                rawSet?.remove();
+                                startElement.setAttribute(RawSet.DR_HAS_KEYS_OPTIONNAME, keys.filter(it => it !== last).join(','));
+                            }
                             if (!keys.includes(last)) {
-                                const raws = DrDictionary.append(this._domRender_proxy, fullPathStr, last, it, this.config);
-                                // console.log('----append---', raws);
+                                const raws = DrThisProperty.append(this._domRender_proxy, fullPathStr, last, it, this.config);
                                 if (raws) {
                                     rawSets.push(...raws);
                                 }
@@ -230,19 +237,8 @@ export class DomRenderProxy<T extends object> implements ProxyHandler<T> {
                         if (skip === false || rawSets.length > 0) {
                             return this.render(rawSets);
                         }
-                        // console.log('rawSets-->#$$$$$$$$$$$', this._rawSets);
-                        // rawSets.forEach(it => this.addRawSet(fullPathStr, it));
-
-                        // DrDictionary.append(this._domRender_proxy, fullPathStr, it, this.config);
-                        // it.render(this._domRender_proxy, this.config);
                     }
-                   /* if (data instanceof Dictionary) {
-                        const a = this._rawSets.get(firstPathStr);
-                        // a?.forEach(it => {
-                        //     if (it.type === RawSetType.TARGET_ATTR)
-                        // })
-                        console.log('dictionary-->', data, last, value, this._rawSets, a);
-                    } else */
+
                     if (last === 'length' && Array.isArray(data)) {
                         const aIterable = this._rawSets.get(firstPathStr);
                         if (aIterable) {

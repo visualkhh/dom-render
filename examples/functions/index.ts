@@ -46,6 +46,7 @@ class Data {
     }
 
     appendDictionary(key = RandomUtils.getRandomString(5)) {
+        // console.log('------append')
         this.dictionary[key] = new Date().toISOString();
         // this.dictionary.z = new Date().toISOString();
         // this.dictionary = this.dictionary;

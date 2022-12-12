@@ -30,14 +30,15 @@ import {AttrInitCallBack} from './AttrInitCallBack';
 import {ElementInitCallBack} from './ElementInitCallBack';
 import {RawSetType} from './RawSetType';
 import {Render} from './Render';
-import {DrDictionary} from '../operators/DrDictionary';
+import {DrThisProperty} from '../operators/DrThisProperty';
+import {RawSetOperatorType} from './RawSetOperatorType';
 
 export class RawSet {
     public static readonly DR_NAME = 'dr';
     public static readonly DR_IF_NAME = 'dr-if';
     public static readonly DR_FOR_NAME = 'dr-for';
     public static readonly DR_FOR_OF_NAME = 'dr-for-of';
-    public static readonly DR_DICTIONARY_NAME = 'dr-dictionary';
+    public static readonly DR_THIS_PROPERTY_NAME = 'dr-this-property';
     public static readonly DR_REPEAT_NAME = 'dr-repeat';
     public static readonly DR_THIS_NAME = 'dr-this';
     public static readonly DR_FORM_NAME = 'dr-form';
@@ -58,7 +59,8 @@ export class RawSet {
 
     public static readonly DR_COMPONENT_NAME_OPTIONNAME = 'dr-component-name';
     public static readonly DR_COMPONENT_INNER_HTML_NAME_OPTIONNAME = 'dr-component-inner-html-name';
-    public static readonly DR_DICTIONARY_OPTIONKEYNAME = 'dr-dictionary-key';
+    public static readonly DR_KEY_OPTIONNAME = 'dr-key';
+    public static readonly DR_HAS_KEYS_OPTIONNAME = 'dr-has-keys';
     public static readonly DR_ON_CREATE_ARGUMENTS_OPTIONNAME = 'dr-on-create:arguments';
     public static readonly DR_ON_CREATED_CALLBACK_OPTIONNAME = 'dr-on-create:callback';
     public static readonly DR_ON_INIT_ARGUMENTS_OPTIONNAME = 'dr-on-init:arguments';
@@ -69,7 +71,7 @@ export class RawSet {
         drIf: RawSet.DR_IF_NAME,
         drFor: RawSet.DR_FOR_NAME,
         drForOf: RawSet.DR_FOR_OF_NAME,
-        drDictionary: RawSet.DR_DICTIONARY_NAME,
+        drThisProperty: RawSet.DR_THIS_PROPERTY_NAME,
         drAppender: RawSet.DR_APPENDER_NAME,
         drRepeat: RawSet.DR_REPEAT_NAME,
         drThis: RawSet.DR_THIS_NAME,
@@ -85,18 +87,20 @@ export class RawSet {
         drCompleteOption: RawSet.DR_COMPLETE_OPTIONNAME,
         drStripOption: RawSet.DR_STRIP_OPTIONNAME,
         drDestroyOption: RawSet.DR_DESTROY_OPTIONNAME,
-        drDictionaryOption: RawSet.DR_DICTIONARY_OPTIONKEYNAME
+        drHasKeysOption: RawSet.DR_HAS_KEYS_OPTIONNAME,
+        drKeyOption: RawSet.DR_KEY_OPTIONNAME
     };
 
     public static readonly DR_TAGS = [];
 
-    public static readonly DR_ATTRIBUTES = [RawSet.DR_NAME, RawSet.DR_APPENDER_NAME, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_DICTIONARY_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_FORM_NAME, RawSet.DR_PRE_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME, RawSet.DR_DETECT_NAME] as const;
+    public static readonly DR_ATTRIBUTES = [RawSet.DR_NAME, RawSet.DR_APPENDER_NAME, RawSet.DR_IF_NAME, RawSet.DR_FOR_OF_NAME, RawSet.DR_THIS_PROPERTY_NAME, RawSet.DR_FOR_NAME, RawSet.DR_THIS_NAME, RawSet.DR_FORM_NAME, RawSet.DR_PRE_NAME, RawSet.DR_INNERHTML_NAME, RawSet.DR_INNERTEXT_NAME, RawSet.DR_REPEAT_NAME, RawSet.DR_DETECT_NAME] as const;
 
     constructor(
         public uuid: string,
         public type: RawSetType,
-        public point: { start: Comment | Text | HTMLMetaElement, node: Node, end: Comment | Text | HTMLMetaElement, thisVariableName?: string | null, parent?: Node | null },
+        public point: { start: (Comment | Text | HTMLMetaElement) & { rawSet?: RawSet }, node: Node, end: Comment | Text | HTMLMetaElement, thisVariableName?: string | null, parent?: Node | null },
         public fragment: DocumentFragment, public detect?: { action: Function }, public data?: any) {
+        point.start.rawSet = this;
         // console.log('rawset constructor->', (this.point.node as Element).getAttributeNames());
     }
 
@@ -213,7 +217,7 @@ export class RawSet {
                     drIf: this.getAttributeAndDelete(element, RawSet.DR_IF_NAME),
                     drFor: this.getAttributeAndDelete(element, RawSet.DR_FOR_NAME),
                     drForOf: this.getAttributeAndDelete(element, RawSet.DR_FOR_OF_NAME),
-                    drDictionary: this.getAttributeAndDelete(element, RawSet.DR_DICTIONARY_NAME),
+                    drThisProperty: this.getAttributeAndDelete(element, RawSet.DR_THIS_PROPERTY_NAME),
                     drAppender: this.getAttributeAndDelete(element, RawSet.DR_APPENDER_NAME),
                     drRepeat: this.getAttributeAndDelete(element, RawSet.DR_REPEAT_NAME),
                     drThis: this.getAttributeAndDelete(element, RawSet.DR_THIS_NAME),
@@ -229,7 +233,7 @@ export class RawSet {
                     drCompleteOption: this.getAttributeAndDelete(element, RawSet.DR_COMPLETE_OPTIONNAME),
                     drStripOption: this.getAttributeAndDelete(element, RawSet.DR_STRIP_OPTIONNAME),
                     drDestroyOption: this.getAttributeAndDelete(element, RawSet.DR_DESTROY_OPTIONNAME),
-                    drDictionaryOption: this.getAttributeAndDelete(element, RawSet.DR_DICTIONARY_OPTIONKEYNAME)
+                    drKeyOption: this.getAttributeAndDelete(element, RawSet.DR_KEY_OPTIONNAME)
                 } as Attrs;
                 drAttrs.push(drAttr);
                 // 아래 순서 중요
@@ -243,7 +247,7 @@ export class RawSet {
                     new DrInnerHTML(this, __render, {raws, fag}, {element, attrName: RawSet.DR_INNERHTML_NAME, attr: drAttr.drInnerHTML, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.drInnerHTML}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new DrFor(this, __render, {raws, fag}, {element, attrName: RawSet.DR_FOR_NAME, attr: drAttr.drFor, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.drFor}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new DrForOf(this, __render, {raws, fag}, {element, attrName: RawSet.DR_FOR_OF_NAME, attr: drAttr.drForOf, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.drForOf}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
-                    new DrDictionary(this, __render, {raws, fag}, {element, attrName: RawSet.DR_DICTIONARY_NAME, attr: drAttr.drDictionary, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.drDictionary}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
+                    new DrThisProperty(this, __render, {raws, fag}, {element, attrName: RawSet.DR_THIS_PROPERTY_NAME, attr: drAttr.drThisProperty, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.drThisProperty}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new DrAppender(this, __render, {raws, fag}, {element, attrName: RawSet.DR_APPENDER_NAME, attr: drAttr.drAppender, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.drAppender}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new DrRepeat(this, __render, {raws, fag}, {element, attrName: RawSet.DR_REPEAT_NAME, attr: drAttr.drRepeat, attrs: drAttr}, {config, obj, operatorAround: config.operatorAround?.drRepeat}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
                     new DrTargetElement(this, __render, {raws, fag}, {element, attrs: drAttr}, {config, obj}, {onAttrInitCallBacks, onElementInitCallBacks, onThisComponentSetCallBacks}),
@@ -551,20 +555,17 @@ export class RawSet {
             const start: HTMLMetaElement = config.window.document.createElement('meta');
             const end: HTMLMetaElement = config.window.document.createElement('meta');
             start.setAttribute('id', `${id}-start`);
-            const dictionaryKey = element.getAttribute('dr-dictionary-key');
-            const dictionary = element.getAttribute('dr-dictionary');
-            if (dictionary) {
-                start.setAttribute('type', 'dictionary');
+            const keys = element.getAttribute(RawSet.DR_KEY_OPTIONNAME);
+            const thisPropertyType = element.getAttribute(RawSet.DR_THIS_PROPERTY_NAME);
+            if (thisPropertyType) {
+                start.setAttribute('type', RawSetOperatorType.DR_THIS_PROPERTY);
             }
-            if (dictionaryKey) {
-                start.setAttribute('dictionary-key', dictionaryKey);
+            if (keys) {
+                element.removeAttribute(RawSet.DR_KEY_OPTIONNAME);
+                start.setAttribute(RawSet.DR_KEY_OPTIONNAME, keys);
             }
             end.setAttribute('id', `${id}-end`);
-
-            return {
-                start,
-                end
-            }
+            return {start, end}
         } else if (type === RawSetType.STYLE_TEXT) {
             return {
                 start: config.window.document.createTextNode(`/*start text ${id}*/`),
@@ -578,6 +579,12 @@ export class RawSet {
         }
     }
 
+    public remove() {
+        this.childAllRemove();
+        this.point.end.remove();
+        this.point.start.remove();
+    }
+
     public childAllRemove() {
         let next = this.point.start.nextSibling;
         while (next) {
@@ -587,6 +594,32 @@ export class RawSet {
             next.remove();
             next = this.point.start.nextSibling;
         }
+    }
+
+    public childs(stopNext?: (node: Node) => boolean) {
+        const childs = [];
+        let next = this.point.start.nextSibling;
+        while (next && next !== this.point.end) {
+            if (stopNext?.(next)) {
+                return;
+            }
+            childs.push(next);
+            next = next.nextSibling;
+        }
+        return childs;
+    }
+
+    public getHasRawSet(key: string) {
+        let rawSet: RawSet | undefined;
+        this.childs((node) => {
+            const drKey = (node as Element).getAttribute?.('dr-key');
+            if (drKey && drKey === key) {
+                rawSet = (node as any).rawSet as RawSet;
+                return true;
+            }
+            return false;
+        })
+        return rawSet;
     }
 
     public static drItOtherEncoding(element: Element | DocumentFragment) {
@@ -950,4 +983,32 @@ export class RawSet {
             }
         }
     }
+
+    // public appendAndRender(obj: any, node: Node, config: Config) {
+    //     this.point.end.before(node);
+    //     const genNode = config.window.document.importNode(rawSet.fragment, true);
+    //     const rawSets: RawSet[] = [];
+    //     for (const cNode of Array.from(genNode.childNodes.values())) {
+    //         const element = cNode.cloneNode(true) as Element;
+    //         element.removeAttribute('dr-dictionary');
+    //         element.setAttribute('dr-this', `this.${fullPath}`);
+    //         // rawSet.point.end.after(element);
+    //         const fg = config.window.document.createDocumentFragment()
+    //         fg.append(element);
+    //         rawSets.push(...RawSet.checkPointCreates(fg, obj, config));
+    //         rawSet.point.end.before(fg);
+    //         const start = (rawSet.point.start as Element);
+    //         const keys = start.getAttribute('dictionary-keys')?.split(',') ?? [];
+    //         keys.push(key);
+    //         start.setAttribute('dictionary-keys', keys.join(','));
+    //         rawSets.forEach(async (it) => await it.render(obj, config));
+    //         // console.log('WWW', fg, Array.from(fg.childNodes));
+    //         // console.log('--------------------------rawSets', rawSets);
+    //     }
+    //     return rawSets;
+    // }
+
+    // public addHasKey() {
+    //
+    // }
 }
