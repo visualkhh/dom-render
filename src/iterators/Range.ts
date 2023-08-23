@@ -35,6 +35,9 @@ export class RangeIterator implements Iterator<number> {
         } else if (this._first > this._last && this._current === this._last) {
             r = new RangeResult(this._current, false);
             this._current -= this._step
+        } else if (this._current === this._last) {
+            r = new RangeResult(this._current, false);
+            this._current -= this._step
         } else {
             r = new RangeResult(undefined, true);
         }
