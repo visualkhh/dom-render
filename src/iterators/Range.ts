@@ -15,7 +15,6 @@ export class RangeIterator implements Iterator<number> {
     private _current: number;
     private _last: number
     private _step: number
-
     constructor(first: number, last: number, step: number) {
         this._current = this._first = first;
         this._last = last;
@@ -27,7 +26,13 @@ export class RangeIterator implements Iterator<number> {
         if (this._first < this._last && this._current < this._last) {
             r = new RangeResult(this._current, false);
             this._current += this._step
+        } else if (this._first < this._last && this._current === this._last) {
+            r = new RangeResult(this._current, false);
+            this._current += this._step
         } else if (this._first > this._last && this._current > this._last) {
+            r = new RangeResult(this._current, false);
+            this._current -= this._step
+        } else if (this._first > this._last && this._current === this._last) {
             r = new RangeResult(this._current, false);
             this._current -= this._step
         } else {
@@ -45,6 +50,10 @@ export class Range implements Iterable<number> {
 
     [Symbol.iterator](): Iterator<number> {
         return new RangeIterator(this.first, this.last, this.step);
+    }
+
+    map<U>(callbackfn: (value: number, index: number, array: number[]) => U, thisArg?: any): U[] {
+        return Array.from(this).map(callbackfn)
     }
 
     public static range(first: number | string, last?: number, step: number = 1): Range {
