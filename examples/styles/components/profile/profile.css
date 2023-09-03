@@ -5,7 +5,7 @@ div {
     color: red;
 }
 span {
-    background-color: ${this.color}$;
+    background-color: gold;
 }
 .wow {
     color: blue;

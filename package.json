@@ -58,8 +58,8 @@
     "bundle:watch": "rollup -c -w",
     "dev:start": "npm run start --workspace=dev",
     "dev:serve": "npm run serve --workspace=dev",
-    "npm-build": "npm run build && cp package.json dist && cp .npmignore dist && cp README.MD dist && rm -rf dist/dist/bundle.js.map",
-    "npm-publish": "npm run npm-build && npm publish ./dist",
+    "npm:build": "npm run build && cp package.json dist && cp .npmignore dist && cp README.MD dist && rm -rf dist/dist/bundle.js.map",
+    "npm:publish": "npm run npm-build && npm publish ./dist",
     "tsc": "tsc",
     "tsc:watch": "rm -rf ./dist && mkdir dist && cp package.json dist && tsc --watch --outDir dist --declarationDir dist --sourceMap true",
     "test": "jest --detectOpenHandles --forceExit"
