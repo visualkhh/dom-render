@@ -329,7 +329,7 @@ export class RawSet {
     }
 
     public static generateStyleSheetsLocal(config: Config) {
-        console.log('config.window.document.styleSheets---------', config.window.document.styleSheets);
+        // console.log('config.window.document.styleSheets---------', config.window.document.styleSheets);
         Array.from(config.window.document.styleSheets).filter(it => it.ownerNode && it.ownerNode instanceof Element && it.ownerNode.hasAttribute('domstyle') && it.ownerNode.getAttribute('id') && !it.ownerNode.getAttribute('completed')).forEach(it => {
             const styleElement = (it.ownerNode as Element);
             const split = styleElement.getAttribute('id')?.split('-');
