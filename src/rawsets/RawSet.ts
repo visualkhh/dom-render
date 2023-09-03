@@ -284,7 +284,7 @@ export class RawSet {
         })
 
         // 중요 style isolation 나중에 :scope로 대체 가능할듯.
-        RawSet.generateStyleSheetsLocal();
+        RawSet.generateStyleSheetsLocal(config);
 
         for (const it of onThisComponentSetCallBacks) {
             it.obj?.onInitRender?.();
@@ -328,8 +328,9 @@ export class RawSet {
         return raws;
     }
 
-    public static generateStyleSheetsLocal() {
-        Array.from(window.document.styleSheets).filter(it => it.ownerNode && it.ownerNode instanceof Element && it.ownerNode.hasAttribute('domstyle') && it.ownerNode.getAttribute('id') && !it.ownerNode.getAttribute('completed')).forEach(it => {
+    public static generateStyleSheetsLocal(config: Config) {
+        console.log('config.window.document.styleSheets---------', config.window.document.styleSheets);
+        Array.from(config.window.document.styleSheets).filter(it => it.ownerNode && it.ownerNode instanceof Element && it.ownerNode.hasAttribute('domstyle') && it.ownerNode.getAttribute('id') && !it.ownerNode.getAttribute('completed')).forEach(it => {
             const styleElement = (it.ownerNode as Element);
             const split = styleElement.getAttribute('id')?.split('-');
             split?.pop();
