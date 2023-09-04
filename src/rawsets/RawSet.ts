@@ -835,7 +835,7 @@ export class RawSet {
         // const styleResponses = await Promise.all(stylePromises);
         this.template = await templatePromise;
         this.styles = await Promise.all(stylePromises);
-        this.styles = this.styles.map(it => {
+        this.styles = this.styles.filter(it=> !it.startsWith('/*domrender-complete*/')).map(it => {
           const start = `#${componentKey}-start`;
           const end = `#${componentKey}-end`;
           // const originCss = it.innerHTML.replace(/\/\*.*?\*\//g, '');
@@ -873,7 +873,7 @@ export class RawSet {
             console.log('datadatadata', data);
             return data[2];
           });
-          return after;
+          return '/*domrender-complete*/'+after;
         })
         // console.log('targetsub-22-', this.styles)
         // console.log('targetsub-222-', this.template, this.styles)
