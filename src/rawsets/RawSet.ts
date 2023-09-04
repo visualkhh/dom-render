@@ -841,10 +841,20 @@ export class RawSet {
           const end = `#${componentKey}-end`;
           // const originCss = it.innerHTML.replace(/\/\*.*?\*\//g, '');
           // const cssobject = css.parse(originCss)
-          const cssobject = cssParse(it);
+          // const a = StringUtils.regexExec(/(\$\{.*?\}\$)/g, it);
+          // console.log('it---->', it);
+          const before = StringUtils.regexExecArrayReplace(it, /(\$\{.*?\}\$)/g, (data) => {
+            return `var(--domrender-${data[0]})`;
+          });
+          // console.log('aaaaa---->', before);
+          const cssobject = cssParse(before);
+          // console.log('cssobject---->', cssobject);
           // const cssobject = css.parse(`h1 { color: red }`);
-          cssobject.stylesheet?.rules.forEach((rule: { type: string; selectors: string[] }) => {
-            if (rule.type === 'rule') {
+          cssobject.stylesheet?.rules.forEach((rule: { type: string; selectors?: string[] }) => {
+            // console.log('rule---->', JSON.stringify(rule));
+            const isRoot = rule.selectors?.find(it => it.startsWith(':root'));
+            // console.log('is Root?', isRoot);
+            if (rule.type === 'rule' && !isRoot) { //  && !!isRoot
               rule.selectors = rule.selectors?.map(sit => {
                 const selectorText = `:is(${start} ~ *:not(${start} ~ ${end} ~ *))`;
                 if (sit.startsWith('.')) {
@@ -856,10 +866,15 @@ export class RawSet {
               });
             }
           })
-          // const stringify = cssStringify(cssobject);
+          const stringify = cssStringify(cssobject);
           // console.log('------->', stringify)
-          // return stringify;
-          return it;
+
+          // const after = StringUtils.regexExecArrayReplace(stringify, /(var\(--domrender-\$\{.*?\}\$\))/g, (data) => {
+          const after = StringUtils.regexExecArrayReplace(stringify, /(var\(--domrender-(\$\{.*?\}\$)?\))/g, (data) => {
+            console.log('datadatadata', data);
+            return data[2];
+          });
+          return after;
         })
         // console.log('targetsub-22-', this.styles)
         // console.log('targetsub-222-', this.template, this.styles)
