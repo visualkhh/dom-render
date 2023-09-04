@@ -836,7 +836,6 @@ export class RawSet {
         this.template = await templatePromise;
         this.styles = await Promise.all(stylePromises);
         this.styles = this.styles.map(it => {
-          console.log('styles-->>', it);
           const start = `#${componentKey}-start`;
           const end = `#${componentKey}-end`;
           // const originCss = it.innerHTML.replace(/\/\*.*?\*\//g, '');
