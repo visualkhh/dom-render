@@ -384,12 +384,40 @@ export class RawSet {
   }
 
   // 중요 스타일 적용 부분
-  public static generateStyleTransform(styleBody: string | string[], id: string, styleTagWrap = true) {
+  public static generateStyleTransform(styleBody: string | string[], componentKey: string, styleTagWrap = true) {
     if (Array.isArray(styleBody)) {
       styleBody = styleBody.join('\n');
     }
+
+
+      const start = `#${componentKey}-start`;
+      const end = `#${componentKey}-end`;
+      const before = StringUtils.regexExecArrayReplace(styleBody, /(\$\{.*?\}\$)/g, (data) => {
+        return `var(--domrender-${data[0]})`;
+      });
+      const cssobject = cssParse(before);
+      cssobject.stylesheet?.rules.forEach((rule: { type: string; selectors?: string[] }) => {
+        const isRoot = rule.selectors?.find(it => it.startsWith(':root'));
+        if (rule.type === 'rule' && !isRoot) { //  && !!isRoot
+          rule.selectors = rule.selectors?.map(sit => {
+            const selectorText = `:is(${start} ~ *:not(${start} ~ ${end} ~ *))`;
+            if (sit.startsWith('.')) {
+              return `${selectorText}${sit}, ${selectorText} ${sit}`;
+            } else {
+              const divText = `${start} ~ ${sit}:not(${start} ~ ${end} ~ *)`;
+              return `${selectorText} ${sit}, ${divText}`;
+            }
+          });
+        }
+      })
+      const stringify = cssStringify(cssobject);
+      const after = StringUtils.regexExecArrayReplace(stringify, /(var\(--domrender-(\$\{.*?\}\$)?\))/g, (data) => {
+        return data[2];
+      });
+
+
     if (styleTagWrap) {
-      styleBody = `<style id='${id}-style' domstyle>${styleBody}</style>`
+      styleBody = `<style id='${componentKey}-style' domstyle>${after}</style>`
     }
 
     return styleBody;
@@ -835,46 +863,6 @@ export class RawSet {
         // const styleResponses = await Promise.all(stylePromises);
         this.template = await templatePromise;
         this.styles = await Promise.all(stylePromises);
-        this.styles = this.styles.filter(it=> !it.startsWith('/*domrender-complete*/')).map(it => {
-          const start = `#${componentKey}-start`;
-          const end = `#${componentKey}-end`;
-          // const originCss = it.innerHTML.replace(/\/\*.*?\*\//g, '');
-          // const cssobject = css.parse(originCss)
-          // const a = StringUtils.regexExec(/(\$\{.*?\}\$)/g, it);
-          // console.log('it---->', it);
-          const before = StringUtils.regexExecArrayReplace(it, /(\$\{.*?\}\$)/g, (data) => {
-            return `var(--domrender-${data[0]})`;
-          });
-          // console.log('aaaaa---->', before);
-          const cssobject = cssParse(before);
-          // console.log('cssobject---->', cssobject);
-          // const cssobject = css.parse(`h1 { color: red }`);
-          cssobject.stylesheet?.rules.forEach((rule: { type: string; selectors?: string[] }) => {
-            // console.log('rule---->', JSON.stringify(rule));
-            const isRoot = rule.selectors?.find(it => it.startsWith(':root'));
-            // console.log('is Root?', isRoot);
-            if (rule.type === 'rule' && !isRoot) { //  && !!isRoot
-              rule.selectors = rule.selectors?.map(sit => {
-                const selectorText = `:is(${start} ~ *:not(${start} ~ ${end} ~ *))`;
-                if (sit.startsWith('.')) {
-                  return `${selectorText}${sit}, ${selectorText} ${sit}`;
-                } else {
-                  const divText = `${start} ~ ${sit}:not(${start} ~ ${end} ~ *)`;
-                  return `${selectorText} ${sit}, ${divText}`;
-                }
-              });
-            }
-          })
-          const stringify = cssStringify(cssobject);
-          // console.log('------->', stringify)
-
-          // const after = StringUtils.regexExecArrayReplace(stringify, /(var\(--domrender-\$\{.*?\}\$\))/g, (data) => {
-          const after = StringUtils.regexExecArrayReplace(stringify, /(var\(--domrender-(\$\{.*?\}\$)?\))/g, (data) => {
-            console.log('datadatadata', data);
-            return data[2];
-          });
-          return '/*domrender-complete*/'+after;
-        })
         // console.log('targetsub-22-', this.styles)
         // console.log('targetsub-222-', this.template, this.styles)
         // Promise.all(promises).then([])
