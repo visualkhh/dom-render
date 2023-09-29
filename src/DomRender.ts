@@ -34,8 +34,8 @@ export class DomRender {
         } else if (config.routerType === 'hash') {
             config.router = config.router ?? new HashRouter(robj, config.window);
         } else { // default
-            config.routerType = 'hash';
-            config.router = config.router ?? new HashRouter(robj, config.window);
+            // config.routerType = 'hash';
+            // config.router = config.router ?? new HashRouter(robj, config.window);
         }
         domRender.run(robj);
         return robj;
