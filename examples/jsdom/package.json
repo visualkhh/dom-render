@@ -1,0 +1,19 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsx test.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jsdom": "^22.1.0",
+    "dom-render": "file:../dist"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^21.1.3",
+    "tsx": "^3.13.0"
+  }
+}
