@@ -7,7 +7,7 @@ import {Attrs} from '../rawsets/Attrs';
 import {Config} from '../configs/Config';
 import {ScriptUtils} from '../utils/script/ScriptUtils';
 
-export type OperatorAround = {
+export interface OperatorAround {
     beforeAttr?: (value: string | null | undefined, opratorExecutor: OperatorExecuter) => string | null | undefined,
     before?: (data: any, opratorExecutor: OperatorExecuter) => any,
     after?: (data: any, opratorExecutor: OperatorExecuter) => void,
