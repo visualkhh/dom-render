@@ -1,6 +1,6 @@
 {
   "name": "dom-render",
-  "version": "1.0.97",
+  "version": "1.0.98",
   "main": "DomRender.js",
   "license": "MIT",
   "description": "html view template engine",
