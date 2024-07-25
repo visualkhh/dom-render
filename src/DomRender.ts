@@ -1,13 +1,13 @@
-import {DomRenderProxy} from './DomRenderProxy';
-import {Config} from './configs/Config';
-import {PathRouter} from './routers/PathRouter';
-import {HashRouter} from './routers/HashRouter';
-import {ConstructorType, DomRenderFinalProxy} from './types/Types';
-import {RawSet} from './rawsets/RawSet';
-import {DefaultMessenger} from './messenger/DefaultMessenger';
+import { DomRenderProxy } from './DomRenderProxy';
+import { Config } from './configs/Config';
+import { PathRouter } from './routers/PathRouter';
+import { HashRouter } from './routers/HashRouter';
+import { ConstructorType, DomRenderFinalProxy } from './types/Types';
+import { RawSet } from './rawsets/RawSet';
+import { DefaultMessenger } from './messenger/DefaultMessenger';
 
 export class DomRender {
-  public static run<T extends object>(obj: T, target?: Node | null, oConfig?: Config): T {
+  public static run<T extends object>(obj: T, target?: Node | null, oConfig?: Omit<Config, 'window'>): T {
     let robj = obj;
     if ('_DomRender_isProxy' in obj) {
       if (target) {
@@ -34,8 +34,8 @@ export class DomRender {
     } else if (config.routerType === 'hash') {
       config.router = config.router ?? new HashRouter(robj, config.window);
     } else { // default
-      // config.routerType = 'hash';
-      // config.router = config.router ?? new HashRouter(robj, config.window);
+      config.routerType = 'hash';
+      config.router = config.router ?? new HashRouter(robj, config.window);
     }
     domRender.run(robj);
     return robj;
