@@ -125,13 +125,13 @@ const data = DomRender.run(new Data(), document.querySelector('#app')!);
 ```html
 <h3>appender</h3>
 <ul>
-  <li dr-appender="this.appender">
+  <li dr-appender="@this@.appender">
     ${#it#}$
   </li>
 </ul>
-<button dr-event-click="this.append()">appending</button>
-<button dr-event-click="this.modifyAppender(0)">idx 0 modify</button>
-<button dr-event-click="this.clearAppend()">appender clear</button>
+<button dr-event-click="@this@.append()">appending</button>
+<button dr-event-click="@this@.modifyAppender(0)">idx 0 modify</button>
+<button dr-event-click="@this@.clearAppend()">appender clear</button>
 ```
 
 ```typescript
@@ -187,12 +187,12 @@ class Data {
 * ref: element
 * variable: $event, $target
 ```html
-click: <button dr-event-click="this.name = 'name' + new Date()">click</button> <br>
-change: <input type="text" dr-event-change="this.name = $target.value"> <br>
-input: <input type="text" dr-event-input="this.name = $target.value"> <br>
-keyup: <input type="text" dr-event-keyup="this.name = $target.value"> <br>
+click: <button dr-event-click="@this@.name = 'name' + new Date()">click</button> <br>
+change: <input type="text" dr-event-change="@this@.name = $target.value"> <br>
+input: <input type="text" dr-event-input="@this@.name = $target.value"> <br>
+keyup: <input type="text" dr-event-keyup="@this@.name = $target.value"> <br>
 ...
-keydown: <input type="text" dr-event-keydown="this.name = $target.value"><br>
+keydown: <input type="text" dr-event-keydown="@this@.name = $target.value"><br>
 submit: <form dr-event-submit="console.log($event); $event.preventDefault();"><input type="text"> <button type="submit">submit</button></form><br>
 ```
 </details>
@@ -204,7 +204,7 @@ submit: <form dr-event-submit="console.log($event); $event.preventDefault();"><i
 * variable: $target
 
 ```html
-window-event-popstate: <input type="text" dr-window-event-popstate="alert(this.name)"><br>
+window-event-popstate: <input type="text" dr-window-event-popstate="alert(@this@.name)"><br>
 ```
 </details>
 
@@ -236,8 +236,8 @@ class data {
 }
 ```
 ```html
-<div dr-this="this.dictionary">
-  ${this.name}$
+<div dr-this="@this@.dictionary">
+  ${@this@.name}$
 </div>
 ```
 </details>
@@ -258,7 +258,7 @@ class data {
 }
 ```
 ```html
-<home dr-this-property="this.dictionary" dr-on-init:arguments="[2,#this#]">
+<home dr-this-property="@this@.dictionary" dr-on-init:arguments="[2,#this#]">
   ${this}$
 </home>
 ```
@@ -274,8 +274,8 @@ class data {
   * Value and variable values are referencing each other. It affects each other when changing. (Immediate reflection event: input)
 
 ```html
-dr-value: <input type="text" dr-value="this.office.name"> <br>
-dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
+dr-value: <input type="text" dr-value="@this@.office.name"> <br>
+dr-value-link: <input type="text" dr-value-link="@this@.office.addr.street"> <br>
 ```
 </details>
 
@@ -284,7 +284,7 @@ dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
   <summary>dr-attr<strong>🔻(click)</strong></summary>
 
 ```html
-<textarea dr-attr="{rows: this.age/2, cols: this.age}"></textarea>
+<textarea dr-attr="{rows: @this@.age/2, cols: @this@.age}"></textarea>
 <div dr-attr="{wow: '123', good: 123444}"></div>
 <div dr-attr="['wow=123', 'good=123444']"></div>
 <div dr-attr="'wow=123, good=123444'"></div>
@@ -295,8 +295,8 @@ dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
   <summary>dr-class<strong>🔻(click)</strong></summary>
 
 ```html
-<div dr-class="{big: this.age > 50, red: this.age > 50}"></div>
-<div dr-class="'big yellow ' + (this.age > 50 ? 'old' : 'young')"></div>
+<div dr-class="{big: @this@.age > 50, red: @this@.age > 50}"></div>
+<div dr-class="'big yellow ' + (@this@.age > 50 ? 'old' : 'young')"></div>
 <div dr-class="['small', 'yellow']"></div>
 ```
 </details>
@@ -305,10 +305,10 @@ dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
   <summary>dr-style<strong>🔻(click)</strong></summary>
 
 ```html
-<div dr-style="{fontSize: this.age + 'px'}"> style </div>
+<div dr-style="{fontSize: @this@.age + 'px'}"> style </div>
 <div dr-style="{'font-size': '20px'}"> style</div>
-<div dr-style="'font-size: ' + this.age +'px; margin: ' + this.age + 'px'"> style </div>
-<div dr-style="['font-size: ' + this.age +'px', 'margin: ' + this.age + 'px']"> style </div>
+<div dr-style="'font-size: ' + @this@.age +'px; margin: ' + @this@.age + 'px'"> style </div>
+<div dr-style="['font-size: ' + @this@.age +'px', 'margin: ' + @this@.age + 'px']"> style </div>
 ```
 </details>
 
@@ -332,8 +332,8 @@ dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
   <summary>dr-complete<strong>🔻(click)</strong></summary>
 
 ```html
-<select dr-value-link="this.currentContry" dr-event-change="this.contryChange($event)">
-  <option dr-for-of="this.languages" dr-value="#it#.key" dr-complete="this.currentContry='defaultValue'">${#it#.title}$</option>
+<select dr-value-link="@this@.currentContry" dr-event-change="@this@.contryChange($event)">
+  <option dr-for-of="@this@.languages" dr-value="#it#.key" dr-complete="@this@.currentContry='defaultValue'">${#it#.title}$</option>
 </select>
 ```
 </details>
@@ -348,7 +348,7 @@ dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
 
 ```html
 <body id="app">
-<form dr-form="this.form" dr-event-submit="this.submit(); $event.preventDefault();">
+<form dr-form="@this@.form" dr-event-submit="@this@.submit(); $event.preventDefault();">
   name: <input name="name">
   age: <input name="age">
   <button type="submit">submit</button>
@@ -373,7 +373,7 @@ dr-value-link: <input type="text" dr-value-link="this.office.addr.street"> <br>
 
 ```html
 <body id="app">
-<form dr-form="this.form" dr-event-submit="this.submit(); $event.preventDefault();">
+<form dr-form="@this@.form" dr-event-submit="@this@.submit(); $event.preventDefault();">
     name: <input name="name">
     age: <input name="age">
     <button type="submit">submit</button>
@@ -457,7 +457,7 @@ const data = DomRender.run(new Data(), document.querySelector('#app')!, config);
 ```html
 <header>
   <h1>examples header</h1>
-  <h2>${this.name}$</h2>
+  <h2>${@this@.name}$</h2>
   <div>
     <div><button dr-event-click="$router.go('/')">main</button></div>
     <div>
@@ -476,7 +476,7 @@ const data = DomRender.run(new Data(), document.querySelector('#app')!, config);
   <page-second dr-if="$router.testRegexp('/second/wow$')">wow</page-second>
   <page-detail url='/detail/{id:[0-9]+}' dr-if="$router.test($attribute.url)" dr-on-create:callback="$component.routerData($router.getRouteData($attribute.url))" ></page-detail>
   <div>
-    <button dr-event-click="this.plusCount()">${this.count}$ count  pluse++</button>
+    <button dr-event-click="@this@.plusCount()">${@this@.count}$ count  pluse++</button>
   </div>
 </main>
 <hr>
@@ -677,29 +677,29 @@ const data = config.scripts.concat('head', 'tail')
 - [examples](./examples/component_script_attr) lazy load (html, css)
 ```html
 <body id="app">
-${this.name}$
+${@this@.name}$
 <h1>component</h1>
 <profile dr-on-create:callback="$component.name='jhone'; $component.age=55;"><b>${#component#.details}$</b></profile>
 <profile dr-on-create:callback="$component.name='cal'; $component.age=56;"><b>detail-2</b></profile>
 <profile dr-on-create:callback="$component.name='rose'; $component.age=57;">
     <profile dr-on-create:callback="$component.name='rose-sub'; $component.age=156;">
-        <b>${this.name}$</b>
+        <b>${@this@.name}$</b>
     </profile>
 </profile>
 <h3>component data link and detect</h3>
-<Profile dr-if="this.toggle" dr-detect="$component.age = this.age" dr-on-create:callback="$component.name='papa'; $component.age=58;">
-    <b>${this.name}$</b>
+<Profile dr-if="@this@.toggle" dr-detect="$component.age = @this@.age" dr-on-create:callback="$component.name='papa'; $component.age=58;">
+    <b>${@this@.name}$</b>
 </Profile>
-<Profile dr-if="this.toggle" dr-detect="$component.age = this.age" dr-on-constructor:arguments="[1,2]">
-    <b>${this.name}$</b>
+<Profile dr-if="@this@.toggle" dr-detect="$component.age = @this@.age" dr-on-constructor:arguments="[1,2]">
+    <b>${@this@.name}$</b>
 </Profile>
 
-<button dr-event-click="this.name = new Date().toString();">change name</button>
-<button dr-event-click="this.age = Date.now();">change age</button>
-<button dr-event-click="this.toggle = !this.toggle;">change toggle</button>
+<button dr-event-click="@this@.name = new Date().toString();">change name</button>
+<button dr-event-click="@this@.age = Date.now();">change age</button>
+<button dr-event-click="@this@.toggle = !@this@.toggle;">change toggle</button>
 
 <j1>component constructor, on-create, dr-on-create:callback</j1>
-<home dr-constructor="[this.name, this.age, 'home welcom']" dr-on-create-arguments="{type: 'onCreate', data: 'datadata'}" dr-on-create:callback="$component.onInit('data')"></home>
+<home dr-constructor="[@this@.name, @this@.age, 'home welcom']" dr-on-create-arguments="{type: 'onCreate', data: 'datadata'}" dr-on-create:callback="$component.onInit('data')"></home>
 
 
 
@@ -709,7 +709,7 @@ ${this.name}$
 </div>
 
 <h1>attr</h1>
-<button link="this.link">
+<button link="@this@.link">
 link attribute
 </button>
 <h1>attrCallBack</h1>
@@ -758,7 +758,7 @@ using component
 ```html
 <my-element dr-on-create:callback="$component.say();"></my-element>
 
-<home value="${this.name}$" wow="${this.color}$">
+<home value="${@this@.name}$" wow="${@this@.color}$">
   ${#component#.homeName}$
   <home value="${#component#.homeName}$" wow="${#component#.homeColor}$" dr-component-name="sub_component" dr-component-inner-html-name="innerHTML">
     ${#sub_component#.homeName}$

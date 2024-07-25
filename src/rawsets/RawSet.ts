@@ -655,18 +655,19 @@ export class RawSet {
     //     let message = it.innerHTML;
     // })
     element.querySelectorAll(`[${RawSet.DR_PRE_NAME}]`).forEach(it => {
-      it.innerHTML = it.innerHTML.replace(/this/g, thisRandom);
+      it.innerHTML = it.innerHTML.replace(/@this@/g, thisRandom);
     })
     element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
       let message = it.innerHTML;
-      StringUtils.regexExec(/([^(dr\-)])?this(?=.?)/g, message).reverse().forEach(it => {
+      // StringUtils.regexExec(/([^(dr\-)])?this(?=.?)/g, message).reverse().forEach(it => {
+      StringUtils.regexExec(/@this@/g, message).reverse().forEach(it => {
         message = message.substr(0, it.index) + message.substr(it.index).replace(it[0], `${it[1] ?? ''}${drThis}`);
       })
       it.innerHTML = message;
     })
 
     let message = element.innerHTML;
-    StringUtils.regexExec(/([^(dr\-)])?this(?=.?)/g, message).reverse().forEach(it => {
+    StringUtils.regexExec(/@this@/g, message).reverse().forEach(it => {
       message = message.substr(0, it.index) + message.substr(it.index).replace(it[0], `${it[1] ?? ''}${drThis}`);
     })
     element.innerHTML = message;
@@ -675,10 +676,10 @@ export class RawSet {
 
   public static drThisDecoding(element: Element, thisRandom: string) {
     element.querySelectorAll(`[${RawSet.DR_PRE_NAME}]`).forEach(it => {
-      it.innerHTML = it.innerHTML.replace(RegExp(thisRandom, 'g'), 'this');
+      it.innerHTML = it.innerHTML.replace(RegExp(thisRandom, 'g'), '@this@');
     })
     element.querySelectorAll(`[${RawSet.DR_THIS_NAME}]`).forEach(it => {
-      it.innerHTML = it.innerHTML.replace(RegExp(thisRandom, 'g'), 'this');
+      it.innerHTML = it.innerHTML.replace(RegExp(thisRandom, 'g'), '@this@');
     });
   }
 
