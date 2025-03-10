@@ -7,8 +7,9 @@ import { RawSet } from './rawsets/RawSet';
 import { DefaultMessenger } from './messenger/DefaultMessenger';
 
 export class DomRender {
-  public static run<T extends object>(obj: T, target?: Node | null, oConfig?: Omit<Config, 'window'>): T {
-    let robj = obj;
+  public static run<T extends object>(obj: T | (() => T), target?: Node | null, oConfig?: Omit<Config, 'window'>): T {
+    obj = typeof obj === 'function' ? obj() : obj;
+    let robj = obj
     if ('_DomRender_isProxy' in obj) {
       if (target) {
         ((obj as any)._DomRender_proxy as DomRenderProxy<T>).initRender(target);
