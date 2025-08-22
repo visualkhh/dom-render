@@ -1,1 +1,0 @@
-export type AttrInitCallBack = { attrName: string, attrValue: string, obj: any };
